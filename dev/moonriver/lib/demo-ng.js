@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, demo_6, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -185,20 +185,23 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_5 = async function() {
-    var Async_pipeline, FS, T, p, show_2;
+    var Async_pipeline, FS, PATH, T, get_source, p, path, show;
     echo('—————————————————————————————————————————————');
     FS = require('node:fs');
+    PATH = require('node:path');
     ({
       Async_pipeline,
       transforms: T
     } = require('../../../apps/moonriver'));
+    path = PATH.join(__dirname, '../../../assets/short-proposal.mkts.md');
+    get_source = function() {
+      return FS.createReadStream(path); //, { encoding: 'utf-8', }
+    };
     p = new Async_pipeline();
-    p.push(FS.createReadStream(__filename, {
-      highWaterMark: 50
-    }));
+    p.push(get_source());
     p.push(T.$split_lines());
     p.push(T.$limit(5));
-    p.push(show_2 = function(d) {
+    p.push(show = function(d) {
       return whisper('Ⅱ', rpr(d));
     });
     info('^24-7^', p);
@@ -206,17 +209,62 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_6 = function() {
+    var $, $collect, $with_stars, FS, Pipeline, T, collect, last, p, show, with_stars;
+    echo('—————————————————————————————————————————————');
+    FS = require('node:fs');
+    ({
+      Pipeline,
+      transforms: T
+    } = require('../../../apps/moonriver'));
+    p = new Pipeline();
+    ({$} = p);
+    last = Symbol('last');
+    //.........................................................................................................
+    $with_stars = $(with_stars = function(d, send) {
+      debug('^4456546^', send);
+      return send(`*${d}*`);
+    });
+    //.........................................................................................................
+    $collect = $(collect = {last}, function() {
+      var collector;
+      collector = [];
+      return function(d, send) {
+        if (d === last) {
+          return send(collector);
+        }
+        collector.push(d);
+        return null;
+      };
+    });
+    //.........................................................................................................
+    info('^40-1^', $with_stars);
+    info('^40-2^', $collect);
+    //.........................................................................................................
+    p.push(Array.from('氣場全開'));
+    p.push($with_stars); // ()
+    p.push(show = function(d) {
+      return whisper(rpr(d));
+    });
+    p.run();
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
-      demo_1();
-      demo_2();
-      await demo_3a();
-      await demo_3b();
-      demo_4();
+    (() => {
+      // demo_1()
+      // demo_2()
+      // await demo_3a()
+      // await demo_3b()
+      // demo_4()
       return demo_5();
     })();
   }
+
+  // demo_6()
 
 }).call(this);
 
