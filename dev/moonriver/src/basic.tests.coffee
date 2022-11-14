@@ -39,13 +39,48 @@ H                         = require '../../../lib/helpers'
 #-----------------------------------------------------------------------------------------------------------
 @simple = ( T, done ) ->
   # T?.halt_on_error()
-  { Pipeline
-    $once     } = require '../../../apps/moonriver'
+  { Pipeline } = require '../../../apps/moonriver'
   #.........................................................................................................
   do =>
     collector = []
     mr        = new Pipeline()
     mr.push [ 1, 2, 3, 5, ]
+    mr.push ( d, send ) -> send d * 2
+    mr.push ( d, send ) -> send d #; urge d
+    mr.push ( d, send ) -> collector.push d #; help collector
+    mr.run()
+    T?.eq collector, [ 2, 4, 6, 10, ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@simple_with_generatorfunction = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  do =>
+    collector = []
+    mr        = new Pipeline()
+    mr.push ( send ) -> yield n for n in [ 1, 2, 3, 5, ]
+    mr.push ( d, send ) -> send d * 2
+    mr.push ( d, send ) -> send d #; urge d
+    mr.push ( d, send ) -> collector.push d #; help collector
+    mr.run()
+    T?.eq collector, [ 2, 4, 6, 10, ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@simple_with_generator = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  do =>
+    collector = []
+    mr        = new Pipeline()
+    mr.push ( ( send ) -> yield n for n in [ 1, 2, 3, 5, ] )()
     mr.push ( d, send ) -> send d * 2
     mr.push ( d, send ) -> send d #; urge d
     mr.push ( d, send ) -> collector.push d #; help collector
@@ -191,40 +226,6 @@ H                         = require '../../../lib/helpers'
   done?()
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@walk_is_repeatable = ( T, done ) ->
-  # T?.halt_on_error()
-  GUY             = require '../../../apps/guy'
-  { Pipeline
-    $           }   = require '../../../apps/moonriver'
-  collector       = []
-  first           = Symbol 'first'
-  last            = Symbol 'last'
-  # source          = [ ( Array.from 'abcdef' )..., last, ]
-  #.........................................................................................................
-  create_pipeline = ->
-    mr              = new Pipeline()
-    mr.push Array.from 'abcdef'
-    # mr.push insert  = ( d, send ) -> send d; send d.toUpperCase() if isa.text d
-    mr.push extra   = ( d, send ) -> send "*#{d}*"
-    mr.push show    = ( d ) -> whisper '^45-1^', d
-    mr.push collect = ( d ) -> collector.push d
-    return mr
-  #.........................................................................................................
-  do ->
-    mr = create_pipeline()
-    mr.run()
-    info '^54-4^', collector
-    collector.length = 0
-    mr.run()
-    info '^54-4^', collector
-    collector.length = 0
-    mr.run()
-    info '^54-4^', collector
-    collector.length = 0
-    return null
-  done?()
-
 
 
 ############################################################################################################
@@ -235,10 +236,5 @@ if require.main is module then do =>
   # test @can_use_asyncgeneratorfunction_as_source
   # @can_use_asyncfunction_as_transform()
   # test @can_use_asyncfunction_as_transform
-  # @window_transform()
-  # @walk_is_repeatable()
   test @
-  # @[ "called even when pipeline empty: once_before_first, once_after_last" ](); test @[ "called even when pipeline empty: once_before_first, once_after_last" ]
-  # @[ "appending data before closing" ](); test @[ "appending data before closing" ]
-  # @[ "once_before_first, once_after_last transformers transparent to data" ](); test @[ "once_before_first, once_after_last transformers transparent to data" ]
 
