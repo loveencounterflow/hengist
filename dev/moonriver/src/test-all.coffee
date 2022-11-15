@@ -17,7 +17,7 @@ echo                      = CND.echo.bind CND
 PATH                      = require 'path'
 FS                        = require 'fs'
 test                      = require 'guy-test'
-my_basename               = PATH.basename __filename
+my_filename               = PATH.basename __filename
 
 
 ############################################################################################################
@@ -25,11 +25,10 @@ L = @
 do ->
   paths = FS.readdirSync __dirname
   for path in paths
-    debug '^3534^', path
-    debug '^3534^', PATH.basename path
+    filename = PATH.basename path
     continue if path.endsWith '.js.map'
-    continue if ( PATH.basename path ) is my_basename
-    continue unless path.endsWith '.tests.js'
+    continue if filename is my_filename
+    continue unless filename.startsWith 'test-'
     path = PATH.join __dirname, path
     module = require path
     for key, value of module
