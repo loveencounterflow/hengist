@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, SQL, after, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -39,6 +39,14 @@
 
   H = require('../../../lib/helpers');
 
+  after = (dts, f) => {
+    return new Promise(function(resolve) {
+      return setTimeout((function() {
+        return resolve(f());
+      }), dts * 1000);
+    });
+  };
+
   // #.........................................................................................................
   // probes_and_matchers = [
   //   ]
@@ -56,6 +64,7 @@
       collector = [];
       mr = new Pipeline();
       mr.push([1, 2, 3, 5]);
+      mr.push([6, 7, 8, 9].values());
       mr.push(function(d, send) {
         return send(d * 2);
       });
@@ -66,7 +75,7 @@
         return collector.push(d); //; help collector
       });
       mr.run();
-      return T != null ? T.eq(collector, [2, 4, 6, 10]) : void 0;
+      return T != null ? T.eq(collector, [2, 12, 4, 14, 6, 16, 10, 18]) : void 0;
     })();
     if (typeof done === "function") {
       done();
@@ -218,7 +227,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncgenerator_as_source = async function(T, done) {
-    var Async_pipeline, GUY, count, p, result, show, source, square;
+    var Async_pipeline, GUY, async_show, async_square, count, p, result, source, sync_show, sync_square;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline} = require('../../../apps/moonriver'));
@@ -233,23 +242,30 @@
       }
       return results;
     };
-    debug('^49-1^', source);
-    debug('^49-1^', source());
-    debug('^49-1^', source().next);
     //.......................................................................................................
     p = new Async_pipeline();
     p.push(source());
-    p.push(square = function(d, send) {
+    p.push(sync_square = function(d, send) {
       return send(d * d);
     });
-    p.push(show = function(d) {
+    p.push(sync_show = function(d) {
       return urge('^49-1^', d);
     });
+    p.push(async_square = async function(d, send) {
+      return (await after(0.05, function() {
+        return send(d * d);
+      }));
+    });
+    p.push(async_show = async function(d) {
+      return (await after(0.05, function() {
+        return urge('^49-1^', d);
+      }));
+    });
     //.........................................................................................................
+    info('^3424^', p);
     result = (await p.run());
-    info('^49-1^', result);
     if (T != null) {
-      T.eq(result, [9, 25, 49, 121]);
+      T.eq(result, [81, 625, 2401, 14641]);
     }
     if (typeof done === "function") {
       done();
@@ -300,17 +316,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncfunction_as_transform = async function(T, done) {
-    var $, Async_pipeline, GUY, after, count, p, result, show;
+    var $, Async_pipeline, GUY, count, p, result, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline, $} = require('../../../apps/moonriver'));
-    after = (dts, f) => {
-      return new Promise(function(resolve) {
-        return setTimeout((function() {
-          return resolve(f());
-        }), dts * 1000);
-      });
-    };
     count = 0;
     //.......................................................................................................
     p = new Async_pipeline();
@@ -390,18 +399,103 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.everything_sync = function(T, done) {
+    var Pipeline;
+    // T?.halt_on_error()
+    ({Pipeline} = require('../../../apps/moonriver'));
+    (() => {      //.........................................................................................................
+      var mr, repeatable_source, result, sync_observer, sync_transducer;
+      mr = new Pipeline();
+      mr.push('abc');
+      mr.push(repeatable_source = function() {
+        return 'def';
+      });
+      mr.push([1, 2]);
+      mr.push([6, 7].values());
+      mr.push({
+        x: 42
+      });
+      mr.push(new Map([[23, true]]));
+      mr.push(new Set('xyz'));
+      mr.push(sync_transducer = function(d, send) {
+        return send(d);
+      });
+      mr.push(sync_observer = function(d) {
+        return info('^23-1^', d);
+      });
+      result = mr.run();
+      help('^23-2^', result);
+      return T != null ? T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']) : void 0;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.everything_async = function(T, done) {
+    var Async_pipeline;
+    // T?.halt_on_error()
+    ({Async_pipeline} = require('../../../apps/moonriver'));
+    (async() => {      //.........................................................................................................
+      var async_observer, async_transducer, mr, repeatable_source, result, sync_observer, sync_transducer;
+      mr = new Async_pipeline();
+      mr.push('abc');
+      mr.push(repeatable_source = function() {
+        return 'def';
+      });
+      mr.push([1, 2]);
+      mr.push([6, 7].values());
+      mr.push({
+        x: 42
+      });
+      mr.push(new Map([[23, true]]));
+      mr.push(new Set('xyz'));
+      mr.push(sync_transducer = function(d, send) {
+        return send(d);
+      });
+      mr.push(sync_observer = function(d) {
+        return info('^23-3^', d);
+      });
+      mr.push(async_transducer = async function(d, send) {
+        return send((await after(0.01, function() {
+          return d;
+        })));
+      });
+      mr.push(async_observer = async function(d) {
+        return (await after(0.01, function() {
+          return urge('^23-4^', d);
+        }));
+      });
+      result = (await mr.run());
+      help('^23-5^', result);
+      return T != null ? T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']) : void 0;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // await @can_use_asyncgenerator_as_source()
       // await @can_use_asyncgeneratorfunction_as_source()
-      // test @can_use_asyncgenerator_as_source
-      // test @can_use_asyncgeneratorfunction_as_source
-      // @can_use_asyncfunction_as_transform()
-      // test @can_use_asyncfunction_as_transform
-      return test(this);
+      // @simple()
+      this.everything_sync();
+      return this.everything_async();
     })();
   }
+
+  // test @everything_sync
+// test @can_use_asyncgenerator_as_source
+// test @can_use_asyncgeneratorfunction_as_source
+// @can_use_asyncfunction_as_transform()
+// test @can_use_asyncfunction_as_transform
+// test @
 
 }).call(this);
 
