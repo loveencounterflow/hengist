@@ -40,7 +40,7 @@
   H = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
-  this.window_transform = function(T, done) {
+  this._window_transform = function(T, done) {
     var $, $window, GUY, Pipeline, collect, collector, i, misfit, mr, nr, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');

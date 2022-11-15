@@ -40,7 +40,7 @@
   H = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
-  this.modifiers = function(T, done) {
+  this._modifiers = function(T, done) {
     var $, Pipeline, first, last, once_after_last, once_before_first;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -128,7 +128,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.resettable_state_shared_across_transforms = function(T, done) {
+  this._resettable_state_shared_across_transforms = function(T, done) {
     var $, Pipeline, source;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -261,7 +261,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["once_before_first, once_after_last transformers transparent to data"] = function(T, done) {
+  this._once_before_first_once_after_last_transformers_transparent_to_data = function(T, done) {
     var $, Pipeline, collect2, collect4, collectors, mr, once_after_last, once_before_first;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -332,7 +332,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["appending data before closing"] = function(T, done) {
+  this._appending_data_before_closing = function(T, done) {
     var $, Pipeline, at_last, collect, collector, last, mr, show;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -374,7 +374,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["modifier last does not leak into pipeline when used with observer"] = function(T, done) {
+  this._modifier_last_does_not_leak_into_pipeline_when_used_with_observer = function(T, done) {
     var $, Pipeline, collector, last1, last2;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -410,7 +410,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["modifier last"] = function(T, done) {
+  this._modifier_last = function(T, done) {
     var $, Pipeline, collect, collector, finalize, first, last, mr, ref, s1;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -449,7 +449,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["modifier once_after_last"] = function(T, done) {
+  this._modifier_once_after_last = function(T, done) {
     var $, Pipeline, collector, finalize, mr, s1;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -485,7 +485,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["exit symbol"] = function(T, done) {
+  this._exit_symbol = function(T, done) {
     var $, Pipeline, collect, collector, d, i, len, look_for_third, mr, protocol;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -516,7 +516,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["called even when pipeline empty: once_before_first, once_after_last"] = function(T, done) {
+  this._once_before_first_and_once_after_last_called_even_when_pipeline_empty = function(T, done) {
     var $, Pipeline, collect, collector, counts, mr, on_once_after, on_once_before, once_after_last, once_before_first, show_1, show_2;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
@@ -562,41 +562,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["transforms with once_after_last can (not yet) be senders"] = function(T, done) {
-    var $, Pipeline, collector, error, mr, on_once_after, once_after_last;
-    // T?.halt_on_error()
-    ({Pipeline, $} = require('../../../apps/moonriver'));
-    once_after_last = true;
-    collector = [];
-    mr = new Pipeline();
-    //.......................................................................................................
-    // mr.push [ 1, 2, 3, ]
-    error = null;
-    try {
-      mr.push($({once_after_last}, on_once_after = function(d, send) {
-        return send('last');
-      }));
-    } catch (error1) {
-      error = error1;
-      if ((error.message.match(/transform with arity 2 not implemented for modifiers once_before_first, once_after_last/)) != null) {
-        if (T != null) {
-          T.ok(true);
-        }
-      } else {
-        throw error;
-      }
-    }
-    if (T != null) {
-      T.ok(error != null);
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["modifier first does not leak into pipeline when used with observer"] = function(T, done) {
+  this._modifier_first_does_not_leak_into_pipeline_when_used_with_observer = function(T, done) {
     var $, Pipeline, collector, first1, first2;
     // T?.halt_on_error()
     ({Pipeline, $} = require('../../../apps/moonriver'));
