@@ -226,15 +226,67 @@ H                         = require '../../../lib/helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@everything_sync = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  do =>
+    mr        = new Pipeline()
+    mr.push 'abc'
+    mr.push repeatable_source = -> 'def'
+    mr.push [ 1, 2, ]
+    mr.push [ 6, 7, ].values()
+    mr.push { x: 42, }
+    mr.push new Map [ [ 23, true, ], ]
+    mr.push new Set 'xyz'
+    mr.push sync_transducer   = ( d, send ) -> send d
+    mr.push sync_observer     = ( d       ) -> info '^23-1^', d
+    result = mr.run()
+    help '^23-2^', result
+    T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@everything_async = ( T, done ) ->
+  # T?.halt_on_error()
+  { Async_pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  do =>
+    mr        = new Async_pipeline()
+    mr.push 'abc'
+    mr.push repeatable_source = -> 'def'
+    mr.push [ 1, 2, ]
+    mr.push [ 6, 7, ].values()
+    mr.push { x: 42, }
+    mr.push new Map [ [ 23, true, ], ]
+    mr.push new Set 'xyz'
+    mr.push sync_transducer   = ( d, send ) -> send d
+    mr.push sync_observer     = ( d       ) -> info '^23-3^', d
+    mr.push async_transducer  = ( d, send ) -> send await after 0.01, -> d
+    mr.push async_observer    = ( d       ) -> await after 0.01, -> urge '^23-4^', d
+    result = await mr.run()
+    help '^23-5^', result
+    T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # await @can_use_asyncgenerator_as_source()
   # await @can_use_asyncgeneratorfunction_as_source()
+  # @simple()
+  @everything_sync()
+  @everything_async()
+  # test @everything_sync
   # test @can_use_asyncgenerator_as_source
   # test @can_use_asyncgeneratorfunction_as_source
   # @can_use_asyncfunction_as_transform()
   # test @can_use_asyncfunction_as_transform
-  test @
+  # test @
 
