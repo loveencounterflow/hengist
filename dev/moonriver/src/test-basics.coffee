@@ -26,6 +26,7 @@ types                     = new ( require 'intertype' ).Intertype
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
+after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 
 
   # #.........................................................................................................
@@ -45,11 +46,12 @@ H                         = require '../../../lib/helpers'
     collector = []
     mr        = new Pipeline()
     mr.push [ 1, 2, 3, 5, ]
+    mr.push [ 6, 7, 8, 9, ].values()
     mr.push ( d, send ) -> send d * 2
     mr.push ( d, send ) -> send d #; urge d
     mr.push ( d, send ) -> collector.push d #; help collector
     mr.run()
-    T?.eq collector, [ 2, 4, 6, 10, ]
+    T?.eq collector, [ 2, 12, 4, 14, 6, 16, 10, 18 ]
   #.........................................................................................................
   done?()
   return null
@@ -134,18 +136,17 @@ H                         = require '../../../lib/helpers'
   { Async_pipeline }  = require '../../../apps/moonriver'
   count               = 0
   source              = -> await yield d for d in [ 3, 5, 7, 11, ]
-  debug '^49-1^', source
-  debug '^49-1^', source()
-  debug '^49-1^', source().next
   #.......................................................................................................
   p = new Async_pipeline()
   p.push source()
-  p.push square = ( d, send ) -> send d * d
-  p.push show = ( d ) -> urge '^49-1^', d
+  p.push sync_square  = ( d, send ) ->                      send d * d
+  p.push sync_show    = ( d       ) ->                      urge '^49-1^', d
+  p.push async_square = ( d, send ) -> await after 0.05, -> send d * d
+  p.push async_show   = ( d       ) -> await after 0.05, -> urge '^49-1^', d
   #.........................................................................................................
+  info '^3424^', p
   result = await p.run()
-  info '^49-1^', result
-  T?.eq result, [ 9, 25, 49, 121, ]
+  T?.eq result, [ 81, 625, 2401, 14641 ]
   done?()
   return null
 
@@ -177,7 +178,6 @@ H                         = require '../../../lib/helpers'
   GUY               = require '../../../apps/guy'
   { Async_pipeline
     $           }   = require '../../../apps/moonriver'
-  after             = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
   count             = 0
   #.......................................................................................................
   p = new Async_pipeline()
