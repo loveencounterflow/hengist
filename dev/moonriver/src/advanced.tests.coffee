@@ -29,7 +29,7 @@ H                         = require '../../../lib/helpers'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@window_transform = ( T, done ) ->
+@_window_transform = ( T, done ) ->
   # T?.halt_on_error()
   GUY             = require '../../../apps/guy'
   { Pipeline

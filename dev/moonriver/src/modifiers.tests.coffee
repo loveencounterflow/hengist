@@ -28,7 +28,7 @@ guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
-@modifiers = ( T, done ) ->
+@_modifiers = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -78,7 +78,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@resettable_state_shared_across_transforms = ( T, done ) ->
+@_resettable_state_shared_across_transforms = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -195,7 +195,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "once_before_first, once_after_last transformers transparent to data" ] = ( T, done ) ->
+@_once_before_first_once_after_last_transformers_transparent_to_data = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -227,7 +227,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "appending data before closing" ] = ( T, done ) ->
+@_appending_data_before_closing = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -249,7 +249,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "modifier last does not leak into pipeline when used with observer" ] = ( T, done ) ->
+@_modifier_last_does_not_leak_into_pipeline_when_used_with_observer = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -271,7 +271,7 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "modifier last" ] = ( T, done ) ->
+@_modifier_last = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -300,7 +300,7 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "modifier once_after_last" ] = ( T, done ) ->
+@_modifier_once_after_last = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -323,7 +323,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "exit symbol" ] = ( T, done ) ->
+@_exit_symbol = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -345,7 +345,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "called even when pipeline empty: once_before_first, once_after_last" ] = ( T, done ) ->
+@_once_before_first_and_once_after_last_called_even_when_pipeline_empty = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
@@ -371,34 +371,7 @@ H                         = require '../../../lib/helpers'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "transforms with once_after_last can (not yet) be senders" ] = ( T, done ) ->
-  # T?.halt_on_error()
-  { Pipeline
-    $           }   = require '../../../apps/moonriver'
-  once_after_last = true
-  collector       = []
-  mr              = new Pipeline()
-  #.......................................................................................................
-  # mr.push [ 1, 2, 3, ]
-  error = null
-  try
-    mr.push $ { once_after_last, }, on_once_after = ( d, send ) -> send 'last'
-  catch error
-    if ( error.message.match /transform with arity 2 not implemented for modifiers once_before_first, once_after_last/ )?
-      T?.ok true
-    else
-      throw error
-  T?.ok error?
-  # mr.push collect = ( d ) -> collector.push d
-  # mr.run()
-  # debug '^498^', collector
-  # T?.eq collector, [ 1, 2, 3, 'last', ]
-  #.........................................................................................................
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "modifier first does not leak into pipeline when used with observer" ] = ( T, done ) ->
+@_modifier_first_does_not_leak_into_pipeline_when_used_with_observer = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline
     $           }   = require '../../../apps/moonriver'
