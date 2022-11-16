@@ -71,7 +71,7 @@ _types                    = new ( require 'intertype' ).Intertype()
   # types.declare 'weirdo', isa: ( x ) -> x is weirdo
   T?.eq ( GUY.props.has types.isa, 'weirdo' ), true
   debug '^353^', GUY.props.has types.isa, 'weirdo'
-  T?.throws /Object instance already has property 'weirdo'/, => types.declare 'weirdo', isa: ( x ) -> x is weirdo
+  T?.throws /unable to re-declare 'weirdo'/, => types.declare 'weirdo', isa: ( x ) -> x is weirdo
   #.........................................................................................................
   done?()
   return null
@@ -1551,15 +1551,15 @@ demo_size_of = ->
     [ [ 't'                                                                     ], null, /not a valid Type_factory_type_dsc/,                ]
     [ [ { name: 't', collection: false, }                                       ], null, /not a valid Type_factory_type_dsc/,                ]
     [ ['t', ( ( x ) -> @isa.object x ), { x: 'float', y: 'float', }             ], null, /expected a function or a nonempty text for `isa`/, ]
-    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
-    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:positive0.integer)', name: 't', typename: 't', }, ]
-    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', }, ]
-    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', }, ]
-    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity', typename: 'quantity', }, ]
+    [ [ 't', 'list.of.integer'                                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ { name: 't', collection: false, isa: 'positive0.integer', }             ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:positive0.integer)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ 't', { collection: false, }, 'list.of.integer'                          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:list.of.integer)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ 't', { collection: false, }, ( x ) -> @isa.positive0.integer x          ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', override: false, replace: false, }, ]
+    [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity', typename: 'quantity', override: false, replace: false, }, ]
     [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
-      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', }, ]
+      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', override: false, replace: false, }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -2202,6 +2202,99 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@can_clone_instance = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types_1           = new Intertype()
+  #.........................................................................................................
+  types_1.declare.function0
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
+    default:    ->
+    override:   true
+  #.........................................................................................................
+  types_1.declare.function1
+    isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
+    default:    ( x ) ->
+    override:   true
+  #.........................................................................................................
+  types_2 = new Intertype types_1
+  #.........................................................................................................
+  # debug '^45-1^', types_1 is types_2
+  # debug '^45-2^', types_1.registry.function0
+  # debug '^45-2^', ( GUY.props.keys types_1.registry.function0, { hidden: true, } )
+  # debug '^45-3^', types_2.registry.function0
+  # debug '^45-4^', types_1.type_of ->
+  # debug '^45-5^', types_1.isa.function0 ->
+  # debug '^45-6^', types_2.type_of ->
+  # debug '^45-7^', types_2.isa.function0 ->
+  # debug '^45-8^', types_2.registry.function0
+  # debug '^45-9^', types_2.registry.function1
+  #.........................................................................................................
+  T?.ok types_1 isnt types_2
+  T?.eq ( types_2.isa.function0 ->        ),  true
+  T?.eq ( types_2.isa.function1 ->        ),  false
+  T?.eq ( types_2.isa.function0 ( x ) ->  ),  false
+  T?.eq ( types_2.isa.function1 ( x ) ->  ),  true
+  T?.eq types_1.registry.function0.override,  true
+  T?.eq types_2.registry.function0.override,  true
+  T?.eq types_1.overrides.length,             2
+  T?.eq types_2.overrides.length,             2
+  #.........................................................................................................
+  T?.eq ( types_1.type_of ->                  ), 'function0'
+  T?.eq ( types_1.type_of ( x ) ->            ), 'function1'
+  T?.eq ( types_1.type_of ( x, y ) ->         ), 'function'
+  #.........................................................................................................
+  T?.eq ( types_2.type_of ->                  ), 'function0'
+  T?.eq ( types_2.type_of ( x ) ->            ), 'function1'
+  T?.eq ( types_2.type_of ( x, y ) ->         ), 'function'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_replace_declarations = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    type_of
+    isa           } = types
+  #.........................................................................................................
+  declare.explanation_for_everything
+    isa:        ( x ) -> x is null
+    default:    null
+    override:   true
+  #.........................................................................................................
+  T?.eq ( isa.explanation_for_everything null                 ), true
+  T?.eq ( type_of null                                        ), 'explanation_for_everything'
+  T?.eq ( types.registry.explanation_for_everything.override  ), true
+  T?.eq ( types.overrides.length                              ), 1
+  #.........................................................................................................
+  declare.explanation_for_everything
+    replace:    true
+    isa:        ( x ) -> x is 42
+    default:    42
+    override:   true
+  #.........................................................................................................
+  T?.eq ( isa.explanation_for_everything null                 ), false
+  T?.eq ( type_of null                                        ), 'null'
+  T?.eq ( type_of 42                                          ), 'explanation_for_everything'
+  T?.eq ( types.registry.explanation_for_everything.override  ), true
+  T?.eq ( types.overrides.length                              ), 1
+  #.........................................................................................................
+  declare.explanation_for_everything
+    replace:    true
+    isa:        ( x ) -> x is 42
+    default:    42
+    override:   false
+  #.........................................................................................................
+  T?.eq ( isa.explanation_for_everything 42                   ), true
+  T?.eq ( type_of 42                                          ), 'float'
+  T?.eq ( types.registry.explanation_for_everything.override  ), false
+  T?.eq ( types.overrides.length                              ), 0
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2242,6 +2335,10 @@ unless module.parent?
   # @intertype_type_regex()
   # test @intertype_type_regex
   # @override_types_are_honored()
+  # @can_clone_instance()
+  # test @can_clone_instance
+  # @can_replace_declarations()
+  # test @can_replace_declarations
   test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
