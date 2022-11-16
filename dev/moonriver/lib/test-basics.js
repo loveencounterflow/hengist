@@ -60,21 +60,21 @@
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
-      var collector, mr;
+      var collector, p;
       collector = [];
-      mr = new Pipeline();
-      mr.push([1, 2, 3, 5]);
-      mr.push([6, 7, 8, 9].values());
-      mr.push(function(d, send) {
+      p = new Pipeline();
+      p.push([1, 2, 3, 5]);
+      p.push([6, 7, 8, 9].values());
+      p.push(function(d, send) {
         return send(d * 2);
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return send(d); //; urge d
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return collector.push(d); //; help collector
       });
-      mr.run();
+      p.run();
       return T != null ? T.eq(collector, [2, 12, 4, 14, 6, 16, 10, 18]) : void 0;
     })();
     if (typeof done === "function") {
@@ -89,10 +89,10 @@
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
-      var collector, mr;
+      var collector, p;
       collector = [];
-      mr = new Pipeline();
-      mr.push(function*(send) {
+      p = new Pipeline();
+      p.push(function*(send) {
         var i, len, n, ref, results;
         ref = [1, 2, 3, 5];
         results = [];
@@ -102,16 +102,16 @@
         }
         return results;
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return send(d * 2);
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return send(d); //; urge d
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return collector.push(d); //; help collector
       });
-      mr.run();
+      p.run();
       return T != null ? T.eq(collector, [2, 4, 6, 10]) : void 0;
     })();
     if (typeof done === "function") {
@@ -126,10 +126,10 @@
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
-      var collector, mr;
+      var collector, p;
       collector = [];
-      mr = new Pipeline();
-      mr.push((function*(send) {
+      p = new Pipeline();
+      p.push((function*(send) {
         var i, len, n, ref, results;
         ref = [1, 2, 3, 5];
         results = [];
@@ -139,16 +139,16 @@
         }
         return results;
       })());
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return send(d * 2);
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return send(d); //; urge d
       });
-      mr.push(function(d, send) {
+      p.push(function(d, send) {
         return collector.push(d); //; help collector
       });
-      mr.run();
+      p.run();
       return T != null ? T.eq(collector, [2, 4, 6, 10]) : void 0;
     })();
     if (typeof done === "function") {
@@ -163,7 +163,7 @@
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     (() => {      //.........................................................................................................
-      var can_access_pipeline_1, can_access_pipeline_2, collector, has_user_area, mr, pipeline;
+      var can_access_pipeline_1, can_access_pipeline_2, collector, has_user_area, p, pipeline;
       collector = [];
       pipeline = [
         ['^4564^'],
@@ -172,7 +172,7 @@
         },
         //.....................................................................................................
         can_access_pipeline_1 = function(d) {
-          if (this === mr) {
+          if (this === p) {
             if (T != null) {
               T.ok(true);
             }
@@ -187,7 +187,7 @@
         can_access_pipeline_2 = function(d,
         send) {
           send(d);
-          if (this === mr) {
+          if (this === p) {
             if (T != null) {
               T.ok(true);
             }
@@ -215,9 +215,9 @@
         }
       ];
       //.....................................................................................................
-      mr = new Pipeline(pipeline);
-      debug('^558^', mr);
-      return mr.run();
+      p = new Pipeline(pipeline);
+      debug('^558^', p);
+      return p.run();
     })();
     if (typeof done === "function") {
       done();
@@ -400,34 +400,46 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.everything_sync = function(T, done) {
-    var Pipeline;
+  this.types_rundown = function(T, done) {
+    var Pipeline, p, repeatable_source, sync_observer, sync_transducer;
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
-    (() => {      //.........................................................................................................
-      var mr, repeatable_source, result, sync_observer, sync_transducer;
-      mr = new Pipeline();
-      mr.push('abc');
-      mr.push(repeatable_source = function() {
+    p = new Pipeline();
+    if (T != null) {
+      T.eq(p.types.type_of('abc'), 'text');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of(repeatable_source = function() {
         return 'def';
-      });
-      mr.push([1, 2]);
-      mr.push([6, 7].values());
-      mr.push({
+      }), 'mr_sync_repeatable_source_fitting');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of([1, 2]), 'list');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of([6, 7].values()), 'arrayiterator');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of({
         x: 42
-      });
-      mr.push(new Map([[23, true]]));
-      mr.push(new Set('xyz'));
-      mr.push(sync_transducer = function(d, send) {
+      }), 'object');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of(new Map([[23, true]])), 'map');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of(new Set('xyz')), 'set');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of(sync_transducer = function(d, send) {
         return send(d);
-      });
-      mr.push(sync_observer = function(d) {
+      }), 'mr_sync_duct_fitting');
+    }
+    if (T != null) {
+      T.eq(p.types.type_of(sync_observer = function(d) {
         return info('^23-1^', d);
-      });
-      result = mr.run();
-      help('^23-2^', result);
-      return T != null ? T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']) : void 0;
-    })();
+      }), 'mr_sync_duct_fitting');
+    }
     if (typeof done === "function") {
       done();
     }
@@ -435,44 +447,79 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.everything_async = function(T, done) {
-    var Async_pipeline;
+  this.everything_sync = function(T, done) {
+    var Pipeline, p, repeatable_source, result, sync_observer, sync_transducer;
+    // T?.halt_on_error()
+    ({Pipeline} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    p = new Pipeline();
+    p.push('abc');
+    p.push(repeatable_source = function() {
+      return 'def';
+    });
+    p.push([1, 2]);
+    p.push([6, 7].values());
+    p.push({
+      x: 42
+    });
+    p.push(new Map([[23, true]]));
+    p.push(new Set('xyz'));
+    p.push(sync_transducer = function(d, send) {
+      return send(d);
+    });
+    p.push(sync_observer = function(d) {
+      return info('^23-1^', d);
+    });
+    result = p.run();
+    help('^23-2^', result);
+    if (T != null) {
+      T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.everything_async = async function(T, done) {
+    var Async_pipeline, async_observer, async_transducer, p, repeatable_source, result, sync_observer, sync_transducer;
     // T?.halt_on_error()
     ({Async_pipeline} = require('../../../apps/moonriver'));
-    (async() => {      //.........................................................................................................
-      var async_observer, async_transducer, mr, repeatable_source, result, sync_observer, sync_transducer;
-      mr = new Async_pipeline();
-      mr.push('abc');
-      mr.push(repeatable_source = function() {
-        return 'def';
-      });
-      mr.push([1, 2]);
-      mr.push([6, 7].values());
-      mr.push({
-        x: 42
-      });
-      mr.push(new Map([[23, true]]));
-      mr.push(new Set('xyz'));
-      mr.push(sync_transducer = function(d, send) {
-        return send(d);
-      });
-      mr.push(sync_observer = function(d) {
-        return info('^23-3^', d);
-      });
-      mr.push(async_transducer = async function(d, send) {
-        return send((await after(0.01, function() {
-          return d;
-        })));
-      });
-      mr.push(async_observer = async function(d) {
-        return (await after(0.01, function() {
-          return urge('^23-4^', d);
-        }));
-      });
-      result = (await mr.run());
-      help('^23-5^', result);
-      return T != null ? T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']) : void 0;
-    })();
+    //.........................................................................................................
+    p = new Async_pipeline();
+    p.push('abc');
+    p.push(repeatable_source = function() {
+      return 'def';
+    });
+    p.push([1, 2]);
+    p.push([6, 7].values());
+    p.push({
+      x: 42
+    });
+    p.push(new Map([[23, true]]));
+    p.push(new Set('xyz'));
+    p.push(sync_transducer = function(d, send) {
+      return send(d);
+    });
+    p.push(sync_observer = function(d) {
+      return info('^23-3^', d);
+    });
+    p.push(async_transducer = async function(d, send) {
+      return send((await after(0.01, function() {
+        return d;
+      })));
+    });
+    p.push(async_observer = async function(d) {
+      return (await after(0.01, function() {
+        return urge('^23-4^', d);
+      }));
+    });
+    result = (await p.run());
+    help('^23-5^', result);
+    if (T != null) {
+      T.eq(result, ['a', 'd', 1, 6, ['x', 42], [23, true], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z']);
+    }
     if (typeof done === "function") {
       done();
     }
@@ -485,12 +532,14 @@
       // await @can_use_asyncgenerator_as_source()
       // await @can_use_asyncgeneratorfunction_as_source()
       // @simple()
-      this.everything_sync();
-      return this.everything_async();
+      this.types_rundown();
+      return test(this.types_rundown);
     })();
   }
 
-  // test @everything_sync
+  // @everything_sync()
+// @everything_async()
+// test @everything_sync
 // test @can_use_asyncgenerator_as_source
 // test @can_use_asyncgeneratorfunction_as_source
 // @can_use_asyncfunction_as_transform()
