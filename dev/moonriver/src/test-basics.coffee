@@ -44,13 +44,13 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   #.........................................................................................................
   do =>
     collector = []
-    mr        = new Pipeline()
-    mr.push [ 1, 2, 3, 5, ]
-    mr.push [ 6, 7, 8, 9, ].values()
-    mr.push ( d, send ) -> send d * 2
-    mr.push ( d, send ) -> send d #; urge d
-    mr.push ( d, send ) -> collector.push d #; help collector
-    mr.run()
+    p        = new Pipeline()
+    p.push [ 1, 2, 3, 5, ]
+    p.push [ 6, 7, 8, 9, ].values()
+    p.push ( d, send ) -> send d * 2
+    p.push ( d, send ) -> send d #; urge d
+    p.push ( d, send ) -> collector.push d #; help collector
+    p.run()
     T?.eq collector, [ 2, 12, 4, 14, 6, 16, 10, 18 ]
   #.........................................................................................................
   done?()
@@ -63,12 +63,12 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   #.........................................................................................................
   do =>
     collector = []
-    mr        = new Pipeline()
-    mr.push ( send ) -> yield n for n in [ 1, 2, 3, 5, ]
-    mr.push ( d, send ) -> send d * 2
-    mr.push ( d, send ) -> send d #; urge d
-    mr.push ( d, send ) -> collector.push d #; help collector
-    mr.run()
+    p        = new Pipeline()
+    p.push ( send ) -> yield n for n in [ 1, 2, 3, 5, ]
+    p.push ( d, send ) -> send d * 2
+    p.push ( d, send ) -> send d #; urge d
+    p.push ( d, send ) -> collector.push d #; help collector
+    p.run()
     T?.eq collector, [ 2, 4, 6, 10, ]
   #.........................................................................................................
   done?()
@@ -81,12 +81,12 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   #.........................................................................................................
   do =>
     collector = []
-    mr        = new Pipeline()
-    mr.push ( ( send ) -> yield n for n in [ 1, 2, 3, 5, ] )()
-    mr.push ( d, send ) -> send d * 2
-    mr.push ( d, send ) -> send d #; urge d
-    mr.push ( d, send ) -> collector.push d #; help collector
-    mr.run()
+    p        = new Pipeline()
+    p.push ( ( send ) -> yield n for n in [ 1, 2, 3, 5, ] )()
+    p.push ( d, send ) -> send d * 2
+    p.push ( d, send ) -> send d #; urge d
+    p.push ( d, send ) -> collector.push d #; help collector
+    p.run()
     T?.eq collector, [ 2, 4, 6, 10, ]
   #.........................................................................................................
   done?()
@@ -104,13 +104,13 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       ( d ) -> urge d
       #.....................................................................................................
       can_access_pipeline_1 = ( d ) ->
-        if @ is mr then T?.ok true
+        if @ is p then T?.ok true
         else            T?.fail "^478-1^ not ok"
         return null
       #.....................................................................................................
       can_access_pipeline_2 = ( d, send ) ->
         send d
-        if @ is mr then T?.ok true
+        if @ is p then T?.ok true
         else            T?.fail "^478-2^ not ok"
         return null
       #.....................................................................................................
@@ -121,9 +121,9 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
         return null
       #.....................................................................................................
       ]
-    mr = new Pipeline pipeline
-    debug '^558^', mr
-    mr.run()
+    p = new Pipeline pipeline
+    debug '^558^', p
+    p.run()
     # T?.eq collector, [ 2, 4, 6, 10, ]
   #.........................................................................................................
   done?()
