@@ -111,7 +111,7 @@
     }
     debug('^353^', GUY.props.has(types.isa, 'weirdo'));
     if (T != null) {
-      T.throws(/Object instance already has property 'weirdo'/, () => {
+      T.throws(/unable to re-declare 'weirdo'/, () => {
         return types.declare('weirdo', {
           isa: function(x) {
             return x === weirdo;
@@ -2793,7 +2793,9 @@
           freeze: false,
           isa: 'f(t:list.of.integer)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2812,7 +2814,9 @@
           freeze: false,
           isa: 'f(t:positive0.integer)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2831,7 +2835,9 @@
           freeze: false,
           isa: 'f(t:list.of.integer)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2852,7 +2858,9 @@
           freeze: false,
           isa: 'f(t:#0)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2870,7 +2878,9 @@
           freeze: false,
           isa: 'f(t:#0)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2891,7 +2901,9 @@
           freeze: false,
           isa: 'f(t:#0)',
           name: 't',
-          typename: 't'
+          typename: 't',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2913,7 +2925,9 @@
           freeze: false,
           isa: 'f(quantity:object)',
           name: 'quantity',
-          typename: 'quantity'
+          typename: 'quantity',
+          override: false,
+          replace: false
         }
       ],
       [
@@ -2946,7 +2960,9 @@
           isa: 'f(foobar:#0)',
           name: 'foobar',
           seal: true,
-          typename: 'foobar'
+          typename: 'foobar',
+          override: false,
+          replace: false
         }
       ]
     ];
@@ -4717,11 +4733,11 @@
     // @can_clone_instance()
     // test @can_clone_instance
     // @can_replace_declarations()
-    test(this.can_replace_declarations);
+    // test @can_replace_declarations
+    test(this);
   }
 
-  // test @
-// test @intertype_ordering_of_field_and_isa_tests
+  // test @intertype_ordering_of_field_and_isa_tests
 // test @intertype_tracing
 // test @_intertype_tracing_2
 // test @intertype_improved_validation_errors
