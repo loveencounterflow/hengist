@@ -17,25 +17,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
-    var Pipeline, on_after_process, on_after_step, on_before_process, on_before_step, p, plus_2, times_2, times_3;
+    var Pipeline, p, plus_2, times_2, times_3;
     echo('—————————————————————————————————————————————');
     ({Pipeline} = require('../../../apps/moonriver'));
-    on_before_process = function() {
-      return help('^97-1^', this);
-    };
-    on_after_process = function() {
-      return warn('^97-2^', this);
-    };
-    on_before_step = function(sidx) {
-      return urge('^97-3^', sidx, this);
-    };
-    on_after_step = function(sidx) {
-      return urge('^97-4^', sidx, this);
-    };
-    on_before_step = null;
-    // on_after_step     = null
-    on_after_process = null;
-    p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
+    p = new Pipeline();
     p.push(times_2 = function(d, send) {
       if (types.isa.float(d)) {
         // send '('
@@ -73,19 +58,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_2 = function() {
-    var Pipeline, on_after_process, on_after_step, on_before_process, on_before_step, p, show_2;
+    var Pipeline, p, show_2;
     echo('—————————————————————————————————————————————');
     ({Pipeline} = require('../../../apps/moonriver'));
-    on_before_process = null;
-    on_before_step = null;
-    on_after_step = null;
-    on_after_process = null;
-    // on_before_process = -> help '^98-1^', @
-    // on_after_process  = -> warn '^98-2^', @
-    // on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
-    // on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
-    p = new Pipeline({on_before_process, on_before_step, on_after_step, on_after_process});
-    // p = new Pipeline()
+    p = new Pipeline();
     // p.push 'AB'
     // p.push 'CD'
     // p.push [ 1, 2, 3, ]
@@ -211,7 +187,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_6 = function() {
-    var $, $collect, $with_stars, FS, Pipeline, T, collect, last, p, show, with_stars;
+    var $, $collect, $with_stars, FS, Pipeline, T, collect, last, p, show;
     echo('—————————————————————————————————————————————');
     FS = require('node:fs');
     ({
@@ -222,12 +198,15 @@
     ({$} = p);
     last = Symbol('last');
     //.........................................................................................................
-    $with_stars = $(with_stars = function(d, send) {
-      debug('^4456546^', send);
-      return send(`*${d}*`);
-    });
+    $with_stars = function() {
+      var with_stars;
+      return with_stars = function(d, send) {
+        debug('^4456546^', send);
+        return send(`*${d}*`);
+      };
+    };
     //.........................................................................................................
-    $collect = $(collect = {last}, function() {
+    $collect = $({last}, collect = function() {
       var collector;
       collector = [];
       return function(d, send) {
@@ -254,17 +233,16 @@
 
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
-      // demo_1()
-      // demo_2()
-      // await demo_3a()
-      // await demo_3b()
-      // demo_4()
-      return demo_5();
+    (async() => {
+      demo_1();
+      demo_2();
+      await demo_3a();
+      await demo_3b();
+      demo_4();
+      demo_5();
+      return demo_6();
     })();
   }
-
-  // demo_6()
 
 }).call(this);
 

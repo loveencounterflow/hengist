@@ -401,7 +401,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_rundown = function(T, done) {
-    var Pipeline, p, repeatable_source, sync_observer, sync_transducer;
+    var Pipeline, p, producer, sync_observer, sync_transducer;
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     p = new Pipeline();
@@ -409,9 +409,9 @@
       T.eq(p.types.type_of('abc'), 'text');
     }
     if (T != null) {
-      T.eq(p.types.type_of(repeatable_source = function() {
+      T.eq(p.types.type_of(producer = function() {
         return 'def';
-      }), 'mr_sync_repeatable_source_fitting');
+      }), 'producer_fitting');
     }
     if (T != null) {
       T.eq(p.types.type_of([1, 2]), 'list');
@@ -433,12 +433,12 @@
     if (T != null) {
       T.eq(p.types.type_of(sync_transducer = function(d, send) {
         return send(d);
-      }), 'mr_sync_duct_fitting');
+      }), 'transducer_fitting');
     }
     if (T != null) {
       T.eq(p.types.type_of(sync_observer = function(d) {
         return info('^23-1^', d);
-      }), 'mr_sync_duct_fitting');
+      }), 'observer_fitting');
     }
     if (typeof done === "function") {
       done();
@@ -448,13 +448,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.everything_sync = function(T, done) {
-    var Pipeline, p, repeatable_source, result, sync_observer, sync_transducer;
+    var Pipeline, p, producer, result, sync_observer, sync_transducer;
     // T?.halt_on_error()
     ({Pipeline} = require('../../../apps/moonriver'));
     //.........................................................................................................
     p = new Pipeline();
     p.push('abc');
-    p.push(repeatable_source = function() {
+    p.push(producer = function() {
       return 'def';
     });
     p.push([1, 2]);
@@ -483,13 +483,13 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.everything_async = async function(T, done) {
-    var Async_pipeline, async_observer, async_transducer, p, repeatable_source, result, sync_observer, sync_transducer;
+    var Async_pipeline, async_observer, async_transducer, p, producer, result, sync_observer, sync_transducer;
     // T?.halt_on_error()
     ({Async_pipeline} = require('../../../apps/moonriver'));
     //.........................................................................................................
     p = new Async_pipeline();
     p.push('abc');
-    p.push(repeatable_source = function() {
+    p.push(producer = function() {
       return 'def';
     });
     p.push([1, 2]);
@@ -532,19 +532,21 @@
       // await @can_use_asyncgenerator_as_source()
       // await @can_use_asyncgeneratorfunction_as_source()
       // @simple()
-      this.types_rundown();
-      return test(this.types_rundown);
+      // @types_rundown()
+      // test @types_rundown
+      // @everything_sync()
+      // @everything_async()
+      // test @everything_sync
+      // test @everything_async
+      // test @can_use_asyncgenerator_as_source
+      // test @can_use_asyncgeneratorfunction_as_source
+      // @can_use_asyncfunction_as_transform()
+      // test @can_use_asyncfunction_as_transform
+      // @simple_with_generatorfunction()
+      // test @simple_with_generatorfunction
+      return test(this);
     })();
   }
-
-  // @everything_sync()
-// @everything_async()
-// test @everything_sync
-// test @can_use_asyncgenerator_as_source
-// test @can_use_asyncgeneratorfunction_as_source
-// @can_use_asyncfunction_as_transform()
-// test @can_use_asyncfunction_as_transform
-// test @
 
 }).call(this);
 

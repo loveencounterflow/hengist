@@ -4629,6 +4629,13 @@
       override: true
     });
     //.........................................................................................................
+    declare.other_type({
+      isa: function(x) {
+        return false;
+      },
+      override: true
+    });
+    //.........................................................................................................
     if (T != null) {
       T.eq(isa.explanation_for_everything(null), true);
     }
@@ -4639,7 +4646,13 @@
       T.eq(types.registry.explanation_for_everything.override, true);
     }
     if (T != null) {
-      T.eq(types.overrides.length, 1);
+      T.eq(types.overrides.length, 2);
+    }
+    if (T != null) {
+      T.eq(types.overrides[0][0], 'other_type');
+    }
+    if (T != null) {
+      T.eq(types.overrides[1][0], 'explanation_for_everything');
     }
     //.........................................................................................................
     declare.explanation_for_everything({
@@ -4664,7 +4677,13 @@
       T.eq(types.registry.explanation_for_everything.override, true);
     }
     if (T != null) {
-      T.eq(types.overrides.length, 1);
+      T.eq(types.overrides.length, 2);
+    }
+    if (T != null) {
+      T.eq(types.overrides[0][0], 'other_type');
+    }
+    if (T != null) {
+      T.eq(types.overrides[1][0], 'explanation_for_everything');
     }
     //.........................................................................................................
     declare.explanation_for_everything({
@@ -4686,8 +4705,174 @@
       T.eq(types.registry.explanation_for_everything.override, false);
     }
     if (T != null) {
-      T.eq(types.overrides.length, 0);
+      T.eq(types.overrides[0][0], 'other_type');
     }
+    if (T != null) {
+      T.eq(types.overrides.length, 1);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_delete_and_redeclare_types = function(T, done) {
+    var Intertype, declare, isa, remove, type_of, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, type_of, isa, remove} = types);
+    //.........................................................................................................
+    declare.explanation_for_everything({
+      isa: function(x) {
+        return x === null;
+      },
+      default: null,
+      override: true
+    });
+    //.........................................................................................................
+    declare.other_type({
+      isa: function(x) {
+        return false;
+      },
+      override: true
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.explanation_for_everything(null), true);
+    }
+    if (T != null) {
+      T.eq(type_of(null), 'explanation_for_everything');
+    }
+    if (T != null) {
+      T.eq(types.registry.explanation_for_everything.override, true);
+    }
+    if (T != null) {
+      T.eq(types.overrides.length, 2);
+    }
+    if (T != null) {
+      T.eq(types.overrides[0][0], 'other_type');
+    }
+    if (T != null) {
+      T.eq(types.overrides[1][0], 'explanation_for_everything');
+    }
+    //.........................................................................................................
+    remove.explanation_for_everything();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.get(types.registry, 'explanation_for_everything', null), null);
+    }
+    if (T != null) {
+      T.eq(type_of(null), 'null');
+    }
+    if (T != null) {
+      T.eq(types.overrides.length, 1);
+    }
+    if (T != null) {
+      T.eq(types.overrides[0][0], 'other_type');
+    }
+    //.........................................................................................................
+    declare.explanation_for_everything({
+      isa: function(x) {
+        return x === null;
+      },
+      default: null,
+      override: true
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(type_of(null), 'explanation_for_everything');
+    }
+    if (T != null) {
+      T.eq(types.overrides.length, 2);
+    }
+    if (T != null) {
+      T.eq(types.overrides[0][0], 'explanation_for_everything');
+    }
+    if (T != null) {
+      T.eq(types.overrides[1][0], 'other_type');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.detect_circular_declarations = function(T, done) {
+    var Intertype, declare, isa, remove, type_of, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, type_of, isa, remove} = types);
+    //.........................................................................................................
+    declare.type_a({
+      override: true,
+      isa: function(x) {
+        return this.isa.type_b(x);
+      }
+    });
+    declare.type_b({
+      override: true,
+      isa: function(x) {
+        return this.isa.type_c(x);
+      }
+    });
+    declare.type_c({
+      override: true,
+      isa: function(x) {
+        return this.isa.type_d(x);
+      }
+    });
+    declare.type_d({
+      override: true,
+      isa: function(x) {
+        return this.isa.type_a(x);
+      }
+    });
+    //.........................................................................................................
+    debug('^87-1^', type_of(null));
+    debug('^87-2^', type_of(42));
+    debug('^87-3^', type_of('helo'));
+    debug('^87-4^', isa.type_a(null));
+    debug('^87-5^', isa.type_a(42));
+    debug('^87-6^', isa.type_a('helo'));
+    debug('^87-7^', isa.type_b(null));
+    debug('^87-8^', isa.type_b(42));
+    debug('^87-9^', isa.type_b('helo'));
+    debug('^87-9^', isa.text('helo'));
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.strange_naming_bug = function(T, done) {
+    var Intertype, declare, misfit, types;
+    // T?.halt_on_error()
+    misfit = Symbol('misfit');
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare} = types);
+    //.........................................................................................................
+    declare.modifiers({
+      fields: {
+        first: 'anything',
+        last: 'anything'
+      },
+      default: {
+        first: misfit,
+        last: misfit
+      },
+      create: function(x) {
+        if (x == null) {
+          return {
+            first: misfit,
+            last: misfit
+          };
+        }
+        if (!this.isa.object(x)) {
+          return x;
+        }
+        return {
+          first: GUY.props.get(x, 'first', misfit),
+          last: GUY.props.get(x, 'last', misfit)
+        };
+      }
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -4734,6 +4919,11 @@
     // test @can_clone_instance
     // @can_replace_declarations()
     // test @can_replace_declarations
+    // @can_delete_and_redeclare_types()
+    // test @can_delete_and_redeclare_types
+    // test @detect_circular_declarations
+    // @strange_naming_bug()
+    // test @strange_naming_bug
     test(this);
   }
 
