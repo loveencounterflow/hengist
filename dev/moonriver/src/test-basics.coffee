@@ -296,12 +296,17 @@ if require.main is module then do =>
   # await @can_use_asyncgenerator_as_source()
   # await @can_use_asyncgeneratorfunction_as_source()
   # @simple()
-  @everything_sync()
-  @everything_async()
+  # @types_rundown()
+  # test @types_rundown
+  # @everything_sync()
+  # @everything_async()
   # test @everything_sync
+  # test @everything_async
   # test @can_use_asyncgenerator_as_source
   # test @can_use_asyncgeneratorfunction_as_source
   # @can_use_asyncfunction_as_transform()
   # test @can_use_asyncfunction_as_transform
-  # test @
+  # @simple_with_generatorfunction()
+  # test @simple_with_generatorfunction
+  test @
 
