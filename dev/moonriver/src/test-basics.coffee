@@ -227,6 +227,23 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@types_rundown = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline }  = require '../../../apps/moonriver'
+  p             = new Pipeline()
+  T?.eq ( p.types.type_of 'abc'                                               ), 'text'
+  T?.eq ( p.types.type_of producer = -> 'def'                                 ), 'producer_fitting'
+  T?.eq ( p.types.type_of [ 1, 2, ]                                           ), 'list'
+  T?.eq ( p.types.type_of [ 6, 7, ].values()                                  ), 'arrayiterator'
+  T?.eq ( p.types.type_of { x: 42, }                                          ), 'object'
+  T?.eq ( p.types.type_of new Map [ [ 23, true, ], ]                          ), 'map'
+  T?.eq ( p.types.type_of new Set 'xyz'                                       ), 'set'
+  T?.eq ( p.types.type_of sync_transducer   = ( d, send ) -> send d           ), 'transducer_fitting'
+  T?.eq ( p.types.type_of sync_observer     = ( d       ) -> info '^23-1^', d ), 'observer_fitting'
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @everything_sync = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline } = require '../../../apps/moonriver'
