@@ -2265,10 +2265,16 @@ demo_size_of = ->
     default:    null
     override:   true
   #.........................................................................................................
+  declare.other_type
+    isa:        ( x ) -> false
+    override:   true
+  #.........................................................................................................
   T?.eq ( isa.explanation_for_everything null                 ), true
   T?.eq ( type_of null                                        ), 'explanation_for_everything'
   T?.eq ( types.registry.explanation_for_everything.override  ), true
-  T?.eq ( types.overrides.length                              ), 1
+  T?.eq ( types.overrides.length                              ), 2
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'other_type'
+  T?.eq ( types.overrides[ 1 ][ 0 ]                           ), 'explanation_for_everything'
   #.........................................................................................................
   declare.explanation_for_everything
     replace:    true
@@ -2280,7 +2286,9 @@ demo_size_of = ->
   T?.eq ( type_of null                                        ), 'null'
   T?.eq ( type_of 42                                          ), 'explanation_for_everything'
   T?.eq ( types.registry.explanation_for_everything.override  ), true
-  T?.eq ( types.overrides.length                              ), 1
+  T?.eq ( types.overrides.length                              ), 2
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'other_type'
+  T?.eq ( types.overrides[ 1 ][ 0 ]                           ), 'explanation_for_everything'
   #.........................................................................................................
   declare.explanation_for_everything
     replace:    true
@@ -2291,7 +2299,103 @@ demo_size_of = ->
   T?.eq ( isa.explanation_for_everything 42                   ), true
   T?.eq ( type_of 42                                          ), 'float'
   T?.eq ( types.registry.explanation_for_everything.override  ), false
-  T?.eq ( types.overrides.length                              ), 0
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'other_type'
+  T?.eq ( types.overrides.length                              ), 1
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_delete_and_redeclare_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    type_of
+    isa
+    remove        } = types
+  #.........................................................................................................
+  declare.explanation_for_everything
+    isa:        ( x ) -> x is null
+    default:    null
+    override:   true
+  #.........................................................................................................
+  declare.other_type
+    isa:        ( x ) -> false
+    override:   true
+  #.........................................................................................................
+  T?.eq ( isa.explanation_for_everything null                 ), true
+  T?.eq ( type_of null                                        ), 'explanation_for_everything'
+  T?.eq ( types.registry.explanation_for_everything.override  ), true
+  T?.eq ( types.overrides.length                              ), 2
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'other_type'
+  T?.eq ( types.overrides[ 1 ][ 0 ]                           ), 'explanation_for_everything'
+  #.........................................................................................................
+  remove.explanation_for_everything()
+  #.........................................................................................................
+  T?.eq ( GUY.props.get types.registry, 'explanation_for_everything', null  ), null
+  T?.eq ( type_of null                                        ), 'null'
+  T?.eq ( types.overrides.length                              ), 1
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'other_type'
+  #.........................................................................................................
+  declare.explanation_for_everything
+    isa:        ( x ) -> x is null
+    default:    null
+    override:   true
+  #.........................................................................................................
+  T?.eq ( type_of null                                        ), 'explanation_for_everything'
+  T?.eq ( types.overrides.length                              ), 2
+  T?.eq ( types.overrides[ 0 ][ 0 ]                           ), 'explanation_for_everything'
+  T?.eq ( types.overrides[ 1 ][ 0 ]                           ), 'other_type'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@detect_circular_declarations = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    type_of
+    isa
+    remove        } = types
+  #.........................................................................................................
+  declare.type_a override: true, isa: ( x ) -> @isa.type_b x
+  declare.type_b override: true, isa: ( x ) -> @isa.type_c x
+  declare.type_c override: true, isa: ( x ) -> @isa.type_d x
+  declare.type_d override: true, isa: ( x ) -> @isa.type_a x
+  #.........................................................................................................
+  debug '^87-1^', type_of null
+  debug '^87-2^', type_of 42
+  debug '^87-3^', type_of 'helo'
+  debug '^87-4^', isa.type_a null
+  debug '^87-5^', isa.type_a 42
+  debug '^87-6^', isa.type_a 'helo'
+  debug '^87-7^', isa.type_b null
+  debug '^87-8^', isa.type_b 42
+  debug '^87-9^', isa.type_b 'helo'
+  debug '^87-9^', isa.text 'helo'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@strange_naming_bug = ( T, done ) ->
+  # T?.halt_on_error()
+  misfit            = Symbol 'misfit'
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare       } = types
+  #.........................................................................................................
+  declare.modifiers
+    fields:
+      first:      'anything'
+      last:       'anything'
+    default:
+      first:      misfit
+      last:       misfit
+    create: ( x ) ->
+      return { first: misfit, last: misfit, } unless x?
+      return x unless @isa.object x
+      return { first: ( GUY.props.get x, 'first', misfit ), last: ( GUY.props.get x, 'last',  misfit ), }
   #.........................................................................................................
   done?()
 
@@ -2339,6 +2443,11 @@ unless module.parent?
   # test @can_clone_instance
   # @can_replace_declarations()
   # test @can_replace_declarations
+  # @can_delete_and_redeclare_types()
+  # test @can_delete_and_redeclare_types
+  # test @detect_circular_declarations
+  # @strange_naming_bug()
+  # test @strange_naming_bug
   test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
