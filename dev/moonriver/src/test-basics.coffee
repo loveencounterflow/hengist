@@ -248,20 +248,19 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Pipeline } = require '../../../apps/moonriver'
   #.........................................................................................................
-  do =>
-    mr        = new Pipeline()
-    mr.push 'abc'
-    mr.push repeatable_source = -> 'def'
-    mr.push [ 1, 2, ]
-    mr.push [ 6, 7, ].values()
-    mr.push { x: 42, }
-    mr.push new Map [ [ 23, true, ], ]
-    mr.push new Set 'xyz'
-    mr.push sync_transducer   = ( d, send ) -> send d
-    mr.push sync_observer     = ( d       ) -> info '^23-1^', d
-    result = mr.run()
-    help '^23-2^', result
-    T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
+  p = new Pipeline()
+  p.push 'abc'
+  p.push producer = -> 'def'
+  p.push [ 1, 2, ]
+  p.push [ 6, 7, ].values()
+  p.push { x: 42, }
+  p.push new Map [ [ 23, true, ], ]
+  p.push new Set 'xyz'
+  p.push sync_transducer   = ( d, send ) -> send d
+  p.push sync_observer     = ( d       ) -> info '^23-1^', d
+  result = p.run()
+  help '^23-2^', result
+  T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
   #.........................................................................................................
   done?()
   return null
@@ -271,22 +270,21 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Async_pipeline } = require '../../../apps/moonriver'
   #.........................................................................................................
-  do =>
-    mr        = new Async_pipeline()
-    mr.push 'abc'
-    mr.push repeatable_source = -> 'def'
-    mr.push [ 1, 2, ]
-    mr.push [ 6, 7, ].values()
-    mr.push { x: 42, }
-    mr.push new Map [ [ 23, true, ], ]
-    mr.push new Set 'xyz'
-    mr.push sync_transducer   = ( d, send ) -> send d
-    mr.push sync_observer     = ( d       ) -> info '^23-3^', d
-    mr.push async_transducer  = ( d, send ) -> send await after 0.01, -> d
-    mr.push async_observer    = ( d       ) -> await after 0.01, -> urge '^23-4^', d
-    result = await mr.run()
-    help '^23-5^', result
-    T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
+  p = new Async_pipeline()
+  p.push 'abc'
+  p.push producer = -> 'def'
+  p.push [ 1, 2, ]
+  p.push [ 6, 7, ].values()
+  p.push { x: 42, }
+  p.push new Map [ [ 23, true, ], ]
+  p.push new Set 'xyz'
+  p.push sync_transducer   = ( d, send ) -> send d
+  p.push sync_observer     = ( d       ) -> info '^23-3^', d
+  p.push async_transducer  = ( d, send ) -> send await after 0.01, -> d
+  p.push async_observer    = ( d       ) -> await after 0.01, -> urge '^23-4^', d
+  result = await p.run()
+  help '^23-5^', result
+  T?.eq result, [ 'a', 'd', 1, 6, [ 'x', 42 ], [ 23, true ], 'x', 'b', 'e', 2, 7, 'y', 'c', 'f', 'z' ]
   #.........................................................................................................
   done?()
   return null
