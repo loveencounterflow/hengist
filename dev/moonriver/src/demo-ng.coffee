@@ -28,14 +28,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype(
 demo_1 = ->
   echo '—————————————————————————————————————————————'
   { Pipeline } = require '../../../apps/moonriver'
-  on_before_process = -> help '^97-1^', @
-  on_after_process  = -> warn '^97-2^', @
-  on_before_step    =  ( sidx ) -> urge '^97-3^', sidx, @
-  on_after_step     =  ( sidx ) -> urge '^97-4^', sidx, @
-  on_before_step    = null
-  # on_after_step     = null
-  on_after_process  = null
-  p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
+  p = new Pipeline()
   p.push times_2 = ( d, send ) ->
     if types.isa.float d
       # send '('
@@ -68,16 +61,7 @@ demo_1 = ->
 demo_2 = ->
   echo '—————————————————————————————————————————————'
   { Pipeline } = require '../../../apps/moonriver'
-  on_before_process = null
-  on_before_step    = null
-  on_after_step     = null
-  on_after_process  = null
-  # on_before_process = -> help '^98-1^', @
-  # on_after_process  = -> warn '^98-2^', @
-  # on_before_step    =  ( sidx ) -> urge '^98-3^', sidx, @
-  # on_after_step     =  ( sidx ) -> urge '^98-4^', sidx, @
-  p = new Pipeline { on_before_process, on_before_step, on_after_step, on_after_process, }
-  # p = new Pipeline()
+  p = new Pipeline()
   # p.push 'AB'
   # p.push 'CD'
   # p.push [ 1, 2, 3, ]
@@ -168,9 +152,9 @@ demo_6 = ->
   { $ }               = p
   last                = Symbol 'last'
   #.........................................................................................................
-  $with_stars         = $ with_stars = ( d, send ) -> debug '^4456546^', send; send "*#{d}*"
+  $with_stars         = -> with_stars = ( d, send ) -> debug '^4456546^', send; send "*#{d}*"
   #.........................................................................................................
-  $collect            = $ collect = { last, }, ->
+  $collect            = $ { last, }, collect = ->
     collector = []
     return ( d, send ) ->
       return send collector if d is last
@@ -191,12 +175,12 @@ demo_6 = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # demo_1()
-  # demo_2()
-  # await demo_3a()
-  # await demo_3b()
-  # demo_4()
+  demo_1()
+  demo_2()
+  await demo_3a()
+  await demo_3b()
+  demo_4()
   demo_5()
-  # demo_6()
+  demo_6()
 
 
