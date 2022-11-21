@@ -36,12 +36,12 @@ H                         = require '../../../lib/helpers'
     signals     } = require '../../../apps/moonriver'
   #.........................................................................................................
   p = new Pipeline()
-  p.push -> return 'abcdef'
+  p.push -> 'abcdef'
   p.push extra    = ( d, send ) -> send "*#{d}*"
-  p.push show     = ( d ) -> whisper '^98-5^', d
+  p.push show     = ( d ) -> whisper '^98-1^', d
   #.........................................................................................................
-  urge '^98-1^', result_1 = p.run()
-  urge '^98-1^', result_2 = p.run()
+  urge '^98-2^', result_1 = p.run()
+  urge '^98-3^', result_2 = p.run()
   T?.eq result_1, result_2
   #.........................................................................................................
   done?()
@@ -90,9 +90,9 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # @can_use_function_without_arguments_as_source()
-  # test @can_use_function_without_arguments_as_source
+  @can_use_function_without_arguments_as_source()
+  test @can_use_function_without_arguments_as_source
   # @run_and_walk_are_repeatable()
   # test @run_and_walk_are_repeatable
-  test @
+  # test @
 
