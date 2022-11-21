@@ -345,61 +345,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.can_use_nodejs_readable_stream_as_source = async function(T, done) {
-    var Async_pipeline, FS, GUY, Pipeline, TF, get_source, matcher, path, result;
-    // T?.halt_on_error()
-    GUY = require('../../../apps/guy');
-    ({
-      Pipeline,
-      Async_pipeline,
-      transforms: TF
-    } = require('../../../apps/moonriver'));
-    FS = require('node:fs');
-    path = PATH.join(__dirname, '../../../assets/short-proposal.mkts.md');
-    get_source = function() {
-      return FS.createReadStream(path); //, { encoding: 'utf-8', }
-    };
-    //.......................................................................................................
-    matcher = (() => {
-      var count, line, ref;
-      count = 0;
-      matcher = [];
-      ref = GUY.fs.walk_lines(path);
-      for (line of ref) {
-        count++;
-        if (count > 5) {
-          continue;
-        }
-        info(count, rpr(line));
-        matcher.push(line);
-      }
-      return matcher;
-    })();
-    //.......................................................................................................
-    result = (await (async() => {
-      var p, show;
-      p = new Async_pipeline();
-      debug('^34-2^', p);
-      p.push(get_source());
-      // p.push 'rtethg'
-      p.push(TF.$split_lines());
-      p.push(TF.$limit(5));
-      p.push(show = function(d) {
-        return urge('^34-3^', rpr(d));
-      });
-      return (await p.run());
-    })());
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(result, matcher);
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.types_rundown = function(T, done) {
     var Pipeline, p, producer, sync_observer, sync_transducer;
     // T?.halt_on_error()
@@ -534,9 +479,9 @@
       // @simple()
       // @types_rundown()
       // test @types_rundown
-      // @everything_sync()
+      this.everything_sync();
       // @everything_async()
-      // test @everything_sync
+      test(this.everything_sync);
       // test @everything_async
       // test @can_use_asyncgenerator_as_source
       // test @can_use_asyncgeneratorfunction_as_source

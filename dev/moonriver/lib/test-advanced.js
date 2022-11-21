@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var CND, H, PATH, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -33,41 +33,64 @@
 
   ({isa, equals, type_of, validate, validate_list_of} = types.export());
 
-  SQL = String.raw;
-
   guy = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
-  this._window_transform = function(T, done) {
-    var $, $window, GUY, Pipeline, collect, collector, i, misfit, mr, nr, show;
+  this.window_transform = function(T, done) {
+    var $window, GUY, Pipeline, add_up, collector, p, result, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Pipeline, $} = require('../../../apps/moonriver'));
+    ({Pipeline} = require('../../../apps/moonriver'));
     ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
-    mr = new Pipeline();
-    misfit = Symbol('misfit');
+    p = new Pipeline();
     //.........................................................................................................
-    mr.push($window(-2, +2, null));
-    mr.push(show = function(d) {
+    p.push([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    p.push($window(-2, +2, 0));
+    p.push(show = function(d) {
       return urge('^45-1^', d);
     });
-    mr.push(collect = function(d) {
-      return collector.push(d);
+    // p.push show    = ( d        ) -> urge ( d[ idx ] for idx in [ -2 .. +2 ] )
+    p.push(add_up = function(d, send) {
+      return send((d[-2] + d[-1]) + d[0] + (d[+1] + d[+2]));
     });
-    for (nr = i = 1; i <= 9; nr = ++i) {
-      mr.send(nr);
+    p.push(show = function(d) {
+      return help('^45-2^', d);
+    });
+    result = p.run();
+    info('^45-2^', result);
+    if (T != null) {
+      T.eq(result, [6, 10, 15, 20, 25, 30, 35, 30, 24]);
     }
-    mr.run();
-    debug('^45-2^', collector);
     return typeof done === "function" ? done() : void 0;
   };
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @window_list_transform = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   GUY             = require '../../../apps/guy'
+  //   { Pipeline
+  //     transforms  } = require '../../../apps/moonriver'
+  //   collector       = []
+  //   p               = new Pipeline()
+  //   #.........................................................................................................
+  //   p.push [ 1 .. 9 ]
+  //   p.push transforms.$window_list -2, +2, 0
+  //   p.push show    = ( d        ) -> urge '^45-1^', d
+  //   # p.push show    = ( d        ) -> urge ( d[ idx ] for idx in [ -2 .. +2 ] )
+  //   p.push add_up  = ( d, send  ) -> send ( d[ -2 ] + d[ -1 ] ) + d[ 0 ] + ( d[ +1 ] + d[ +2 ] )
+  //   p.push show    = ( d        ) -> help '^45-2^', d
+  //   result = p.run()
+  //   info '^45-2^', result
+  //   T?.eq result, [ 6, 10, 15, 20, 25, 30, 35, 30, 24 ]
+  //   done?()
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
+      // @window_transform()
       return test(this);
     })();
   }

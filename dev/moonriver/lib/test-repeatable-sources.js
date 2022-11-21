@@ -54,11 +54,11 @@
       return send(`*${d}*`);
     });
     p.push(show = function(d) {
-      return whisper('^98-5^', d);
+      return whisper('^98-1^', d);
     });
     //.........................................................................................................
-    urge('^98-1^', result_1 = p.run());
-    urge('^98-1^', result_2 = p.run());
+    urge('^98-2^', result_1 = p.run());
+    urge('^98-3^', result_2 = p.run());
     if (T != null) {
       T.eq(result_1, result_2);
     }
@@ -131,13 +131,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @can_use_function_without_arguments_as_source()
-      // test @can_use_function_without_arguments_as_source
-      // @run_and_walk_are_repeatable()
-      // test @run_and_walk_are_repeatable
-      return test(this);
+      this.can_use_function_without_arguments_as_source();
+      return test(this.can_use_function_without_arguments_as_source);
     })();
   }
+
+  // @run_and_walk_are_repeatable()
+// test @run_and_walk_are_repeatable
+// test @
 
 }).call(this);
 

@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, demo_6, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, demo_6, demo_7, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -231,16 +231,47 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_7 = function() {
+    var $, FS, Pipeline, T, last, p, show;
+    echo('—————————————————————————————————————————————');
+    FS = require('node:fs');
+    ({
+      Pipeline,
+      transforms: T
+    } = require('../../../apps/moonriver'));
+    p = new Pipeline();
+    ({$} = p);
+    last = Symbol('last');
+    //.........................................................................................................
+    p.push([1]);
+    p.push(function(d, send) {
+      return send(d * 2);
+    });
+    p.push(show = function(d) {
+      return info(d);
+    });
+    p.push(function(d) {
+      if (d < 1e6) {
+        return p.send(d);
+      }
+    });
+    urge(p.run());
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (async() => {
-      demo_1();
-      demo_2();
-      await demo_3a();
-      await demo_3b();
-      demo_4();
-      demo_5();
-      return demo_6();
+    (() => {
+      // demo_1()
+      // demo_2()
+      // await demo_3a()
+      // await demo_3b()
+      // demo_4()
+      // demo_5()
+      // demo_6()
+      return demo_7();
     })();
   }
 
