@@ -192,41 +192,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@can_use_nodejs_readable_stream_as_source = ( T, done ) ->
-  # T?.halt_on_error()
-  GUY                   = require '../../../apps/guy'
-  { Pipeline,           \
-    Async_pipeline,     \
-    transforms: TF }    = require '../../../apps/moonriver'
-  FS                    = require 'node:fs'
-  path                  = PATH.join __dirname, '../../../assets/short-proposal.mkts.md'
-  get_source            = -> FS.createReadStream path #, { encoding: 'utf-8', }
-  #.......................................................................................................
-  matcher = do =>
-    count   = 0
-    matcher = []
-    for line from GUY.fs.walk_lines path
-      count++
-      continue if count > 5
-      info count, rpr line
-      matcher.push line
-    return matcher
-  #.......................................................................................................
-  result = await do =>
-    p = new Async_pipeline()
-    debug '^34-2^', p
-    p.push get_source()
-    # p.push 'rtethg'
-    p.push TF.$split_lines()
-    p.push TF.$limit 5
-    p.push show = ( d ) -> urge '^34-3^', rpr d
-    return await p.run()
-  #.........................................................................................................
-  T?.eq result, matcher
-  done?()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @types_rundown = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline }  = require '../../../apps/moonriver'
@@ -298,9 +263,9 @@ if require.main is module then do =>
   # @simple()
   # @types_rundown()
   # test @types_rundown
-  # @everything_sync()
+  @everything_sync()
   # @everything_async()
-  # test @everything_sync
+  test @everything_sync
   # test @everything_async
   # test @can_use_asyncgenerator_as_source
   # test @can_use_asyncgeneratorfunction_as_source
