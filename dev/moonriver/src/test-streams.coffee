@@ -60,6 +60,7 @@ H                         = require '../../../lib/helpers'
     p.push TF.$split_lines()
     p.push TF.$limit 5
     p.push show = ( d ) -> urge '^34-3^', rpr d
+    help '^34-3^', p
     return await p.run()
   #.........................................................................................................
   T?.eq result, matcher
@@ -160,10 +161,10 @@ H                         = require '../../../lib/helpers'
 ############################################################################################################
 if require.main is module then do =>
   # @window_transform()
-  await @can_use_readstream_as_source()
-  test @can_use_readstream_as_source
+  # await @can_use_readstream_as_source()
+  # test @can_use_readstream_as_source
   # await @can_use_writestream_as_target_2()
-  # test @can_use_writestream_as_target_2
-  # @can_use_writestream_as_target_3()
+  @can_use_writestream_as_target_3()
+  # test @can_use_writestream_as_target_3
   # test @
 
