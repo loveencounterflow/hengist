@@ -139,47 +139,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.can_use_writestream_as_target_2 = async function(T, done) {
-    var Async_pipeline, FS, p, source, transforms;
-    // T?.halt_on_error()
-    FS = require('node:fs');
-    GUY = require('../../../apps/guy');
-    ({Async_pipeline, transforms} = require('../../../apps/moonriver'));
-    source = "ファイルに書けたいテキストです。";
-    p = new Async_pipeline();
-    //.........................................................................................................
-    await GUY.temp.with_file({
-      keep: false
-    }, async function(temp) {
-      var output, result, written_text;
-      output = FS.createWriteStream(temp.path, {
-        encoding: 'utf-8'
-      });
-      debug(temp.path);
-      //.......................................................................................................
-      p.push(source);
-      p.push(function(d) {
-        return help('^45-2^', rpr(d));
-      });
-      p.push(transforms.$sink_from_writestream(output));
-      //.......................................................................................................
-      result = (await p.run());
-      result = result.join('');
-      written_text = FS.readFileSync(temp.path, {
-        encoding: 'utf-8'
-      });
-      if (T != null) {
-        T.eq(result, source);
-      }
-      if (T != null) {
-        T.eq(written_text, source);
-      }
-      return info('^45-2^', result);
-    });
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.can_use_writestream_as_target_3 = async function(T, done) {
     var Async_pipeline, FS, p, source;
     // T?.halt_on_error()
