@@ -131,6 +131,36 @@ H                         = require '../../../lib/helpers'
     info '^45-2^', result
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@writestream_accepts_buffers = ( T, done ) ->
+  # T?.halt_on_error()
+  FS                    = require 'node:fs'
+  GUY                   = require '../../../apps/guy'
+  { Async_pipeline    } = require '../../../apps/moonriver'
+  source                = [ 0 .. 9 ]
+  p                     = new Async_pipeline()
+  #.........................................................................................................
+  await GUY.temp.with_file { keep: false, }, ( temp ) ->
+    output = FS.createWriteStream temp.path, { encoding: 'utf-8', }
+    debug temp.path
+    #.......................................................................................................
+    p.push source
+    p.push ( d ) -> help '^47-1^', rpr d
+    p.push ( d, send ) -> send Buffer.from rpr d
+    p.push ( d ) -> urge '^47-2^', rpr d
+    p.push output
+    #.......................................................................................................
+    matcher       = ( rpr d for d in source ).join ''
+    result        = await p.run()
+    result        = result.join ''
+    written_text  = FS.readFileSync temp.path, { encoding: 'utf-8', }
+    T?.eq result,       matcher
+    T?.eq written_text, matcher
+    info '^47-3^', rpr matcher
+    info '^47-4^', rpr result
+    info '^47-5^', rpr written_text
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -138,7 +168,8 @@ if require.main is module then do =>
   # await @can_use_readstream_as_source()
   # test @can_use_readstream_as_source
   # await @can_use_writestream_as_target_2()
-  @can_use_writestream_as_target_3()
-  # test @can_use_writestream_as_target_3
+  # @can_use_writestream_as_target_3()
+  await @writestream_accepts_buffers()
+  await test @writestream_accepts_buffers
   # test @
 
