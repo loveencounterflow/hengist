@@ -192,6 +192,27 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@can_use_walk_with_async_pipeline = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY               = require '../../../apps/guy'
+  { Async_pipeline
+    $           }   = require '../../../apps/moonriver'
+  count             = 0
+  #.......................................................................................................
+  p = new Async_pipeline()
+  p.push Array.from '覚える'
+  p.push ( d, send ) -> send await after 0.1, -> "(#{d})"
+  p.push show = ( d ) -> urge '^49-1^', d
+  #.........................................................................................................
+  result = []
+  for await d from p.walk()
+    result.push d
+  info '^49-1^', result
+  T?.eq result, [ '(覚)', '(え)', '(る)' ]
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @types_rundown = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline }  = require '../../../apps/moonriver'
@@ -263,9 +284,9 @@ if require.main is module then do =>
   # @simple()
   # @types_rundown()
   # test @types_rundown
-  @everything_sync()
+  # @everything_sync()
   # @everything_async()
-  test @everything_sync
+  # test @everything_sync
   # test @everything_async
   # test @can_use_asyncgenerator_as_source
   # test @can_use_asyncgeneratorfunction_as_source
@@ -273,5 +294,7 @@ if require.main is module then do =>
   # test @can_use_asyncfunction_as_transform
   # @simple_with_generatorfunction()
   # test @simple_with_generatorfunction
-  test @
+  await @can_use_walk_with_async_pipeline()
+  await test @can_use_walk_with_async_pipeline
+  # test @
 
