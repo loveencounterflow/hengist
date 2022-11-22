@@ -107,32 +107,6 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@can_use_writestream_as_target_2 = ( T, done ) ->
-  # T?.halt_on_error()
-  FS                    = require 'node:fs'
-  GUY                   = require '../../../apps/guy'
-  { Async_pipeline
-    transforms        } = require '../../../apps/moonriver'
-  source                = "ファイルに書けたいテキストです。"
-  p                     = new Async_pipeline()
-  #.........................................................................................................
-  await GUY.temp.with_file { keep: false, }, ( temp ) ->
-    output = FS.createWriteStream temp.path, { encoding: 'utf-8', }
-    debug temp.path
-    #.......................................................................................................
-    p.push source
-    p.push ( d ) -> help '^45-2^', rpr d
-    p.push transforms.$sink_from_writestream output
-    #.......................................................................................................
-    result        = await p.run()
-    result        = result.join ''
-    written_text  = FS.readFileSync temp.path, { encoding: 'utf-8', }
-    T?.eq result,       source
-    T?.eq written_text, source
-    info '^45-2^', result
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
 @can_use_writestream_as_target_3 = ( T, done ) ->
   # T?.halt_on_error()
   FS                    = require 'node:fs'
