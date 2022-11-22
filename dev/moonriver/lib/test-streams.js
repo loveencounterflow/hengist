@@ -65,6 +65,7 @@
       p.push(show = function(d) {
         return urge('^34-3^', rpr(d));
       });
+      help('^34-3^', p);
       return (await p.run());
     })());
     //.........................................................................................................
@@ -221,16 +222,16 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
+    (() => {
       // @window_transform()
-      await this.can_use_readstream_as_source();
-      return test(this.can_use_readstream_as_source);
+      // await @can_use_readstream_as_source()
+      // test @can_use_readstream_as_source
+      // await @can_use_writestream_as_target_2()
+      return this.can_use_writestream_as_target_3();
     })();
   }
 
-  // await @can_use_writestream_as_target_2()
-// test @can_use_writestream_as_target_2
-// @can_use_writestream_as_target_3()
+  // test @can_use_writestream_as_target_3
 // test @
 
 }).call(this);
