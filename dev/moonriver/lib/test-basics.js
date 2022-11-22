@@ -1,27 +1,13 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, after, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
-  CND = require('cnd');
+  GUY = require('guy');
 
-  rpr = CND.rpr;
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('MOONRIVER/TESTS/BASIC'));
 
-  badge = 'MOONRIVER/BASICS';
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  info = CND.get_logger('info', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  help = CND.get_logger('help', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  echo = CND.echo.bind(CND);
+  ({rpr, inspect, echo, log} = GUY.trm);
 
   //...........................................................................................................
   test = require('../../../apps/guy-test');
@@ -227,7 +213,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncgenerator_as_source = async function(T, done) {
-    var Async_pipeline, GUY, async_show, async_square, count, p, result, source, sync_show, sync_square;
+    var Async_pipeline, async_show, async_square, count, p, result, source, sync_show, sync_square;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline} = require('../../../apps/moonriver'));
@@ -275,7 +261,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncgeneratorfunction_as_source = async function(T, done) {
-    var Async_pipeline, GUY, count, p, result, show, source, square;
+    var Async_pipeline, count, p, result, show, source, square;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline} = require('../../../apps/moonriver'));
@@ -316,7 +302,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_asyncfunction_as_transform = async function(T, done) {
-    var $, Async_pipeline, GUY, count, p, result, show;
+    var $, Async_pipeline, count, p, result, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline, $} = require('../../../apps/moonriver'));
@@ -346,7 +332,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_walk_with_async_pipeline = async function(T, done) {
-    var $, Async_pipeline, GUY, count, d, p, ref, result, show;
+    var $, Async_pipeline, count, d, p, ref, result, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Async_pipeline, $} = require('../../../apps/moonriver'));

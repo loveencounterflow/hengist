@@ -1,27 +1,13 @@
 (function() {
   'use strict';
-  var CND, H, PATH, SQL, badge, debug, echo, equals, guy, help, info, isa, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var GUY, H, PATH, SQL, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
-  CND = require('cnd');
+  GUY = require('guy');
 
-  rpr = CND.rpr;
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('MOONRIVER/TESTS/REPEATABLE-SOURCES'));
 
-  badge = 'MOONRIVER/TESTS/REPEATABLE';
-
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  info = CND.get_logger('info', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  help = CND.get_logger('help', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  echo = CND.echo.bind(CND);
+  ({rpr, inspect, echo, log} = GUY.trm);
 
   //...........................................................................................................
   test = require('../../../apps/guy-test');
@@ -41,7 +27,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_function_without_arguments_as_source = function(T, done) {
-    var GUY, Pipeline, extra, p, result_1, result_2, show, signals;
+    var Pipeline, extra, p, result_1, result_2, show, signals;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Pipeline, signals} = require('../../../apps/moonriver'));
@@ -67,7 +53,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.run_and_walk_are_repeatable = function(T, done) {
-    var $, GUY, Pipeline, extra, p, show, signals, source;
+    var $, Pipeline, extra, p, show, signals, source;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({Pipeline, $, signals} = require('../../../apps/moonriver'));
