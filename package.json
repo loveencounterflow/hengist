@@ -1,6 +1,6 @@
 {
   "name": "hengist",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "a platform to conceive, test, benchmark software",
   "main": "lib/main.js",
   "scripts": {
