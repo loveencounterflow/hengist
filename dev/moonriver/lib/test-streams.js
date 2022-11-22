@@ -179,19 +179,78 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.writestream_accepts_buffers = async function(T, done) {
+    var Async_pipeline, FS, p, source;
+    // T?.halt_on_error()
+    FS = require('node:fs');
+    GUY = require('../../../apps/guy');
+    ({Async_pipeline} = require('../../../apps/moonriver'));
+    source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    p = new Async_pipeline();
+    //.........................................................................................................
+    await GUY.temp.with_file({
+      keep: false
+    }, async function(temp) {
+      var d, matcher, output, result, written_text;
+      output = FS.createWriteStream(temp.path, {
+        encoding: 'utf-8'
+      });
+      debug(temp.path);
+      //.......................................................................................................
+      p.push(source);
+      p.push(function(d) {
+        return help('^47-1^', rpr(d));
+      });
+      p.push(function(d, send) {
+        return send(Buffer.from(rpr(d)));
+      });
+      p.push(function(d) {
+        return urge('^47-2^', rpr(d));
+      });
+      p.push(output);
+      //.......................................................................................................
+      matcher = ((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = source.length; i < len; i++) {
+          d = source[i];
+          results.push(rpr(d));
+        }
+        return results;
+      })()).join('');
+      result = (await p.run());
+      result = result.join('');
+      written_text = FS.readFileSync(temp.path, {
+        encoding: 'utf-8'
+      });
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+      if (T != null) {
+        T.eq(written_text, matcher);
+      }
+      info('^47-3^', rpr(matcher));
+      info('^47-4^', rpr(result));
+      return info('^47-5^', rpr(written_text));
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
+    (async() => {
       // @window_transform()
       // await @can_use_readstream_as_source()
       // test @can_use_readstream_as_source
       // await @can_use_writestream_as_target_2()
-      return this.can_use_writestream_as_target_3();
+      // @can_use_writestream_as_target_3()
+      await this.writestream_accepts_buffers();
+      return (await test(this.writestream_accepts_buffers));
     })();
   }
 
-  // test @can_use_writestream_as_target_3
-// test @
+  // test @
 
 }).call(this);
 

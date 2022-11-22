@@ -345,6 +345,40 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.can_use_walk_with_async_pipeline = async function(T, done) {
+    var $, Async_pipeline, GUY, count, d, p, ref, result, show;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Async_pipeline, $} = require('../../../apps/moonriver'));
+    count = 0;
+    //.......................................................................................................
+    p = new Async_pipeline();
+    p.push(Array.from('覚える'));
+    p.push(async function(d, send) {
+      return send((await after(0.1, function() {
+        return `(${d})`;
+      })));
+    });
+    p.push(show = function(d) {
+      return urge('^49-1^', d);
+    });
+    //.........................................................................................................
+    result = [];
+    ref = p.walk();
+    for await (d of ref) {
+      result.push(d);
+    }
+    info('^49-1^', result);
+    if (T != null) {
+      T.eq(result, ['(覚)', '(え)', '(る)']);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.types_rundown = function(T, done) {
     var Pipeline, p, producer, sync_observer, sync_transducer;
     // T?.halt_on_error()
@@ -473,15 +507,15 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
+    (async() => {
       // await @can_use_asyncgenerator_as_source()
       // await @can_use_asyncgeneratorfunction_as_source()
       // @simple()
       // @types_rundown()
       // test @types_rundown
-      this.everything_sync();
+      // @everything_sync()
       // @everything_async()
-      test(this.everything_sync);
+      // test @everything_sync
       // test @everything_async
       // test @can_use_asyncgenerator_as_source
       // test @can_use_asyncgeneratorfunction_as_source
@@ -489,9 +523,12 @@
       // test @can_use_asyncfunction_as_transform
       // @simple_with_generatorfunction()
       // test @simple_with_generatorfunction
-      return test(this);
+      await this.can_use_walk_with_async_pipeline();
+      return (await test(this.can_use_walk_with_async_pipeline));
     })();
   }
+
+  // test @
 
 }).call(this);
 
