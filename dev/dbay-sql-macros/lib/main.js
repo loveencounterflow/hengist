@@ -1079,29 +1079,28 @@ answer;`) : void 0;
       // test @dbay_macros_regexen
       // test @dbay_macros_declarations
       // @dbay_macros_simple_resolution()
-      return test(this.dbay_macros_simple_resolution);
+      // test @dbay_macros_simple_resolution
+      // @dbay_macros_more_resolutions()
+      // test @dbay_macros_more_resolutions
+      // @dbay_macros_checks_for_leftovers()
+      // test @dbay_macros_checks_for_leftovers
+      // @dbay_use_escape_as_terminator()
+      // test @dbay_use_escape_as_terminator
+      // @dbay_macros_dont_allow_circular_references()
+      // test @dbay_macros_dont_allow_circular_references
+      // @dbay_macros_dont_allow_undeclared_parameters()
+      // test @dbay_macros_dont_allow_undeclared_parameters
+      // @dbay_macros_dont_allow_reduplicated_parameters()
+      // test @dbay_macros_dont_allow_reduplicated_parameters
+      // @dbay_macros_dont_allow_unprefixed_parameters()
+      // test @dbay_macros_dont_allow_unprefixed_parameters
+      // @dbay_macros_declarations_undone_on_rollback_or_not()
+      // test @dbay_macros_declarations_undone_on_rollback_or_not
+      // @dbm_replace_escape()
+      // test @dbm_replace_escape
+      return test(this);
     })();
   }
-
-  // @dbay_macros_more_resolutions()
-// test @dbay_macros_more_resolutions
-// @dbay_macros_checks_for_leftovers()
-// test @dbay_macros_checks_for_leftovers
-// @dbay_use_escape_as_terminator()
-// test @dbay_use_escape_as_terminator
-// @dbay_macros_dont_allow_circular_references()
-// test @dbay_macros_dont_allow_circular_references
-// @dbay_macros_dont_allow_undeclared_parameters()
-// test @dbay_macros_dont_allow_undeclared_parameters
-// @dbay_macros_dont_allow_reduplicated_parameters()
-// test @dbay_macros_dont_allow_reduplicated_parameters
-// @dbay_macros_dont_allow_unprefixed_parameters()
-// test @dbay_macros_dont_allow_unprefixed_parameters
-// @dbay_macros_declarations_undone_on_rollback_or_not()
-// test @dbay_macros_declarations_undone_on_rollback_or_not
-// @dbm_replace_escape()
-// test @dbm_replace_escape
-// test @
 
 }).call(this);
 

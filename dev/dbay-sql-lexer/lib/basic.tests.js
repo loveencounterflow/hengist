@@ -5,7 +5,7 @@
   //###########################################################################################################
   GUY = require('guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DBAY-SQL-LEXER'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DBAY-SQL-LEXER/TEST-BASICS'));
 
   ({rpr, inspect, echo, log} = GUY.trm);
 
@@ -41,13 +41,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_sql_lexer = function(T, done) {
-    var Lexer, cfg, lexer, mr, rx;
+    var Lexer, cfg, lexer, mr, ref, rx, token;
     ({rx, cfg} = require('./demo-sticky-regex-lexer'));
     ({Lexer} = require('../../../apps/dbay-sql-lexer'));
     lexer = new Lexer(cfg);
     mr = lexer._create_pipeline();
     mr.send("select a + b as sum from mytable;");
-    mr.drive();
+    ref = mr.walk();
+    for (token of ref) {
+      info('^45-5^', token);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
