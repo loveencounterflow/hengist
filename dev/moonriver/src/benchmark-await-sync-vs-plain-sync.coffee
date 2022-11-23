@@ -43,13 +43,14 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @plain_sync = ( cfg ) -> new Promise ( resolve ) =>
-  { integers } = @get_data cfg
+  { integers }  = @get_data cfg
+  get_value     = ( P... ) => @compute P...
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     count = 0
     sum   = 0
     for integer in integers
-      c     = @compute 12345, integer
+      c     = get_value 12345, integer
       sum  += c
       count++
     info '^543^', { sum, } if cfg.show
@@ -58,13 +59,14 @@ data_cache                = null
 
 #-----------------------------------------------------------------------------------------------------------
 @plain_await = ( cfg ) -> new Promise ( resolve ) =>
-  { integers } = @get_data cfg
+  { integers }  = @get_data cfg
+  get_value     = ( P... ) => await @compute P...
   #.........................................................................................................
   resolve => new Promise ( resolve ) =>
     count = 0
     sum   = 0
     for integer in integers
-      c     = await @compute 12345, integer
+      c     = get_value 12345, integer
       sum  += c
       count++
     info '^543^', { sum, } if cfg.show
@@ -75,7 +77,7 @@ data_cache                = null
 @run_benchmarks = ->
   bench         = BM.new_benchmarks()
   cfg           =
-    item_count:     1e7
+    item_count:     1e1
   cfg.show      = cfg.item_count < 100
   repetitions   = 5
   test_names    = [
