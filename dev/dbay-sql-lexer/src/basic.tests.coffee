@@ -12,7 +12,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'DBAY-SQL-LEXER'
+  whisper }               = GUY.trm.get_loggers 'DBAY-SQL-LEXER/TEST-BASICS'
 { rpr
   inspect
   echo
@@ -47,7 +47,8 @@ show = ( sql, tokens ) ->
   lexer     = new Lexer cfg
   mr        = lexer._create_pipeline()
   mr.send "select a + b as sum from mytable;"
-  mr.drive()
+  for token from mr.walk()
+    info '^45-5^', token
   done?()
 
 
