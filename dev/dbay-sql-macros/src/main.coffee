@@ -642,7 +642,7 @@ if require.main is module then do =>
   # test @dbay_macros_regexen
   # test @dbay_macros_declarations
   # @dbay_macros_simple_resolution()
-  test @dbay_macros_simple_resolution
+  # test @dbay_macros_simple_resolution
   # @dbay_macros_more_resolutions()
   # test @dbay_macros_more_resolutions
   # @dbay_macros_checks_for_leftovers()
@@ -661,5 +661,5 @@ if require.main is module then do =>
   # test @dbay_macros_declarations_undone_on_rollback_or_not
   # @dbm_replace_escape()
   # test @dbm_replace_escape
-  # test @
+  test @
 
