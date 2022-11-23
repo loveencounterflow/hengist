@@ -62,10 +62,47 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@async_walk_named_pipelines = ( T, done ) ->
+  { Async_pipeline, \
+    $,              } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  { defer }           = GUY.async
+  #.........................................................................................................
+  get_pipelines = ->
+    p_1                 = new Async_pipeline()
+    p_2                 = new Async_pipeline()
+    p_1.push [ 0 .. 5 ]
+    p_1.push show = ( d ) -> whisper 'input', d
+    p_1.push $ { first, last, }, ( d, send ) -> await defer -> send d
+    p_1.push show = ( d ) -> whisper 'input', d
+    p_1.push do ->
+      count = 0
+      return ( d, send ) ->
+        await defer ->
+          count++
+          if count %% 2 is 0 then return p_2.send d
+          send d
+    p_1.push show = ( d ) -> urge 'p_1', d
+    p_2.push show = ( d ) -> warn 'p_2', d
+    return { p_1, p_2, }
+  #.........................................................................................................
+  await do ->
+    { p_1, p_2, } = get_pipelines()
+    result        = { even: [], odd: [], }
+    for await d from Async_pipeline.walk_named_pipelines { odd: p_1, even: p_2, }
+      info d
+      result[ d.name ].push d.data
+    T?.eq result, { even: [ 0, 2, 4, last ], odd: [ first, 1, 3, 5 ] }
+    return null
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   # @walk_named_pipelines_1()
-  # @walk_named_pipelines()
+  # await @async_walk_named_pipelines()
   # test @walk_named_pipelines
-  test @
+  await test @
