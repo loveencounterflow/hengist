@@ -42,8 +42,11 @@
   //-----------------------------------------------------------------------------------------------------------
   this.plain_sync = function(cfg) {
     return new Promise((resolve) => {
-      var integers;
+      var get_value, integers;
       ({integers} = this.get_data(cfg));
+      get_value = (...P) => {
+        return this.compute(...P);
+      };
       //.........................................................................................................
       resolve(() => {
         return new Promise((resolve) => {
@@ -52,7 +55,7 @@
           sum = 0;
           for (i = 0, len = integers.length; i < len; i++) {
             integer = integers[i];
-            c = this.compute(12345, integer);
+            c = get_value(12345, integer);
             sum += c;
             count++;
           }
@@ -69,17 +72,20 @@
   //-----------------------------------------------------------------------------------------------------------
   this.plain_await = function(cfg) {
     return new Promise((resolve) => {
-      var integers;
+      var get_value, integers;
       ({integers} = this.get_data(cfg));
+      get_value = async(...P) => {
+        return (await this.compute(...P));
+      };
       //.........................................................................................................
       resolve(() => {
-        return new Promise(async(resolve) => {
+        return new Promise((resolve) => {
           var c, count, i, integer, len, sum;
           count = 0;
           sum = 0;
           for (i = 0, len = integers.length; i < len; i++) {
             integer = integers[i];
-            c = (await this.compute(12345, integer));
+            c = get_value(12345, integer);
             sum += c;
             count++;
           }
@@ -98,7 +104,7 @@
     var _, bench, cfg, i, j, len, ref, ref1, repetitions, test_name, test_names;
     bench = BM.new_benchmarks();
     cfg = {
-      item_count: 1e7
+      item_count: 1e1
     };
     cfg.show = cfg.item_count < 100;
     repetitions = 5;
