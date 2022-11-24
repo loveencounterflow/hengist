@@ -73,13 +73,137 @@
   //   T?.eq result, [ 6, 10, 15, 20, 25, 30, 35, 30, 24 ]
   //   done?()
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_sync_pipeline_as_segment = function(T, done) {
+    var Pipeline, add, byline, count, enumerate, mul, result_1, result_2, show, trunk_1, trunk_2;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Pipeline} = require('../../../apps/moonriver'));
+    count = 0;
+    //.........................................................................................................
+    byline = new Pipeline();
+    byline.push(show = function(d) {
+      return urge('^29-1^', d);
+    });
+    byline.push(add = function(d, send) {
+      return send(d + 3);
+    });
+    byline.push(mul = function(d, send) {
+      return send(d * 3);
+    });
+    byline.push(enumerate = function(d, send) {
+      count++;
+      send(count);
+      return send(d * 3);
+    });
+    //.........................................................................................................
+    trunk_1 = new Pipeline();
+    trunk_1.push([1, 2, 3, 4, 5]);
+    trunk_1.push(show = function(d) {
+      return help('^29-2^', d);
+    });
+    trunk_1.push(byline);
+    trunk_1.push(show = function(d) {
+      return help('^29-3^', d);
+    });
+    //.........................................................................................................
+    trunk_2 = new Pipeline();
+    trunk_2.push([1, 2, 3, 4, 5]);
+    trunk_2.push(show = function(d) {
+      return help('^29-4^', d);
+    });
+    trunk_2.push(byline);
+    trunk_2.push(show = function(d) {
+      return help('^29-5^', d);
+    });
+    //.........................................................................................................
+    result_1 = trunk_1.run();
+    result_2 = trunk_2.run();
+    urge('^29-6^', trunk_1);
+    info('^29-7^', result_1);
+    urge('^29-8^', trunk_2);
+    info('^29-9^', result_2);
+    if (T != null) {
+      T.eq(result_1, [1, 36, 2, 45, 3, 54, 4, 63, 5, 72]);
+    }
+    if (T != null) {
+      T.eq(result_2, [6, 36, 7, 45, 8, 54, 9, 63, 10, 72]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_async_pipeline_as_segment = async function(T, done) {
+    var Async_pipeline, add, byline, count, enumerate, mul, result_1, result_2, show, trunk_1, trunk_2;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({Async_pipeline} = require('../../../apps/moonriver'));
+    count = 0;
+    //.........................................................................................................
+    byline = new Async_pipeline();
+    byline.push(show = function(d) {
+      return urge('^29-1^', d);
+    });
+    byline.push(add = function(d, send) {
+      return send(d + 3);
+    });
+    byline.push(mul = function(d, send) {
+      return send(d * 3);
+    });
+    byline.push(enumerate = function(d, send) {
+      return GUY.async.after(0.01, function() {
+        count++;
+        send(count);
+        return send(d * 3);
+      });
+    });
+    //.........................................................................................................
+    trunk_1 = new Async_pipeline();
+    trunk_1.push([1, 2, 3, 4, 5]);
+    trunk_1.push(show = function(d) {
+      return help('^29-2^', d);
+    });
+    trunk_1.push(byline);
+    trunk_1.push(show = function(d) {
+      return help('^29-3^', d);
+    });
+    //.........................................................................................................
+    trunk_2 = new Async_pipeline();
+    trunk_2.push([1, 2, 3, 4, 5]);
+    trunk_2.push(show = function(d) {
+      return help('^29-4^', d);
+    });
+    trunk_2.push(byline);
+    trunk_2.push(show = function(d) {
+      return help('^29-5^', d);
+    });
+    //.........................................................................................................
+    result_1 = (await trunk_1.run());
+    result_2 = (await trunk_2.run());
+    urge('^29-6^', trunk_1);
+    info('^29-7^', result_1);
+    urge('^29-8^', trunk_2);
+    info('^29-9^', result_2);
+    if (T != null) {
+      T.eq(result_1, [1, 36, 2, 45, 3, 54, 4, 63, 5, 72]);
+    }
+    if (T != null) {
+      T.eq(result_2, [6, 36, 7, 45, 8, 54, 9, 63, 10, 72]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @window_transform()
-      return test(this);
+      // @use_pipeline_as_segment_preview()
+      this.use_async_pipeline_as_segment();
+      return test(this.use_async_pipeline_as_segment);
     })();
   }
+
+  // test @
 
 }).call(this);
 

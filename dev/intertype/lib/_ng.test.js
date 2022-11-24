@@ -4876,6 +4876,31 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.symbols = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.type_of(Symbol('x')), 'symbol');
+    }
+    if (T != null) {
+      T.eq(types.isa.symbol(Symbol('x')), true);
+    }
+    if (T != null) {
+      T.eq(types.type_of(Symbol.for('x')), 'symbol');
+    }
+    if (T != null) {
+      T.eq(types.isa.symbol(Symbol.for('x')), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.symbol('x'), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()

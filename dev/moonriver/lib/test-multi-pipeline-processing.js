@@ -155,15 +155,75 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.diverted_pipelines = function(T, done) {
+    var $, Pipeline, first, get_pipelines, last;
+    ({Pipeline, $} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    get_pipelines = function() {
+      var diverter, firstlast, p_1, p_2, receiver, show, square;
+      p_1 = new Pipeline();
+      p_2 = new Pipeline();
+      p_1.push([0, 1, 2, 3, 4, 5]);
+      p_1.push($({first, last}, firstlast = function(d, send) {
+        return send(d);
+      }));
+      p_1.push(diverter = function(d, send) {
+        return p_2.send(d);
+      });
+      p_1.push(receiver = function(d, send) {
+        return send(d);
+      });
+      p_1.push(show = function(d) {
+        return whisper('input', d);
+      });
+      p_2.push(square = function(d, send) {
+        return send(isa.symbol(d) ? d : d ** 2);
+      });
+      p_2.push(diverter = function(d, send) {
+        return p_1.segments[3].send(d);
+      });
+      return {p_1, p_2};
+    };
+    (function() {      //.........................................................................................................
+      var d, p_1, p_2, ref, result;
+      ({p_1, p_2} = get_pipelines());
+      result = {
+        p_1: [],
+        p_2: []
+      };
+      info('^77-1^', p_1);
+      info('^77-1^', p_2);
+      ref = Pipeline.walk_named_pipelines({p_1, p_2});
+      for (d of ref) {
+        info(d);
+        result[d.name].push(d.data);
+      }
+      if (T != null) {
+        T.eq(result, {
+          p_1: [first, 0, 1, 4, 9, 16, 25, last],
+          p_2: []
+        });
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
+    (() => {
       // @walk_named_pipelines_1()
       // await @async_walk_named_pipelines()
       // test @walk_named_pipelines
-      return (await test(this));
+      this.diverted_pipelines();
+      return test(this.diverted_pipelines);
     })();
   }
+
+  // await test @
 
 }).call(this);
 
