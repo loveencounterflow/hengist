@@ -93,12 +93,11 @@ H                         = require '../../../lib/helpers'
   GUY                 = require '../../../apps/guy'
   { Pipeline,         \
     transforms: TF  } = require '../../../apps/moonriver'
-  { $window         } = require '../../../apps/moonriver/lib/transforms'
   collector           = []
   p                   = new Pipeline()
   #.........................................................................................................
   p.push [ 1 .. 5 ]
-  p.push $window { names: [ 'before', 'here', 'after', ], empty: null, }
+  p.push TF.$named_window { names: [ 'before', 'here', 'after', ], empty: null, }
   p.push show    = ( d        ) -> urge '^45-1^', d
   result = p.run()
   info '^45-2^', result
