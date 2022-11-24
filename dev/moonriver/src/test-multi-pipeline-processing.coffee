@@ -99,10 +99,44 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@diverted_pipelines = ( T, done ) ->
+  { Pipeline, \
+    $,              } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  get_pipelines = ->
+    p_1                 = new Pipeline()
+    p_2                 = new Pipeline()
+    p_1.push [ 0 .. 5 ]
+    p_1.push $ { first, last, }, firstlast = ( d, send ) -> send d
+    p_1.push diverter = ( d, send ) -> p_2.send d
+    p_1.push receiver = ( d, send ) -> send d
+    p_1.push show     = ( d ) -> whisper 'input', d
+    p_2.push square   = ( d, send ) -> send if isa.symbol d then d else d ** 2
+    p_2.push diverter = ( d, send ) -> p_1.segments[ 3 ].send d
+    return { p_1, p_2, }
+  #.........................................................................................................
+  do ->
+    { p_1, p_2, } = get_pipelines()
+    result        = { p_1: [], p_2: [], }
+    info '^77-1^', p_1
+    info '^77-1^', p_2
+    for d from Pipeline.walk_named_pipelines { p_1, p_2, }
+      info d
+      result[ d.name ].push d.data
+    T?.eq result, { p_1: [ first, 0, 1, 4, 9, 16, 25, last ], p_2: [] }
+    return null
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   # @walk_named_pipelines_1()
   # await @async_walk_named_pipelines()
   # test @walk_named_pipelines
-  await test @
+  @diverted_pipelines()
+  test @diverted_pipelines
+  # await test @
