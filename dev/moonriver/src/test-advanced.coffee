@@ -71,13 +71,88 @@ H                         = require '../../../lib/helpers'
 #   T?.eq result, [ 6, 10, 15, 20, 25, 30, 35, 30, 24 ]
 #   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@use_sync_pipeline_as_segment = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY                   = require '../../../apps/guy'
+  { Pipeline    }       = require '../../../apps/moonriver'
+  count                 = 0
+  #.........................................................................................................
+  byline                = new Pipeline()
+  byline.push show      = ( d ) -> urge '^29-1^', d
+  byline.push add       = ( d, send ) -> send d + 3
+  byline.push mul       = ( d, send ) -> send d * 3
+  byline.push enumerate = ( d, send ) -> count++; send count; send d * 3
+  #.........................................................................................................
+  trunk_1               = new Pipeline()
+  trunk_1.push [ 1 .. 5 ]
+  trunk_1.push show     = ( d ) -> help '^29-2^', d
+  trunk_1.push byline
+  trunk_1.push show     = ( d ) -> help '^29-3^', d
+  #.........................................................................................................
+  trunk_2               = new Pipeline()
+  trunk_2.push [ 1 .. 5 ]
+  trunk_2.push show     = ( d ) -> help '^29-4^', d
+  trunk_2.push byline
+  trunk_2.push show     = ( d ) -> help '^29-5^', d
+  #.........................................................................................................
+  result_1              = trunk_1.run()
+  result_2              = trunk_2.run()
+  urge '^29-6^', trunk_1
+  info '^29-7^', result_1
+  urge '^29-8^', trunk_2
+  info '^29-9^', result_2
+  T?.eq result_1, [ 1, 36, 2, 45, 3, 54, 4, 63, 5, 72 ]
+  T?.eq result_2, [ 6, 36, 7, 45, 8, 54, 9, 63, 10, 72 ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@use_async_pipeline_as_segment = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY                   = require '../../../apps/guy'
+  { Async_pipeline }    = require '../../../apps/moonriver'
+  count                 = 0
+  #.........................................................................................................
+  byline                = new Async_pipeline()
+  byline.push show      = ( d ) -> urge '^29-1^', d
+  byline.push add       = ( d, send ) -> send d + 3
+  byline.push mul       = ( d, send ) -> send d * 3
+  byline.push enumerate = ( d, send ) -> GUY.async.after 0.01, -> count++; send count; send d * 3
+  #.........................................................................................................
+  trunk_1               = new Async_pipeline()
+  trunk_1.push [ 1 .. 5 ]
+  trunk_1.push show     = ( d ) -> help '^29-2^', d
+  trunk_1.push byline
+  trunk_1.push show     = ( d ) -> help '^29-3^', d
+  #.........................................................................................................
+  trunk_2               = new Async_pipeline()
+  trunk_2.push [ 1 .. 5 ]
+  trunk_2.push show     = ( d ) -> help '^29-4^', d
+  trunk_2.push byline
+  trunk_2.push show     = ( d ) -> help '^29-5^', d
+  #.........................................................................................................
+  result_1              = await trunk_1.run()
+  result_2              = await trunk_2.run()
+  urge '^29-6^', trunk_1
+  info '^29-7^', result_1
+  urge '^29-8^', trunk_2
+  info '^29-9^', result_2
+  T?.eq result_1, [ 1, 36, 2, 45, 3, 54, 4, 63, 5, 72 ]
+  T?.eq result_2, [ 6, 36, 7, 45, 8, 54, 9, 63, 10, 72 ]
+  #.........................................................................................................
+  done?()
+
 
 
 
 ############################################################################################################
 if require.main is module then do =>
   # @window_transform()
-  test @
+  # @use_pipeline_as_segment_preview()
+  @use_async_pipeline_as_segment()
+  test @use_async_pipeline_as_segment
+  # test @
 
 
 
