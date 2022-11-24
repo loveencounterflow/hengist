@@ -134,19 +134,18 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.named_window_transform = function(T, done) {
-    var $window, Pipeline, TF, collector, p, result, show;
+    var Pipeline, TF, collector, p, result, show;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
     ({
       Pipeline,
       transforms: TF
     } = require('../../../apps/moonriver'));
-    ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
     p = new Pipeline();
     //.........................................................................................................
     p.push([1, 2, 3, 4, 5]);
-    p.push($window({
+    p.push(TF.$named_window({
       names: ['before', 'here', 'after'],
       empty: null
     }));
