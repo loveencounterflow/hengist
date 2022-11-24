@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, PATH, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -19,22 +19,82 @@
 
   ({isa, equals, type_of, validate, validate_list_of} = types.export());
 
-  guy = require('../../../apps/guy');
+  GUY = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.transform_window_cfg_type = function(T, done) {
+    var create, get_transform_types, misfit;
+    // T?.halt_on_error()
+    ({get_transform_types, misfit} = require('../../../apps/moonriver'));
+    ({isa, type_of, create} = get_transform_types());
+    //.........................................................................................................
+    if (T != null) {
+      T.eq([
+        '^07-1^',
+        isa.transform_window_cfg({
+          min: -1,
+          max: 2,
+          empty: null
+        })
+      ], ['^07-1^', true]);
+    }
+    if (T != null) {
+      T.eq([
+        '^07-2^',
+        isa.transform_window_cfg({
+          min: +1,
+          max: 2,
+          empty: null
+        })
+      ], ['^07-2^', true]);
+    }
+    if (T != null) {
+      T.eq([
+        '^07-3^',
+        isa.transform_window_cfg({
+          min: +2,
+          max: 2,
+          empty: null
+        })
+      ], ['^07-3^', false]);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(create.transform_window_cfg({}), {
+        min: -1,
+        max: 1,
+        empty: misfit
+      });
+    }
+    if (T != null) {
+      T.eq(create.transform_window_cfg({
+        min: -3
+      }), {
+        min: -3,
+        max: 1,
+        empty: misfit
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.window_transform = function(T, done) {
     var $window, Pipeline, add_up, collector, p, result, show;
     // T?.halt_on_error()
-    GUY = require('../../../apps/guy');
     ({Pipeline} = require('../../../apps/moonriver'));
     ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
     p = new Pipeline();
     //.........................................................................................................
     p.push([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    p.push($window(-2, +2, 0));
+    p.push($window({
+      min: -2,
+      max: +2,
+      empty: 0
+    }));
     p.push(show = function(d) {
       return urge('^45-1^', d);
     });
@@ -56,7 +116,6 @@
   // #-----------------------------------------------------------------------------------------------------------
   // @window_list_transform = ( T, done ) ->
   //   # T?.halt_on_error()
-  //   GUY             = require '../../../apps/guy'
   //   { Pipeline
   //     transforms  } = require '../../../apps/moonriver'
   //   collector       = []
@@ -72,6 +131,35 @@
   //   info '^45-2^', result
   //   T?.eq result, [ 6, 10, 15, 20, 25, 30, 35, 30, 24 ]
   //   done?()
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.named_window_transform = function(T, done) {
+    var $window, Pipeline, TF, collector, p, result, show;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    ({$window} = require('../../../apps/moonriver/lib/transforms'));
+    collector = [];
+    p = new Pipeline();
+    //.........................................................................................................
+    p.push([1, 2, 3, 4, 5]);
+    p.push($window({
+      names: ['before', 'here', 'after'],
+      empty: null
+    }));
+    p.push(show = function(d) {
+      return urge('^45-1^', d);
+    });
+    result = p.run();
+    info('^45-2^', result);
+    if (T != null) {
+      T.eq(result, [6, 10, 15, 20, 25, 30, 35, 30, 24]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_sync_pipeline_as_segment = function(T, done) {
@@ -198,12 +286,16 @@
     (() => {
       // @window_transform()
       // @use_pipeline_as_segment_preview()
-      this.use_async_pipeline_as_segment();
-      return test(this.use_async_pipeline_as_segment);
+      this.named_window_transform();
+      return test(this.named_window_transform);
     })();
   }
 
-  // test @
+  // @transform_window_cfg_type()
+// test @transform_window_cfg_type
+// @use_async_pipeline_as_segment()
+// test @use_async_pipeline_as_segment
+// test @
 
 }).call(this);
 

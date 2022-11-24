@@ -4901,6 +4901,46 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.throws_validation_error_for_unfit_arguments = function(T, done) {
+    var Intertype, create, declare, isa, type_of, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa, type_of, create} = types);
+    //.........................................................................................................
+    declare.foobar({
+      fields: {
+        a: 'integer',
+        b: 'integer'
+      },
+      default: {
+        a: 0,
+        b: 1
+      }
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(create.foobar(null), {
+        a: 0,
+        b: 1
+      });
+    }
+    if (T != null) {
+      T.eq(create.foobar({}), {
+        a: 0,
+        b: 1
+      });
+    }
+    debug('^46645^', create.foobar(42));
+    if (T != null) {
+      T.throws(/x/, function() {
+        return create.foobar(42);
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -4949,6 +4989,8 @@
     // test @detect_circular_declarations
     // @strange_naming_bug()
     // test @strange_naming_bug
+    // @throws_validation_error_for_unfit_arguments()
+    // test @throws_validation_error_for_unfit_arguments
     test(this);
   }
 
