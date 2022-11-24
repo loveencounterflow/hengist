@@ -2413,6 +2413,31 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@throws_validation_error_for_unfit_arguments = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    isa
+    type_of
+    create        } = types
+  #.........................................................................................................
+  declare.foobar
+    fields:
+      a:      'integer'
+      b:      'integer'
+    default:
+      a:      0
+      b:      1
+  #.........................................................................................................
+  T?.eq ( create.foobar null  ), { a: 0, b: 1, }
+  T?.eq ( create.foobar {}    ), { a: 0, b: 1, }
+  debug '^46645^', create.foobar 42
+  T?.throws /x/, -> create.foobar 42
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2462,6 +2487,8 @@ unless module.parent?
   # test @detect_circular_declarations
   # @strange_naming_bug()
   # test @strange_naming_bug
+  # @throws_validation_error_for_unfit_arguments()
+  # test @throws_validation_error_for_unfit_arguments
   test @
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
