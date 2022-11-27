@@ -399,6 +399,8 @@
     })();
   }
 
+  // demo_sending_values_into_iterators()
+
 }).call(this);
 
 //# sourceMappingURL=demo-ng.js.map

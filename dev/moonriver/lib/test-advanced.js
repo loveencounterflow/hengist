@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, PATH, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var $as_keysorted_list, GUY, H, PATH, alert, as_keysorted_list, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -22,6 +22,37 @@
   GUY = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
+
+  //-----------------------------------------------------------------------------------------------------------
+  $as_keysorted_list = function() {
+    return (d, send) => {
+      return send(as_keysorted_list(d));
+    };
+  };
+
+  as_keysorted_list = function(d) {
+    var key, keys;
+    keys = (Object.keys(d)).sort(function(a, b) {
+      a = parseInt(a, 10);
+      b = parseInt(b, 10);
+      if (a > b) {
+        return +1;
+      }
+      if (a < b) {
+        return -1;
+      }
+      return 0;
+    });
+    return (function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = keys.length; i < len; i++) {
+        key = keys[i];
+        results.push(d[key]);
+      }
+      return results;
+    })();
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.transform_window_cfg_type = function(T, done) {
@@ -82,55 +113,44 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.window_transform = function(T, done) {
-    var $window, Pipeline, add_up, collector, p, result, show;
-    // T?.halt_on_error()
-    ({Pipeline} = require('../../../apps/moonriver'));
+    var $window, Pipeline, TF, collector, p, result, show;
+    ({
+      // T?.halt_on_error()
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
     ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
     p = new Pipeline();
     //.........................................................................................................
     p.push([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    p.push($window({
+    p.push(TF.$window({
       min: -2,
       max: +2,
-      empty: 0
+      empty: '_'
     }));
+    p.push($as_keysorted_list());
+    p.push(function(d, send) {
+      var e;
+      return send(((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = d.length; i < len; i++) {
+          e = d[i];
+          results.push(`${e}`);
+        }
+        return results;
+      })()).join(''));
+    });
     p.push(show = function(d) {
       return urge('^45-1^', d);
     });
-    // p.push show    = ( d        ) -> urge ( d[ idx ] for idx in [ -2 .. +2 ] )
-    p.push(add_up = function(d, send) {
-      return send((d[-2] + d[-1]) + d[0] + (d[+1] + d[+2]));
-    });
-    p.push(show = function(d) {
-      return help('^45-2^', d);
-    });
     result = p.run();
-    info('^45-2^', result);
     if (T != null) {
-      T.eq(result, [6, 10, 15, 20, 25, 30, 35, 30, 24]);
+      T.eq(result, ['__123', '_1234', '12345', '23456', '34567', '45678', '56789', '6789_', '789__']);
     }
     return typeof done === "function" ? done() : void 0;
   };
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @window_list_transform = ( T, done ) ->
-  //   # T?.halt_on_error()
-  //   { Pipeline
-  //     transforms  } = require '../../../apps/moonriver'
-  //   collector       = []
-  //   p               = new Pipeline()
-  //   #.........................................................................................................
-  //   p.push [ 1 .. 9 ]
-  //   p.push transforms.$window_list -2, +2, 0
-  //   p.push show    = ( d        ) -> urge '^45-1^', d
-  //   # p.push show    = ( d        ) -> urge ( d[ idx ] for idx in [ -2 .. +2 ] )
-  //   p.push add_up  = ( d, send  ) -> send ( d[ -2 ] + d[ -1 ] ) + d[ 0 ] + ( d[ +1 ] + d[ +2 ] )
-  //   p.push show    = ( d        ) -> help '^45-2^', d
-  //   result = p.run()
-  //   info '^45-2^', result
-  //   T?.eq result, [ 6, 10, 15, 20, 25, 30, 35, 30, 24 ]
-  //   done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this.named_window_transform = function(T, done) {
@@ -144,28 +164,50 @@
     collector = [];
     p = new Pipeline();
     //.........................................................................................................
-    p.push([1, 2, 3, 4, 5]);
+    p.push([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    p.push(show = function(d) {
+      return urge('^45-1^', d);
+    });
     p.push(TF.$named_window({
-      names: ['before', 'here', 'after'],
-      empty: null
+      names: ['a', 'b', 'c', 'd', 'e'],
+      empty: '_'
     }));
+    p.push(show = function(d) {
+      return urge('^45-1^', d);
+    });
+    p.push($as_keysorted_list());
+    p.push(function(d, send) {
+      var e;
+      return send(((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = d.length; i < len; i++) {
+          e = d[i];
+          results.push(`${e}`);
+        }
+        return results;
+      })()).join(''));
+    });
     p.push(show = function(d) {
       return urge('^45-1^', d);
     });
     result = p.run();
     info('^45-2^', result);
     if (T != null) {
-      T.eq(result, [6, 10, 15, 20, 25, 30, 35, 30, 24]);
+      T.eq(result, ['__123', '_1234', '12345', '23456', '34567', '45678', '56789', '6789_', '789__']);
     }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_sync_pipeline_as_segment = function(T, done) {
-    var Pipeline, add, byline, count, enumerate, mul, result_1, result_2, show, trunk_1, trunk_2;
+    var Pipeline, TF, add, byline, count, enumerate, mul, result_1, show, trunk_1;
     // T?.halt_on_error()
     GUY = require('../../../apps/guy');
-    ({Pipeline} = require('../../../apps/moonriver'));
+    ({
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
     count = 0;
     //.........................................................................................................
     byline = new Pipeline();
@@ -183,6 +225,7 @@
       send(count);
       return send(d * 3);
     });
+    // byline.push TF.$collect()
     //.........................................................................................................
     trunk_1 = new Pipeline();
     trunk_1.push([1, 2, 3, 4, 5]);
@@ -193,29 +236,96 @@
     trunk_1.push(show = function(d) {
       return help('^29-3^', d);
     });
+    // #.........................................................................................................
+    // trunk_2               = new Pipeline()
+    // trunk_2.push [ 1 .. 5 ]
+    // trunk_2.push show     = ( d ) -> help '^29-4^', d
+    // trunk_2.push byline
+    // trunk_2.push show     = ( d ) -> help '^29-5^', d
     //.........................................................................................................
-    trunk_2 = new Pipeline();
-    trunk_2.push([1, 2, 3, 4, 5]);
-    trunk_2.push(show = function(d) {
-      return help('^29-4^', d);
-    });
-    trunk_2.push(byline);
-    trunk_2.push(show = function(d) {
-      return help('^29-5^', d);
-    });
-    //.........................................................................................................
+    debug('^57-1^');
     result_1 = trunk_1.run();
-    result_2 = trunk_2.run();
+    // debug '^57-2^'
+    // result_2              = trunk_2.run()
+    debug('^57-3^');
     urge('^29-6^', trunk_1);
     info('^29-7^', result_1);
-    urge('^29-8^', trunk_2);
-    info('^29-9^', result_2);
+    // urge '^29-8^', trunk_2
+    // info '^29-9^', result_2
     if (T != null) {
       T.eq(result_1, [1, 36, 2, 45, 3, 54, 4, 63, 5, 72]);
     }
     if (T != null) {
       T.eq(result_2, [6, 36, 7, 45, 8, 54, 9, 63, 10, 72]);
     }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.segment_pipelines_can_be_nested = function(T, done) {
+    var Pipeline, TF;
+    ({
+      // T?.halt_on_error()
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    (function() {      //.........................................................................................................
+      var join, outer, result, show, uppercase;
+      outer = new Pipeline();
+      //.......................................................................................................
+      outer.push('abcde');
+      //.......................................................................................................
+      outer.push(uppercase = function(d, send) {
+        return send(d.toUpperCase());
+      });
+      outer.push(show = function(d) {
+        return whisper('(inner)', d);
+      });
+      outer.push(TF.$collect());
+      outer.push(join = function(d, send) {
+        return send(d.join(''));
+      });
+      //.......................................................................................................
+      outer.push(function(d) {
+        return help('outer', d);
+      });
+      //.......................................................................................................
+      result = outer.run();
+      info('^34-1^', rpr(result));
+      if (T != null) {
+        T.eq(result, ['ABCDE']);
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var finish, inner, join, outer, result, show, uppercase;
+      inner = new Pipeline();
+      outer = new Pipeline();
+      //.......................................................................................................
+      inner.push(uppercase = function(d, send) {
+        return send(d.toUpperCase());
+      });
+      inner.push(TF.$collect());
+      inner.push(join = function(d, send) {
+        return send(d.join(''));
+      });
+      inner.push(show = function(d) {
+        return whisper('inner', d);
+      });
+      //.......................................................................................................
+      outer.push('abcde');
+      outer.push(inner);
+      outer.push(finish = function(d) {
+        return help('outer', d);
+      });
+      //.......................................................................................................
+      result = outer.run();
+      info('^34-2^', rpr(result));
+      if (T != null) {
+        T.eq(result, ['ABCDE']);
+      }
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -280,20 +390,67 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.modifiers_preserved_for_pipeline_segments = function(T, done) {
+    var $, Pipeline, TF, first, last;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({
+      Pipeline,
+      $,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    (function() {      //.........................................................................................................
+      var p, result;
+      p = new Pipeline();
+      p.push('abcd');
+      p.push($({first, last}, function(d, send) {
+        debug('^53-1^', rpr(d));
+        if (d === first) {
+          return send('(');
+        }
+        if (d === last) {
+          return send(')');
+        }
+        return send(d.toUpperCase());
+      }));
+      p.push(TF.$collect());
+      // p.push do ->
+      //   collector = []
+      //   return $ { last, }, ( d, send ) ->
+      //     return send collector if d is last
+      //     collector.push d
+      p.push(function(d, send) {
+        return send(d.join(''));
+      });
+      result = p.run();
+      return T != null ? T.eq(result, ['(ABCD)']) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @window_transform()
+      // test @window_transform
       // @use_pipeline_as_segment_preview()
-      this.named_window_transform();
-      return test(this.named_window_transform);
+      // @named_window_transform()
+      // test @named_window_transform
+      // @use_sync_pipeline_as_segment()
+      // @transform_window_cfg_type()
+      // test @transform_window_cfg_type
+      // @use_async_pipeline_as_segment()
+      // test @use_async_pipeline_as_segment
+      // @segment_pipelines_can_be_nested()
+      this.modifiers_preserved_for_pipeline_segments();
+      return test(this.modifiers_preserved_for_pipeline_segments);
     })();
   }
 
-  // @transform_window_cfg_type()
-// test @transform_window_cfg_type
-// @use_async_pipeline_as_segment()
-// test @use_async_pipeline_as_segment
+  // test @segment_pipelines_can_be_nested
 // test @
 
 }).call(this);
