@@ -32,9 +32,9 @@ guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
-@modifiers_first_and_last = ( T, done ) ->
+@modifiers_first_and_last_1 = ( T, done ) ->
   # T?.halt_on_error()
-  { Pipeline, \
+  { Pipeline,         \
     transforms,     } = require '../../../apps/moonriver'
   p                   = new Pipeline()
   { $ }               = p
@@ -48,23 +48,78 @@ H                         = require '../../../lib/helpers'
       return send ')' if d is last
       send d
   #.........................................................................................................
-  $collect            = ->
-    return $ { last, }, do ->
-      collector = []
-      return collect = ( d, send ) ->
-        debug '^234^', d
-        return send collector if d is last
-        collector.push d
-        return null
+  do ->
+    p.push Array.from '氣場全開'
+    p.push $with_stars()
+    p.push $add_parentheses()
+    # p.push transforms.$collect()
+    p.push show = ( d ) -> whisper rpr d
+    result = p.run()
+    urge '^735^', result
+    T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
   #.........................................................................................................
-  p.push Array.from '氣場全開'
-  p.push $with_stars()
-  p.push $add_parentheses()
-  # p.push $collect()
-  p.push show = ( d ) -> whisper rpr d
-  result = p.run()
-  urge '^735^', result
-  T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@modifiers_first_and_last_2 = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  $with_stars         = -> with_stars = ( d, send ) -> send "*#{d}*"
+  $add_parentheses    = ->
+    return $ { first, last, }, add_parentheses = ( d, send ) ->
+      return send '(' if d is first
+      return send ')' if d is last
+      send d
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push Array.from '氣場全開'
+    p.push $with_stars()
+    p.push $add_parentheses()
+    # p.push transforms.$collect()
+    p.push show = ( d ) -> whisper rpr d
+    result = p.run()
+    urge '^735^', result
+    T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@modifiers_first_and_last_3 = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  $with_stars         = -> with_stars = ( d, send ) -> send "*#{d}*"
+  $add_parentheses    = ->
+    return $ { first, last, }, add_parentheses = ( d, send ) ->
+      return send '(' if d is first
+      return send ')' if d is last
+      send d
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push Array.from '氣場全開'
+    p.push $with_stars()
+    # p.push ( d ) -> info '^77-1^', p, p.segments[ 0 ].output
+    p.push $add_parentheses()
+    # p.push ( d ) -> info '^77-2^', p # .segments[ 1 ].output
+    p.push show = ( d ) -> help rpr d
+    p.push transforms.$collect()
+    p.push show = ( d ) -> urge rpr d
+    p.push join = ( d, send ) -> send d.join ''
+    result = p.run()
+    urge '^77-3^', p
+    urge '^77-4^', result
+    T?.eq result, [ '(*氣**場**全**開*)' ]
   #.........................................................................................................
   done?()
 
@@ -88,12 +143,7 @@ H                         = require '../../../lib/helpers'
     p.push                             ( d, send ) -> collector.push d #; help collector
     p.run()
     T?.eq collector, [ first, last, ]
-    # debug '^453^', d for d in protocol
-    # H.tabulate 'protocol', protocol
   #.........................................................................................................
-  done?()
-  return null
-
   do =>
     collector           = []
     protocol            = []
@@ -117,9 +167,13 @@ H                         = require '../../../lib/helpers'
 ############################################################################################################
 if require.main is module then do =>
   # @modifiers_first_and_last()
-  # test @modifiers_first_and_last
-  @modifiers_with_empty_pipeline()
-  test @modifiers_with_empty_pipeline
+  # test @modifiers_first_and_last_1
+  # @modifiers_first_and_last_2()
+  @modifiers_first_and_last_3()
+  # test @modifiers_first_and_last_2
+  # test @modifiers_first_and_last_3
+  # @modifiers_with_empty_pipeline()
+  # test @modifiers_with_empty_pipeline
   # test @
 
 
