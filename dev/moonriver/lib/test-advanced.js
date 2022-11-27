@@ -391,42 +391,93 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.modifiers_preserved_for_pipeline_segments = function(T, done) {
-    var $, Pipeline, TF, first, last;
+  this.protocol_1 = function(T, done) {
+    var $, Pipeline, first, last, transforms;
     // T?.halt_on_error()
-    GUY = require('../../../apps/guy');
-    ({
-      Pipeline,
-      $,
-      transforms: TF
-    } = require('../../../apps/moonriver'));
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     first = Symbol('first');
     last = Symbol('last');
     (function() {      //.........................................................................................................
-      var p, result;
-      p = new Pipeline();
-      p.push('abcd');
-      p.push($({first, last}, function(d, send) {
-        debug('^53-1^', rpr(d));
+      var add2, fl_ap, i, mul2, n, p, result;
+      p = new Pipeline({
+        protocol: true
+      });
+      p.push(add2 = function(d, send) {
+        return send(d + 2);
+      });
+      p.push(mul2 = function(d, send) {
+        return send(d * 2);
+      });
+      p.push($({first, last}, fl_ap = function(d, send) {
         if (d === first) {
           return send('(');
         }
         if (d === last) {
           return send(')');
         }
-        return send(d.toUpperCase());
+        return send(d);
       }));
-      p.push(TF.$collect());
-      // p.push do ->
-      //   collector = []
-      //   return $ { last, }, ( d, send ) ->
-      //     return send collector if d is last
-      //     collector.push d
-      p.push(function(d, send) {
+      for (n = i = 0; i <= 3; n = ++i) {
+        p.send(n);
+      }
+      // p.push l_coll = ( d, send ) ->
+      //   return send collector if d is last
+      //   collector.push d
+      debug('^74-2^', p);
+      debug('^74-2^', result = p.run());
+      return H.tabulate("journal", p.journal);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.protocol_2 = function(T, done) {
+    var $, $add_parentheses, $with_stars, Pipeline, first, last, transforms;
+    // T?.halt_on_error()
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    $with_stars = function() {
+      var with_stars;
+      return with_stars = function(d, send) {
+        return send(`*${d}*`);
+      };
+    };
+    $add_parentheses = function() {
+      var add_parentheses;
+      return $({first, last}, add_parentheses = function(d, send) {
+        if (d === first) {
+          return send('(');
+        }
+        if (d === last) {
+          return send(')');
+        }
+        return send(d);
+      });
+    };
+    (function() {      //.........................................................................................................
+      var join, p, result, show;
+      p = new Pipeline();
+      p.push(Array.from('氣場全開'));
+      p.push($with_stars());
+      // p.push ( d ) -> info '^77-1^', p, p.segments[ 0 ].output
+      p.push($add_parentheses());
+      // p.push ( d ) -> info '^77-2^', p # .segments[ 1 ].output
+      p.push(show = function(d) {
+        return help(rpr(d));
+      });
+      p.push(transforms.$collect());
+      p.push(show = function(d) {
+        return urge(rpr(d));
+      });
+      p.push(join = function(d, send) {
         return send(d.join(''));
       });
       result = p.run();
-      return T != null ? T.eq(result, ['(ABCD)']) : void 0;
+      urge('^77-3^', p);
+      urge('^77-4^', result);
+      return T != null ? T.eq(result, ['(*氣**場**全**開*)']) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -445,12 +496,12 @@
       // @use_async_pipeline_as_segment()
       // test @use_async_pipeline_as_segment
       // @segment_pipelines_can_be_nested()
-      this.modifiers_preserved_for_pipeline_segments();
-      return test(this.modifiers_preserved_for_pipeline_segments);
+      return this.protocol_1();
     })();
   }
 
-  // test @segment_pipelines_can_be_nested
+  // test @modifiers_preserved_for_pipeline_segments
+// test @segment_pipelines_can_be_nested
 // test @
 
 }).call(this);

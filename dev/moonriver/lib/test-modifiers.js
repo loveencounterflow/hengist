@@ -174,7 +174,9 @@
     (() => {      //.........................................................................................................
       var $, collector, p, protocol;
       collector = [];
-      protocol = [];
+      protocol = function(d) {
+        return debug('^345^', d);
+      };
       p = new Pipeline({protocol});
       ({$} = p);
       p.push([]);
@@ -199,7 +201,9 @@
     (() => {      //.........................................................................................................
       var $, collector, p, protocol;
       collector = [];
-      protocol = [];
+      protocol = function(d) {
+        return debug('^345^', d);
+      };
       p = new Pipeline({protocol});
       ({$} = p);
       p.push([]);
@@ -224,20 +228,61 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.modifiers_preserved_for_pipeline_segments = function(T, done) {
+    var $, Pipeline, TF, first, last;
+    // T?.halt_on_error()
+    GUY = require('../../../apps/guy');
+    ({
+      Pipeline,
+      $,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    (function() {      //.........................................................................................................
+      var p, result;
+      p = new Pipeline();
+      p.push('abcd');
+      p.push($({first, last}, function(d, send) {
+        debug('^53-1^', rpr(d));
+        if (d === first) {
+          return send('(');
+        }
+        if (d === last) {
+          return send(')');
+        }
+        return send(d.toUpperCase());
+      }));
+      p.push(TF.$collect());
+      // p.push do ->
+      //   collector = []
+      //   return $ { last, }, ( d, send ) ->
+      //     return send collector if d is last
+      //     collector.push d
+      p.push(function(d, send) {
+        return send(d.join(''));
+      });
+      result = p.run();
+      return T != null ? T.eq(result, ['(ABCD)']) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @modifiers_first_and_last()
       // test @modifiers_first_and_last_1
       // @modifiers_first_and_last_2()
-      return this.modifiers_first_and_last_3();
+      // @modifiers_first_and_last_3()
+      // test @modifiers_first_and_last_2
+      // test @modifiers_first_and_last_3
+      return this.modifiers_with_empty_pipeline();
     })();
   }
 
-  // test @modifiers_first_and_last_2
-// test @modifiers_first_and_last_3
-// @modifiers_with_empty_pipeline()
-// test @modifiers_with_empty_pipeline
+  // test @modifiers_with_empty_pipeline
 // test @
 
 }).call(this);
