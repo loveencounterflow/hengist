@@ -132,7 +132,7 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   do =>
     collector           = []
-    protocol            = []
+    protocol            = ( d ) -> debug '^345^', d
     p                   = new Pipeline { protocol, }
     { $ }               = p
     p.push []
@@ -146,7 +146,7 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   do =>
     collector           = []
-    protocol            = []
+    protocol            = ( d ) -> debug '^345^', d
     p                   = new Pipeline { protocol, }
     { $ }               = p
     p.push []
@@ -162,6 +162,37 @@ H                         = require '../../../lib/helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@modifiers_preserved_for_pipeline_segments = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY                   = require '../../../apps/guy'
+  { Pipeline,           \
+    $,                  \
+    transforms: TF    } = require '../../../apps/moonriver'
+  first                 = Symbol 'first'
+  last                  = Symbol 'last'
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push 'abcd'
+    p.push $ { first, last, }, ( d, send ) ->
+      debug '^53-1^', rpr d
+      return send '(' if d is first
+      return send ')' if d is last
+      send d.toUpperCase()
+    p.push TF.$collect()
+    # p.push do ->
+    #   collector = []
+    #   return $ { last, }, ( d, send ) ->
+    #     return send collector if d is last
+    #     collector.push d
+    p.push ( d, send ) -> send d.join ''
+    result = p.run()
+    T?.eq result, [ '(ABCD)', ]
+  #.........................................................................................................
+  done?()
+
+
 
 
 ############################################################################################################
@@ -169,10 +200,10 @@ if require.main is module then do =>
   # @modifiers_first_and_last()
   # test @modifiers_first_and_last_1
   # @modifiers_first_and_last_2()
-  @modifiers_first_and_last_3()
+  # @modifiers_first_and_last_3()
   # test @modifiers_first_and_last_2
   # test @modifiers_first_and_last_3
-  # @modifiers_with_empty_pipeline()
+  @modifiers_with_empty_pipeline()
   # test @modifiers_with_empty_pipeline
   # test @
 

@@ -30,6 +30,7 @@ types                     = new ( require 'intertype' ).Intertype
 GUY                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
 
+
 #-----------------------------------------------------------------------------------------------------------
 $as_keysorted_list = -> ( d, send ) => send as_keysorted_list d
 as_keysorted_list = ( d ) ->
@@ -239,35 +240,65 @@ as_keysorted_list = ( d ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@modifiers_preserved_for_pipeline_segments = ( T, done ) ->
+@protocol_1 = ( T, done ) ->
   # T?.halt_on_error()
-  GUY                   = require '../../../apps/guy'
-  { Pipeline,           \
-    $,                  \
-    transforms: TF    } = require '../../../apps/moonriver'
-  first                 = Symbol 'first'
-  last                  = Symbol 'last'
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
   #.........................................................................................................
   do ->
-    p = new Pipeline()
-    p.push 'abcd'
-    p.push $ { first, last, }, ( d, send ) ->
-      debug '^53-1^', rpr d
+    p = new Pipeline { protocol: true, }
+    p.push add2   = ( d, send ) -> send d + 2
+    p.push mul2   = ( d, send ) -> send d * 2
+    p.push $ { first, last, }, fl_ap = ( d, send ) ->
       return send '(' if d is first
       return send ')' if d is last
-      send d.toUpperCase()
-    p.push TF.$collect()
-    # p.push do ->
-    #   collector = []
-    #   return $ { last, }, ( d, send ) ->
-    #     return send collector if d is last
-    #     collector.push d
-    p.push ( d, send ) -> send d.join ''
-    result = p.run()
-    T?.eq result, [ '(ABCD)', ]
+      send d
+    p.send n for n in [ 0 .. 3 ]
+    # p.push l_coll = ( d, send ) ->
+    #   return send collector if d is last
+    #   collector.push d
+    debug '^74-2^', p
+    debug '^74-2^', result = p.run()
+    H.tabulate "journal", p.journal
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@protocol_2 = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  $with_stars         = -> with_stars = ( d, send ) -> send "*#{d}*"
+  $add_parentheses    = ->
+    return $ { first, last, }, add_parentheses = ( d, send ) ->
+      return send '(' if d is first
+      return send ')' if d is last
+      send d
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push Array.from '氣場全開'
+    p.push $with_stars()
+    # p.push ( d ) -> info '^77-1^', p, p.segments[ 0 ].output
+    p.push $add_parentheses()
+    # p.push ( d ) -> info '^77-2^', p # .segments[ 1 ].output
+    p.push show = ( d ) -> help rpr d
+    p.push transforms.$collect()
+    p.push show = ( d ) -> urge rpr d
+    p.push join = ( d, send ) -> send d.join ''
+    result = p.run()
+    urge '^77-3^', p
+    urge '^77-4^', result
+    T?.eq result, [ '(*氣**場**全**開*)' ]
+  #.........................................................................................................
+  done?()
 
 
 
@@ -284,8 +315,8 @@ if require.main is module then do =>
   # @use_async_pipeline_as_segment()
   # test @use_async_pipeline_as_segment
   # @segment_pipelines_can_be_nested()
-  @modifiers_preserved_for_pipeline_segments()
-  test @modifiers_preserved_for_pipeline_segments
+  @protocol_1()
+  # test @modifiers_preserved_for_pipeline_segments
   # test @segment_pipelines_can_be_nested
   # test @
 
