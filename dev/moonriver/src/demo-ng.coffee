@@ -286,4 +286,3 @@ if module is require.main then do =>
   # demo_7()
   # demo_tee()
   demo_pulling_data_from_pipelines_with_mpp()
-
