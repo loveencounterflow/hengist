@@ -313,7 +313,7 @@ show_query_plan = ->
   mrg             = new Mrg { db, prefix, }
   db.create_stdlib()
   PARAGATE        = require '../../../apps/paragate'
-  CAT             = require 'multimix/lib/cataloguing'
+  # CAT             = require 'multimix/lib/cataloguing'
   #.........................................................................................................
   # for key from CAT.walk_all_keys_of PARAGATE.HTML.grammar.lexer
   #   debug '^372^', key
