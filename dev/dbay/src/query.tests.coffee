@@ -173,7 +173,7 @@ X                         = require '../../../lib/helpers'
     db.execute  SQL"drop table if exists texts;"
     db.execute  SQL"create table texts ( nr integer not null primary key, text text );"
     db.execute  SQL"insert into texts values ( 3, 'third' );"
-    T?.throws /argument extra not allowed/, =>
+    T?.throws /argument 'extra' not allowed/, =>
       db.execute  SQL"insert into texts values ( ?, ? );", [ 4, 'fourth', ]
     db.query    SQL"insert into texts values ( 1, 'first' );"
     db.query    SQL"insert into texts values ( ?, ? );", [ 2, 'second', ]
