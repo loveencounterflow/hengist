@@ -166,10 +166,12 @@ H                         = require '../../../lib/helpers'
 if require.main is module then do =>
   # @window_transform()
   # await @can_use_readstream_as_source()
+  @can_use_writestream_as_target_1()
+  test @can_use_writestream_as_target_1
   # test @can_use_readstream_as_source
   # await @can_use_writestream_as_target_2()
   # @can_use_writestream_as_target_3()
-  await @writestream_accepts_buffers()
-  await test @writestream_accepts_buffers
+  # await @writestream_accepts_buffers()
+  # await test @writestream_accepts_buffers
   # test @
 
