@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, demo_6, demo_7, demo_pulling_data_from_pipelines_with_mpp, demo_tee, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper,
+  var GUY, alert, async_yield, debug, demo_1, demo_2, demo_3a, demo_3b, demo_4, demo_5, demo_6, demo_7, demo_pulling_data_from_pipelines_with_mpp, demo_tee, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper,
     modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
@@ -383,9 +383,45 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  async_yield = async function() {
+    var d, gf, main_1, main_2, ref, ref1;
+    gf = async function*() {
+      yield (await GUY.async.after(0.1, function() {
+        return 1;
+      }));
+      yield (await GUY.async.after(0.1, function() {
+        return 2;
+      }));
+      return (yield (await GUY.async.after(0.1, function() {
+        return 3;
+      })));
+    };
+    //.........................................................................................................
+    main_1 = async function*() {
+      return (yield* (await gf()));
+    };
+    main_2 = async function*() {
+      return (await (yield* gf()));
+    };
+    ref = main_1();
+    for await (d of ref) {
+      // for await x from gf()
+      //   yield x
+      //.........................................................................................................
+      debug(d);
+    }
+    ref1 = main_2();
+    for await (d of ref1) {
+      debug(d);
+    }
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
-    (() => {
+    (async() => {
       // demo_1()
       // demo_2()
       // await demo_3a()
@@ -395,7 +431,8 @@
       // demo_6()
       // demo_7()
       // demo_tee()
-      return demo_pulling_data_from_pipelines_with_mpp();
+      // demo_pulling_data_from_pipelines_with_mpp()
+      return (await async_yield());
     })();
   }
 

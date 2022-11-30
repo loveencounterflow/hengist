@@ -165,6 +165,52 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.modifiers_of_observers_do_not_leak = async function(T, done) {
+    var $, Async_pipeline, Pipeline, first, last, transforms;
+    // T?.halt_on_error()
+    ({Pipeline, Async_pipeline, $, transforms} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    (function() {      //.........................................................................................................
+      var observe, p, result;
+      p = new Pipeline({
+        protocol: true
+      });
+      p.push(Array.from('氣場全開'));
+      p.push($({first, last}, observe = function(d) {
+        return info('^79-1^', rpr(d));
+      }));
+      result = p.run();
+      urge('^79-2^', p);
+      urge('^79-3^', result);
+      if (T != null) {
+        T.eq(result, ['氣', '場', '全', '開']);
+      }
+      return H.tabulate("modifiers_of_observers_do_not_leak", p.journal);
+    })();
+    await (async function() {      //.........................................................................................................
+      var observe, p, result;
+      p = new Async_pipeline({
+        protocol: true
+      });
+      p.push(Array.from('氣場全開'));
+      p.push($({first, last}, observe = async function(d) {
+        return (await GUY.async.after(0.1, function() {
+          return info('^79-4^', rpr(d));
+        }));
+      }));
+      result = (await p.run());
+      urge('^79-5^', p);
+      urge('^79-6^', result);
+      if (T != null) {
+        T.eq(result, ['氣', '場', '全', '開']);
+      }
+      return H.tabulate("modifiers_of_observers_do_not_leak", p.journal);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.modifiers_with_empty_pipeline = function(T, done) {
     var Pipeline, first, last;
     // T?.halt_on_error()
@@ -172,12 +218,11 @@
     first = Symbol('first');
     last = Symbol('last');
     (() => {      //.........................................................................................................
-      var $, collector, p, protocol;
+      var $, collector, p;
       collector = [];
-      protocol = function(d) {
-        return debug('^345^', d);
-      };
-      p = new Pipeline({protocol});
+      p = new Pipeline({
+        protocol: true
+      });
       ({$} = p);
       p.push([]);
       p.push(function(d, send) {
@@ -196,15 +241,17 @@
         return collector.push(d); //; help collector
       });
       p.run();
-      return T != null ? T.eq(collector, [first, last]) : void 0;
+      if (T != null) {
+        T.eq(collector, [first, last]);
+      }
+      return H.tabulate('modifiers_with_empty_pipeline #2', p.journal);
     })();
     (() => {      //.........................................................................................................
-      var $, collector, p, protocol;
+      var $, collector, p;
       collector = [];
-      protocol = function(d) {
-        return debug('^345^', d);
-      };
-      p = new Pipeline({protocol});
+      p = new Pipeline({
+        protocol: true
+      });
       ({$} = p);
       p.push([]);
       p.push(function(d, send) {
@@ -220,7 +267,11 @@
         return collector.push(d); //; help collector
       });
       p.run();
-      return T != null ? T.eq(collector, [first, last]) : void 0;
+      if (T != null) {
+        T.eq(collector, [first, last]);
+      }
+      // debug '^453^', d for d in protocol
+      return H.tabulate('modifiers_with_empty_pipeline #2', p.journal);
     })();
     if (typeof done === "function") {
       done();
@@ -278,7 +329,10 @@
       // @modifiers_first_and_last_3()
       // test @modifiers_first_and_last_2
       // test @modifiers_first_and_last_3
-      return this.modifiers_with_empty_pipeline();
+      // @modifiers_with_empty_pipeline()
+      // test @modifiers_with_empty_pipeline
+      // await @modifiers_of_observers_do_not_leak()
+      return test(this.modifiers_of_observers_do_not_leak);
     })();
   }
 

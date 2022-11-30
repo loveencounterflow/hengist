@@ -93,14 +93,18 @@
     ({defer} = GUY.async);
     //.........................................................................................................
     get_pipelines = function() {
-      var p_1, p_2, show;
-      p_1 = new Async_pipeline();
-      p_2 = new Async_pipeline();
+      var firstlast, p_1, p_2, show;
+      p_1 = new Async_pipeline({
+        protocol: true
+      });
+      p_2 = new Async_pipeline({
+        protocol: true
+      });
       p_1.push([0, 1, 2, 3, 4, 5]);
       p_1.push(show = function(d) {
         return whisper('input', d);
       });
-      p_1.push($({first, last}, async function(d, send) {
+      p_1.push($({first, last}, firstlast = async function(d, send) {
         return (await defer(function() {
           return send(d);
         }));
@@ -109,9 +113,9 @@
         return whisper('input', d);
       });
       p_1.push((function() {
-        var count;
+        var count, divert;
         count = 0;
-        return async function(d, send) {
+        return divert = async function(d, send) {
           return (await defer(function() {
             count++;
             if (modulo(count, 2) === 0) {
@@ -150,6 +154,8 @@
           odd: [first, 1, 3, 5]
         });
       }
+      H.tabulate("async_walk_named_pipeline 1", p_1.journal);
+      H.tabulate("async_walk_named_pipeline 2", p_2.journal);
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -164,8 +170,13 @@
     //.........................................................................................................
     get_pipelines = function() {
       var diverter, firstlast, p_1, p_2, receiver, show, square;
-      p_1 = new Pipeline();
-      p_2 = new Pipeline();
+      p_1 = new Pipeline({
+        protocol: true
+      });
+      p_2 = new Pipeline({
+        protocol: true
+      });
+      //.......................................................................................................
       p_1.push([0, 1, 2, 3, 4, 5]);
       p_1.push($({first, last}, firstlast = function(d, send) {
         return send(d);
@@ -179,12 +190,14 @@
       p_1.push(show = function(d) {
         return whisper('input', d);
       });
+      //.......................................................................................................
       p_2.push(square = function(d, send) {
         return send(isa.symbol(d) ? d : d ** 2);
       });
       p_2.push(diverter = function(d, send) {
         return p_1.segments[3].send(d);
       });
+      //.......................................................................................................
       return {p_1, p_2};
     };
     (function() {      //.........................................................................................................
@@ -207,6 +220,8 @@
           p_2: []
         });
       }
+      H.tabulate("diverted_pipeline 1", p_1.journal);
+      H.tabulate("diverted_pipeline 2", p_2.journal);
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -217,13 +232,14 @@
     (() => {
       // @walk_named_pipelines_1()
       // await @async_walk_named_pipelines()
-      // test @walk_named_pipelines
-      this.diverted_pipelines();
-      return test(this.diverted_pipelines);
+      return test(this.async_walk_named_pipelines);
     })();
   }
 
-  // await test @
+  // test @walk_named_pipelines
+// @diverted_pipelines()
+// test @diverted_pipelines
+// await test @
 
 }).call(this);
 

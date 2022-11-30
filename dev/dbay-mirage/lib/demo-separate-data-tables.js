@@ -464,7 +464,7 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_parse_single_tag = function(cfg) {
-    var CAT, DBay, Mrg, PARAGATE, d, db, i, len, mrg, path, prefix, tokens, txt;
+    var DBay, Mrg, PARAGATE, d, db, i, len, mrg, path, prefix, tokens, txt;
     ({DBay} = require('../../../apps/dbay'));
     ({Mrg} = require('../../../apps/dbay-mirage'));
     prefix = 'mrg';
@@ -476,7 +476,7 @@ select name from v1 where type in ( 'table', 'view' ) order by nr;`);
     mrg = new Mrg({db, prefix});
     db.create_stdlib();
     PARAGATE = require('../../../apps/paragate');
-    CAT = require('multimix/lib/cataloguing');
+    // CAT             = require 'multimix/lib/cataloguing'
     //.........................................................................................................
     // for key from CAT.walk_all_keys_of PARAGATE.HTML.grammar.lexer
     //   debug '^372^', key

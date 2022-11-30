@@ -1,4 +1,4 @@
-(function() {
+(async function() {
   'use strict';
   var $as_keysorted_list, GUY, H, PATH, alert, as_keysorted_list, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
@@ -210,7 +210,9 @@
     } = require('../../../apps/moonriver'));
     count = 0;
     //.........................................................................................................
-    byline = new Pipeline();
+    byline = new Pipeline({
+      protocol: true
+    });
     byline.push(show = function(d) {
       return urge('^29-1^', d);
     });
@@ -227,7 +229,9 @@
     });
     // byline.push TF.$collect()
     //.........................................................................................................
-    trunk_1 = new Pipeline();
+    trunk_1 = new Pipeline({
+      protocol: true
+    });
     trunk_1.push([1, 2, 3, 4, 5]);
     trunk_1.push(show = function(d) {
       return help('^29-2^', d);
@@ -236,27 +240,30 @@
     trunk_1.push(show = function(d) {
       return help('^29-3^', d);
     });
-    // #.........................................................................................................
-    // trunk_2               = new Pipeline()
+    //.........................................................................................................
+    // trunk_2               = new Pipeline { protocol: true, }
     // trunk_2.push [ 1 .. 5 ]
     // trunk_2.push show     = ( d ) -> help '^29-4^', d
     // trunk_2.push byline
     // trunk_2.push show     = ( d ) -> help '^29-5^', d
-    //.........................................................................................................
-    debug('^57-1^');
+    // #.........................................................................................................
+    // result_1              = []
+    // step_count            = 0
+    // for d from trunk_1.walk()
+    //   info '^29-1^', d
+    //   result_1.push d
+    //   step_count++
+    //   break if step_count > 3
     result_1 = trunk_1.run();
+    H.tabulate("sync_pipeline_as_segment t1", trunk_1.journal);
     // debug '^57-2^'
     // result_2              = trunk_2.run()
-    debug('^57-3^');
     urge('^29-6^', trunk_1);
     info('^29-7^', result_1);
     // urge '^29-8^', trunk_2
     // info '^29-9^', result_2
     if (T != null) {
       T.eq(result_1, [1, 36, 2, 45, 3, 54, 4, 63, 5, 72]);
-    }
-    if (T != null) {
-      T.eq(result_2, [6, 36, 7, 45, 8, 54, 9, 63, 10, 72]);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -420,33 +427,32 @@
       for (n = i = 0; i <= 3; n = ++i) {
         p.send(n);
       }
-      // p.push l_coll = ( d, send ) ->
-      //   return send collector if d is last
-      //   collector.push d
       debug('^74-2^', p);
       debug('^74-2^', result = p.run());
-      return H.tabulate("journal", p.journal);
+      return H.tabulate("protocol_1", p.journal);
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.protocol_2 = function(T, done) {
-    var $, $add_parentheses, $with_stars, Pipeline, first, last, transforms;
+    var $, Pipeline, first, last, transforms;
     // T?.halt_on_error()
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     first = Symbol('first');
     last = Symbol('last');
-    //.........................................................................................................
-    $with_stars = function() {
-      var with_stars;
-      return with_stars = function(d, send) {
-        return send(`*${d}*`);
-      };
-    };
-    $add_parentheses = function() {
-      var add_parentheses;
-      return $({first, last}, add_parentheses = function(d, send) {
+    (function() {      //.........................................................................................................
+      var add2, fl_ap, i, mul2, n, p, result;
+      p = new Pipeline({
+        protocol: true
+      });
+      p.push(add2 = function(d, send) {
+        return send(d + 2);
+      });
+      p.push(mul2 = function(d, send) {
+        return send(d * 2);
+      });
+      p.push($({first, last}, fl_ap = function(d, send) {
         if (d === first) {
           return send('(');
         }
@@ -454,37 +460,109 @@
           return send(')');
         }
         return send(d);
-      });
-    };
-    (function() {      //.........................................................................................................
-      var join, p, result, show;
-      p = new Pipeline();
-      p.push(Array.from('氣場全開'));
-      p.push($with_stars());
-      // p.push ( d ) -> info '^77-1^', p, p.segments[ 0 ].output
-      p.push($add_parentheses());
-      // p.push ( d ) -> info '^77-2^', p # .segments[ 1 ].output
-      p.push(show = function(d) {
-        return help(rpr(d));
-      });
+      }));
       p.push(transforms.$collect());
-      p.push(show = function(d) {
-        return urge(rpr(d));
+      for (n = i = 0; i <= 3; n = ++i) {
+        p.send(n);
+      }
+      debug('^75-1^', p);
+      debug('^75-2^', result = p.run());
+      return H.tabulate("protocol_2", p.journal);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.protocol_3 = function(T, done) {
+    var $, Pipeline, first, last, transforms;
+    // T?.halt_on_error()
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    (function() {      //.........................................................................................................
+      var add2, again, fl_ap, i, mul2, n, p, result;
+      p = new Pipeline({
+        protocol: true
       });
-      p.push(join = function(d, send) {
-        return send(d.join(''));
+      p.push(add2 = function(d, send) {
+        return send(d + 2);
       });
-      result = p.run();
-      urge('^77-3^', p);
-      urge('^77-4^', result);
-      return T != null ? T.eq(result, ['(*氣**場**全**開*)']) : void 0;
+      p.push(mul2 = function(d, send) {
+        return send(d * 2);
+      });
+      p.push(again = function(d, send) {
+        send(d);
+        if (d === 10) {
+          return p.send(100);
+        }
+      });
+      p.push($({first, last}, fl_ap = function(d, send) {
+        if (d === first) {
+          return send('(');
+        }
+        if (d === last) {
+          return send(')');
+        }
+        return send(d);
+      }));
+      p.push(transforms.$collect());
+      for (n = i = 0; i <= 3; n = ++i) {
+        p.send(n);
+      }
+      debug('^75-1^', p);
+      debug('^75-2^', result = p.run());
+      return H.tabulate("protocol_3", p.journal);
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.async_protocol_3 = async function(T, done) {
+    var $, Async_pipeline, first, last, transforms;
+    // T?.halt_on_error()
+    ({Async_pipeline, $, transforms} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
+    await (async function() {      //.........................................................................................................
+      var add2, again, fl_ap, i, mul2, n, p, result;
+      p = new Async_pipeline({
+        protocol: true
+      });
+      p.push(add2 = function(d, send) {
+        return send(d + 2);
+      });
+      p.push(mul2 = function(d, send) {
+        return send(d * 2);
+      });
+      p.push(again = function(d, send) {
+        send(d);
+        if (d === 10) {
+          return p.send(100);
+        }
+      });
+      p.push($({first, last}, fl_ap = function(d, send) {
+        if (d === first) {
+          return send('(');
+        }
+        if (d === last) {
+          return send(')');
+        }
+        return send(d);
+      }));
+      p.push(transforms.$collect());
+      for (n = i = 0; i <= 3; n = ++i) {
+        p.send(n);
+      }
+      debug('^76-1^', p);
+      debug('^76-2^', result = (await p.run()));
+      return H.tabulate("async_protocol_3", p.journal);
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
+    await (() => {
       // @window_transform()
       // test @window_transform
       // @use_pipeline_as_segment_preview()
@@ -496,13 +574,15 @@
       // @use_async_pipeline_as_segment()
       // test @use_async_pipeline_as_segment
       // @segment_pipelines_can_be_nested()
-      return this.protocol_1();
+      // @protocol_1()
+      // @protocol_2()
+      // @protocol_3()
+      // await @async_protocol_3()
+      // test @modifiers_preserved_for_pipeline_segments
+      // test @segment_pipelines_can_be_nested
+      return test(this);
     })();
   }
-
-  // test @modifiers_preserved_for_pipeline_segments
-// test @segment_pipelines_can_be_nested
-// test @
 
 }).call(this);
 

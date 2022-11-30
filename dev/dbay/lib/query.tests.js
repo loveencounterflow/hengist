@@ -273,7 +273,7 @@
       db.execute(SQL`create table texts ( nr integer not null primary key, text text );`);
       db.execute(SQL`insert into texts values ( 3, 'third' );`);
       if (T != null) {
-        T.throws(/argument extra not allowed/, () => {
+        T.throws(/argument 'extra' not allowed/, () => {
           return db.execute(SQL`insert into texts values ( ?, ? );`, [4, 'fourth']);
         });
       }

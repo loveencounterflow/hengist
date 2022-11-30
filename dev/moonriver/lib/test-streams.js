@@ -86,13 +86,13 @@
     GUY = require('../../../apps/guy');
     ({Async_pipeline, $} = require('../../../apps/moonriver'));
     last = Symbol('last');
-    source = "ファイルに書けたいテキストです。";
+    source = "ファイルに書きたいテキストです。";
     p = new Async_pipeline();
     //.........................................................................................................
     await GUY.temp.with_file({
       keep: false
     }, async function(temp) {
-      var output, result, written_text;
+      var output, result, written_text, x;
       output = FS.createWriteStream(temp.path, {
         encoding: 'utf-8'
       });
@@ -123,7 +123,15 @@
       // p.push output
       //.......................................................................................................
       result = (await p.run());
-      result = result.join('');
+      result = ((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = result.length; i < len; i++) {
+          x = result[i];
+          results.push(x.toString());
+        }
+        return results;
+      })()).join('');
       written_text = FS.readFileSync(temp.path, {
         encoding: 'utf-8'
       });
@@ -145,7 +153,7 @@
     FS = require('node:fs');
     GUY = require('../../../apps/guy');
     ({Async_pipeline} = require('../../../apps/moonriver'));
-    source = "ファイルに書けたいテキストです。";
+    source = "ファイルに書きたいテキストです。";
     p = new Async_pipeline();
     //.........................................................................................................
     await GUY.temp.with_file({
@@ -239,18 +247,20 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
+    (() => {
       // @window_transform()
       // await @can_use_readstream_as_source()
-      // test @can_use_readstream_as_source
-      // await @can_use_writestream_as_target_2()
-      // @can_use_writestream_as_target_3()
-      await this.writestream_accepts_buffers();
-      return (await test(this.writestream_accepts_buffers));
+      this.can_use_writestream_as_target_1();
+      return test(this.can_use_writestream_as_target_1);
     })();
   }
 
-  // test @
+  // test @can_use_readstream_as_source
+// await @can_use_writestream_as_target_2()
+// @can_use_writestream_as_target_3()
+// await @writestream_accepts_buffers()
+// await test @writestream_accepts_buffers
+// test @
 
 }).call(this);
 
