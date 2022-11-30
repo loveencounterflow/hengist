@@ -75,7 +75,7 @@ H                         = require '../../../lib/helpers'
   { Async_pipeline
     $               }   = require '../../../apps/moonriver'
   last                  = Symbol 'last'
-  source                = "ファイルに書けたいテキストです。"
+  source                = "ファイルに書きたいテキストです。"
   p                     = new Async_pipeline()
   #.........................................................................................................
   await GUY.temp.with_file { keep: false, }, ( temp ) ->
@@ -112,7 +112,7 @@ H                         = require '../../../lib/helpers'
   FS                    = require 'node:fs'
   GUY                   = require '../../../apps/guy'
   { Async_pipeline    } = require '../../../apps/moonriver'
-  source                = "ファイルに書けたいテキストです。"
+  source                = "ファイルに書きたいテキストです。"
   p                     = new Async_pipeline()
   #.........................................................................................................
   await GUY.temp.with_file { keep: false, }, ( temp ) ->
