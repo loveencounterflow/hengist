@@ -71,15 +71,15 @@ H                         = require '../../../lib/helpers'
   { defer }           = GUY.async
   #.........................................................................................................
   get_pipelines = ->
-    p_1                 = new Async_pipeline()
-    p_2                 = new Async_pipeline()
+    p_1                 = new Async_pipeline { protocol: true, }
+    p_2                 = new Async_pipeline { protocol: true, }
     p_1.push [ 0 .. 5 ]
     p_1.push show = ( d ) -> whisper 'input', d
-    p_1.push $ { first, last, }, ( d, send ) -> await defer -> send d
+    p_1.push $ { first, last, }, firstlast = ( d, send ) -> await defer -> send d
     p_1.push show = ( d ) -> whisper 'input', d
     p_1.push do ->
       count = 0
-      return ( d, send ) ->
+      return divert = ( d, send ) ->
         await defer ->
           count++
           if count %% 2 is 0 then return p_2.send d
@@ -95,6 +95,8 @@ H                         = require '../../../lib/helpers'
       info d
       result[ d.name ].push d.data
     T?.eq result, { even: [ 0, 2, 4, last ], odd: [ first, 1, 3, 5 ] }
+    H.tabulate "async_walk_named_pipeline 1", p_1.journal
+    H.tabulate "async_walk_named_pipeline 2", p_2.journal
     return null
   #.........................................................................................................
   done?()
@@ -107,15 +109,18 @@ H                         = require '../../../lib/helpers'
   last                = Symbol 'last'
   #.........................................................................................................
   get_pipelines = ->
-    p_1                 = new Pipeline()
-    p_2                 = new Pipeline()
+    p_1                 = new Pipeline { protocol: true, }
+    p_2                 = new Pipeline { protocol: true, }
+    #.......................................................................................................
     p_1.push [ 0 .. 5 ]
     p_1.push $ { first, last, }, firstlast = ( d, send ) -> send d
     p_1.push diverter = ( d, send ) -> p_2.send d
     p_1.push receiver = ( d, send ) -> send d
     p_1.push show     = ( d ) -> whisper 'input', d
+    #.......................................................................................................
     p_2.push square   = ( d, send ) -> send if isa.symbol d then d else d ** 2
     p_2.push diverter = ( d, send ) -> p_1.segments[ 3 ].send d
+    #.......................................................................................................
     return { p_1, p_2, }
   #.........................................................................................................
   do ->
@@ -127,6 +132,8 @@ H                         = require '../../../lib/helpers'
       info d
       result[ d.name ].push d.data
     T?.eq result, { p_1: [ first, 0, 1, 4, 9, 16, 25, last ], p_2: [] }
+    H.tabulate "diverted_pipeline 1", p_1.journal
+    H.tabulate "diverted_pipeline 2", p_2.journal
     return null
   #.........................................................................................................
   done?()
