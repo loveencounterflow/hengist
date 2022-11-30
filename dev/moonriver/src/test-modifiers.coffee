@@ -124,6 +124,38 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@modifiers_of_observers_do_not_leak = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline
+    Async_pipeline
+    $
+    transforms      } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  do ->
+    p = new Pipeline { protocol: true, }
+    p.push Array.from '氣場全開'
+    p.push $ { first, last, }, observe = ( d ) -> info '^79-1^', rpr d
+    result = p.run()
+    urge '^79-2^', p
+    urge '^79-3^', result
+    T?.eq result, [ '氣', '場', '全', '開', ]
+    H.tabulate "modifiers_of_observers_do_not_leak", p.journal
+  #.........................................................................................................
+  await do ->
+    p = new Async_pipeline { protocol: true, }
+    p.push Array.from '氣場全開'
+    p.push $ { first, last, }, observe = ( d ) -> await GUY.async.after 0.1, -> info '^79-4^', rpr d
+    result = await p.run()
+    urge '^79-5^', p
+    urge '^79-6^', result
+    T?.eq result, [ '氣', '場', '全', '開', ]
+    H.tabulate "modifiers_of_observers_do_not_leak", p.journal
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @modifiers_with_empty_pipeline = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline    }     = require '../../../apps/moonriver'
@@ -132,8 +164,7 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   do =>
     collector           = []
-    protocol            = ( d ) -> debug '^345^', d
-    p                   = new Pipeline { protocol, }
+    p                   = new Pipeline { protocol: true, }
     { $ }               = p
     p.push []
     p.push                             ( d, send ) -> send d * 2
@@ -143,11 +174,11 @@ H                         = require '../../../lib/helpers'
     p.push                             ( d, send ) -> collector.push d #; help collector
     p.run()
     T?.eq collector, [ first, last, ]
+    H.tabulate 'modifiers_with_empty_pipeline #2', p.journal
   #.........................................................................................................
   do =>
     collector           = []
-    protocol            = ( d ) -> debug '^345^', d
-    p                   = new Pipeline { protocol, }
+    p                   = new Pipeline { protocol: true, }
     { $ }               = p
     p.push []
     p.push                             ( d, send ) -> send d * 2
@@ -157,7 +188,7 @@ H                         = require '../../../lib/helpers'
     p.run()
     T?.eq collector, [ first, last, ]
     # debug '^453^', d for d in protocol
-    # H.tabulate 'protocol', protocol
+    H.tabulate 'modifiers_with_empty_pipeline #2', p.journal
   #.........................................................................................................
   done?()
   return null
@@ -203,7 +234,10 @@ if require.main is module then do =>
   # @modifiers_first_and_last_3()
   # test @modifiers_first_and_last_2
   # test @modifiers_first_and_last_3
-  @modifiers_with_empty_pipeline()
+  # @modifiers_with_empty_pipeline()
+  # test @modifiers_with_empty_pipeline
+  # await @modifiers_of_observers_do_not_leak()
+  test @modifiers_of_observers_do_not_leak
   # test @modifiers_with_empty_pipeline
   # test @
 
