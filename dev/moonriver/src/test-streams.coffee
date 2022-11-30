@@ -99,7 +99,7 @@ H                         = require '../../../lib/helpers'
     # p.push output
     #.......................................................................................................
     result        = await p.run()
-    result        = result.join ''
+    result        = ( x.toString() for x in result ).join ''
     written_text  = FS.readFileSync temp.path, { encoding: 'utf-8', }
     T?.eq result,       source
     T?.eq written_text, source
