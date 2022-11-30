@@ -143,7 +143,8 @@ H                         = require '../../../lib/helpers'
 if require.main is module then do =>
   # @walk_named_pipelines_1()
   # await @async_walk_named_pipelines()
+  test @async_walk_named_pipelines
   # test @walk_named_pipelines
-  @diverted_pipelines()
-  test @diverted_pipelines
+  # @diverted_pipelines()
+  # test @diverted_pipelines
   # await test @
