@@ -91,11 +91,18 @@ demo_shadow_db = ->
     db insert_number, { n, sqr: null, } for n in [ 0 .. 10 ]
   #.........................................................................................................
   H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
+  select_numbers = db.prepare SQL"select * from numbers order by n;"
   #.........................................................................................................
   db = with_shadow read_db = db, ({ db: write_db, }) ->
-    insert_number = write_db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-    for d from read_db SQL"select * from numbers order by n;"
-      write_db insert_number, { n, sqr: n ** 2, } for n in [ 0 .. 10 ]
+    db.pragma SQL"journal_mode = wal;"
+    db ->
+      debug '^23-1^'
+      insert_number = write_db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+      debug '^23-2^'
+      for d from read_db select_numbers
+        write_db insert_number, { n, sqr: n ** 2, } for n in [ 0 .. 10 ]
+      debug '^23-3^'
+      return null
     return null
   #.........................................................................................................
   H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
