@@ -186,7 +186,69 @@ declare.fs_exists
   data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
   assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
   #.........................................................................................................
-  FS.rm data_path, { recursive: true, force: true, }
+  prepare     = ->
+    FS.rmSync data_path,              { recursive: true, force: true, }
+    FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  #.........................................................................................................
+  do ->
+    ### errors with non-existant path ###
+    prepare()
+    file_path   = PATH.resolve PATH.join data_path, 'XXXXXXXXX'
+    T?.throws /no such file/, ->
+      GUY.temp.with_shadow_file file_path, ({ path: temp_file_path, }) ->
+        debug '^35-1^', temp_file_path
+  #.........................................................................................................
+  do ->
+    ### can read from temp, writing to it updates original ###
+    prepare()
+    file_path   = PATH.resolve PATH.join data_path, 'helo-world.txt'
+    GUY.temp.with_shadow_file file_path, ({ path: temp_file_path, }) ->
+      text = FS.readFileSync temp_file_path, { encoding: 'utf-8', }
+      T?.eq text, "helo world"
+      FS.writeFileSync temp_file_path, "#{text}!!!"
+      return null
+    text = FS.readFileSync file_path, { encoding: 'utf-8', }
+    T?.eq text, "helo world!!!"
+  #.........................................................................................................
+  do ->
+    ### links are transparent ###
+    prepare()
+    file_path = PATH.resolve PATH.join data_path, 'helo-world.txt.symlink.symlink'
+    GUY.temp.with_shadow_file file_path, ({ path: temp_file_path, }) ->
+      text = FS.readFileSync temp_file_path, { encoding: 'utf-8', }
+      T?.eq text, "helo world"
+      FS.writeFileSync temp_file_path, "#{text}!!!"
+      return null
+    text = FS.readFileSync file_path, { encoding: 'utf-8', }
+    T?.eq text, "helo world!!!"
+    do ->
+      stats           = FS.lstatSync file_path
+      result          = {}
+      result.symlink  = stats.isSymbolicLink()
+      result.file     = stats.isFile()
+      result.folder   = stats.isDirectory()
+      T?.eq result, { symlink: true, file: false, folder: false, }
+    do ->
+      stats           = FS.statSync file_path
+      result          = {}
+      result.symlink  = stats.isSymbolicLink()
+      result.file     = stats.isFile()
+      result.folder   = stats.isDirectory()
+      T?.eq result, { symlink: false, file: true, folder: false, }
+  #.........................................................................................................
+  do ->
+    ### folders are rejected ###
+    prepare()
+    file_path = PATH.resolve PATH.join data_path, 'helo-world.folder'
+    T?.throws /illegal operation on a directory/, ->
+      GUY.temp.with_shadow_file file_path, ({ path: temp_file_path, }) ->
+  #.........................................................................................................
+  do ->
+    ### links to folders are rejected ###
+    prepare()
+    file_path = PATH.resolve PATH.join data_path, 'helo-world.folder.symlink'
+    T?.throws /illegal operation on a directory/, ->
+      GUY.temp.with_shadow_file file_path, ({ path: temp_file_path, }) ->
   #.........................................................................................................
   return done?()
 
@@ -194,7 +256,8 @@ declare.fs_exists
 
 ############################################################################################################
 if require.main is module then do =>
-  @GUY_temp_with_shadow_file()
+  # @GUY_temp_with_shadow_file()
+  test @GUY_temp_with_shadow_file
   # test @
   # test @GUY_temp_context_handler_file
   # @GUY_temp_context_handler_file()
