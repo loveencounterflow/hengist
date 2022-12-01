@@ -68,20 +68,16 @@ demo_datamill = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_shadow_db = ->
+demo_configurable_concurrent_writes = ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
   #.........................................................................................................
-  with_shadow = ( db, handler ) ->
-    original_path = db.cfg.path
-    GUY.temp.with_shadow_file original_path, ({ path, }) ->
-      handler { db: ( new DBay { path, } ), }
-      db.destroy()
-    return new DBay { path: original_path, }
-  #.........................................................................................................
   my_path = '/tmp/helo.db'
   db      = new DBay { path: my_path, }
-  db ->
+  #.........................................................................................................
+  show = ( db ) -> H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
+  #.........................................................................................................
+  prepare = ->
     if ( db.all_rows SQL"select name from sqlite_schema where name = 'numbers';" ).length is 0
       db SQL"""create table numbers (
         n   integer not null primary key,
@@ -90,22 +86,33 @@ demo_shadow_db = ->
     insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
     db insert_number, { n, sqr: null, } for n in [ 0 .. 10 ]
   #.........................................................................................................
-  H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
-  select_numbers = db.prepare SQL"select * from numbers order by n;"
-  #.........................................................................................................
-  db = with_shadow read_db = db, ({ db: write_db, }) ->
-    db.pragma SQL"journal_mode = wal;"
-    db ->
-      debug '^23-1^'
-      insert_number = write_db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-      debug '^23-2^'
-      for d from read_db select_numbers
-        write_db insert_number, { n, sqr: n ** 2, } for n in [ 0 .. 10 ]
-      debug '^23-3^'
+  do ->
+    prepare()
+    show db
+    reader          = db.prepare SQL"select * from numbers order by n;"
+    insert_numbers  = null
+    #.......................................................................................................
+    writer = ( db, d ) ->
+      insert_numbers ?= db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+      d.sqr = d.n ** 2
+      db insert_numbers, d
       return null
-    return null
+    db = db.with_concurrent { mode: 'shadow', reader, writer, }
+    show db
   #.........................................................................................................
-  H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
+  do ->
+    prepare()
+    show db
+    reader          = db.prepare SQL"select * from numbers order by n;"
+    insert_numbers  = null
+    #.......................................................................................................
+    writer = ( db, d ) ->
+      insert_numbers ?= db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+      d.sqr = d.n ** 2
+      db insert_numbers, d
+      return null
+    db = db.with_concurrent { mode: 'reader', reader, writer, }
+    show db
   #.........................................................................................................
   return null
 
@@ -113,6 +120,6 @@ demo_shadow_db = ->
 ############################################################################################################
 if module is require.main then do =>
   # await demo_datamill()
-  demo_shadow_db()
+  demo_configurable_concurrent_writes()
 
 
