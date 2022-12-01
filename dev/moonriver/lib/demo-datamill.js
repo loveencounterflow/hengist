@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_datamill, demo_shadow_db, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_configurable_concurrent_writes, demo_datamill, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -101,30 +101,21 @@ sqr integer );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_shadow_db = function() {
-    var DBay, SQL, db, my_path, read_db, select_numbers, with_shadow;
+  demo_configurable_concurrent_writes = function() {
+    var DBay, SQL, db, my_path, prepare, show;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
-    //.........................................................................................................
-    with_shadow = function(db, handler) {
-      var original_path;
-      original_path = db.cfg.path;
-      GUY.temp.with_shadow_file(original_path, function({path}) {
-        handler({
-          db: new DBay({path})
-        });
-        return db.destroy();
-      });
-      return new DBay({
-        path: original_path
-      });
-    };
     //.........................................................................................................
     my_path = '/tmp/helo.db';
     db = new DBay({
       path: my_path
     });
-    db(function() {
+    //.........................................................................................................
+    show = function(db) {
+      return H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
+    };
+    //.........................................................................................................
+    prepare = function() {
       var i, insert_number, n, results;
       if ((db.all_rows(SQL`select name from sqlite_schema where name = 'numbers';`)).length === 0) {
         db(SQL`create table numbers (
@@ -146,41 +137,61 @@ sqr integer );`);
         }));
       }
       return results;
-    });
-    //.........................................................................................................
-    H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
-    select_numbers = db.prepare(SQL`select * from numbers order by n;`);
-    //.........................................................................................................
-    db = with_shadow(read_db = db, function({
-        db: write_db
-      }) {
-      db.pragma(SQL`journal_mode = wal;`);
-      db(function() {
-        var d, i, insert_number, n, ref;
-        debug('^23-1^');
-        insert_number = write_db.prepare_insert({
-          into: 'numbers',
-          on_conflict: {
-            update: true
-          }
-        });
-        debug('^23-2^');
-        ref = read_db(select_numbers);
-        for (d of ref) {
-          for (n = i = 0; i <= 10; n = ++i) {
-            write_db(insert_number, {
-              n,
-              sqr: n ** 2
-            });
-          }
+    };
+    (function() {      //.........................................................................................................
+      var insert_numbers, reader, writer;
+      prepare();
+      show(db);
+      reader = db.prepare(SQL`select * from numbers order by n;`);
+      insert_numbers = null;
+      //.......................................................................................................
+      writer = function(db, d) {
+        if (insert_numbers == null) {
+          insert_numbers = db.prepare_insert({
+            into: 'numbers',
+            on_conflict: {
+              update: true
+            }
+          });
         }
-        debug('^23-3^');
+        d.sqr = d.n ** 2;
+        db(insert_numbers, d);
         return null;
+      };
+      db = db.with_concurrent({
+        mode: 'shadow',
+        reader,
+        writer
       });
-      return null;
-    });
-    //.........................................................................................................
-    H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
+      return show(db);
+    })();
+    (function() {      //.........................................................................................................
+      var insert_numbers, reader, writer;
+      prepare();
+      show(db);
+      reader = db.prepare(SQL`select * from numbers order by n;`);
+      insert_numbers = null;
+      //.......................................................................................................
+      writer = function(db, d) {
+        if (insert_numbers == null) {
+          insert_numbers = db.prepare_insert({
+            into: 'numbers',
+            on_conflict: {
+              update: true
+            }
+          });
+        }
+        d.sqr = d.n ** 2;
+        db(insert_numbers, d);
+        return null;
+      };
+      db = db.with_concurrent({
+        mode: 'reader',
+        reader,
+        writer
+      });
+      return show(db);
+    })();
     //.........................................................................................................
     return null;
   };
@@ -189,7 +200,7 @@ sqr integer );`);
   if (module === require.main) {
     (() => {
       // await demo_datamill()
-      return demo_shadow_db();
+      return demo_configurable_concurrent_writes();
     })();
   }
 
