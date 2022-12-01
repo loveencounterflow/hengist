@@ -179,11 +179,23 @@ declare.fs_exists
   debug '^43-7^', collector
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_temp_with_shadow_file = ( T, done ) ->
+  GUY         = require '../../../apps/guy'
+  base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  #.........................................................................................................
+  FS.rm data_path, { recursive: true, force: true, }
+  #.........................................................................................................
+  return done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  @GUY_temp_with_shadow_file()
+  # test @
   # test @GUY_temp_context_handler_file
   # @GUY_temp_context_handler_file()
   # @GUY_temp_works_with_async_functions()
