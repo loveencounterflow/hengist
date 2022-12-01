@@ -283,23 +283,140 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.GUY_temp_with_shadow_file = function(T, done) {
-    var GUY, assets_path, base_path, data_path;
+    var GUY, assets_path, base_path, data_path, prepare;
     GUY = require('../../../apps/guy');
     base_path = PATH.resolve(PATH.join(__dirname, '../../../'));
     data_path = PATH.resolve(PATH.join(base_path, 'data/guy/temp'));
     assets_path = PATH.resolve(PATH.join(base_path, 'assets/guy/temp'));
     //.........................................................................................................
-    FS.rm(data_path, {
-      recursive: true,
-      force: true
-    });
+    prepare = function() {
+      FS.rmSync(data_path, {
+        recursive: true,
+        force: true
+      });
+      return FS.cpSync(assets_path, data_path, {
+        recursive: true,
+        force: false,
+        verbatimSymlinks: true
+      });
+    };
+    (function() {      //.........................................................................................................
+      var file_path;
+      /* errors with non-existant path */
+      prepare();
+      file_path = PATH.resolve(PATH.join(data_path, 'XXXXXXXXX'));
+      return T != null ? T.throws(/no such file/, function() {
+        return GUY.temp.with_shadow_file(file_path, function({
+            path: temp_file_path
+          }) {
+          return debug('^35-1^', temp_file_path);
+        });
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var file_path, text;
+      /* can read from temp, writing to it updates original */
+      prepare();
+      file_path = PATH.resolve(PATH.join(data_path, 'helo-world.txt'));
+      GUY.temp.with_shadow_file(file_path, function({
+          path: temp_file_path
+        }) {
+        var text;
+        text = FS.readFileSync(temp_file_path, {
+          encoding: 'utf-8'
+        });
+        if (T != null) {
+          T.eq(text, "helo world");
+        }
+        FS.writeFileSync(temp_file_path, `${text}!!!`);
+        return null;
+      });
+      text = FS.readFileSync(file_path, {
+        encoding: 'utf-8'
+      });
+      return T != null ? T.eq(text, "helo world!!!") : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var file_path, text;
+      /* links are transparent */
+      prepare();
+      file_path = PATH.resolve(PATH.join(data_path, 'helo-world.txt.symlink.symlink'));
+      GUY.temp.with_shadow_file(file_path, function({
+          path: temp_file_path
+        }) {
+        var text;
+        text = FS.readFileSync(temp_file_path, {
+          encoding: 'utf-8'
+        });
+        if (T != null) {
+          T.eq(text, "helo world");
+        }
+        FS.writeFileSync(temp_file_path, `${text}!!!`);
+        return null;
+      });
+      text = FS.readFileSync(file_path, {
+        encoding: 'utf-8'
+      });
+      if (T != null) {
+        T.eq(text, "helo world!!!");
+      }
+      (function() {
+        var result, stats;
+        stats = FS.lstatSync(file_path);
+        result = {};
+        result.symlink = stats.isSymbolicLink();
+        result.file = stats.isFile();
+        result.folder = stats.isDirectory();
+        return T != null ? T.eq(result, {
+          symlink: true,
+          file: false,
+          folder: false
+        }) : void 0;
+      })();
+      return (function() {
+        var result, stats;
+        stats = FS.statSync(file_path);
+        result = {};
+        result.symlink = stats.isSymbolicLink();
+        result.file = stats.isFile();
+        result.folder = stats.isDirectory();
+        return T != null ? T.eq(result, {
+          symlink: false,
+          file: true,
+          folder: false
+        }) : void 0;
+      })();
+    })();
+    (function() {      //.........................................................................................................
+      var file_path;
+      /* folders are rejected */
+      prepare();
+      file_path = PATH.resolve(PATH.join(data_path, 'helo-world.folder'));
+      return T != null ? T.throws(/illegal operation on a directory/, function() {
+        return GUY.temp.with_shadow_file(file_path, function({
+            path: temp_file_path
+          }) {});
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var file_path;
+      /* links to folders are rejected */
+      prepare();
+      file_path = PATH.resolve(PATH.join(data_path, 'helo-world.folder.symlink'));
+      return T != null ? T.throws(/illegal operation on a directory/, function() {
+        return GUY.temp.with_shadow_file(file_path, function({
+            path: temp_file_path
+          }) {});
+      }) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return this.GUY_temp_with_shadow_file();
+      // @GUY_temp_with_shadow_file()
+      return test(this.GUY_temp_with_shadow_file);
     })();
   }
 
