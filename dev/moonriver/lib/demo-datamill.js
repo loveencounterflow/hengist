@@ -102,7 +102,7 @@ sqr integer );`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_shadow_db = function() {
-    var DBay, SQL, db, my_path, read_db, with_shadow;
+    var DBay, SQL, db, my_path, read_db, select_numbers, with_shadow;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     //.........................................................................................................
@@ -149,26 +149,34 @@ sqr integer );`);
     });
     //.........................................................................................................
     H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
+    select_numbers = db.prepare(SQL`select * from numbers order by n;`);
     //.........................................................................................................
     db = with_shadow(read_db = db, function({
         db: write_db
       }) {
-      var d, i, insert_number, n, ref;
-      insert_number = write_db.prepare_insert({
-        into: 'numbers',
-        on_conflict: {
-          update: true
+      db.pragma(SQL`journal_mode = wal;`);
+      db(function() {
+        var d, i, insert_number, n, ref;
+        debug('^23-1^');
+        insert_number = write_db.prepare_insert({
+          into: 'numbers',
+          on_conflict: {
+            update: true
+          }
+        });
+        debug('^23-2^');
+        ref = read_db(select_numbers);
+        for (d of ref) {
+          for (n = i = 0; i <= 10; n = ++i) {
+            write_db(insert_number, {
+              n,
+              sqr: n ** 2
+            });
+          }
         }
+        debug('^23-3^');
+        return null;
       });
-      ref = read_db(SQL`select * from numbers order by n;`);
-      for (d of ref) {
-        for (n = i = 0; i <= 10; n = ++i) {
-          write_db(insert_number, {
-            n,
-            sqr: n ** 2
-          });
-        }
-      }
       return null;
     });
     //.........................................................................................................

@@ -281,14 +281,30 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_temp_with_shadow_file = function(T, done) {
+    var GUY, assets_path, base_path, data_path;
+    GUY = require('../../../apps/guy');
+    base_path = PATH.resolve(PATH.join(__dirname, '../../../'));
+    data_path = PATH.resolve(PATH.join(base_path, 'data/guy/temp'));
+    assets_path = PATH.resolve(PATH.join(base_path, 'assets/guy/temp'));
+    //.........................................................................................................
+    FS.rm(data_path, {
+      recursive: true,
+      force: true
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      return this.GUY_temp_with_shadow_file();
     })();
   }
 
-  // test @GUY_temp_context_handler_file
+  // test @
+// test @GUY_temp_context_handler_file
 // @GUY_temp_context_handler_file()
 // @GUY_temp_works_with_async_functions()
 // test @GUY_temp_works_with_async_functions
