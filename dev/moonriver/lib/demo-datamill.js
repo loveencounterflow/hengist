@@ -102,21 +102,19 @@ sqr integer );`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_configurable_concurrent_writes = function() {
-    var DBay, SQL, db, my_path, prepare, show;
+    var DBay, SQL, my_path, prepare, show, write_concurrently;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     //.........................................................................................................
     my_path = '/tmp/helo.db';
-    db = new DBay({
-      path: my_path
-    });
+    // db      = new DBay { path: my_path, }
     //.........................................................................................................
     show = function(db) {
       return H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
     };
     //.........................................................................................................
-    prepare = function() {
-      var i, insert_number, n, results;
+    prepare = function(db) {
+      var i, insert_number, n;
       if ((db.all_rows(SQL`select name from sqlite_schema where name = 'numbers';`)).length === 0) {
         db(SQL`create table numbers (
 n   integer not null primary key,
@@ -129,18 +127,18 @@ sqr integer );`);
           update: true
         }
       });
-      results = [];
       for (n = i = 0; i <= 10; n = ++i) {
-        results.push(db(insert_number, {
+        db(insert_number, {
           n,
           sqr: null
-        }));
+        });
       }
-      return results;
+      return null;
     };
-    (function() {      //.........................................................................................................
+    //.........................................................................................................
+    write_concurrently = function(db, mode) {
       var insert_numbers, reader, writer;
-      prepare();
+      prepare(db);
       show(db);
       reader = db.prepare(SQL`select * from numbers order by n;`);
       insert_numbers = null;
@@ -158,40 +156,14 @@ sqr integer );`);
         db(insert_numbers, d);
         return null;
       };
-      db = db.with_concurrent({
-        mode: 'shadow',
-        reader,
-        writer
-      });
-      return show(db);
-    })();
-    (function() {      //.........................................................................................................
-      var insert_numbers, reader, writer;
-      prepare();
+      db = db.with_concurrent({mode, reader, writer});
       show(db);
-      reader = db.prepare(SQL`select * from numbers order by n;`);
-      insert_numbers = null;
-      //.......................................................................................................
-      writer = function(db, d) {
-        if (insert_numbers == null) {
-          insert_numbers = db.prepare_insert({
-            into: 'numbers',
-            on_conflict: {
-              update: true
-            }
-          });
-        }
-        d.sqr = d.n ** 2;
-        db(insert_numbers, d);
-        return null;
-      };
-      db = db.with_concurrent({
-        mode: 'reader',
-        reader,
-        writer
-      });
-      return show(db);
-    })();
+      return db;
+    };
+    //.........................................................................................................
+    // write_concurrently ( new DBay() ), 'reader'
+    // write_concurrently ( new DBay { path: my_path, } ), 'shadow'
+    write_concurrently(new DBay(), 'shadow');
     //.........................................................................................................
     return null;
   };

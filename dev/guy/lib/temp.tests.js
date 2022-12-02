@@ -412,19 +412,65 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_temp_with_shadow_file_works_across_device_boundaries = function(T, done) {
+    var GUY, assets_path, base_path, data_path, prepare;
+    GUY = require('../../../apps/guy');
+    base_path = PATH.resolve(PATH.join(__dirname, '../../../'));
+    data_path = PATH.resolve(PATH.join(base_path, 'data/guy/temp'));
+    assets_path = PATH.resolve(PATH.join(base_path, 'assets/guy/temp'));
+    //.........................................................................................................
+    prepare = function() {
+      FS.rmSync(data_path, {
+        recursive: true,
+        force: true
+      });
+      return FS.cpSync(assets_path, data_path, {
+        recursive: true,
+        force: false,
+        verbatimSymlinks: true
+      });
+    };
+    (function() {      //.........................................................................................................
+      /* TAINT path only valid on modern Linux distros */
+      prepare();
+      GUY.temp.with_file({
+        tmpdir: '/dev/shm'
+      }, function({
+          path: shm_path
+        }) {
+        var result;
+        GUY.temp.with_shadow_file(shm_path, function({
+            path: tmp_path
+          }) {
+          return FS.writeFileSync(tmp_path, "some words");
+        });
+        result = FS.readFileSync(shm_path, {
+          encoding: 'utf-8'
+        });
+        if (T != null) {
+          T.eq(result, "some words");
+        }
+        return null;
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @GUY_temp_with_shadow_file()
-      return test(this.GUY_temp_with_shadow_file);
+      // test @GUY_temp_with_shadow_file
+      // test @GUY_temp_context_handler_file
+      // @GUY_temp_context_handler_file()
+      // @GUY_temp_works_with_async_functions()
+      // test @GUY_temp_works_with_async_functions
+      // test @GUY_temp_with_shadow_file_works_across_device_boundaries
+      return test(this);
     })();
   }
-
-  // test @
-// test @GUY_temp_context_handler_file
-// @GUY_temp_context_handler_file()
-// @GUY_temp_works_with_async_functions()
-// test @GUY_temp_works_with_async_functions
 
 }).call(this);
 
