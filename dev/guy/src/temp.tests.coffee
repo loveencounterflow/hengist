@@ -252,17 +252,41 @@ declare.fs_exists
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_temp_with_shadow_file_works_across_device_boundaries = ( T, done ) ->
+  GUY         = require '../../../apps/guy'
+  base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  #.........................................................................................................
+  prepare     = ->
+    FS.rmSync data_path,              { recursive: true, force: true, }
+    FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  #.........................................................................................................
+  do ->
+    ### TAINT path only valid on modern Linux distros ###
+    prepare()
+    GUY.temp.with_file { tmpdir: '/dev/shm', }, ({ path: shm_path }) ->
+      GUY.temp.with_shadow_file shm_path, ({ path: tmp_path, }) ->
+        FS.writeFileSync tmp_path, "some words"
+      result = FS.readFileSync shm_path, { encoding: 'utf-8', }
+      T?.eq result, "some words"
+      return null
+    return null
+  #.........................................................................................................
+  return done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # @GUY_temp_with_shadow_file()
-  test @GUY_temp_with_shadow_file
-  # test @
+  # test @GUY_temp_with_shadow_file
   # test @GUY_temp_context_handler_file
   # @GUY_temp_context_handler_file()
   # @GUY_temp_works_with_async_functions()
   # test @GUY_temp_works_with_async_functions
-
+  # test @GUY_temp_with_shadow_file_works_across_device_boundaries
+  test @
 
 
