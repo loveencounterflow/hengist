@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_concurrency_with_unsafe_mode, demo_configurable_concurrent_writes, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_concurrency_with_unsafe_mode, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -18,6 +18,8 @@
   };
 
   H = require('../../../lib/helpers');
+
+  ({lets, freeze} = require('../../../apps/letsfreezethat'));
 
   //===========================================================================================================
 
@@ -101,10 +103,11 @@ sqr integer );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_configurable_concurrent_writes = function() {
-    var DBay, SQL, prepare, show, write_concurrently;
+  demo_concurrent_writes = function() {
+    var $initialize, $my_datamill, $process, $sink, DBay, Pipeline, SQL, db, insert_numbers, prepare, read_numbers, show;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
+    ({Pipeline} = require('../../../apps/moonriver'));
     //.........................................................................................................
     show = function(db) {
       return H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
@@ -133,50 +136,76 @@ sqr integer );`);
       return null;
     };
     //.........................................................................................................
-    write_concurrently = function(db, mode) {
-      var FS, insert_numbers, reader, writer;
-      FS = require('node:fs');
-      debug('^34-1^', FS.readdirSync('/tmp/dbay-concurrent'));
-      prepare(db);
-      show(db);
-      reader = db.prepare(SQL`select * from numbers order by n;`);
-      insert_numbers = null;
-      debug('^34-1^', db.cfg.path);
-      //.......................................................................................................
-      writer = function(db, d) {
-        debug('^34-2^', db.cfg.path);
-        if (insert_numbers == null) {
-          insert_numbers = db.prepare_insert({
-            into: 'numbers',
-            on_conflict: {
-              update: true
-            }
-          });
-        }
-        d.sqr = d.n ** 2;
-        db(insert_numbers, d);
-        return null;
-      };
-      db = db.with_concurrent({mode, reader, writer});
-      show(db);
-      return db;
+    db = new DBay();
+    prepare(db);
+    show(db);
+    read_numbers = db.prepare(SQL`select * from numbers order by n;`);
+    insert_numbers = db.prepare_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
+    //.........................................................................................................
+    $initialize = function() {
+      var _freeze, _show, p;
+      p = new Pipeline();
+      p.push(_show = function(d) {
+        return urge('^22-1^', d);
+      });
+      p.push(_freeze = function(d) {
+        return freeze(d);
+      });
+      return p;
     };
     //.........................................................................................................
-    // write_concurrently ( new DBay() ), 'reader'
-    // write_concurrently ( new DBay { journal_mode: 'delete', } ), 'shadow'
-    // write_concurrently ( new DBay { journal_mode: 'delete', path: '/tmp/dbay-concurrent/mydb.sqlite', } ), 'shadow'
-    write_concurrently(new DBay({
-      journal_mode: 'wal',
-      path: '/tmp/dbay-concurrent/mydb.sqlite'
-    }), 'shadow');
+    $process = function() {
+      var p, square;
+      p = new Pipeline();
+      p.push(square = function(d, send) {
+        return send(lets(d, function(d) {
+          return d.sqr = d.n ** 2;
+        }));
+      });
+      return p;
+    };
     //.........................................................................................................
+    $sink = function(write_data) {
+      var _sink;
+      return _sink = function(d) {
+        return write_data(d);
+      };
+    };
+    //.........................................................................................................
+    $my_datamill = function(read_data, write_data) {
+      var p;
+      p = new Pipeline();
+      p.push(function*() {
+        return (yield* db(read_data));
+      });
+      p.push($initialize());
+      p.push($process());
+      p.push($sink(write_data));
+      return p;
+    };
+    //.........................................................................................................
+    db.with_deferred_write(function(write) {
+      var p, write_data;
+      write_data = function(d) {
+        return write(insert_numbers, d);
+      };
+      p = $my_datamill(read_numbers, write_data);
+      return p.run();
+    });
+    //.........................................................................................................
+    show(db);
     return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return demo_configurable_concurrent_writes();
+      return demo_concurrent_writes();
     })();
   }
 

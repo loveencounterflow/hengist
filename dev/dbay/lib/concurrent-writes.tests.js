@@ -41,8 +41,8 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_shadow_db = function(T, done) {
-    var DBay, SQL, db, my_path, read_db, result, select_numbers;
+  this.dbay_virtual_concurrent_writes = function(T, done) {
+    var DBay, SQL, db, insert_number, my_path, result, select_numbers;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     //.........................................................................................................
@@ -50,6 +50,7 @@
     db = new DBay({
       path: my_path
     });
+    debug('^23-1^');
     db(function() {
       var i, insert_number, n, results;
       if ((db.all_rows(SQL`select name from sqlite_schema where name = 'numbers';`)).length === 0) {
@@ -74,10 +75,15 @@ sqr integer );`);
       return results;
     });
     //.........................................................................................................
-    // H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
     select_numbers = db.prepare(SQL`select * from numbers order by n;`);
+    insert_number = db.prepare_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
     if (T != null) {
-      T.eq(db.all_rows(SQL`select * from numbers order by n;`), [
+      T.eq(db.all_rows(select_numbers), [
         {
           n: 0,
           sqr: null
@@ -125,33 +131,20 @@ sqr integer );`);
       ]);
     }
     //.........................................................................................................
-    db = db.with_shadow(read_db = db, function({
-        db: write_db
-      }) {
-      db.pragma(SQL`journal_mode = wal;`);
-      db(function() {
-        var d, i, insert_number, n, ref;
-        insert_number = write_db.prepare_insert({
-          into: 'numbers',
-          on_conflict: {
-            update: true
-          }
-        });
-        ref = read_db(select_numbers);
-        for (d of ref) {
-          for (n = i = 0; i <= 10; n = ++i) {
-            write_db(insert_number, {
-              n,
-              sqr: n ** 2
-            });
-          }
-        }
-        return null;
-      });
-      return null;
+    db.with_deferred_write(function(write) {
+      var d, ref, results;
+      ref = db(select_numbers);
+      results = [];
+      for (d of ref) {
+        results.push(write(insert_number, {
+          n: d.n,
+          sqr: d.n ** 2
+        }));
+      }
+      return results;
     });
     //.........................................................................................................
-    result = db.all_rows(SQL`select * from numbers order by n;`);
+    result = db.all_rows(select_numbers);
     if (T != null) {
       T.eq(result, [
         {
@@ -206,7 +199,7 @@ sqr integer );`);
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      this.dbay_shadow_db();
+      this.dbay_virtual_concurrent_writes();
       return test(this);
     })();
   }
