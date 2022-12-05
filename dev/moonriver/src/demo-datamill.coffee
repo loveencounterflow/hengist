@@ -22,6 +22,9 @@ types                     = new ( require '../../../apps/intertype' ).Intertype(
   type_of }               = types
 br                        = -> echo '—————————————————————————————————————————————'
 H                         = require '../../../lib/helpers'
+{ lets
+  freeze  }               = require '../../../apps/letsfreezethat'
+
 
 #===========================================================================================================
 #
@@ -68,9 +71,10 @@ demo_concurrency_with_unsafe_mode = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_configurable_concurrent_writes = ->
+demo_concurrent_writes = ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
+  { Pipeline }        = require '../../../apps/moonriver'
   #.........................................................................................................
   show = ( db ) -> H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
   #.........................................................................................................
@@ -84,35 +88,44 @@ demo_configurable_concurrent_writes = ->
     db insert_number, { n, sqr: null, } for n in [ 0 .. 10 ]
     return null
   #.........................................................................................................
-  write_concurrently = ( db, mode ) ->
-    FS = require 'node:fs'
-    debug '^34-1^', FS.readdirSync '/tmp/dbay-concurrent'
-    prepare db
-    show db
-    reader          = db.prepare SQL"select * from numbers order by n;"
-    insert_numbers  = null
-    debug '^34-1^', db.cfg.path
-    #.......................................................................................................
-    writer = ( db, d ) ->
-      debug '^34-2^', db.cfg.path
-      insert_numbers ?= db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-      d.sqr = d.n ** 2
-      db insert_numbers, d
-      return null
-    db = db.with_concurrent { mode, reader, writer, }
-    show db
-    return db
+  db              = new DBay()
+  prepare db
+  show    db
+  read_numbers    = db.prepare SQL"select * from numbers order by n;"
+  insert_numbers  = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
   #.........................................................................................................
-  # write_concurrently ( new DBay() ), 'reader'
-  # write_concurrently ( new DBay { journal_mode: 'delete', } ), 'shadow'
-  # write_concurrently ( new DBay { journal_mode: 'delete', path: '/tmp/dbay-concurrent/mydb.sqlite', } ), 'shadow'
-  write_concurrently ( new DBay { journal_mode: 'wal', path: '/tmp/dbay-concurrent/mydb.sqlite', } ), 'shadow'
+  $initialize = ->
+    p               = new Pipeline()
+    p.push _show    = ( d ) -> urge '^22-1^', d
+    p.push _freeze  = ( d ) -> freeze d
+    return p
   #.........................................................................................................
+  $process = ->
+    p               = new Pipeline()
+    p.push square   = ( d, send ) -> send lets d, ( d ) -> d.sqr = d.n ** 2
+    return p
+  #.........................................................................................................
+  $sink = ( write_data ) -> _sink = ( d ) -> write_data d
+  #.........................................................................................................
+  $my_datamill = ( read_data, write_data ) ->
+    p               = new Pipeline()
+    p.push -> yield from db read_data
+    p.push $initialize()
+    p.push $process()
+    p.push $sink write_data
+    return p
+  #.........................................................................................................
+  db.with_deferred_write ( write ) ->
+    write_data  = ( d ) -> write insert_numbers, d
+    p           = $my_datamill read_numbers, write_data
+    p.run()
+  #.........................................................................................................
+  show db
   return null
 
 
 ############################################################################################################
 if module is require.main then do =>
-  demo_configurable_concurrent_writes()
+  demo_concurrent_writes()
 
 
