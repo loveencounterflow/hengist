@@ -71,6 +71,42 @@ demo_concurrency_with_unsafe_mode = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+demo_concurrency_with_two_connections = ->
+  br()
+  { Pipeline, \
+    transforms: T,
+    $,              } = require '../../../apps/moonriver'
+  { DBay }            = require '../../../apps/dbay'
+  { SQL  }            = DBay
+  dbr                 = new DBay()
+  dbw                 = new DBay { path: dbr.cfg.path, }
+  # dbr.set_journal_mode 'delete'
+  # dbw.set_journal_mode 'delete'
+  #.........................................................................................................
+  dbr SQL"""create table numbers (
+    n   integer not null primary key,
+    sqr integer );"""
+  insert_number = dbw.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+  #.........................................................................................................
+  dbr ->
+    for n in [ 0 .. 10 ]
+      dbr insert_number, { n, sqr: null, }
+  #.........................................................................................................
+  H.tabulate "numbers", dbr SQL"""select * from numbers order by n;"""
+  #.........................................................................................................
+  # dbr.with_transaction ->
+  for d from dbr SQL"select * from numbers order by n;"
+    d.sqr = d.n ** 2
+    dbw insert_number, d
+    d.n = d.n + 100
+    d.sqr = d.n ** 2
+    dbw insert_number, d
+  #.........................................................................................................
+  H.tabulate "numbers", dbr SQL"""select * from numbers order by n;"""
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 demo_concurrent_writes = ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
@@ -126,6 +162,6 @@ demo_concurrent_writes = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  demo_concurrent_writes()
-
+  # demo_concurrent_writes()
+  demo_concurrency_with_two_connections()
 
