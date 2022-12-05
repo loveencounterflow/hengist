@@ -318,6 +318,40 @@ SQL                       = String.raw
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_ctx_journal_mode = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }          = require H.dbay_path
+  #.........................................................................................................
+  do ->
+    journal_mode  = 'delete'
+    db            = new DBay()
+    db.set_journal_mode journal_mode
+    T?.eq db.get_journal_mode(), journal_mode
+  #.........................................................................................................
+  do ->
+    journal_mode  = 'wal'
+    db            = new DBay()
+    db.set_journal_mode journal_mode
+    T?.eq db.get_journal_mode(), journal_mode
+  #.........................................................................................................
+  do ->
+    journal_mode  = null
+    db            = new DBay { journal_mode, }
+    T?.eq db.get_journal_mode(), 'wal'
+  #.........................................................................................................
+  do ->
+    journal_mode  = 'wal'
+    db            = new DBay { journal_mode, }
+    T?.eq db.get_journal_mode(), journal_mode
+  #.........................................................................................................
+  do ->
+    journal_mode  = null
+    db            = new DBay { journal_mode, }
+    T?.eq db.get_journal_mode(), 'wal'
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
@@ -327,5 +361,10 @@ if module is require.main then do =>
   # test @[ "DBAY/CTX with_transaction() 2" ]
   # test @[ "DBAY/CTX with_unsafe_mode()" ]
   # test @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ]
-  test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
+  # test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
   # @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]()
+  @dbay_ctx_journal_mode()
+  test @dbay_ctx_journal_mode
+
+
+
