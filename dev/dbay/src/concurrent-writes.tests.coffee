@@ -40,12 +40,13 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@dbay_shadow_db = ( T, done ) ->
+@dbay_virtual_concurrent_writes = ( T, done ) ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
   #.........................................................................................................
   my_path = '/tmp/helo.db'
   db      = new DBay { path: my_path, }
+  debug '^23-1^'
   db ->
     if ( db.all_rows SQL"select name from sqlite_schema where name = 'numbers';" ).length is 0
       db SQL"""create table numbers (
@@ -55,29 +56,23 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
     insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
     db insert_number, { n, sqr: null, } for n in [ 0 .. 10 ]
   #.........................................................................................................
-  # H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
-  select_numbers = db.prepare SQL"select * from numbers order by n;"
-  T?.eq ( db.all_rows SQL"select * from numbers order by n;" ), [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null }, { n: 5, sqr: null }, { n: 6, sqr: null }, { n: 7, sqr: null }, { n: 8, sqr: null }, { n: 9, sqr: null }, { n: 10, sqr: null } ]
+  select_numbers  = db.prepare SQL"select * from numbers order by n;"
+  insert_number   = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+  T?.eq ( db.all_rows select_numbers ), [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null }, { n: 5, sqr: null }, { n: 6, sqr: null }, { n: 7, sqr: null }, { n: 8, sqr: null }, { n: 9, sqr: null }, { n: 10, sqr: null } ]
   #.........................................................................................................
-  db = db.with_shadow read_db = db, ({ db: write_db, }) ->
-    db.pragma SQL"journal_mode = wal;"
-    db ->
-      insert_number = write_db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-      for d from read_db select_numbers
-        write_db insert_number, { n, sqr: n ** 2, } for n in [ 0 .. 10 ]
-      return null
-    return null
+  db.with_deferred_write ( write ) ->
+    for d from db select_numbers
+      write insert_number, { n: d.n, sqr: d.n ** 2, }
   #.........................................................................................................
-  result = db.all_rows SQL"select * from numbers order by n;"
+  result = db.all_rows select_numbers
   T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 5, sqr: 25 }, { n: 6, sqr: 36 }, { n: 7, sqr: 49 }, { n: 8, sqr: 64 }, { n: 9, sqr: 81 }, { n: 10, sqr: 100 } ]
-  # H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
   #.........................................................................................................
   done?()
 
 
 ############################################################################################################
 if require.main is module then do =>
-  @dbay_shadow_db()
+  @dbay_virtual_concurrent_writes()
   test @
 
 
