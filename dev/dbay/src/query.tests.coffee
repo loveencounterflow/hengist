@@ -561,7 +561,7 @@ if require.main is module then do =>
   # test @
   # test @[ "DBAY SQL tag function" ]
   # test @[ "DBAY `db.as_object()`" ]
-  test @[ "DBAY query with non-unique field names" ]
+  test @[ "DBAY tx rollback also reverts create table" ]
   # @[ "DBAY prepared statement allowed in `db.do()`" ]()
   # test @[ "DBAY create DB, insert, query values 1" ]
   # test @[ "DBAY db as callable" ]
