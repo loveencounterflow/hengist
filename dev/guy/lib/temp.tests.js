@@ -458,16 +458,369 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_temp_with_shadow_file_can_pick_up_extra_files = function(T, done) {
+    var GUY, assets_path, base_path, data_path, prepare;
+    GUY = require('../../../apps/guy');
+    base_path = PATH.resolve(PATH.join(__dirname, '../../../'));
+    data_path = PATH.resolve(PATH.join(base_path, 'data/guy/temp'));
+    assets_path = PATH.resolve(PATH.join(base_path, 'assets/guy/temp'));
+    //.........................................................................................................
+    prepare = function() {
+      FS.rmSync(data_path, {
+        recursive: true,
+        force: true
+      });
+      return FS.cpSync(assets_path, data_path, {
+        recursive: true,
+        force: false,
+        verbatimSymlinks: true
+      });
+    };
+    (function() {      //.........................................................................................................
+      /* TAINT path only valid on modern Linux distros */
+      prepare();
+      //.......................................................................................................
+      GUY.temp.with_directory({
+        tmpdir: '/dev/shm'
+      }, function({
+          path: shm_dir_path
+        }) {
+        var shm_path;
+        shm_path = PATH.join(shm_dir_path, 'main.txt');
+        FS.writeFileSync(shm_path, "original content");
+        //.....................................................................................................
+        GUY.temp.with_shadow_file({
+          path: shm_path,
+          all: true
+        }, function({
+            path: tmp_path
+          }) {
+          var extra_tmp_path;
+          FS.writeFileSync(tmp_path, "some words");
+          extra_tmp_path = PATH.join(PATH.dirname(tmp_path), 'extra.txt');
+          return FS.writeFileSync(extra_tmp_path, "some extra words");
+        });
+        (function() {          //.....................................................................................................
+          var result;
+          result = FS.readFileSync(shm_path, {
+            encoding: 'utf-8'
+          });
+          return T != null ? T.eq(result, "some words") : void 0;
+        })();
+        (function() {          //.....................................................................................................
+          var extra_shm_path, result;
+          extra_shm_path = PATH.join(PATH.dirname(shm_path), 'extra.txt');
+          result = FS.readFileSync(extra_shm_path, {
+            encoding: 'utf-8'
+          });
+          return T != null ? T.eq(result, "some extra words") : void 0;
+        })();
+        //.....................................................................................................
+        return null;
+      });
+      //.......................................................................................................
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_temp_with_shadow_file_can_bring_along_files = function(T, done) {
+    var GUY, assets_path, base_path, data_path, prepare;
+    GUY = require('../../../apps/guy');
+    base_path = PATH.resolve(PATH.join(__dirname, '../../../'));
+    data_path = PATH.resolve(PATH.join(base_path, 'data/guy/temp'));
+    assets_path = PATH.resolve(PATH.join(base_path, 'assets/guy/temp'));
+    //.........................................................................................................
+    prepare = function() {
+      FS.rmSync(data_path, {
+        recursive: true,
+        force: true
+      });
+      return FS.cpSync(assets_path, data_path, {
+        recursive: true,
+        force: false,
+        verbatimSymlinks: true
+      });
+    };
+    (function() {      //.........................................................................................................
+      /* TAINT path only valid on modern Linux distros */
+      prepare();
+      //.......................................................................................................
+      GUY.temp.with_directory({
+        tmpdir: '/dev/shm'
+      }, function({
+          path: shm_dir_path
+        }) {
+        var shm_path;
+        shm_path = PATH.join(shm_dir_path, 'main.txt');
+        FS.writeFileSync(shm_path, "original content");
+        //.....................................................................................................
+        GUY.temp.with_shadow_file({
+          path: shm_path,
+          all: true
+        }, function({
+            path: tmp_path
+          }) {
+          var extra_tmp_path;
+          FS.writeFileSync(tmp_path, "some words");
+          extra_tmp_path = PATH.join(PATH.dirname(tmp_path), 'extra.txt');
+          return FS.writeFileSync(extra_tmp_path, "some extra words");
+        });
+        (function() {          //.....................................................................................................
+          var result;
+          result = FS.readFileSync(shm_path, {
+            encoding: 'utf-8'
+          });
+          return T != null ? T.eq(result, "some words") : void 0;
+        })();
+        (function() {          //.....................................................................................................
+          var extra_shm_path, result;
+          extra_shm_path = PATH.join(PATH.dirname(shm_path), 'extra.txt');
+          result = FS.readFileSync(extra_shm_path, {
+            encoding: 'utf-8'
+          });
+          return T != null ? T.eq(result, "some extra words") : void 0;
+        })();
+        //.....................................................................................................
+        return null;
+      });
+      //.......................................................................................................
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+  //###########################################################################################################
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @GUY_temp_with_shadow_files = ( T, done ) ->
+  //   GUY         = require '../../../apps/guy'
+  //   base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  //   data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  //   assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  //   #.........................................................................................................
+  //   prepare     = ->
+  //     FS.rmSync data_path,              { recursive: true, force: true, }
+  //     FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  //   #.........................................................................................................
+  //   do ->
+  //     ### errors with non-existant path ###
+  //     prepare()
+  //     file_path   = PATH.resolve PATH.join data_path, 'XXXXXXXXX'
+  //     T?.throws /no such file/, ->
+  //       GUY.temp.with_shadow_files file_path, ({ paths: temp_file_paths, }) ->
+  //         debug '^35-1^', temp_file_paths
+  //   #.........................................................................................................
+  //   do ->
+  //     ### can read from temp, writing to it updates original ###
+  //     prepare()
+  //     file_path   = PATH.resolve PATH.join data_path, 'helo-world.txt'
+  //     GUY.temp.with_shadow_files file_path, ({ paths: temp_file_paths, }) ->
+  //       temp_file_path  = temp_file_paths[ 0 ]
+  //       text            = FS.readFileSync temp_file_path, { encoding: 'utf-8', }
+  //       T?.eq text, "helo world"
+  //       FS.writeFileSync temp_file_path, "#{text}!!!"
+  //       return null
+  //     text = FS.readFileSync file_path, { encoding: 'utf-8', }
+  //     T?.eq text, "helo world!!!"
+  //   #.........................................................................................................
+  //   do ->
+  //     ### links are transparent ###
+  //     prepare()
+  //     file_path = PATH.resolve PATH.join data_path, 'helo-world.txt.symlink.symlink'
+  //     GUY.temp.with_shadow_files file_path, ({ paths: temp_file_paths, }) ->
+  //       temp_file_path  = temp_file_paths[ 0 ]
+  //       text            = FS.readFileSync temp_file_path, { encoding: 'utf-8', }
+  //       T?.eq text, "helo world"
+  //       FS.writeFileSync temp_file_path, "#{text}!!!"
+  //       return null
+  //     text = FS.readFileSync file_path, { encoding: 'utf-8', }
+  //     T?.eq text, "helo world!!!"
+  //     do ->
+  //       stats           = FS.lstatSync file_path
+  //       result          = {}
+  //       result.symlink  = stats.isSymbolicLink()
+  //       result.file     = stats.isFile()
+  //       result.folder   = stats.isDirectory()
+  //       T?.eq result, { symlink: true, file: false, folder: false, }
+  //     do ->
+  //       stats           = FS.statSync file_path
+  //       result          = {}
+  //       result.symlink  = stats.isSymbolicLink()
+  //       result.file     = stats.isFile()
+  //       result.folder   = stats.isDirectory()
+  //       T?.eq result, { symlink: false, file: true, folder: false, }
+  //   #.........................................................................................................
+  //   do ->
+  //     ### folders are rejected ###
+  //     prepare()
+  //     file_path = PATH.resolve PATH.join data_path, 'helo-world.folder'
+  //     T?.throws /illegal operation on a directory/, ->
+  //       GUY.temp.with_shadow_files file_path, ({ path: temp_file_path, }) ->
+  //   #.........................................................................................................
+  //   do ->
+  //     ### links to folders are rejected ###
+  //     prepare()
+  //     file_path = PATH.resolve PATH.join data_path, 'helo-world.folder.symlink'
+  //     T?.throws /illegal operation on a directory/, ->
+  //       GUY.temp.with_shadow_files file_path, ({ path: temp_file_path, }) ->
+  //   #.........................................................................................................
+  //   return done?()
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @GUY_temp_with_shadow_files_works_across_device_boundaries = ( T, done ) ->
+  //   GUY         = require '../../../apps/guy'
+  //   base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  //   data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  //   assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  //   #.........................................................................................................
+  //   prepare     = ->
+  //     FS.rmSync data_path,              { recursive: true, force: true, }
+  //     FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  //   #.........................................................................................................
+  //   do ->
+  //     ### TAINT path only valid on modern Linux distros ###
+  //     prepare()
+  //     GUY.temp.with_file { tmpdir: '/dev/shm', }, ({ path: shm_path }) ->
+  //       GUY.temp.with_shadow_files shm_path, ({ paths: tmp_paths, }) ->
+  //         tmp_path = tmp_paths[ 0 ]
+  //         FS.writeFileSync tmp_path, "some words"
+  //       result = FS.readFileSync shm_path, { encoding: 'utf-8', }
+  //       T?.eq result, "some words"
+  //       return null
+  //     return null
+  //   #.........................................................................................................
+  //   return done?()
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @GUY_temp_with_shadow_files_files_may_or_may_not_exist = ( T, done ) ->
+  //   GUY         = require '../../../apps/guy'
+  //   base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  //   data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  //   assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  //   #.........................................................................................................
+  //   prepare     = ->
+  //     FS.rmSync data_path,              { recursive: true, force: true, }
+  //     FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  //   #.........................................................................................................
+  //   do ->
+  //     ### TAINT path only valid on modern Linux distros ###
+  //     prepare()
+  //     #.......................................................................................................
+  //     GUY.temp.with_directory { tmpdir: '/dev/shm', }, ({ path: shm_dir_path }) ->
+  //       main_shm_path   = PATH.join shm_dir_path, 'main.txt'
+  //       extra_shm_path  = PATH.join shm_dir_path, 'extra.txt'
+  //       other_shm_path  = PATH.join shm_dir_path, 'other.txt'
+  //       shm_paths       = [ main_shm_path, extra_shm_path, other_shm_path, ]
+  //       FS.writeFileSync main_shm_path,   "main content"
+  //       FS.writeFileSync extra_shm_path,  "extra content"
+  //       T?.eq ( FS.existsSync other_shm_path ), false
+  //       #.....................................................................................................
+  //       GUY.temp.with_shadow_files shm_paths..., ({ paths: tmp_paths, }) ->
+  //         [ main_tmp_path
+  //           extra_tmp_path
+  //           other_tmp_path ]  = tmp_paths
+  //         FS.appendFileSync main_tmp_path, " and some words"
+  //         FS.unlinkSync     extra_shm_path
+  //         FS.writeFileSync  other_tmp_path, "other content"
+  //       #.....................................................................................................
+  //       do ->
+  //         result = FS.readFileSync main_shm_path, { encoding: 'utf-8', }
+  //         T?.eq result, "main content and some words"
+  //       #.....................................................................................................
+  //       do ->
+  //         T?.eq ( FS.existsSync extra_shm_path ), false
+  //       #.....................................................................................................
+  //       do ->
+  //         result = FS.readFileSync other_shm_path, { encoding: 'utf-8', }
+  //         T?.eq result, "other content"
+  //       #.....................................................................................................
+  //       return null
+  //     #.......................................................................................................
+  //     return null
+  //   #.........................................................................................................
+  //   return done?()
+
+  // #-----------------------------------------------------------------------------------------------------------
+  // @GUY_temp_with_shadow_files_can_bring_along_files = ( T, done ) ->
+  //   GUY         = require '../../../apps/guy'
+  //   base_path   = PATH.resolve PATH.join __dirname, '../../../'
+  //   data_path   = PATH.resolve PATH.join base_path, 'data/guy/temp'
+  //   assets_path = PATH.resolve PATH.join base_path, 'assets/guy/temp'
+  //   #.........................................................................................................
+  //   prepare     = ->
+  //     FS.rmSync data_path,              { recursive: true, force: true, }
+  //     FS.cpSync assets_path, data_path, { recursive: true, force: false, verbatimSymlinks: true, }
+  //   #.........................................................................................................
+  //   do ->
+  //     ### TAINT path only valid on modern Linux distros ###
+  //     prepare()
+  //     #.......................................................................................................
+  //     GUY.temp.with_directory { tmpdir: '/dev/shm', }, ({ path: shm_dir_path }) ->
+  //       shm_path = PATH.join shm_dir_path, 'main.txt'
+  //       FS.writeFileSync shm_path, "original content"
+  //       #.....................................................................................................
+  //       GUY.temp.with_shadow_files { path: shm_path, all: true, }, ({ path: tmp_path, }) ->
+  //         FS.writeFileSync tmp_path, "some words"
+  //         extra_tmp_path = PATH.join ( PATH.dirname tmp_path ), 'extra.txt'
+  //         FS.writeFileSync extra_tmp_path, "some extra words"
+  //       #.....................................................................................................
+  //       do ->
+  //         result = FS.readFileSync shm_path, { encoding: 'utf-8', }
+  //         T?.eq result, "some words"
+  //       #.....................................................................................................
+  //       do ->
+  //         extra_shm_path = PATH.join ( PATH.dirname shm_path ), 'extra.txt'
+  //         result = FS.readFileSync extra_shm_path, { encoding: 'utf-8', }
+  //         T?.eq result, "some extra words"
+  //       #.....................................................................................................
+  //       return null
+  //     #.......................................................................................................
+  //     return null
+  //   #.........................................................................................................
+  //   return done?()
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @GUY_temp_with_shadow_file()
-      // test @GUY_temp_with_shadow_file
+      // @GUY_temp_with_shadow_files()
+      // test @GUY_temp_with_shadow_files
+      // @GUY_temp_with_shadow_files_works_across_device_boundaries()
+      // test @GUY_temp_with_shadow_files_works_across_device_boundaries
+      // @GUY_temp_with_shadow_files_files_may_or_may_not_exist()
+      // test @GUY_temp_with_shadow_files_files_may_or_may_not_exist
       // test @GUY_temp_context_handler_file
       // @GUY_temp_context_handler_file()
       // @GUY_temp_works_with_async_functions()
       // test @GUY_temp_works_with_async_functions
       // test @GUY_temp_with_shadow_file_works_across_device_boundaries
+      // @GUY_temp_with_shadow_file_can_pick_up_extra_files()
+      // test @GUY_temp_with_shadow_file_can_pick_up_extra_files
+      // @GUY_temp_with_shadow_file_can_bring_along_files()
+      // test @GUY_temp_with_shadow_file_can_bring_along_files
       return test(this);
     })();
   }

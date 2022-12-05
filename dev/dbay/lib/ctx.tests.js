@@ -631,6 +631,46 @@ create table b ( n integer not null primary key references a ( n ) );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_ctx_journal_mode = function(T, done) {
+    var DBay;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    (function() {      //.........................................................................................................
+      var db, journal_mode;
+      journal_mode = 'delete';
+      db = new DBay();
+      db.set_journal_mode(journal_mode);
+      return T != null ? T.eq(db.get_journal_mode(), journal_mode) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var db, journal_mode;
+      journal_mode = 'wal';
+      db = new DBay();
+      db.set_journal_mode(journal_mode);
+      return T != null ? T.eq(db.get_journal_mode(), journal_mode) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var db, journal_mode;
+      journal_mode = null;
+      db = new DBay({journal_mode});
+      return T != null ? T.eq(db.get_journal_mode(), 'wal') : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var db, journal_mode;
+      journal_mode = 'wal';
+      db = new DBay({journal_mode});
+      return T != null ? T.eq(db.get_journal_mode(), journal_mode) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var db, journal_mode;
+      journal_mode = null;
+      db = new DBay({journal_mode});
+      return T != null ? T.eq(db.get_journal_mode(), 'wal') : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
@@ -639,11 +679,12 @@ create table b ( n integer not null primary key references a ( n ) );`);
       // test @[ "DBAY/CTX with_transaction() 2" ]
       // test @[ "DBAY/CTX with_unsafe_mode()" ]
       // test @[ "DBAY/CTX with_foreign_keys_deferred(), preliminaries" ]
-      return test(this["DBAY/CTX with_foreign_keys_deferred(), ensure checks"]);
+      // test @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]
+      // @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]()
+      this.dbay_ctx_journal_mode();
+      return test(this.dbay_ctx_journal_mode);
     })();
   }
-
-  // @[ "DBAY/CTX with_foreign_keys_deferred(), ensure checks" ]()
 
 }).call(this);
 

@@ -977,7 +977,7 @@ create table integers (
       // test @
       // test @[ "DBAY SQL tag function" ]
       // test @[ "DBAY `db.as_object()`" ]
-      return test(this["DBAY query with non-unique field names"]);
+      return test(this["DBAY tx rollback also reverts create table"]);
     })();
   }
 

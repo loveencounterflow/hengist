@@ -42,7 +42,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_shadow_db = function(T, done) {
-    var DBay, SQL, db, my_path, read_db, select_numbers;
+    var DBay, SQL, db, my_path, read_db, result, select_numbers;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     //.........................................................................................................
@@ -151,8 +151,9 @@ sqr integer );`);
       return null;
     });
     //.........................................................................................................
+    result = db.all_rows(SQL`select * from numbers order by n;`);
     if (T != null) {
-      T.eq(db.all_rows(SQL`select * from numbers order by n;`), [
+      T.eq(result, [
         {
           n: 0,
           sqr: 0
@@ -205,9 +206,7 @@ sqr integer );`);
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @dbay_macros_methods()
-      // test @dbay_macros_methods
-      // @dbay_macros_implicit_expansion()
+      this.dbay_shadow_db();
       return test(this);
     })();
   }

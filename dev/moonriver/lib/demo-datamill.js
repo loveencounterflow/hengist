@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_configurable_concurrent_writes, demo_datamill, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_concurrency_with_unsafe_mode, demo_configurable_concurrent_writes, echo, help, info, inspect, isa, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -22,7 +22,7 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_datamill = function() {
+  demo_concurrency_with_unsafe_mode = function() {
     var $, DBay, Pipeline, SQL, T, db, insert_number, iterator, p;
     br();
     ({
@@ -33,6 +33,7 @@
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     db = new DBay();
+    db.pragma(SQL`journal_mode = wal;`);
     //.........................................................................................................
     db(SQL`create table numbers (
 n   integer not null primary key,
@@ -43,7 +44,6 @@ sqr integer );`);
         update: true
       }
     });
-    // db.sqlt1.unsafeMode true
     //.........................................................................................................
     db(function() {
       var i, n, results;
@@ -102,12 +102,9 @@ sqr integer );`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_configurable_concurrent_writes = function() {
-    var DBay, SQL, my_path, prepare, show, write_concurrently;
+    var DBay, SQL, prepare, show, write_concurrently;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
-    //.........................................................................................................
-    my_path = '/tmp/helo.db';
-    // db      = new DBay { path: my_path, }
     //.........................................................................................................
     show = function(db) {
       return H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
@@ -137,13 +134,17 @@ sqr integer );`);
     };
     //.........................................................................................................
     write_concurrently = function(db, mode) {
-      var insert_numbers, reader, writer;
+      var FS, insert_numbers, reader, writer;
+      FS = require('node:fs');
+      debug('^34-1^', FS.readdirSync('/tmp/dbay-concurrent'));
       prepare(db);
       show(db);
       reader = db.prepare(SQL`select * from numbers order by n;`);
       insert_numbers = null;
+      debug('^34-1^', db.cfg.path);
       //.......................................................................................................
       writer = function(db, d) {
+        debug('^34-2^', db.cfg.path);
         if (insert_numbers == null) {
           insert_numbers = db.prepare_insert({
             into: 'numbers',
@@ -162,8 +163,12 @@ sqr integer );`);
     };
     //.........................................................................................................
     // write_concurrently ( new DBay() ), 'reader'
-    // write_concurrently ( new DBay { path: my_path, } ), 'shadow'
-    write_concurrently(new DBay(), 'shadow');
+    // write_concurrently ( new DBay { journal_mode: 'delete', } ), 'shadow'
+    // write_concurrently ( new DBay { journal_mode: 'delete', path: '/tmp/dbay-concurrent/mydb.sqlite', } ), 'shadow'
+    write_concurrently(new DBay({
+      journal_mode: 'wal',
+      path: '/tmp/dbay-concurrent/mydb.sqlite'
+    }), 'shadow');
     //.........................................................................................................
     return null;
   };
@@ -171,7 +176,6 @@ sqr integer );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // await demo_datamill()
       return demo_configurable_concurrent_writes();
     })();
   }
