@@ -68,7 +68,8 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
       return null
     return null
   #.........................................................................................................
-  T?.eq ( db.all_rows SQL"select * from numbers order by n;" ), [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 5, sqr: 25 }, { n: 6, sqr: 36 }, { n: 7, sqr: 49 }, { n: 8, sqr: 64 }, { n: 9, sqr: 81 }, { n: 10, sqr: 100 } ]
+  result = db.all_rows SQL"select * from numbers order by n;"
+  T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 5, sqr: 25 }, { n: 6, sqr: 36 }, { n: 7, sqr: 49 }, { n: 8, sqr: 64 }, { n: 9, sqr: 81 }, { n: 10, sqr: 100 } ]
   # H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
   #.........................................................................................................
   done?()
@@ -76,9 +77,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
 
 ############################################################################################################
 if require.main is module then do =>
-  # @dbay_macros_methods()
-  # test @dbay_macros_methods
-  # @dbay_macros_implicit_expansion()
+  @dbay_shadow_db()
   test @
 
 
