@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_concurrency_with_unsafe_mode, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_concurrency_with_two_connections, demo_concurrency_with_unsafe_mode, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -98,6 +98,63 @@ sqr integer );`);
     });
     //.........................................................................................................
     H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_concurrency_with_two_connections = function() {
+    var $, DBay, Pipeline, SQL, T, d, dbr, dbw, insert_number, ref;
+    br();
+    ({
+      Pipeline,
+      transforms: T,
+      $
+    } = require('../../../apps/moonriver'));
+    ({DBay} = require('../../../apps/dbay'));
+    ({SQL} = DBay);
+    dbr = new DBay();
+    dbw = new DBay({
+      path: dbr.cfg.path
+    });
+    // dbr.set_journal_mode 'delete'
+    // dbw.set_journal_mode 'delete'
+    //.........................................................................................................
+    dbr(SQL`create table numbers (
+n   integer not null primary key,
+sqr integer );`);
+    insert_number = dbw.prepare_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
+    //.........................................................................................................
+    dbr(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 0; i <= 10; n = ++i) {
+        results.push(dbr(insert_number, {
+          n,
+          sqr: null
+        }));
+      }
+      return results;
+    });
+    //.........................................................................................................
+    H.tabulate("numbers", dbr(SQL`select * from numbers order by n;`));
+    ref = dbr(SQL`select * from numbers order by n;`);
+    //.........................................................................................................
+    // dbr.with_transaction ->
+    for (d of ref) {
+      d.sqr = d.n ** 2;
+      dbw(insert_number, d);
+      d.n = d.n + 100;
+      d.sqr = d.n ** 2;
+      dbw(insert_number, d);
+    }
+    //.........................................................................................................
+    H.tabulate("numbers", dbr(SQL`select * from numbers order by n;`));
     //.........................................................................................................
     return null;
   };
@@ -205,7 +262,8 @@ sqr integer );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      return demo_concurrent_writes();
+      // demo_concurrent_writes()
+      return demo_concurrency_with_two_connections();
     })();
   }
 
