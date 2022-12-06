@@ -196,13 +196,258 @@ sqr integer );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_concurrency_with_explicitly_two_connections = function(T, done) {
+    var DBay, SQL, d, dbr, dbw, insert_number, ref;
+    ({DBay} = require('../../../apps/dbay'));
+    ({SQL} = DBay);
+    dbr = new DBay();
+    dbw = new DBay({
+      path: dbr.cfg.path
+    });
+    if (T != null) {
+      T.eq(dbr.get_journal_mode(), 'wal');
+    }
+    if (T != null) {
+      T.eq(dbw.get_journal_mode(), 'wal');
+    }
+    //.........................................................................................................
+    dbr(SQL`create table numbers (
+n   integer not null primary key,
+sqr integer );`);
+    insert_number = dbw.prepare_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
+    //.........................................................................................................
+    dbr(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 0; i <= 4; n = ++i) {
+        results.push(dbr(insert_number, {
+          n,
+          sqr: null
+        }));
+      }
+      return results;
+    });
+    (function() {      //.........................................................................................................
+      var result;
+      result = dbr.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: null
+        },
+        {
+          n: 1,
+          sqr: null
+        },
+        {
+          n: 2,
+          sqr: null
+        },
+        {
+          n: 3,
+          sqr: null
+        },
+        {
+          n: 4,
+          sqr: null
+        }
+      ]) : void 0;
+    })();
+    ref = dbr(SQL`select * from numbers order by n;`);
+    //.........................................................................................................
+    // dbr.with_transaction ->
+    for (d of ref) {
+      d.sqr = d.n ** 2;
+      dbw(insert_number, d);
+      d.n = d.n + 100;
+      d.sqr = d.n ** 2;
+      dbw(insert_number, d);
+    }
+    (function() {      //.........................................................................................................
+      var result;
+      result = dbr.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: 0
+        },
+        {
+          n: 1,
+          sqr: 1
+        },
+        {
+          n: 2,
+          sqr: 4
+        },
+        {
+          n: 3,
+          sqr: 9
+        },
+        {
+          n: 4,
+          sqr: 16
+        },
+        {
+          n: 100,
+          sqr: 10000
+        },
+        {
+          n: 101,
+          sqr: 10201
+        },
+        {
+          n: 102,
+          sqr: 10404
+        },
+        {
+          n: 103,
+          sqr: 10609
+        },
+        {
+          n: 104,
+          sqr: 10816
+        }
+      ]) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_concurrency_with_implicitly_two_connections = function(T, done) {
+    var DBay, SQL, d, db, insert_number, ref;
+    ({DBay} = require('../../../apps/dbay'));
+    ({SQL} = DBay);
+    db = new DBay();
+    if (T != null) {
+      T.eq(db.get_journal_mode(), 'wal');
+    }
+    if (T != null) {
+      T.eq(db.get_journal_mode(), 'wal');
+    }
+    //.........................................................................................................
+    db(SQL`create table numbers (
+n   integer not null primary key,
+sqr integer );`);
+    insert_number = db.prepare_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
+    //.........................................................................................................
+    db(function() {
+      var i, n, results;
+      results = [];
+      for (n = i = 0; i <= 4; n = ++i) {
+        results.push(db(insert_number, {
+          n,
+          sqr: null
+        }));
+      }
+      return results;
+    });
+    (function() {      //.........................................................................................................
+      var result;
+      result = db.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: null
+        },
+        {
+          n: 1,
+          sqr: null
+        },
+        {
+          n: 2,
+          sqr: null
+        },
+        {
+          n: 3,
+          sqr: null
+        },
+        {
+          n: 4,
+          sqr: null
+        }
+      ]) : void 0;
+    })();
+    ref = db(SQL`select * from numbers order by n;`);
+    //.........................................................................................................
+    // db.with_transaction ->
+    for (d of ref) {
+      d.sqr = d.n ** 2;
+      db(insert_number, d);
+      d.n = d.n + 100;
+      d.sqr = d.n ** 2;
+      db(insert_number, d);
+    }
+    (function() {      //.........................................................................................................
+      var result;
+      result = db.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: 0
+        },
+        {
+          n: 1,
+          sqr: 1
+        },
+        {
+          n: 2,
+          sqr: 4
+        },
+        {
+          n: 3,
+          sqr: 9
+        },
+        {
+          n: 4,
+          sqr: 16
+        },
+        {
+          n: 100,
+          sqr: 10000
+        },
+        {
+          n: 101,
+          sqr: 10201
+        },
+        {
+          n: 102,
+          sqr: 10404
+        },
+        {
+          n: 103,
+          sqr: 10609
+        },
+        {
+          n: 104,
+          sqr: 10816
+        }
+      ]) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      this.dbay_virtual_concurrent_writes();
-      return test(this);
+      // @dbay_virtual_concurrent_writes()
+      // @dbay_concurrency_with_explicitly_two_connections()
+      // test @dbay_concurrency_with_explicitly_two_connections
+      return test(this.dbay_concurrency_with_implicitly_two_connections);
     })();
   }
+
+  // test @
 
 }).call(this);
 

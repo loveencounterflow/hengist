@@ -326,11 +326,14 @@ next_id integer generated always as ( id + 1 ) );`);
     schema = 'main';
     //.........................................................................................................
     db(function() {
-      var insert_into_xy;
-      db(SQL`create table xy (
+      return db(SQL`create table xy (
   a   integer not null primary key,
   b   text not null,
   c   boolean not null );`);
+    });
+    //.........................................................................................................
+    db(function() {
+      var insert_into_xy;
       urge('^4498^', db.create_insert({
         into: 'xy'
       }));
@@ -358,10 +361,13 @@ next_id integer generated always as ( id + 1 ) );`);
         b: 'three',
         c: 1
       });
-      insert_into_xy.run({
+      return insert_into_xy.run({
         b: 'four',
         c: 1
       });
+    });
+    //.........................................................................................................
+    db(function() {
       echo(dtab._tabulate(db(SQL`select * from xy order by a;`)));
       if (T != null) {
         T.eq(db.all_rows(SQL`select * from xy order by a;`), [
@@ -636,13 +642,14 @@ next_id integer generated always as ( id + 1 ) );`);
       // test @, { timeout: 10e3, }
       // test @[ "DBAY Sqlgen create_insert() without known table" ]
       // @[ "_DBAY Sqlgen demo" ]()
-      // test @[ "DBAY Sqlgen create_insert() 2" ]
-      // test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
-      // test @[ "DBAY Sqlgen on_conflict 2" ]
-      // @[ "DBAY Sqlgen create_insert() with returning clause" ]()
-      return test(this["DBAY Sqlgen create_insert() without any fields"]);
+      return test(this["DBAY Sqlgen create_insert() 2"]);
     })();
   }
+
+  // test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
+// test @[ "DBAY Sqlgen on_conflict 2" ]
+// @[ "DBAY Sqlgen create_insert() with returning clause" ]()
+// test @[ "DBAY Sqlgen create_insert() without any fields" ]
 
 }).call(this);
 

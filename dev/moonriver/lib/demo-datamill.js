@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_concurrency_with_two_connections, demo_concurrency_with_unsafe_mode, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_concurrency_with_two_connections, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -22,85 +22,6 @@
   ({lets, freeze} = require('../../../apps/letsfreezethat'));
 
   //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_concurrency_with_unsafe_mode = function() {
-    var $, DBay, Pipeline, SQL, T, db, insert_number, iterator, p;
-    br();
-    ({
-      Pipeline,
-      transforms: T,
-      $
-    } = require('../../../apps/moonriver'));
-    ({DBay} = require('../../../apps/dbay'));
-    ({SQL} = DBay);
-    db = new DBay();
-    db.pragma(SQL`journal_mode = wal;`);
-    //.........................................................................................................
-    db(SQL`create table numbers (
-n   integer not null primary key,
-sqr integer );`);
-    insert_number = db.prepare_insert({
-      into: 'numbers',
-      on_conflict: {
-        update: true
-      }
-    });
-    //.........................................................................................................
-    db(function() {
-      var i, n, results;
-      results = [];
-      for (n = i = 0; i <= 10; n = ++i) {
-        results.push(db(insert_number, {
-          n,
-          sqr: null
-        }));
-      }
-      return results;
-    });
-    //.........................................................................................................
-    p = new Pipeline({
-      protocol: true
-    });
-    p.push(function(d) {
-      return d.sqr = d.n ** 2;
-    });
-    p.push(function(d) {
-      return urge('^35^', d);
-    });
-    iterator = p.walk();
-    db.with_unsafe_mode(function() {
-      // mode = 'deferred' # 'deferred', 'immediate', 'exclusive'
-      // mode = 'immediate' # 'deferred', 'immediate', 'exclusive'
-      // mode = 'exclusive' # 'deferred', 'immediate', 'exclusive'
-      // db.with_transaction { mode, }, ->
-      db.pragma(SQL`journal_mode = wal;`);
-      return db.with_transaction(function() {
-        var d, done, e, ref, results;
-        ref = db(SQL`select * from numbers order by n;`);
-        results = [];
-        for (d of ref) {
-          debug('^35^', d);
-          p.send(d);
-          ({
-            value: e,
-            done
-          } = iterator.next());
-          db(insert_number, e);
-          if (done) {
-            break;
-          } else {
-            results.push(void 0);
-          }
-        }
-        return results;
-      });
-    });
-    //.........................................................................................................
-    H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
-    //.........................................................................................................
-    return null;
-  };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_concurrency_with_two_connections = function() {

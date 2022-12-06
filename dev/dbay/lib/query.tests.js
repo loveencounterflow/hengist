@@ -794,11 +794,14 @@
     schema = 'main';
     //.........................................................................................................
     db(function() {
-      var insert_into_xy;
-      db(SQL`create table xy (
+      return db(SQL`create table xy (
   a   integer not null primary key,
   b   text not null,
   c   boolean not null );`);
+    });
+    //.........................................................................................................
+    db(function() {
+      var insert_into_xy;
       insert_into_xy = db.prepare_insert({
         into: 'xy',
         exclude: ['a']
@@ -815,10 +818,13 @@
         b: 'three',
         c: 1
       });
-      db(insert_into_xy, {
+      return db(insert_into_xy, {
         b: 'four',
         c: 1
       });
+    });
+    //.........................................................................................................
+    db(function() {
       echo(dtab._tabulate(db(SQL`select * from xy order by a;`)));
       if (T != null) {
         T.eq(db.all_rows(SQL`select * from xy order by a;`), [
@@ -896,12 +902,15 @@
     db = new DBay();
     //.........................................................................................................
     db(function() {
-      var insert_into_integers;
-      db(SQL`drop table if exists integers;
+      return db(SQL`drop table if exists integers;
 create table integers (
   value   integer not null primary key,
   name    text    not null,
   is_even boolean not null );`);
+    });
+    //.........................................................................................................
+    db(function() {
+      var insert_into_integers;
       insert_into_integers = db.prepare_insert({
         into: 'integers'
       });
