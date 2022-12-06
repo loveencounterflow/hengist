@@ -163,7 +163,11 @@ dba_types                 = require H.dbay_path + '/lib/types'
 
 #-----------------------------------------------------------------------------------------------------------
 @copy_over = ( from_path, to_path ) ->
-  @try_to_remove_file to_path unless to_path in [ ':memory:', '', ]
+  unless to_path in [ ':memory:', '', ]
+    @try_to_remove_file "#{to_path}-wal"
+    @try_to_remove_file "#{to_path}-journal"
+    @try_to_remove_file "#{to_path}-shm"
+    @try_to_remove_file to_path
   await FSP.copyFile from_path, to_path
   return null
 
