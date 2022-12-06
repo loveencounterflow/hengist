@@ -69,11 +69,85 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_concurrency_with_explicitly_two_connections = ( T, done ) ->
+  { DBay }            = require '../../../apps/dbay'
+  { SQL  }            = DBay
+  dbr                 = new DBay()
+  dbw                 = new DBay { path: dbr.cfg.path, }
+  T?.eq dbr.get_journal_mode(), 'wal'
+  T?.eq dbw.get_journal_mode(), 'wal'
+  #.........................................................................................................
+  dbr SQL"""create table numbers (
+    n   integer not null primary key,
+    sqr integer );"""
+  insert_number = dbw.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+  #.........................................................................................................
+  dbr ->
+    for n in [ 0 .. 4 ]
+      dbr insert_number, { n, sqr: null, }
+  #.........................................................................................................
+  do ->
+    result = dbr.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+  #.........................................................................................................
+  # dbr.with_transaction ->
+  for d from dbr SQL"select * from numbers order by n;"
+    d.sqr = d.n ** 2
+    dbw insert_number, d
+    d.n = d.n + 100
+    d.sqr = d.n ** 2
+    dbw insert_number, d
+  #.........................................................................................................
+  do ->
+    result = dbr.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_concurrency_with_implicitly_two_connections = ( T, done ) ->
+  { DBay }            = require '../../../apps/dbay'
+  { SQL  }            = DBay
+  db                  = new DBay()
+  T?.eq db.get_journal_mode(), 'wal'
+  T?.eq db.get_journal_mode(), 'wal'
+  #.........................................................................................................
+  db SQL"""create table numbers (
+    n   integer not null primary key,
+    sqr integer );"""
+  insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+  #.........................................................................................................
+  db ->
+    for n in [ 0 .. 4 ]
+      db insert_number, { n, sqr: null, }
+  #.........................................................................................................
+  do ->
+    result = db.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+  #.........................................................................................................
+  # db.with_transaction ->
+  for d from db SQL"select * from numbers order by n;"
+    d.sqr = d.n ** 2
+    db insert_number, d
+    d.n = d.n + 100
+    d.sqr = d.n ** 2
+    db insert_number, d
+  #.........................................................................................................
+  do ->
+    result = db.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
-  @dbay_virtual_concurrent_writes()
-  test @
+  # @dbay_virtual_concurrent_writes()
+  # @dbay_concurrency_with_explicitly_two_connections()
+  # test @dbay_concurrency_with_explicitly_two_connections
+  test @dbay_concurrency_with_implicitly_two_connections
+  # test @
 
 
 
