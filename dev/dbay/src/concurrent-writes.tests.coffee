@@ -141,12 +141,61 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_concurrency_with_table_function = ( T, done ) ->
+  # T.halt_on_error()
+  { DBay }          = require H.dbay_path
+  { SQL }           = DBay
+  schema            = 'main'
+  { template_path
+    work_path }     = await H.procure_db { size: 'nnt', ref: 'fn', }
+  debug { template_path, work_path, }
+  db                = new DBay { path: work_path, schema, }
+  numbers           = db.all_first_values SQL"select n from nnt order by n;"
+  console.table db.all_rows SQL"select * from nnt order by n;"
+  #.........................................................................................................
+  db.create_table_function
+    name:         're_matches'
+    columns:      [ 'match', 'capture', ]
+    parameters:   [ 'text', 'pattern', ]
+    rows: ( text, pattern ) ->
+      regex = new RegExp pattern, 'g'
+      while ( match = regex.exec text )?
+        yield [ match[ 0 ], match[ 1 ], ]
+      return null
+  #.........................................................................................................
+  do =>
+    insert_number   = db.prepare_insert { into: 'nnt', }
+    select_numbers  = SQL"""select n from nnt order by n;"""
+    select_rows     = SQL"""
+      select
+          *
+        from
+          nnt,
+          re_matches( t, '^.*(point).*$' ) as rx
+        order by rx.match;"""
+    #.......................................................................................................
+    console.table db.all_rows select_rows
+    T?.eq ( db.all_first_values select_numbers ), [ 0, 1, 1.5, 2, 2.3, 3, 3.1, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+    #.......................................................................................................
+    for d from db select_rows
+      db insert_number, { d..., n: d.n + 100, }
+    #.......................................................................................................
+    console.table db.all_rows select_rows
+    T?.eq ( db.all_first_values select_numbers ), [ 0, 1, 1.5, 2, 2.3, 3, 3.1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101.5, 102.3, 103.1 ]
+    return null
+  #.........................................................................................................
+  done?()
+
+
 ############################################################################################################
 if require.main is module then do =>
   # @dbay_virtual_concurrent_writes()
   # @dbay_concurrency_with_explicitly_two_connections()
   # test @dbay_concurrency_with_explicitly_two_connections
-  test @dbay_concurrency_with_implicitly_two_connections
+  # test @dbay_concurrency_with_implicitly_two_connections
+  # @dbay_concurrency_with_table_function()
+  test @dbay_concurrency_with_table_function
   # test @
 
 
