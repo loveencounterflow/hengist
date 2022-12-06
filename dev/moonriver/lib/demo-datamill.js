@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, br, debug, demo_concurrency_with_two_connections, demo_concurrent_writes, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var GUY, H, alert, br, debug, demo_concurrency_with_two_connections, demo_datamill_pipeline, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -81,55 +81,46 @@ sqr integer );`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  demo_concurrent_writes = function() {
-    var $initialize, $my_datamill, $process, $sink, DBay, Pipeline, SQL, db, insert_numbers, prepare, read_numbers, show;
+  demo_datamill_pipeline = function() {
+    var $initialize, $my_datamill, $process, DBay, Pipeline, SQL, db, p, prepare, read_data, show, write_data;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     ({Pipeline} = require('../../../apps/moonriver'));
     //.........................................................................................................
     show = function(db) {
-      return H.tabulate("numbers", db(SQL`select * from numbers order by n;`));
+      return H.tabulate("texts", db(SQL`select * from texts order by lnr, part;`));
     };
     //.........................................................................................................
     prepare = function(db) {
-      var i, insert_number, n;
-      if ((db.all_rows(SQL`select name from sqlite_schema where name = 'numbers';`)).length === 0) {
-        db(SQL`create table numbers (
-n   integer not null primary key,
-sqr integer );`);
-      }
+      var read_data, write_data;
+      db = new DBay();
+      // if ( db.all_rows SQL"select name from sqlite_schema where name = 'texts';" ).length is 0
+      db(SQL`create table texts (
+lnr   integer not null,
+part  integer not null,
+line  text    not null,
+primary key ( lnr, part ) );`);
       //.......................................................................................................
-      insert_number = db.prepare_insert({
-        into: 'numbers',
+      write_data = db.prepare_insert({
+        into: 'texts',
         on_conflict: {
           update: true
         }
       });
-      for (n = i = 0; i <= 10; n = ++i) {
-        db(insert_number, {
-          n,
-          sqr: null
-        });
-      }
-      return null;
+      read_data = db.prepare(SQL`select * from texts order by lnr, part;`);
+      db(write_data, {
+        lnr: 1,
+        part: 1,
+        line: "helo world"
+      });
+      return {db, read_data, write_data};
     };
-    //.........................................................................................................
-    db = new DBay();
-    prepare(db);
-    show(db);
-    read_numbers = db.prepare(SQL`select * from numbers order by n;`);
-    insert_numbers = db.prepare_insert({
-      into: 'numbers',
-      on_conflict: {
-        update: true
-      }
-    });
     //.........................................................................................................
     $initialize = function() {
       var _freeze, _show, p;
       p = new Pipeline();
       p.push(_show = function(d) {
-        return urge('^22-1^', d);
+        return whisper('^22-1^', d);
       });
       p.push(_freeze = function(d) {
         return freeze(d);
@@ -138,43 +129,37 @@ sqr integer );`);
     };
     //.........................................................................................................
     $process = function() {
-      var p, square;
+      var _show, foobar, p;
       p = new Pipeline();
-      p.push(square = function(d, send) {
+      p.push(foobar = function(d, send) {
         return send(lets(d, function(d) {
-          return d.sqr = d.n ** 2;
+          return d.line = `*${d.line}*`;
         }));
+      });
+      p.push(_show = function(d) {
+        return urge('^22-1^', d);
       });
       return p;
     };
     //.........................................................................................................
-    $sink = function(write_data) {
-      var _sink;
-      return _sink = function(d) {
-        return write_data(d);
-      };
-    };
-    //.........................................................................................................
-    $my_datamill = function(read_data, write_data) {
-      var p;
+    $my_datamill = function(db, read_data, write_data) {
+      var p, sink, source;
       p = new Pipeline();
-      p.push(function*() {
+      p.push(source = function*() {
         return (yield* db(read_data));
       });
       p.push($initialize());
       p.push($process());
-      p.push($sink(write_data));
+      p.push(sink = function(d) {
+        return db(write_data, d);
+      });
       return p;
     };
     //.........................................................................................................
-    db.with_deferred_write(function(write) {
-      var p, write_data;
-      write_data = function(d) {
-        return write(insert_numbers, d);
-      };
-      p = $my_datamill(read_numbers, write_data);
-      return p.run();
-    });
+    ({db, read_data, write_data} = prepare());
+    show(db);
+    p = $my_datamill(db, read_data, write_data);
+    p.run();
     //.........................................................................................................
     show(db);
     return null;
@@ -183,10 +168,11 @@ sqr integer );`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // demo_concurrent_writes()
-      return demo_concurrency_with_two_connections();
+      return demo_datamill_pipeline();
     })();
   }
+
+  // demo_concurrency_with_two_connections()
 
 }).call(this);
 
