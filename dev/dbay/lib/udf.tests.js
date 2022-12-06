@@ -996,15 +996,16 @@ select
   if (module === require.main) {
     (() => {
       // test @, { timeout: 10e3, }
-      // test @[ "DBAY/UDF window functions etc." ]
-      // test @[ "DBAY/UDF User-Defined Window Function" ]
-      // test @[ "DBAY/UDF view with UDF" ]
-      // test @[ "DBAY/UDF typing" ]
-      // test @[ "DBAY/UDF concurrent UDFs 2" ]
-      // @[ "XXXXXX aggregate function" ]()
-      return this["assertions, warnings"]();
+      return test(this["DBAY/UDF window functions etc."]);
     })();
   }
+
+  // test @[ "DBAY/UDF User-Defined Window Function" ]
+// test @[ "DBAY/UDF view with UDF" ]
+// test @[ "DBAY/UDF typing" ]
+// test @[ "DBAY/UDF concurrent UDFs 2" ]
+// @[ "XXXXXX aggregate function" ]()
+// @[ "assertions, warnings" ]()
 
 }).call(this);
 

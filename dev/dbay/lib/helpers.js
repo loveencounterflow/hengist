@@ -331,6 +331,9 @@
   //-----------------------------------------------------------------------------------------------------------
   this.copy_over = async function(from_path, to_path) {
     if (to_path !== ':memory:' && to_path !== '') {
+      this.try_to_remove_file(`${to_path}-wal`);
+      this.try_to_remove_file(`${to_path}-journal`);
+      this.try_to_remove_file(`${to_path}-shm`);
       this.try_to_remove_file(to_path);
     }
     await FSP.copyFile(from_path, to_path);

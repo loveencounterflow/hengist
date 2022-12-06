@@ -437,13 +437,82 @@ sqr integer );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_concurrency_with_table_function = async function(T, done) {
+    var DBay, SQL, db, numbers, schema, template_path, work_path;
+    // T.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL} = DBay);
+    schema = 'main';
+    ({template_path, work_path} = (await H.procure_db({
+      size: 'nnt',
+      ref: 'fn'
+    })));
+    debug({template_path, work_path});
+    db = new DBay({
+      path: work_path,
+      schema
+    });
+    numbers = db.all_first_values(SQL`select n from nnt order by n;`);
+    console.table(db.all_rows(SQL`select * from nnt order by n;`));
+    //.........................................................................................................
+    db.create_table_function({
+      name: 're_matches',
+      columns: ['match', 'capture'],
+      parameters: ['text', 'pattern'],
+      rows: function*(text, pattern) {
+        var match, regex;
+        regex = new RegExp(pattern, 'g');
+        while ((match = regex.exec(text)) != null) {
+          yield [match[0], match[1]];
+        }
+        return null;
+      }
+    });
+    (() => {      //.........................................................................................................
+      var d, insert_number, ref, select_numbers, select_rows;
+      insert_number = db.prepare_insert({
+        into: 'nnt'
+      });
+      select_numbers = SQL`select n from nnt order by n;`;
+      select_rows = SQL`select
+    *
+  from
+    nnt,
+    re_matches( t, '^.*(point).*$' ) as rx
+  order by rx.match;`;
+      //.......................................................................................................
+      console.table(db.all_rows(select_rows));
+      if (T != null) {
+        T.eq(db.all_first_values(select_numbers), [0, 1, 1.5, 2, 2.3, 3, 3.1, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      }
+      ref = db(select_rows);
+      //.......................................................................................................
+      for (d of ref) {
+        db(insert_number, {
+          ...d,
+          n: d.n + 100
+        });
+      }
+      //.......................................................................................................
+      console.table(db.all_rows(select_rows));
+      if (T != null) {
+        T.eq(db.all_first_values(select_numbers), [0, 1, 1.5, 2, 2.3, 3, 3.1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 101.5, 102.3, 103.1]);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @dbay_virtual_concurrent_writes()
       // @dbay_concurrency_with_explicitly_two_connections()
       // test @dbay_concurrency_with_explicitly_two_connections
-      return test(this.dbay_concurrency_with_implicitly_two_connections);
+      // test @dbay_concurrency_with_implicitly_two_connections
+      // @dbay_concurrency_with_table_function()
+      return test(this.dbay_concurrency_with_table_function);
     })();
   }
 
