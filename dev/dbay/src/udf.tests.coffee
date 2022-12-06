@@ -482,12 +482,12 @@ jp                        = JSON.parse
 ############################################################################################################
 if module is require.main then do =>
   # test @, { timeout: 10e3, }
-  # test @[ "DBAY/UDF window functions etc." ]
+  test @[ "DBAY/UDF window functions etc." ]
   # test @[ "DBAY/UDF User-Defined Window Function" ]
   # test @[ "DBAY/UDF view with UDF" ]
   # test @[ "DBAY/UDF typing" ]
   # test @[ "DBAY/UDF concurrent UDFs 2" ]
   # @[ "XXXXXX aggregate function" ]()
-  @[ "assertions, warnings" ]()
+  # @[ "assertions, warnings" ]()
 
 
