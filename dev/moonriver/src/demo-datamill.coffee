@@ -65,54 +65,53 @@ demo_concurrency_with_two_connections = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_concurrent_writes = ->
+demo_datamill_pipeline = ->
   { DBay }            = require '../../../apps/dbay'
   { SQL  }            = DBay
   { Pipeline }        = require '../../../apps/moonriver'
   #.........................................................................................................
-  show = ( db ) -> H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
+  show = ( db ) -> H.tabulate "texts", db SQL"""select * from texts order by lnr, part;"""
   #.........................................................................................................
   prepare = ( db ) ->
-    if ( db.all_rows SQL"select name from sqlite_schema where name = 'numbers';" ).length is 0
-      db SQL"""create table numbers (
-        n   integer not null primary key,
-        sqr integer );"""
+    db = new DBay()
+    # if ( db.all_rows SQL"select name from sqlite_schema where name = 'texts';" ).length is 0
+    db SQL"""create table texts (
+      lnr   integer not null,
+      part  integer not null,
+      line  text    not null,
+      primary key ( lnr, part ) );"""
     #.......................................................................................................
-    insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-    db insert_number, { n, sqr: null, } for n in [ 0 .. 10 ]
-    return null
-  #.........................................................................................................
-  db              = new DBay()
-  prepare db
-  show    db
-  read_numbers    = db.prepare SQL"select * from numbers order by n;"
-  insert_numbers  = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+    write_data  = db.prepare_insert { into: 'texts', on_conflict: { update: true, }, }
+    read_data   = db.prepare SQL"""select * from texts order by lnr, part;"""
+    db write_data, { lnr: 1, part: 1, line: "helo world", }
+    return { db, read_data, write_data, }
   #.........................................................................................................
   $initialize = ->
     p               = new Pipeline()
-    p.push _show    = ( d ) -> urge '^22-1^', d
+    p.push _show    = ( d ) -> whisper '^22-1^', d
     p.push _freeze  = ( d ) -> freeze d
     return p
   #.........................................................................................................
   $process = ->
     p               = new Pipeline()
-    p.push square   = ( d, send ) -> send lets d, ( d ) -> d.sqr = d.n ** 2
+    p.push foobar   = ( d, send ) -> send lets d, ( d ) -> d.line = "*#{d.line}*"
+    p.push _show    = ( d ) -> urge '^22-1^', d
     return p
   #.........................................................................................................
-  $sink = ( write_data ) -> _sink = ( d ) -> write_data d
-  #.........................................................................................................
-  $my_datamill = ( read_data, write_data ) ->
-    p               = new Pipeline()
-    p.push -> yield from db read_data
+  $my_datamill = ( db, read_data, write_data ) ->
+    p = new Pipeline()
+    p.push source = -> yield from db read_data
     p.push $initialize()
     p.push $process()
-    p.push $sink write_data
+    p.push sink = ( d ) -> db write_data, d
     return p
   #.........................................................................................................
-  db.with_deferred_write ( write ) ->
-    write_data  = ( d ) -> write insert_numbers, d
-    p           = $my_datamill read_numbers, write_data
-    p.run()
+  { db
+    read_data
+    write_data }  = prepare()
+  show db
+  p = $my_datamill db, read_data, write_data
+  p.run()
   #.........................................................................................................
   show db
   return null
@@ -120,6 +119,6 @@ demo_concurrent_writes = ->
 
 ############################################################################################################
 if module is require.main then do =>
-  # demo_concurrent_writes()
-  demo_concurrency_with_two_connections()
+  demo_datamill_pipeline()
+  # demo_concurrency_with_two_connections()
 
