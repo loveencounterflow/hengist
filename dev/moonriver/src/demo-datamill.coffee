@@ -29,48 +29,6 @@ H                         = require '../../../lib/helpers'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-demo_concurrency_with_unsafe_mode = ->
-  br()
-  { Pipeline, \
-    transforms: T,
-    $,              } = require '../../../apps/moonriver'
-  { DBay }            = require '../../../apps/dbay'
-  { SQL  }            = DBay
-  db                  = new DBay()
-  db.pragma SQL"journal_mode = wal;"
-  #.........................................................................................................
-  db SQL"""create table numbers (
-    n   integer not null primary key,
-    sqr integer );"""
-  insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-  #.........................................................................................................
-  db ->
-    for n in [ 0 .. 10 ]
-      db insert_number, { n, sqr: null, }
-  #.........................................................................................................
-  p = new Pipeline { protocol: true, }
-  p.push ( d ) -> d.sqr = d.n ** 2
-  p.push ( d ) -> urge '^35^', d
-  iterator = p.walk()
-  db.with_unsafe_mode ->
-    # mode = 'deferred' # 'deferred', 'immediate', 'exclusive'
-    # mode = 'immediate' # 'deferred', 'immediate', 'exclusive'
-    # mode = 'exclusive' # 'deferred', 'immediate', 'exclusive'
-    # db.with_transaction { mode, }, ->
-    db.pragma SQL"journal_mode = wal;"
-    db.with_transaction ->
-      for d from db SQL"select * from numbers order by n;"
-        debug '^35^', d
-        p.send d
-        { value: e, done, } = iterator.next()
-        db insert_number, e
-        break if done
-  #.........................................................................................................
-  H.tabulate "numbers", db SQL"""select * from numbers order by n;"""
-  #.........................................................................................................
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 demo_concurrency_with_two_connections = ->
   br()
   { Pipeline, \

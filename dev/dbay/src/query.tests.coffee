@@ -464,11 +464,15 @@ X                         = require '../../../lib/helpers'
         a   integer not null primary key,
         b   text not null,
         c   boolean not null );"""
+  #.........................................................................................................
+  db ->
     insert_into_xy = db.prepare_insert { into: 'xy', exclude: [ 'a', ], }
     db insert_into_xy, { b: 'one', c: 1, }
     db insert_into_xy, { b: 'two', c: 1, }
     db insert_into_xy, { b: 'three', c: 1, }
     db insert_into_xy, { b: 'four', c: 1, }
+  #.........................................................................................................
+  db ->
     echo dtab._tabulate db SQL"select * from xy order by a;"
     T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'one', c: 1 }, { a: 2, b: 'two', c: 1 }, { a: 3, b: 'three', c: 1 }, { a: 4, b: 'four', c: 1 } ]
     db SQL"rollback;"
@@ -527,6 +531,8 @@ X                         = require '../../../lib/helpers'
         value   integer not null primary key,
         name    text    not null,
         is_even boolean not null );"""
+  #.........................................................................................................
+  db ->
     insert_into_integers = db.prepare_insert { into: 'integers', }
     db insert_into_integers, { value: 1, name: 'one',   is_even: 0, }
     db insert_into_integers, { value: 2, name: 'two',   is_even: 1, }

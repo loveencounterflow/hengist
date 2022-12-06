@@ -162,6 +162,8 @@ r                         = String.raw
         a   integer not null primary key,
         b   text not null,
         c   boolean not null );"""
+  #.........................................................................................................
+  db ->
     urge '^4498^', db.create_insert { into: 'xy', }
     urge '^4498^', db.create_insert { into: 'xy', fields: [ 'b', 'c', ] }
     urge '^4498^', db.create_insert { into: 'xy', exclude: [ 'a', ], }
@@ -170,6 +172,8 @@ r                         = String.raw
     insert_into_xy.run { b: 'two', c: 1, }
     insert_into_xy.run { b: 'three', c: 1, }
     insert_into_xy.run { b: 'four', c: 1, }
+  #.........................................................................................................
+  db ->
     echo dtab._tabulate db SQL"select * from xy order by a;"
     T?.eq ( db.all_rows SQL"select * from xy order by a;" ), [ { a: 1, b: 'one', c: 1 }, { a: 2, b: 'two', c: 1 }, { a: 3, b: 'three', c: 1 }, { a: 4, b: 'four', c: 1 } ]
     db SQL"rollback;"
@@ -295,11 +299,11 @@ if module is require.main then do =>
   # test @, { timeout: 10e3, }
   # test @[ "DBAY Sqlgen create_insert() without known table" ]
   # @[ "_DBAY Sqlgen demo" ]()
-  # test @[ "DBAY Sqlgen create_insert() 2" ]
+  test @[ "DBAY Sqlgen create_insert() 2" ]
   # test @[ "DBAY Sqlgen isa.dbay_create_insert_cfg()" ]
   # test @[ "DBAY Sqlgen on_conflict 2" ]
   # @[ "DBAY Sqlgen create_insert() with returning clause" ]()
-  test @[ "DBAY Sqlgen create_insert() without any fields" ]
+  # test @[ "DBAY Sqlgen create_insert() without any fields" ]
 
 
 
