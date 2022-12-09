@@ -62,14 +62,14 @@
       ({HDML} = require('../../../apps/hdml'));
       //.......................................................................................................
       show = function(db) {
-        return H.tabulate("texts", db(SQL`select * from texts order by n1_lnr, n3_part;`));
+        return H.tabulate("documents", db(SQL`select * from documents order by n1_lnr, n3_part;`));
       };
       //.......................................................................................................
       prepare = function(db) {
         var read_data, write_data;
         db = new DBay();
-        // if ( db.all_rows SQL"select name from sqlite_schema where name = 'texts';" ).length is 0
-        db(SQL`create table texts (
+        // if ( db.all_rows SQL"select name from sqlite_schema where name = 'documents';" ).length is 0
+        db(SQL`create table documents (
 n1_lnr      integer not null,
 n2_version  integer not null,
 n3_part     integer not null,
@@ -77,12 +77,12 @@ line  text    not null,
 primary key ( n1_lnr, n2_version, n3_part ) );`);
         //.....................................................................................................
         write_data = db.prepare_insert({
-          into: 'texts',
+          into: 'documents',
           on_conflict: {
             update: true
           }
         });
-        read_data = db.prepare(SQL`select * from texts order by n1_lnr, n3_part;`);
+        read_data = db.prepare(SQL`select * from documents order by n1_lnr, n3_part;`);
         db(write_data, {
           n1_lnr: 1,
           n3_part: 1,
