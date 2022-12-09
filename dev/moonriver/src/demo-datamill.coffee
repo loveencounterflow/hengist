@@ -66,24 +66,26 @@ demo_concurrency_with_two_connections = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_datamill_pipeline = ->
-  { DBay }            = require '../../../apps/dbay'
-  { SQL  }            = DBay
-  { Pipeline }        = require '../../../apps/moonriver'
+  { DBay }                  = require '../../../apps/dbay'
+  { SQL  }                  = DBay
+  { Pipeline }              = require '../../../apps/moonriver'
+  { HDML }                  = require '../../../apps/hdml'
   #.........................................................................................................
-  show = ( db ) -> H.tabulate "texts", db SQL"""select * from texts order by lnr, part;"""
+  show = ( db ) -> H.tabulate "texts", db SQL"""select * from texts order by n1_lnr, n3_part;"""
   #.........................................................................................................
   prepare = ( db ) ->
     db = new DBay()
     # if ( db.all_rows SQL"select name from sqlite_schema where name = 'texts';" ).length is 0
     db SQL"""create table texts (
-      lnr   integer not null,
-      part  integer not null,
+      n1_lnr      integer not null,
+      n2_version  integer not null,
+      n3_part     integer not null,
       line  text    not null,
-      primary key ( lnr, part ) );"""
+      primary key ( n1_lnr, n2_version, n3_part ) );"""
     #.......................................................................................................
     write_data  = db.prepare_insert { into: 'texts', on_conflict: { update: true, }, }
-    read_data   = db.prepare SQL"""select * from texts order by lnr, part;"""
-    db write_data, { lnr: 1, part: 1, line: "helo world", }
+    read_data   = db.prepare SQL"""select * from texts order by n1_lnr, n3_part;"""
+    db write_data, { n1_lnr: 1, n3_part: 1, n2_version: 1, line: "helo world", }
     return { db, read_data, write_data, }
   #.........................................................................................................
   $initialize = ->
@@ -95,6 +97,9 @@ demo_datamill_pipeline = ->
   $process = ->
     p               = new Pipeline()
     p.push foobar   = ( d, send ) -> send lets d, ( d ) -> d.line = "*#{d.line}*"
+    p.push foobar   = ( d, send ) -> send lets d, ( d ) ->
+      d.line = HDML.pair 'div.foo', HDML.text d.line
+      d.n2_version++
     p.push _show    = ( d ) -> urge '^22-1^', d
     return p
   #.........................................................................................................
@@ -111,6 +116,7 @@ demo_datamill_pipeline = ->
     write_data }  = prepare()
   show db
   p = $my_datamill db, read_data, write_data
+  info '^34-1^', p
   p.run()
   #.........................................................................................................
   show db
