@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/push-notifications-with-sse.coffee"
+  ],
+  "names": [],
+  "mappings": "AAaG;EAAA;;;;;;;;;;;;;;EAGH;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAHG",
+  "sourcesContent": [
+    "###\n\nthx to https://medium.com/trabe/server-sent-events-sse-streams-with-node-and-koa-d9330677f0bf\n\nopen http://localhost:8088, and in the developer tools console, insert\n\n```\nconst source = new EventSource(\"http://localhost:8080/sse\");\nsource.onopen = () => console.log(\"Connected\");\nsource.onerror = console.error;\nsource.onmessage = console.log;\n```\n\n###\n\n\n```\nconst Koa = require(\"koa\");\nconst { PassThrough } = require(\"stream\");\n\nnew Koa().\n  use(async (ctx, next) => {\n    if (ctx.path !== \"/sse\") {\n      return await next();\n    }\n\n    ctx.request.socket.setTimeout(0);\n    ctx.req.socket.setNoDelay(true);\n    ctx.req.socket.setKeepAlive(true);\n\n    ctx.set({\n      \"Content-Type\": \"text/event-stream\",\n      \"Cache-Control\": \"no-cache\",\n      \"Connection\": \"keep-alive\",\n      'Access-Control-Allow-Origin'; '*',\n    });\n\n    const stream = new PassThrough();\n\n    ctx.status = 200;\n    ctx.body = stream;\n\n    const interval = setInterval(() => {\n      stream.write(`data: ${new Date()}\\n\\n`);\n    }, 1000);\n\n    stream.on(\"close\", () => {\n      clearInterval(interval);\n    });\n\n\n  })\n  .use(ctx => {\n    ctx.status = 200;\n    ctx.body = `\nconst source = new EventSource(\"http://localhost:8088/sse\");\nsource.onopen = () => console.log(\"Connected\");\nsource.onerror = console.error;\nsource.onmessage = console.log;\n    `;\n  })\n  .listen(8088, () => console.log(\"Listening\"));\n```"
+  ]
+}
