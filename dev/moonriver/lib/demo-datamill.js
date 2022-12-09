@@ -82,13 +82,14 @@ sqr integer );`);
 
   //-----------------------------------------------------------------------------------------------------------
   demo_datamill_pipeline = function() {
-    var $initialize, $my_datamill, $process, DBay, Pipeline, SQL, db, p, prepare, read_data, show, write_data;
+    var $initialize, $my_datamill, $process, DBay, HDML, Pipeline, SQL, db, p, prepare, read_data, show, write_data;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     ({Pipeline} = require('../../../apps/moonriver'));
+    ({HDML} = require('../../../apps/hdml'));
     //.........................................................................................................
     show = function(db) {
-      return H.tabulate("texts", db(SQL`select * from texts order by lnr, part;`));
+      return H.tabulate("texts", db(SQL`select * from texts order by n1_lnr, n3_part;`));
     };
     //.........................................................................................................
     prepare = function(db) {
@@ -96,10 +97,11 @@ sqr integer );`);
       db = new DBay();
       // if ( db.all_rows SQL"select name from sqlite_schema where name = 'texts';" ).length is 0
       db(SQL`create table texts (
-lnr   integer not null,
-part  integer not null,
+n1_lnr      integer not null,
+n2_version  integer not null,
+n3_part     integer not null,
 line  text    not null,
-primary key ( lnr, part ) );`);
+primary key ( n1_lnr, n2_version, n3_part ) );`);
       //.......................................................................................................
       write_data = db.prepare_insert({
         into: 'texts',
@@ -107,10 +109,11 @@ primary key ( lnr, part ) );`);
           update: true
         }
       });
-      read_data = db.prepare(SQL`select * from texts order by lnr, part;`);
+      read_data = db.prepare(SQL`select * from texts order by n1_lnr, n3_part;`);
       db(write_data, {
-        lnr: 1,
-        part: 1,
+        n1_lnr: 1,
+        n3_part: 1,
+        n2_version: 1,
         line: "helo world"
       });
       return {db, read_data, write_data};
@@ -136,6 +139,12 @@ primary key ( lnr, part ) );`);
           return d.line = `*${d.line}*`;
         }));
       });
+      p.push(foobar = function(d, send) {
+        return send(lets(d, function(d) {
+          d.line = HDML.pair('div.foo', HDML.text(d.line));
+          return d.n2_version++;
+        }));
+      });
       p.push(_show = function(d) {
         return urge('^22-1^', d);
       });
@@ -159,6 +168,7 @@ primary key ( lnr, part ) );`);
     ({db, read_data, write_data} = prepare());
     show(db);
     p = $my_datamill(db, read_data, write_data);
+    info('^34-1^', p);
     p.run();
     //.........................................................................................................
     show(db);
