@@ -332,6 +332,59 @@ create table bar ( n integer );`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_SQL_sql_available_on_module = function(T, done) {
+    var sql;
+    // T?.halt_on_error()
+    ({SQL, sql} = require(H.dbay_path));
+    if (T != null) {
+      T.eq(type_of(SQL), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(sql), 'sql');
+    }
+    if (T != null) {
+      T.eq(isa.object(sql), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_SQL_sql_available_on_class = function(T, done) {
+    var DBay, sql;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL, sql} = DBay);
+    if (T != null) {
+      T.eq(type_of(SQL), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(sql), 'sql');
+    }
+    if (T != null) {
+      T.eq(isa.object(sql), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_SQL_sql_available_on_instance = function(T, done) {
+    var DBay, sql;
+    // T?.halt_on_error()
+    ({DBay} = require(H.dbay_path));
+    ({SQL, sql} = new DBay());
+    if (T != null) {
+      T.eq(type_of(SQL), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(sql), 'sql');
+    }
+    if (T != null) {
+      T.eq(isa.object(sql), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -339,14 +392,16 @@ create table bar ( n integer );`);
       // test @[ "DBAY _get-autolocation" ]
       // test @[ "DBAY constructor arguments 1" ]
       // @[ "DBAY instance has property `alt` (alternative connection)" ]()
-      return test(this["DBAY instance has property `_dayjs`"]);
+      // test @[ "DBAY instance has property `_dayjs`" ]
+      // test @[ "DBAY URL/path conversion" ]
+      // test @[ "xxx" ]
+      // test @[ "DBAY instance has two connections" ]
+      // test @[ "DBAY instance non-enumerable properties" ]
+      // test @dbay_SQL_sql_available_on_module
+      // test @dbay_SQL_sql_available_on_class
+      return test(this.dbay_SQL_sql_available_on_instance);
     })();
   }
-
-  // test @[ "DBAY URL/path conversion" ]
-// test @[ "xxx" ]
-// test @[ "DBAY instance has two connections" ]
-// test @[ "DBAY instance non-enumerable properties" ]
 
 }).call(this);
 
