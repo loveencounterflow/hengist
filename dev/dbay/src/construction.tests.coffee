@@ -185,6 +185,38 @@ guy                       = require '../../../apps/guy'
   T?.eq ( type_of db._dayjs.utc ), 'function'
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@dbay_SQL_sql_available_on_module = ( T, done ) ->
+  # T?.halt_on_error()
+  { SQL
+    sql  }        = require H.dbay_path
+  T?.eq ( type_of SQL ), 'function'
+  T?.eq ( type_of sql ), 'sql'
+  T?.eq ( isa.object sql ), true
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_SQL_sql_available_on_class = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }        = require H.dbay_path
+  { SQL
+    sql  }        = DBay
+  T?.eq ( type_of SQL ), 'function'
+  T?.eq ( type_of sql ), 'sql'
+  T?.eq ( isa.object sql ), true
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dbay_SQL_sql_available_on_instance = ( T, done ) ->
+  # T?.halt_on_error()
+  { DBay }        = require H.dbay_path
+  { SQL
+    sql  }        = new DBay()
+  T?.eq ( type_of SQL ), 'function'
+  T?.eq ( type_of sql ), 'sql'
+  T?.eq ( isa.object sql ), true
+  done?()
+
 
 
 
@@ -195,8 +227,12 @@ if require.main is module then do =>
   # test @[ "DBAY _get-autolocation" ]
   # test @[ "DBAY constructor arguments 1" ]
   # @[ "DBAY instance has property `alt` (alternative connection)" ]()
-  test @[ "DBAY instance has property `_dayjs`" ]
+  # test @[ "DBAY instance has property `_dayjs`" ]
   # test @[ "DBAY URL/path conversion" ]
   # test @[ "xxx" ]
   # test @[ "DBAY instance has two connections" ]
   # test @[ "DBAY instance non-enumerable properties" ]
+  # test @dbay_SQL_sql_available_on_module
+  # test @dbay_SQL_sql_available_on_class
+  test @dbay_SQL_sql_available_on_instance
+
