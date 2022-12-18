@@ -39,10 +39,10 @@
         repo_path = PATH.join(repo_home, 'kaseki-demo.fossil');
         work_path = PATH.join(work_home);
         ksk = new Kaseki({repo_path, work_path});
-        info('^98-3^', rpr(ksk.get_fossil_version_text()));
+        info('^98-3^', rpr(ksk.fsl_version()));
         // 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
         if (T != null) {
-          T.ok(/^This is fossil version .*UTC$/.test(ksk.get_fossil_version_text()));
+          T.ok(/^This is fossil version .*UTC$/.test(ksk.fsl_version()));
         }
         //.....................................................................................................
         if (T != null) {
@@ -140,7 +140,7 @@ A fancy text explaing MyProject.`);
       debug('^99-1^', rpr(work_path));
       repo_path = work_path;
       ksk = new Kaseki({work_path, repo_path});
-      info('^99-3^', rpr(ksk.get_fossil_version_text()));
+      info('^99-3^', rpr(ksk.fsl_version()));
       urge('^99-26^', FS.readdirSync(repo_path));
       return urge('^99-27^', FS.readdirSync(work_path));
     });
@@ -251,12 +251,38 @@ A fancy text explaing MyProject.`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.kaseki_generated_methods = function(T, done) {
+    var Kaseki;
+    ({Kaseki} = require('../../../apps/kaseki'));
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: work_path
+      }) {
+      var ksk, repo_path;
+      repo_path = work_path;
+      ksk = new Kaseki({work_path, repo_path});
+      // debug '^76-1^', ksk.fsl_version()
+      // debug '^76-2^', ksk._spawn 'fossil', 'version'
+      // debug '^76-3^', ksk._spawn_inner 'fossil', 'version'
+      debug('^76-4^', ksk.fsl_init({
+        project_name: 'myname'
+      }, 'myname.fossil'));
+      urge('^76-5^', FS.readdirSync(repo_path));
+      debug('^76-6^', ksk.fsl_version());
+      debug('^76-7^', ksk.fsl_open('--keep', 'myname.fossil'));
+      return debug('^76-8^', ksk.fsl_status());
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // @kaseki_zero()
+      this.kaseki_generated_methods();
       // @kaseki_as_cli_parameters()
-      test(this.kaseki_as_cli_parameters);
+      // test @kaseki_as_cli_parameters
       // @kaseki_create_doc_workflow_for_consuming_app()
       return null;
     })();
