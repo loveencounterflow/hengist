@@ -157,11 +157,30 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@kaseki_generated_methods = ( T, done ) ->
+  { Kaseki } = require '../../../apps/kaseki'
+  #.........................................................................................................
+  GUY.temp.with_directory ({ path: work_path, }) ->
+    repo_path     = work_path
+    ksk           = new Kaseki { work_path, repo_path, }
+    # debug '^76-1^', ksk.fsl_version()
+    # debug '^76-2^', ksk._spawn 'fossil', 'version'
+    # debug '^76-3^', ksk._spawn_inner 'fossil', 'version'
+    debug '^76-4^', ksk.fsl_init { project_name: 'myname', }, 'myname.fossil'
+    urge  '^76-5^', FS.readdirSync repo_path
+    debug '^76-6^', ksk.fsl_version()
+    debug '^76-7^', ksk.fsl_open '--keep', 'myname.fossil'
+    debug '^76-8^', ksk.fsl_status()
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
   # @kaseki_zero()
+  @kaseki_generated_methods()
   # @kaseki_as_cli_parameters()
-  test @kaseki_as_cli_parameters
+  # test @kaseki_as_cli_parameters
   # @kaseki_create_doc_workflow_for_consuming_app()
   return null
