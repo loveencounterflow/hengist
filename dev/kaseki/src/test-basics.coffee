@@ -34,22 +34,27 @@ FS                        = require 'node:fs'
 @kaseki_zero = ( T, done ) ->
   { Kaseki } = require '../../../apps/kaseki'
   GUY.temp.with_directory ({ path: repo_home, }) ->
-    GUY.temp.with_directory ({ path: checkout_home, }) ->
+    GUY.temp.with_directory ({ path: work_home, }) ->
       debug '^98-1^', rpr repo_home
-      debug '^98-2^', rpr checkout_home
+      debug '^98-2^', rpr work_home
       repo_path     = PATH.join repo_home,     'kaseki-demo.fossil'
-      checkout_path = PATH.join checkout_home
-      ksk           = new Kaseki { repo_path, checkout_path, }
+      work_path     = PATH.join work_home
+      ksk           = new Kaseki { repo_path, work_path, }
       info  '^98-3^', rpr ksk.get_fossil_version_text()
-      urge  '^98-4^', ksk.init()
-      urge  '^98-5^', ksk.init()
+      # 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
+      T?.ok /^This is fossil version .*UTC$/.test ksk.get_fossil_version_text()
+      #.....................................................................................................
+      T?.eq ksk.init(), null
+      T?.eq ksk.init(), null
       try ksk.init { if_exists: 'error', } catch error then warn GUY.trm.reverse error.message
+      T?.throws /when trying to `init` rep.* an error occurred.*file already exists/, -> ksk.init { if_exists: 'error', }
+      #.....................................................................................................
       urge  '^98-6^', ksk.open()
       urge  '^98-7^', ksk.list_file_names()
       urge  '^98-8^', ksk.list_file_paths()
       urge  '^98-9^', ksk.ls()
       #.....................................................................................................
-      readme_path = PATH.join checkout_home, 'README.md'
+      readme_path = PATH.join work_home, 'README.md'
       FS.writeFileSync readme_path, """
         # MyProject
 
@@ -62,14 +67,14 @@ FS                        = require 'node:fs'
       #.....................................................................................................
       FS.appendFileSync readme_path, "\n\nhelo"
       strange_name = '  strange.txt'
-      FS.appendFileSync ( PATH.join checkout_path, strange_name ), "\n\nhelo"
+      FS.appendFileSync ( PATH.join work_path, strange_name ), "\n\nhelo"
       help  '^98-14^', rpr ksk._spawn 'fossil', 'changes'
       help  '^98-15^', rpr ksk._spawn 'fossil', 'extras'
       help  '^98-16^', rpr ksk.add strange_name
       urge  '^98-17^', ksk.commit "add file with strange name"
       help  '^98-18^', rpr ksk.change_texts()
       #.....................................................................................................
-      FS.appendFileSync ( PATH.join checkout_path, strange_name ), "\n\nhelo again"
+      FS.appendFileSync ( PATH.join work_path, strange_name ), "\n\nhelo again"
       help  '^98-19^', rpr ksk.change_texts()
       help  '^98-19^', rpr ksk.list_of_changes()
       help  '^98-19^', rpr ksk.has_changes()
@@ -80,12 +85,48 @@ FS                        = require 'node:fs'
       info  '^98-24^', ( k.padEnd 20 ), v for k, v of ksk.status()
       help  '^98-25^', ksk.list_file_names()
       urge  '^98-26^', FS.readdirSync repo_home
-      urge  '^98-27^', FS.readdirSync checkout_home
-      # urge  '^98-28^', FS.readFileSync ( PATH.join checkout_home, '.fslckout' ), { encoding: 'utf-8', }
+      urge  '^98-27^', FS.readdirSync work_home
+      # urge  '^98-28^', FS.readFileSync ( PATH.join work_home, '.fslckout' ), { encoding: 'utf-8', }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@kaseki_create_doc_workflow_for_consuming_app = ( T, done ) ->
+  ###
+
+  An app (e.g. DataMill, the 'client' app) that uses KaSeki to provide a single-file format that is a
+  container of multiple individual files (text souirces, images, stylesheets &c) would have to tell KaSeki
+
+  * the location of the 'repo' (i.e. the single container of any number of versioned document sources);
+    let's call it `my-first-doc.datamill`, and
+
+  * the location where to unpack the repo; let's call it the 'working path'.
+
+  There are two interesting ways to organize these two locations: one approach is the one advocated by []()
+
+
+  ###
+
+  ### NOTE fossil apparently passes the 'mirror test' i.e. when the repo is present in the checkout folder
+      it will *not* be listed by the `fossil extras` command, although a copy of it will (which seems to
+      indicate that fossil tests not against a file not being a fossil repo but specifically the repo that
+      is connected to the current project) ###
+
+  #.........................................................................................................
+  { Kaseki } = require '../../../apps/kaseki'
+  GUY.temp.with_directory ({ path: work_path, }) ->
+      debug '^99-1^', rpr work_path
+      repo_path     = work_path
+      ksk           = new Kaseki { work_path, repo_path, }
+      info  '^99-3^', rpr ksk.get_fossil_version_text()
+      urge  '^99-26^', FS.readdirSync repo_path
+      urge  '^99-27^', FS.readdirSync work_path
   #.........................................................................................................
   done?()
 
 
 ############################################################################################################
 if module is require.main then do =>
+  @kaseki_zero()
+  # @kaseki_create_doc_workflow_for_consuming_app()
   return null
