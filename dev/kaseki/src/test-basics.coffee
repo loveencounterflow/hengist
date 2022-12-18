@@ -40,9 +40,9 @@ FS                        = require 'node:fs'
       repo_path     = PATH.join repo_home,     'kaseki-demo.fossil'
       work_path     = PATH.join work_home
       ksk           = new Kaseki { repo_path, work_path, }
-      info  '^98-3^', rpr ksk.get_fossil_version_text()
+      info  '^98-3^', rpr ksk.fsl_version()
       # 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
-      T?.ok /^This is fossil version .*UTC$/.test ksk.get_fossil_version_text()
+      T?.ok /^This is fossil version .*UTC$/.test ksk.fsl_version()
       #.....................................................................................................
       T?.eq ksk.init(), null
       T?.eq ksk.init(), null
@@ -115,12 +115,12 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   { Kaseki } = require '../../../apps/kaseki'
   GUY.temp.with_directory ({ path: work_path, }) ->
-      debug '^99-1^', rpr work_path
-      repo_path     = work_path
-      ksk           = new Kaseki { work_path, repo_path, }
-      info  '^99-3^', rpr ksk.get_fossil_version_text()
-      urge  '^99-26^', FS.readdirSync repo_path
-      urge  '^99-27^', FS.readdirSync work_path
+    debug '^99-1^', rpr work_path
+    repo_path     = work_path
+    ksk           = new Kaseki { work_path, repo_path, }
+    info  '^99-3^', rpr ksk.fsl_version()
+    urge  '^99-26^', FS.readdirSync repo_path
+    urge  '^99-27^', FS.readdirSync work_path
   #.........................................................................................................
   done?()
 
