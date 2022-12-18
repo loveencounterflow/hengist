@@ -147,10 +147,116 @@ A fancy text explaing MyProject.`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.kaseki_as_cli_parameters = function(T, done) {
+    var _as_cli_parameters, error;
+    //.........................................................................................................
+    ({_as_cli_parameters} = require('../../../apps/kaseki'));
+    if (T != null) {
+      T.eq(type_of(_as_cli_parameters), 'function');
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters(), []);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({}), []);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters('x'), ['x']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters(42), ['42']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters(42, 'x'), ['42', 'x']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters(true), ['true']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters(false), ['false']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({
+        x: 42
+      }), ['-x', '42']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({
+        extra: 42
+      }), ['--extra', '42']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({
+        foo_bar: 42
+      }), ['--foo-bar', '42']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({
+        x: null
+      }), ['-x']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters({
+        x: null
+      }, '--', 'foo'), ['-x', '--', 'foo']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters('-x'), ['-x']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters('--x'), ['--x']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters('-xxx'), ['-xxx']);
+    }
+    if (T != null) {
+      T.eq(_as_cli_parameters('--xxx'), ['--xxx']);
+    }
+    try {
+      _as_cli_parameters({
+        '': 42
+      });
+    } catch (error1) {
+      error = error1;
+      warn(GUY.trm.reverse(error.message));
+    }
+    if (T != null) {
+      T.throws(/detected empty key/, function() {
+        return _as_cli_parameters({
+          '': 42
+        });
+      });
+    }
+    debug('^87-1^', _as_cli_parameters());
+    debug('^87-1^', _as_cli_parameters({}));
+    debug('^87-1^', _as_cli_parameters({
+      x: 42
+    }));
+    debug('^87-4^', _as_cli_parameters({
+      x: null
+    }));
+    debug('^87-5^', _as_cli_parameters({
+      extra: null
+    }));
+    debug('^87-6^', _as_cli_parameters({
+      x: 42,
+      y: {
+        x: 42
+      }
+    }));
+    debug('^87-6^', _as_cli_parameters({
+      x: null
+    }, '--', 'foo'));
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      this.kaseki_zero();
+      // @kaseki_zero()
+      // @kaseki_as_cli_parameters()
+      test(this.kaseki_as_cli_parameters);
       // @kaseki_create_doc_workflow_for_consuming_app()
       return null;
     })();
