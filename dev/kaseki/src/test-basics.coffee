@@ -124,9 +124,44 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@kaseki_as_cli_parameters = ( T, done ) ->
+  #.........................................................................................................
+  { _as_cli_parameters } = require '../../../apps/kaseki'
+  T?.eq ( type_of _as_cli_parameters ), 'function'
+  T?.eq ( _as_cli_parameters()                            ), []
+  T?.eq ( _as_cli_parameters {}                           ), []
+  T?.eq ( _as_cli_parameters 'x'                          ), [ 'x', ]
+  T?.eq ( _as_cli_parameters 42                           ), [ '42', ]
+  T?.eq ( _as_cli_parameters 42, 'x',                     ), [ '42', 'x', ]
+  T?.eq ( _as_cli_parameters true,                        ), [ 'true', ]
+  T?.eq ( _as_cli_parameters false,                       ), [ 'false', ]
+  T?.eq ( _as_cli_parameters { x: 42, },                  ), [ '-x', '42', ]
+  T?.eq ( _as_cli_parameters { extra: 42, },              ), [ '--extra', '42', ]
+  T?.eq ( _as_cli_parameters { foo_bar: 42, },            ), [ '--foo-bar', '42', ]
+  T?.eq ( _as_cli_parameters { x: null, },                ), [ '-x', ]
+  T?.eq ( _as_cli_parameters { x: null, }, '--', 'foo'    ), [ '-x', '--', 'foo', ]
+  T?.eq ( _as_cli_parameters '-x'                         ), [ '-x', ]
+  T?.eq ( _as_cli_parameters '--x'                        ), [ '--x', ]
+  T?.eq ( _as_cli_parameters '-xxx'                       ), [ '-xxx', ]
+  T?.eq ( _as_cli_parameters '--xxx'                      ), [ '--xxx', ]
+  try _as_cli_parameters { '': 42, } catch error then warn GUY.trm.reverse error.message
+  T?.throws /detected empty key/, -> _as_cli_parameters { '': 42, }
+  debug '^87-1^', _as_cli_parameters()
+  debug '^87-1^', _as_cli_parameters {}
+  debug '^87-1^', _as_cli_parameters { x: 42, }
+  debug '^87-4^', _as_cli_parameters { x: null, }
+  debug '^87-5^', _as_cli_parameters { extra: null, }
+  debug '^87-6^', _as_cli_parameters { x: 42, y: { x: 42, }, }
+  debug '^87-6^', _as_cli_parameters { x: null, }, '--', 'foo'
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if module is require.main then do =>
-  @kaseki_zero()
+  # @kaseki_zero()
+  # @kaseki_as_cli_parameters()
+  test @kaseki_as_cli_parameters
   # @kaseki_create_doc_workflow_for_consuming_app()
   return null
