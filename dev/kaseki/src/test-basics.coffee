@@ -40,9 +40,9 @@ FS                        = require 'node:fs'
       repo_path     = PATH.join repo_home,     'kaseki-demo.fossil'
       work_path     = PATH.join work_home
       ksk           = new Kaseki { repo_path, work_path, }
-      info  '^98-3^', rpr ksk.fsl_version()
+      info  '^98-3^', rpr ksk.lns_version()
       # 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
-      T?.ok /^This is fossil version .*UTC$/.test ksk.fsl_version()
+      T?.ok /^This is fossil version .*UTC$/.test ksk.lns_version()
       #.....................................................................................................
       T?.eq ksk.init(), null
       T?.eq ksk.init(), null
@@ -72,10 +72,10 @@ FS                        = require 'node:fs'
       help  '^98-15^', rpr ksk._spawn 'fossil', 'extras'
       help  '^98-16^', rpr ksk.add strange_name
       urge  '^98-17^', ksk.commit "add file with strange name"
-      help  '^98-18^', rpr ksk.change_texts()
+      help  '^98-18^', rpr ksk.lns_changes()
       #.....................................................................................................
       FS.appendFileSync ( PATH.join work_path, strange_name ), "\n\nhelo again"
-      help  '^98-19^', rpr ksk.change_texts()
+      help  '^98-19^', rpr ksk.lns_changes()
       help  '^98-19^', rpr ksk.list_of_changes()
       help  '^98-19^', rpr ksk.has_changes()
       help  '^98-19^', rpr ksk.changes_by_file()
@@ -118,7 +118,7 @@ FS                        = require 'node:fs'
     debug '^99-1^', rpr work_path
     repo_path     = work_path
     ksk           = new Kaseki { work_path, repo_path, }
-    info  '^99-3^', rpr ksk.fsl_version()
+    info  '^99-3^', rpr ksk.lns_version()
     urge  '^99-26^', FS.readdirSync repo_path
     urge  '^99-27^', FS.readdirSync work_path
   #.........................................................................................................
@@ -162,16 +162,25 @@ FS                        = require 'node:fs'
   { Kaseki } = require '../../../apps/kaseki'
   #.........................................................................................................
   GUY.temp.with_directory ({ path: work_path, }) ->
-    repo_path     = work_path
+    repo_path     = PATH.join work_path, 'myname.fossil'
+    doc_path      = PATH.join work_path, 'somefile.txt'
+    debug '^76-4^', { work_path, repo_path, doc_path, }
     ksk           = new Kaseki { work_path, repo_path, }
-    # debug '^76-1^', ksk.fsl_version()
+    # debug '^76-1^', ksk.lns_version()
     # debug '^76-2^', ksk._spawn 'fossil', 'version'
     # debug '^76-3^', ksk._spawn_inner 'fossil', 'version'
-    debug '^76-4^', ksk.fsl_init { project_name: 'myname', }, 'myname.fossil'
-    urge  '^76-5^', FS.readdirSync repo_path
-    debug '^76-6^', ksk.fsl_version()
-    debug '^76-7^', ksk.fsl_open '--keep', 'myname.fossil'
-    debug '^76-8^', ksk.fsl_status()
+    debug '^76-4^', ksk.lns_init { project_name: 'myname', }, repo_path
+    urge  '^76-5^', FS.readdirSync work_path
+    debug '^76-6^', ksk.raw_version()
+    debug '^76-7^', ksk.lns_open '--keep', repo_path
+    FS.writeFileSync doc_path, "some file contents"
+    urge  '^76-8^', FS.readdirSync work_path
+    debug '^76-10^', ksk.lns_status '--extra'
+    debug '^76-11^', ksk.lns_add()
+    debug '^76-10^', ksk.lns_status '--extra'
+    # # debug '^76-12^', ksk.lns_commit { m: "first!", }
+    # debug '^76-13^', ksk.lns_status()
+    # debug '^76-14^', ksk.lns_ls()
   #.........................................................................................................
   done?()
 
