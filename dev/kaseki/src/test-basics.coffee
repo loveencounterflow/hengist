@@ -34,11 +34,10 @@ FS                        = require 'node:fs'
 @kaseki_zero = ( T, done ) ->
   { Kaseki } = require '../../../apps/kaseki'
   GUY.temp.with_directory ({ path: repo_home, }) ->
-    GUY.temp.with_directory ({ path: work_home, }) ->
+    GUY.temp.with_directory ({ path: work_path, }) ->
       debug '^98-1^', rpr repo_home
-      debug '^98-2^', rpr work_home
+      debug '^98-2^', rpr work_path
       repo_path     = PATH.join repo_home,     'kaseki-demo.fossil'
-      work_path     = PATH.join work_home
       ksk           = new Kaseki { repo_path, work_path, }
       info  '^98-3^', rpr ksk.lns_version()
       # 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
@@ -49,18 +48,20 @@ FS                        = require 'node:fs'
       try ksk.init { if_exists: 'error', } catch error then warn GUY.trm.reverse error.message
       T?.throws /when trying to `init` rep.* an error occurred.*file already exists/, -> ksk.init { if_exists: 'error', }
       #.....................................................................................................
+      urge  '^98-26^', FS.readdirSync repo_home
+      urge  '^98-27^', FS.readdirSync work_path
       urge  '^98-6^', ksk.open()
       urge  '^98-7^', ksk.list_file_names()
       urge  '^98-8^', ksk.list_file_paths()
       urge  '^98-9^', ksk.ls()
       #.....................................................................................................
-      readme_path = PATH.join work_home, 'README.md'
+      readme_path = PATH.join work_path, 'README.md'
       FS.writeFileSync readme_path, """
         # MyProject
 
         A fancy text explaing MyProject.
         """
-      help  '^98-10^', rpr ksk._spawn 'fossil', 'changes'
+      help  '^98-10^', rpr ksk.ic.spawn 'fossil', 'changes'
       urge  '^98-11^', ksk.add readme_path
       urge  '^98-12^', ksk.commit "add README.md"
       urge  '^98-13^', ksk.list_file_names()
@@ -68,8 +69,8 @@ FS                        = require 'node:fs'
       FS.appendFileSync readme_path, "\n\nhelo"
       strange_name = '  strange.txt'
       FS.appendFileSync ( PATH.join work_path, strange_name ), "\n\nhelo"
-      help  '^98-14^', rpr ksk._spawn 'fossil', 'changes'
-      help  '^98-15^', rpr ksk._spawn 'fossil', 'extras'
+      help  '^98-14^', rpr ksk.ic.spawn 'fossil', 'changes'
+      help  '^98-15^', rpr ksk.ic.spawn 'fossil', 'extras'
       help  '^98-16^', rpr ksk.add strange_name
       urge  '^98-17^', ksk.commit "add file with strange name"
       help  '^98-18^', rpr ksk.lns_changes()
@@ -85,8 +86,8 @@ FS                        = require 'node:fs'
       info  '^98-24^', ( k.padEnd 20 ), v for k, v of ksk.status()
       help  '^98-25^', ksk.list_file_names()
       urge  '^98-26^', FS.readdirSync repo_home
-      urge  '^98-27^', FS.readdirSync work_home
-      # urge  '^98-28^', FS.readFileSync ( PATH.join work_home, '.fslckout' ), { encoding: 'utf-8', }
+      urge  '^98-27^', FS.readdirSync work_path
+      # urge  '^98-28^', FS.readFileSync ( PATH.join work_path, '.fslckout' ), { encoding: 'utf-8', }
   #.........................................................................................................
   done?()
 
@@ -167,8 +168,8 @@ FS                        = require 'node:fs'
     debug '^76-4^', { work_path, repo_path, doc_path, }
     ksk           = new Kaseki { work_path, repo_path, }
     # debug '^76-1^', ksk.lns_version()
-    # debug '^76-2^', ksk._spawn 'fossil', 'version'
-    # debug '^76-3^', ksk._spawn_inner 'fossil', 'version'
+    # debug '^76-2^', ksk.ic.spawn 'fossil', 'version'
+    # debug '^76-3^', ksk.ic._spawn_inner 'fossil', 'version'
     debug '^76-4^', ksk.lns_init { project_name: 'myname', }, repo_path
     urge  '^76-5^', FS.readdirSync work_path
     debug '^76-6^', ksk.raw_version()
@@ -187,8 +188,8 @@ FS                        = require 'node:fs'
 
 ############################################################################################################
 if module is require.main then do =>
-  # @kaseki_zero()
-  @kaseki_generated_methods()
+  @kaseki_zero()
+  # @kaseki_generated_methods()
   # @kaseki_as_cli_parameters()
   # test @kaseki_as_cli_parameters
   # @kaseki_create_doc_workflow_for_consuming_app()
