@@ -190,10 +190,9 @@ demo_git_get_dirty_counts = ->
 demo_show_recent_commits = ->
   { Dpan, }             = require H.dpan_path
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
-  { Dba, }              = require H.dba_path
+  { DBay, }             = require '../../../apps/dbay'
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  dba                   = new Dba()
-  dba.open { path: db_path, }
+  dba                   = new DBay { path: db_path, }
   dpan                  = new Dpan { dba, recreate: true, }
   recent_commits        = []
   pkgs                  = get_pkg_infos dpan
