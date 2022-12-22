@@ -31,13 +31,12 @@
         path: repo_home
       }) {
       return GUY.temp.with_directory(function({
-          path: work_home
+          path: work_path
         }) {
-        var error, k, ksk, readme_path, ref, repo_path, strange_name, v, work_path;
+        var error, k, ksk, readme_path, ref, repo_path, strange_name, v;
         debug('^98-1^', rpr(repo_home));
-        debug('^98-2^', rpr(work_home));
+        debug('^98-2^', rpr(work_path));
         repo_path = PATH.join(repo_home, 'kaseki-demo.fossil');
-        work_path = PATH.join(work_home);
         ksk = new Kaseki({repo_path, work_path});
         info('^98-3^', rpr(ksk.lns_version()));
         // 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
@@ -67,16 +66,18 @@
           });
         }
         //.....................................................................................................
+        urge('^98-26^', FS.readdirSync(repo_home));
+        urge('^98-27^', FS.readdirSync(work_path));
         urge('^98-6^', ksk.open());
         urge('^98-7^', ksk.list_file_names());
         urge('^98-8^', ksk.list_file_paths());
         urge('^98-9^', ksk.ls());
         //.....................................................................................................
-        readme_path = PATH.join(work_home, 'README.md');
+        readme_path = PATH.join(work_path, 'README.md');
         FS.writeFileSync(readme_path, `# MyProject
 
 A fancy text explaing MyProject.`);
-        help('^98-10^', rpr(ksk._spawn('fossil', 'changes')));
+        help('^98-10^', rpr(ksk.ic.spawn('fossil', 'changes')));
         urge('^98-11^', ksk.add(readme_path));
         urge('^98-12^', ksk.commit("add README.md"));
         urge('^98-13^', ksk.list_file_names());
@@ -84,8 +85,8 @@ A fancy text explaing MyProject.`);
         FS.appendFileSync(readme_path, "\n\nhelo");
         strange_name = '  strange.txt';
         FS.appendFileSync(PATH.join(work_path, strange_name), "\n\nhelo");
-        help('^98-14^', rpr(ksk._spawn('fossil', 'changes')));
-        help('^98-15^', rpr(ksk._spawn('fossil', 'extras')));
+        help('^98-14^', rpr(ksk.ic.spawn('fossil', 'changes')));
+        help('^98-15^', rpr(ksk.ic.spawn('fossil', 'extras')));
         help('^98-16^', rpr(ksk.add(strange_name)));
         urge('^98-17^', ksk.commit("add file with strange name"));
         help('^98-18^', rpr(ksk.lns_changes()));
@@ -105,7 +106,7 @@ A fancy text explaing MyProject.`);
         }
         help('^98-25^', ksk.list_file_names());
         urge('^98-26^', FS.readdirSync(repo_home));
-        return urge('^98-27^', FS.readdirSync(work_home));
+        return urge('^98-27^', FS.readdirSync(work_path));
       });
     });
     return typeof done === "function" ? done() : void 0;
@@ -265,8 +266,8 @@ A fancy text explaing MyProject.`);
       debug('^76-4^', {work_path, repo_path, doc_path});
       ksk = new Kaseki({work_path, repo_path});
       // debug '^76-1^', ksk.lns_version()
-      // debug '^76-2^', ksk._spawn 'fossil', 'version'
-      // debug '^76-3^', ksk._spawn_inner 'fossil', 'version'
+      // debug '^76-2^', ksk.ic.spawn 'fossil', 'version'
+      // debug '^76-3^', ksk.ic._spawn_inner 'fossil', 'version'
       debug('^76-4^', ksk.lns_init({
         project_name: 'myname'
       }, repo_path));
@@ -285,8 +286,8 @@ A fancy text explaing MyProject.`);
   //###########################################################################################################
   if (module === require.main) {
     (() => {
-      // @kaseki_zero()
-      this.kaseki_generated_methods();
+      this.kaseki_zero();
+      // @kaseki_generated_methods()
       // @kaseki_as_cli_parameters()
       // test @kaseki_as_cli_parameters
       // @kaseki_create_doc_workflow_for_consuming_app()

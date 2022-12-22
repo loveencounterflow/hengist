@@ -270,13 +270,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_show_recent_commits = function() {
-    var Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, recent_commits, ref, subject;
+    var DBay, Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, recent_commits, ref, subject;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    ({Dba} = require(H.dba_path));
+    ({DBay} = require('../../../apps/dbay'));
     db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
-    dba = new Dba();
-    dba.open({
+    dba = new DBay({
       path: db_path
     });
     dpan = new Dpan({
