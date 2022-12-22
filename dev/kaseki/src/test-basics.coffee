@@ -32,13 +32,13 @@ FS                        = require 'node:fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @kaseki_zero = ( T, done ) ->
-  { Kaseki } = require '../../../apps/kaseki'
+  { Fossil } = require '../../../apps/kaseki'
   GUY.temp.with_directory ({ path: repo_home, }) ->
     GUY.temp.with_directory ({ path: work_path, }) ->
       debug '^98-1^', rpr repo_home
       debug '^98-2^', rpr work_path
       repo_path     = PATH.join repo_home,     'kaseki-demo.fossil'
-      ksk           = new Kaseki { repo_path, work_path, }
+      ksk           = new Fossil { repo_path, work_path, }
       info  '^98-3^', rpr ksk.lns_version()
       # 'This is fossil version 2.21 [3e95d94583] 2022-11-30 11:44:26 UTC'
       T?.ok /^This is fossil version .*UTC$/.test ksk.lns_version()
@@ -114,11 +114,11 @@ FS                        = require 'node:fs'
       is connected to the current project) ###
 
   #.........................................................................................................
-  { Kaseki } = require '../../../apps/kaseki'
+  { Fossil } = require '../../../apps/kaseki'
   GUY.temp.with_directory ({ path: work_path, }) ->
     debug '^99-1^', rpr work_path
     repo_path     = work_path
-    ksk           = new Kaseki { work_path, repo_path, }
+    ksk           = new Fossil { work_path, repo_path, }
     info  '^99-3^', rpr ksk.lns_version()
     urge  '^99-26^', FS.readdirSync repo_path
     urge  '^99-27^', FS.readdirSync work_path
@@ -160,13 +160,13 @@ FS                        = require 'node:fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @kaseki_generated_methods = ( T, done ) ->
-  { Kaseki } = require '../../../apps/kaseki'
+  { Fossil } = require '../../../apps/kaseki'
   #.........................................................................................................
   GUY.temp.with_directory ({ path: work_path, }) ->
     repo_path     = PATH.join work_path, 'myname.fossil'
     doc_path      = PATH.join work_path, 'somefile.txt'
     debug '^76-4^', { work_path, repo_path, doc_path, }
-    ksk           = new Kaseki { work_path, repo_path, }
+    ksk           = new Fossil { work_path, repo_path, }
     # debug '^76-1^', ksk.lns_version()
     # debug '^76-2^', ksk.ic.spawn 'fossil', 'version'
     # debug '^76-3^', ksk.ic._spawn_inner 'fossil', 'version'
