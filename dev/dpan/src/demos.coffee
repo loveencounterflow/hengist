@@ -95,38 +95,33 @@ demo_db_add_pkg_infos = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-get_gitlog = ( pkg_fspath ) ->
+get_gitlog = ( dpan, pkg_fspath ) ->
   debug '^353455^', pkg_fspath
   # if pkg_fspath.endsWith '/cxltx'
   #   warn "^439342344^ skipping #{pkg_fspath}"
   #   return []
-  gitlog              = ( require 'gitlog' ).default
-  cfg                 =
-    repo:         pkg_fspath
-    number:       1e6
-    execOptions:  { maxBuffer: 40096 * 1024, },
-    fields:       [ 'abbrevHash', 'authorDate', 'files', 'subject', ],
-  try commits = gitlog cfg catch error
-    # throw error
-    warn "^347834^ when trying to get git logs for #{pkg_fspath}, an error occurred:"
-    warn "#{error.code} #{error.message}"
-    return []
+  commits = dpan.git_get_log { pkg_fspath, }
+  # try commits = gitlog cfg catch error
+  #   # throw error
+  #   warn "^347834^ when trying to get git logs for #{pkg_fspath}, an error occurred:"
+  #   warn "#{error.code} #{error.message}"
+  #   throw error
+  #   return []
   commit_count  = commits.length
   info "commit_count:", commit_count, pkg_fspath
   ### NOTE commits are ordered newest first ###
   for commit in commits[ .. 3 ]
-    file_count  = commit.files.length
-    short_hash  = commit.abbrevHash
-    date        = commit.authorDate
-    subject     = to_width commit.subject, 100
+    short_hash  = commit.hash
+    date        = commit.date_iso
+    subject     = to_width commit.message, 100
     subject     = subject.trim()
-    urge file_count, short_hash, date, subject
+    urge short_hash, date, subject
   #.........................................................................................................
   R               = []
-  for commit in commits[ .. 100 ]
+  for commit in commits # [ .. 100 ]
     name    = PATH.basename pkg_fspath
-    date    = commit.authorDate.replace /:[^:]+$/, ''
-    subject = commit.subject.trim()
+    date    = commit.date_iso
+    subject = commit.message.trim()
     R.push { name, date, subject, }
   return R
 
@@ -198,9 +193,10 @@ demo_show_recent_commits = ->
   help '^46456^', "using DB at #{db_path}"
   #.........................................................................................................
   for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkgs
-    for commit in get_gitlog pkg_fspath
+    for commit in get_gitlog dpan, pkg_fspath
       recent_commits.push commit
   #.........................................................................................................
+  ### TAINT the idea was to use the DB for this kind of processing ###
   recent_commits.sort ( a, b ) ->
     return -1 if a.date < b.date
     return +1 if a.date > b.date
@@ -283,7 +279,7 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
-  # await demo_show_recent_commits()
+  await demo_show_recent_commits()
   await demo_git_get_dirty_counts()
   # await demo_variables()
   # await demo_staged_file_paths()
