@@ -130,51 +130,39 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  get_gitlog = function(pkg_fspath) {
-    var R, cfg, commit, commit_count, commits, date, error, file_count, gitlog, i, j, len, len1, name, ref, ref1, short_hash, subject;
+  get_gitlog = function(dpan, pkg_fspath) {
+    var R, commit, commit_count, commits, date, i, j, len, len1, name, ref, short_hash, subject;
     debug('^353455^', pkg_fspath);
     // if pkg_fspath.endsWith '/cxltx'
     //   warn "^439342344^ skipping #{pkg_fspath}"
     //   return []
-    gitlog = (require('gitlog')).default;
-    cfg = {
-      repo: pkg_fspath,
-      number: 1e6,
-      execOptions: {
-        maxBuffer: 40096 * 1024
-      },
-      fields: ['abbrevHash', 'authorDate', 'files', 'subject']
-    };
-    try {
-      commits = gitlog(cfg);
-    } catch (error1) {
-      error = error1;
-      // throw error
-      warn(`^347834^ when trying to get git logs for ${pkg_fspath}, an error occurred:`);
-      warn(`${error.code} ${error.message}`);
-      return [];
-    }
+    commits = dpan.git_get_log({pkg_fspath});
+    // try commits = gitlog cfg catch error
+    //   # throw error
+    //   warn "^347834^ when trying to get git logs for #{pkg_fspath}, an error occurred:"
+    //   warn "#{error.code} #{error.message}"
+    //   throw error
+    //   return []
     commit_count = commits.length;
     info("commit_count:", commit_count, pkg_fspath);
     ref = commits.slice(0, 4);
     /* NOTE commits are ordered newest first */
     for (i = 0, len = ref.length; i < len; i++) {
       commit = ref[i];
-      file_count = commit.files.length;
-      short_hash = commit.abbrevHash;
-      date = commit.authorDate;
-      subject = to_width(commit.subject, 100);
+      short_hash = commit.hash;
+      date = commit.date_iso;
+      subject = to_width(commit.message, 100);
       subject = subject.trim();
-      urge(file_count, short_hash, date, subject);
+      urge(short_hash, date, subject);
     }
     //.........................................................................................................
     R = [];
-    ref1 = commits.slice(0, 101);
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      commit = ref1[j];
+// [ .. 100 ]
+    for (j = 0, len1 = commits.length; j < len1; j++) {
+      commit = commits[j];
       name = PATH.basename(pkg_fspath);
-      date = commit.authorDate.replace(/:[^:]+$/, '');
-      subject = commit.subject.trim();
+      date = commit.date_iso;
+      subject = commit.message.trim();
       R.push({name, date, subject});
     }
     return R;
@@ -287,13 +275,14 @@
 //.........................................................................................................
     for (i = 0, len = pkgs.length; i < len; i++) {
       ({pkg_fspath, pkg_rel_fspath, pkg_name} = pkgs[i]);
-      ref = get_gitlog(pkg_fspath);
+      ref = get_gitlog(dpan, pkg_fspath);
       for (j = 0, len1 = ref.length; j < len1; j++) {
         commit = ref[j];
         recent_commits.push(commit);
       }
     }
     //.........................................................................................................
+    /* TAINT the idea was to use the DB for this kind of processing */
     recent_commits.sort(function(a, b) {
       if (a.date < b.date) {
         return -1;
@@ -411,7 +400,7 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
-      // await demo_show_recent_commits()
+      await demo_show_recent_commits();
       return (await demo_git_get_dirty_counts());
     })();
   }
