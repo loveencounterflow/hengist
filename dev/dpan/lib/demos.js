@@ -230,20 +230,19 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_git_get_dirty_counts = function() {
-    var Dpan, Tbl, db_path, dba, dcs, dpan, i, k, len, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, sum, v;
+    var DBay, Dpan, Tbl, db_path, dba, dcs, dpan, i, k, len, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, sum, v;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
-    ({Dba} = require(H.dba_path));
+    ({DBay} = require('../../../apps/dbay'));
     db_path = PATH.resolve(PATH.join(__dirname, '../../../data/dpan.sqlite'));
-    dba = new Dba();
-    dba.open({
+    dba = new DBay({
       path: db_path
     });
-    //.........................................................................................................
     dpan = new Dpan({
       dba,
       recreate: true
     });
+    //.........................................................................................................
     pkgs = get_pkg_infos(dpan);
     help('^46456^', `using DB at ${db_path}`);
     whisper("ACC: ahead-commit  count");
@@ -412,7 +411,7 @@
       // await demo_db_add_pkg_info()
       // await demo_db_add_pkg_infos()
       // await demo_git_fetch_pkg_status()
-      await demo_show_recent_commits();
+      // await demo_show_recent_commits()
       return (await demo_git_get_dirty_counts());
     })();
   }
