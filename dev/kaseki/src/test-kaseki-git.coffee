@@ -67,6 +67,8 @@ FS                        = require 'node:fs'
       FS.appendFileSync ( PATH.join work_path, 'foo.txt', ), "helo world"
       info '^76-6^', local.status()
       T?.eq local.status(), { local_branch: 'main', remote_branch: 'hoopla/main', ahead_count: 0, behind_count: 0, dirty_count: 1 }
+      urge '^76-6^', local.ic.spawn 'git', 'log', "--pretty=format:'%h%x09%cI%x09%s'", '--since="12 months ago"'
+      urge '^76-6^', local.log { since: '12 months ago', }
   #.........................................................................................................
   done?()
 
