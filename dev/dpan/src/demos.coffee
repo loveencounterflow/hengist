@@ -165,12 +165,11 @@ _get_pkg_infos = ( dpan, ref_path, project_path_pattern ) ->
 demo_git_get_dirty_counts = ->
   { Dpan, }             = require H.dpan_path
   { Tbl, }              = require '../../../apps/icql-dba-tabulate'
-  { Dba, }              = require H.dba_path
+  { DBay, }             = require '../../../apps/dbay'
   db_path               = PATH.resolve PATH.join __dirname, '../../../data/dpan.sqlite'
-  dba                   = new Dba()
-  dba.open { path: db_path, }
-  #.........................................................................................................
+  dba                   = new DBay { path: db_path, }
   dpan                  = new Dpan { dba, recreate: true, }
+  #.........................................................................................................
   pkgs                  = get_pkg_infos dpan
   help '^46456^', "using DB at #{db_path}"
   whisper "ACC: ahead-commit  count"
@@ -284,7 +283,7 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
-  await demo_show_recent_commits()
+  # await demo_show_recent_commits()
   await demo_git_get_dirty_counts()
   # await demo_variables()
   # await demo_staged_file_paths()
