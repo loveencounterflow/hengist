@@ -116,7 +116,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   db SQL"""create table numbers (
     n   integer not null primary key,
     sqr integer );"""
-  insert_number = db.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+  insert_number = db.alt.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
   #.........................................................................................................
   db ->
     for n in [ 0 .. 4 ]
@@ -165,7 +165,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
       return null
   #.........................................................................................................
   do =>
-    insert_number   = db.prepare_insert { into: 'nnt', }
+    insert_number   = db.alt.prepare_insert { into: 'nnt', }
     select_numbers  = SQL"""select n from nnt order by n;"""
     select_rows     = SQL"""
       select
