@@ -121,8 +121,9 @@ get_gitlog = ( dpan, pkg_fspath ) ->
   for commit in commits # [ .. 100 ]
     name    = PATH.basename pkg_fspath
     date    = commit.date_iso
+    hash    = commit.hash
     subject = commit.message.trim()
-    R.push { name, date, subject, }
+    R.push { name, date, hash, subject, }
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -203,9 +204,13 @@ demo_show_recent_commits = ->
     return 0
   #.........................................................................................................
   for commit in recent_commits
-    name    = to_width commit.name, 20
-    subject = to_width commit.subject, 100
-    echo ( CND.white commit.date ), ( chalk.inverse.bold.hex hashbow name ) name + ' ' + subject
+    name    = to_width commit.name,      20
+    subject = to_width commit.subject,  100
+    hash    = to_width commit.hash,      10
+    echo \
+      ( CND.white               commit.date ), \
+      ( CND.reverse CND.yellow  hash        ) + \
+      ( chalk.inverse.bold.hex hashbow name ) ' ' + name + ' ' + subject
   #.........................................................................................................
   return null
 
