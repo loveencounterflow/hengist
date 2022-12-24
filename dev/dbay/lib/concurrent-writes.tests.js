@@ -334,7 +334,7 @@ sqr integer );`);
     db(SQL`create table numbers (
 n   integer not null primary key,
 sqr integer );`);
-    insert_number = db.prepare_insert({
+    insert_number = db.alt.prepare_insert({
       into: 'numbers',
       on_conflict: {
         update: true
@@ -471,7 +471,7 @@ sqr integer );`);
     });
     (() => {      //.........................................................................................................
       var d, insert_number, ref, select_numbers, select_rows;
-      insert_number = db.prepare_insert({
+      insert_number = db.alt.prepare_insert({
         into: 'nnt'
       });
       select_numbers = SQL`select n from nnt order by n;`;
