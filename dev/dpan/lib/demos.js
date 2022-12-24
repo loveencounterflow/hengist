@@ -131,7 +131,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_gitlog = function(dpan, pkg_fspath) {
-    var R, commit, commit_count, commits, date, i, j, len, len1, name, ref, short_hash, subject;
+    var R, commit, commit_count, commits, date, hash, i, j, len, len1, name, ref, short_hash, subject;
     debug('^353455^', pkg_fspath);
     // if pkg_fspath.endsWith '/cxltx'
     //   warn "^439342344^ skipping #{pkg_fspath}"
@@ -162,8 +162,9 @@
       commit = commits[j];
       name = PATH.basename(pkg_fspath);
       date = commit.date_iso;
+      hash = commit.hash;
       subject = commit.message.trim();
-      R.push({name, date, subject});
+      R.push({name, date, hash, subject});
     }
     return R;
   };
@@ -257,7 +258,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_show_recent_commits = function() {
-    var DBay, Dpan, Tbl, commit, db_path, dba, dpan, i, j, l, len, len1, len2, name, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, recent_commits, ref, subject;
+    var DBay, Dpan, Tbl, commit, db_path, dba, dpan, hash, i, j, l, len, len1, len2, name, pkg_fspath, pkg_name, pkg_rel_fspath, pkgs, recent_commits, ref, subject;
     ({Dpan} = require(H.dpan_path));
     ({Tbl} = require('../../../apps/icql-dba-tabulate'));
     ({DBay} = require('../../../apps/dbay'));
@@ -297,7 +298,8 @@
       commit = recent_commits[l];
       name = to_width(commit.name, 20);
       subject = to_width(commit.subject, 100);
-      echo(CND.white(commit.date), (chalk.inverse.bold.hex(hashbow(name)))(name + ' ' + subject));
+      hash = to_width(commit.hash, 10);
+      echo(CND.white(commit.date), (CND.reverse(CND.yellow(hash))) + (chalk.inverse.bold.hex(hashbow(name)))(' ' + name + ' ' + subject));
     }
     //.........................................................................................................
     return null;
