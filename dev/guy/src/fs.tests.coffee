@@ -135,11 +135,33 @@ matchers = freeze matchers
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_lines_yields_from_empty_file = ( T, done ) ->
+  GUY     = require H.guy_path
+  paths   = [
+    [ 'ef', '../../../assets/empty-file.txt',                   ]
+    [ '3n', '../../../assets/file-with-3-lines-no-eofnl.txt',   ]
+    [ '3w', '../../../assets/file-with-3-lines-with-eofnl.txt', ]
+    [ '1n', '../../../assets/file-with-single-nl.txt',          ], ]
+  #.........................................................................................................
+  result  = []
+  for [ id, path, ] in paths
+    path  = PATH.resolve PATH.join __dirname, path
+    lnr   = 0
+    for line from GUY.fs.walk_lines path
+      lnr++
+      result.push "#{id}##{lnr}:#{line}"
+  #.........................................................................................................
+  T?.eq result, [ 'ef#1:', '3n#1:1', '3n#2:2', '3n#3:3', '3w#1:1', '3w#2:2', '3w#3:3', '1n#1:' ]
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @, { timeout: 5000, }
+  @GUY_fs_walk_lines_yields_from_empty_file()
+  # test @, { timeout: 5000, }
   # test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
   # test @[ "guy.fs.get_content_hash" ]
   # @[ "guy.fs.get_content_hash" ]()
