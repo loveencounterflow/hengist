@@ -1368,7 +1368,7 @@
       T.eq(GUY.props.keys(lst, {
         symbols: true,
         builtins: true
-      }), ['0', 'length', 'constructor', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'at', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__']);
+      }), ['0', 'length', 'constructor', 'at', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__']);
     }
     if (T != null) {
       T.eq(GUY.props.keys(Array, {
@@ -1902,22 +1902,22 @@
       // test @[ "guy.props.crossmerge()" ]
       // test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
       // demo_keys()
-      // @[ "GUY.props.keys()" ]()
-      // test @[ "GUY.props.keys()" ]
-      // @[ "GUY.props.Strict_owner 1" ]()
-      // test @[ "GUY.props.Strict_owner 1" ]
-      // @[ "GUY.props.has()" ]()
-      // test @[ "GUY.props.has()" ]
-      // @GUY_props_get()
-      // test @GUY_props_get
-      // @GUY_props_xray()
-      // test @GUY_props_xray
-      this.GUY_props_locking();
-      return test(this.GUY_props_locking);
+      this["GUY.props.keys()"]();
+      return test(this["GUY.props.keys()"]);
     })();
   }
 
-  // @[ "GUY.props.Strict_owner 2" ]()
+  // @[ "GUY.props.Strict_owner 1" ]()
+// test @[ "GUY.props.Strict_owner 1" ]
+// @[ "GUY.props.has()" ]()
+// test @[ "GUY.props.has()" ]
+// @GUY_props_get()
+// test @GUY_props_get
+// @GUY_props_xray()
+// test @GUY_props_xray
+// @GUY_props_locking()
+// test @GUY_props_locking
+// @[ "GUY.props.Strict_owner 2" ]()
 // test @[ "GUY.props.Strict_owner 2" ]
 // test @[ "GUY.props.Strict_owner can use explicit target" ]
 // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
