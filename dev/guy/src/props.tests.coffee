@@ -507,7 +507,7 @@ demo_keys = ->
   T?.eq ( Object.keys lst    ), [ '0', ]
   T?.eq ( ( k for k of lst ) ), [ '0', ]
   T?.eq ( GUY.props.keys lst ), [ '0', ]
-  T?.eq ( GUY.props.keys lst, { symbols: true, builtins: true, } ), [ '0', 'length', 'constructor', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'at', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__' ]
+  T?.eq ( GUY.props.keys lst, { symbols: true, builtins: true, } ), [ '0', 'length', 'constructor', 'at', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__' ]
   T?.eq ( GUY.props.keys Array, { symbols: true, builtins: true, } ), [ 'length', 'name', 'prototype', 'isArray', 'from', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString' ]
   #.........................................................................................................
   done?()
@@ -773,8 +773,8 @@ if require.main is module then do =>
   # test @[ "guy.props.crossmerge()" ]
   # test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
   # demo_keys()
-  # @[ "GUY.props.keys()" ]()
-  # test @[ "GUY.props.keys()" ]
+  @[ "GUY.props.keys()" ]()
+  test @[ "GUY.props.keys()" ]
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
@@ -783,8 +783,8 @@ if require.main is module then do =>
   # test @GUY_props_get
   # @GUY_props_xray()
   # test @GUY_props_xray
-  @GUY_props_locking()
-  test @GUY_props_locking
+  # @GUY_props_locking()
+  # test @GUY_props_locking
   # @[ "GUY.props.Strict_owner 2" ]()
   # test @[ "GUY.props.Strict_owner 2" ]
   # test @[ "GUY.props.Strict_owner can use explicit target" ]
