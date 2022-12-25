@@ -194,23 +194,45 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs_walk_lines_yields_from_empty_file = function(T, done) {
+    var GUY, i, id, len, line, lnr, path, paths, ref, result;
+    GUY = require(H.guy_path);
+    paths = [['ef', '../../../assets/empty-file.txt'], ['3n', '../../../assets/file-with-3-lines-no-eofnl.txt'], ['3w', '../../../assets/file-with-3-lines-with-eofnl.txt'], ['1n', '../../../assets/file-with-single-nl.txt']];
+    //.........................................................................................................
+    result = [];
+    for (i = 0, len = paths.length; i < len; i++) {
+      [id, path] = paths[i];
+      path = PATH.resolve(PATH.join(__dirname, path));
+      lnr = 0;
+      ref = GUY.fs.walk_lines(path);
+      for (line of ref) {
+        lnr++;
+        result.push(`${id}#${lnr}:${line}`);
+      }
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(result, ['ef#1:', '3n#1:1', '3n#2:2', '3n#3:3', '3w#1:1', '3w#2:2', '3w#3:3', '1n#1:']);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this, {
-        timeout: 5000
-      });
+      return this.GUY_fs_walk_lines_yields_from_empty_file();
     })();
   }
 
-  // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
+  // test @, { timeout: 5000, }
+// test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
 // test @[ "guy.fs.get_content_hash" ]
 // @[ "guy.fs.get_content_hash" ]()
 // test @[ "guy.props.def(), .hide()" ]
-// test @[ "guy.obj.pick_with_fallback()" ]
-// test @[ "guy.obj.pluck_with_fallback()" ]
-// test @[ "guy.obj.nullify_undefined()" ]
-// test @[ "guy.obj.omit_nullish()" ]
 // @[ "configurator" ]()
 // test @[ "await with async steampipes" ]
 // test @[ "nowait with async steampipes" ]
