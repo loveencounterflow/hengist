@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var FS, GUY, H, PATH, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -19,6 +19,10 @@
   guy = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
+
+  PATH = require('node:path');
+
+  FS = require('node:fs');
 
   //-----------------------------------------------------------------------------------------------------------
   this.doc_object_creation = function(T, done) {
@@ -86,20 +90,137 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.doc_file_path_resolution = function(T, done) {
+    var DBay, Document;
+    ({DBay} = require('../../../apps/dbay'));
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home_parent
+      }) {
+      var doc, home;
+      home = PATH.resolve(home_parent, 'dmd');
+      FS.mkdirSync(home);
+      doc = new Document({home});
+      debug('^34-5^', {doc});
+      debug('^34-5^', doc.cfg.home === home);
+      if (T != null) {
+        T.eq(doc.get_doc_file_abspath('.'), `${home_parent}/dmd`);
+      }
+      if (T != null) {
+        T.eq(doc.get_doc_file_abspath('foo.md'), `${home_parent}/dmd/foo.md`);
+      }
+      if (T != null) {
+        T.eq(doc.get_doc_file_abspath('/path/to/foo.md'), "/path/to/foo.md");
+      }
+      if (T != null) {
+        T.eq(doc.get_doc_file_abspath('./path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
+      }
+      if (T != null) {
+        T.eq(doc.get_doc_file_abspath('path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
+      }
+      //.......................................................................................................
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.doc_add_and_read_file = function(T, done) {
     var DBay, Document;
     ({DBay} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
-    (function() {      //.........................................................................................................
-      var doc, file;
-      doc = new Document();
-      file = doc.add_file({
-        doc_fad_id: 'xtxt',
-        doc_file_id: 'mytxt',
-        doc_file_path: 'somewhere'
-      });
-      return debug('^34-5^', {file});
-    })();
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home_parent
+      }) {
+      var doc, doc_file_id, doc_file_path, file, files, home, i, len, result, source_path, target_path;
+      home = PATH.resolve(home_parent, 'dmd');
+      FS.mkdirSync(home);
+      doc = new Document({home});
+      result = [];
+      debug('^34-5^', {doc});
+      files = [
+        {
+          doc_file_id: 'ef',
+          doc_file_path: 'empty-file.txt'
+        },
+        {
+          doc_file_id: '3n',
+          doc_file_path: 'file-with-3-lines-no-eofnl.txt'
+        },
+        {
+          doc_file_id: '3w',
+          doc_file_path: 'file-with-3-lines-with-eofnl.txt'
+        },
+        {
+          doc_file_id: '1n',
+          doc_file_path: 'file-with-single-nl.txt'
+        }
+      ];
+      for (i = 0, len = files.length; i < len; i++) {
+        ({doc_file_id, doc_file_path} = files[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
+        target_path = PATH.resolve(home, doc_file_path);
+        FS.cpSync(source_path, target_path);
+        file = doc.add_file({doc_file_id, doc_file_path});
+        result.push(file);
+      }
+      H.tabulate("files", result);
+      H.tabulate("lines", doc.db("select * from doc_lines;"));
+      //.......................................................................................................
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.doc_paragraphs = function(T, done) {
+    var DBay, Document, SQL;
+    ({DBay, SQL} = require('../../../apps/dbay'));
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home_parent
+      }) {
+      var doc, doc_file_id, doc_file_path, file, files, home, i, len, result, source_path, target_path;
+      home = PATH.resolve(home_parent, 'dmd');
+      FS.mkdirSync(home);
+      doc = new Document({home});
+      result = [];
+      debug('^34-5^', {doc});
+      files = [
+        {
+          doc_file_id: 'sp',
+          doc_file_path: 'short-proposal.mkts.md'
+        },
+        {
+          doc_file_id: '3p',
+          doc_file_path: 'datamill/three-paragraphs.txt'
+        },
+        {
+          doc_file_id: '3n',
+          doc_file_path: 'file-with-3-lines-no-eofnl.txt'
+        },
+        {
+          doc_file_id: '1n',
+          doc_file_path: 'file-with-single-nl.txt'
+        }
+      ];
+      for (i = 0, len = files.length; i < len; i++) {
+        ({doc_file_id, doc_file_path} = files[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
+        doc_file_path = PATH.basename(doc_file_path);
+        target_path = PATH.resolve(home, doc_file_path);
+        FS.cpSync(source_path, target_path);
+        file = doc.add_file({doc_file_id, doc_file_path});
+        result.push(file);
+      }
+      H.tabulate("files", result);
+      H.tabulate("lines", doc.db(SQL`select * from doc_lines;`));
+      //.......................................................................................................
+      return null;
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -108,7 +229,12 @@
     (() => {
       // test @doc_object_creation
       // test @doc_document_creation
-      return this.doc_add_and_read_file();
+      // @doc_file_path_resolution()
+      // test @doc_file_path_resolution
+      // @doc_add_and_read_file()
+      // test @doc_add_and_read_file
+      this.doc_paragraphs();
+      return test(this.doc_paragraphs);
     })();
   }
 

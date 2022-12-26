@@ -154,21 +154,21 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["guy.fs.get_content_hash"] = function(T, done) {
-    var guy, path;
-    guy = require(H.guy_path);
+  this.GUY_fs_get_content_hash = function(T, done) {
+    var GUY, path;
+    GUY = require(H.guy_path);
     path = 'short-proposal.mkts.md';
     path = PATH.resolve(PATH.join(__dirname, '../../../assets', path));
     (() => {      //.........................................................................................................
       var matcher, result;
       matcher = '2c244f1d168c54906';
-      result = guy.fs.get_content_hash(path);
+      result = GUY.fs.get_content_hash(path);
       return T != null ? T.eq(result, matcher) : void 0;
     })();
     (() => {      //.........................................................................................................
       var matcher, result;
       matcher = '2c24';
-      result = guy.fs.get_content_hash(path, {
+      result = GUY.fs.get_content_hash(path, {
         length: 4
       });
       return T != null ? T.eq(result, matcher) : void 0;
@@ -177,7 +177,7 @@
       var error, result;
       error = null;
       try {
-        result = guy.fs.get_content_hash(path, {
+        result = GUY.fs.get_content_hash(path, {
           length: 400
         });
       } catch (error1) {
@@ -187,6 +187,22 @@
         }
       }
       return T != null ? T.ok(error != null) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var foobar;
+      path = 'NONEXISTANT';
+      if (T != null) {
+        T.eq(FS.existsSync(path), false);
+      }
+      if (T != null) {
+        T.throws(/No such file or directory/, function() {
+          return GUY.fs.get_content_hash(path);
+        });
+      }
+      foobar = Symbol('foobar');
+      return T != null ? T.eq(GUY.fs.get_content_hash(path, {
+        fallback: foobar
+      }), foobar) : void 0;
     })();
     if (typeof done === "function") {
       done();
@@ -224,22 +240,23 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return this.GUY_fs_walk_lines_yields_from_empty_file();
+      // @GUY_fs_walk_lines_yields_from_empty_file()
+      // test @, { timeout: 5000, }
+      // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
+      // test @[ "guy.fs.get_content_hash" ]
+      // @[ "guy.fs.get_content_hash" ]()
+      // test @[ "guy.props.def(), .hide()" ]
+      // @[ "configurator" ]()
+      // test @[ "await with async steampipes" ]
+      // test @[ "nowait with async steampipes" ]
+      // test @[ "use-call" ]
+      // @[ "await with async steampipes" ]()
+      // @[ "demo" ]()
+      // @[ "nowait" ]()
+      this.GUY_fs_get_content_hash();
+      return test(this.GUY_fs_get_content_hash);
     })();
   }
-
-  // test @, { timeout: 5000, }
-// test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
-// test @[ "guy.fs.get_content_hash" ]
-// @[ "guy.fs.get_content_hash" ]()
-// test @[ "guy.props.def(), .hide()" ]
-// @[ "configurator" ]()
-// test @[ "await with async steampipes" ]
-// test @[ "nowait with async steampipes" ]
-// test @[ "use-call" ]
-// @[ "await with async steampipes" ]()
-// @[ "demo" ]()
-// @[ "nowait" ]()
 
 }).call(this);
 

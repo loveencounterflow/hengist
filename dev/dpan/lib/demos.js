@@ -240,6 +240,7 @@
 //.........................................................................................................
     for (i = 0, len = pkgs.length; i < len; i++) {
       ({pkg_fspath, pkg_rel_fspath, pkg_name, dcs} = pkgs[i]);
+      // debug '^3234^', { pkg_fspath, pkg_name, }
       sum = dcs.sum;
       delete dcs.sum;
       if (sum > 0) {
