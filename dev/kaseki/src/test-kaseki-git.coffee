@@ -38,6 +38,9 @@ FS                        = require 'node:fs'
   GUY.temp.with_directory ({ path: remote_path, }) ->
     remote = new Git { work_path: remote_path, repo_path: remote_path, }
     remote.ic.spawn 'git', 'init', '--bare'
+    # remote.ic.spawn 'git', 'branch', '-m', 'master', 'main'
+    # remote.ic.spawn 'git', 'checkout', '-b', 'main'
+    # remote.ic.spawn 'git', 'symbolic-ref', 'HEAD', 'refs/heads/main'
     urge '^76-1^', FS.readdirSync remote_path
     T?.eq ( FS.readdirSync remote_path ), [ 'HEAD', 'branches', 'config', 'description', 'hooks', 'info', 'objects', 'refs' ]
     # echo '---'; echo remote.ic.spawn 'git', 'branch', '-m', 'master', 'main'
@@ -59,16 +62,20 @@ FS                        = require 'node:fs'
       T?.eq local.status(), { local_branch: 'main', remote_branch: null, ahead_count: 0, behind_count: 0, dirty_count: 0 }
       #.....................................................................................................
       local.ic.spawn 'git', 'remote', 'add', 'hoopla', remote_path
+      # local.ic.spawn 'git', 'branch', '--set-upstream-to', 'main', 'hoopla/main'
+      info '^76-5^', local.status()
       local.ic.spawn 'git', 'push', '-u', 'hoopla', 'main'
       #.....................................................................................................
-      info '^76-5^', local.status()
+      info '^76-6^', local.status()
       T?.eq local.status(), { local_branch: 'main', remote_branch: 'hoopla/main', ahead_count: 0, behind_count: 0, dirty_count: 0 }
       #.....................................................................................................
       FS.appendFileSync ( PATH.join work_path, 'foo.txt', ), "helo world"
-      info '^76-6^', local.status()
       T?.eq local.status(), { local_branch: 'main', remote_branch: 'hoopla/main', ahead_count: 0, behind_count: 0, dirty_count: 1 }
-      urge '^76-6^', local.ic.spawn 'git', 'log', "--pretty=format:'%h%x09%cI%x09%s'", '--since="12 months ago"'
-      urge '^76-6^', local.log { since: '12 months ago', }
+      local._add_and_commit_all "second!"
+      info '^76-7^', local.status()
+      T?.eq local.status(), { local_branch: 'main', remote_branch: 'hoopla/main', ahead_count: 1, behind_count: 0, dirty_count: 0 }
+      urge '^76-8^', local.ic.spawn 'git', 'log', "--pretty=format:'%h%x09%cI%x09%s'", '--since="12 months ago"'
+      urge '^76-9^', local.log { since: '12 months ago', }
   #.........................................................................................................
   done?()
 
