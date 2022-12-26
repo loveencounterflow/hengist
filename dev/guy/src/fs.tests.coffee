@@ -111,26 +111,33 @@ matchers = freeze matchers
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "guy.fs.get_content_hash" ] = ( T, done ) ->
-  guy     = require H.guy_path
+@GUY_fs_get_content_hash = ( T, done ) ->
+  GUY     = require H.guy_path
   path    = 'short-proposal.mkts.md'
   path    = PATH.resolve PATH.join __dirname, '../../../assets', path
   #.........................................................................................................
   do =>
     matcher = '2c244f1d168c54906'
-    result  = guy.fs.get_content_hash path
+    result  = GUY.fs.get_content_hash path
     T?.eq result, matcher
   #.........................................................................................................
   do =>
     matcher = '2c24'
-    result  = guy.fs.get_content_hash path, { length: 4, }
+    result  = GUY.fs.get_content_hash path, { length: 4, }
     T?.eq result, matcher
   #.........................................................................................................
   do =>
     error = null
-    try result  = guy.fs.get_content_hash path, { length: 400, } catch error
+    try result  = GUY.fs.get_content_hash path, { length: 400, } catch error
       T?.ok ( error.message.match /unable to generate hash of length 400 using/ )?
     T?.ok error?
+  #.........................................................................................................
+  do =>
+    path = 'NONEXISTANT'
+    T?.eq ( FS.existsSync path ), false
+    T?.throws /No such file or directory/, -> GUY.fs.get_content_hash path
+    foobar = Symbol 'foobar'
+    T?.eq ( GUY.fs.get_content_hash path, { fallback: foobar, } ), foobar
   #.........................................................................................................
   done?()
   return null
@@ -160,7 +167,7 @@ matchers = freeze matchers
 
 ############################################################################################################
 if require.main is module then do =>
-  @GUY_fs_walk_lines_yields_from_empty_file()
+  # @GUY_fs_walk_lines_yields_from_empty_file()
   # test @, { timeout: 5000, }
   # test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
   # test @[ "guy.fs.get_content_hash" ]
@@ -173,6 +180,7 @@ if require.main is module then do =>
   # @[ "await with async steampipes" ]()
   # @[ "demo" ]()
   # @[ "nowait" ]()
-
+  @GUY_fs_get_content_hash()
+  test @GUY_fs_get_content_hash
 
 
