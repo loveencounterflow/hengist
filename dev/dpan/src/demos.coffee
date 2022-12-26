@@ -173,6 +173,7 @@ demo_git_get_dirty_counts = ->
   whisper "DFC: dirty file    count"
   #.........................................................................................................
   for { pkg_fspath, pkg_rel_fspath, pkg_name, dcs, } in pkgs
+    # debug '^3234^', { pkg_fspath, pkg_name, }
     sum = dcs.sum
     delete dcs.sum
     if sum > 0
