@@ -26,7 +26,8 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   validate              } = types
 guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
-
+PATH                      = require 'node:path'
+FS                        = require 'node:fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @doc_object_creation = ( T, done ) ->
@@ -64,14 +65,83 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@doc_file_path_resolution = ( T, done ) ->
+  { DBay }      = require '../../../apps/dbay'
+  { Document }  = require '../../../apps/datamill-v2/lib/document'
+  #.........................................................................................................
+  GUY.temp.with_directory ({ path: home_parent, }) ->
+    home  = PATH.resolve home_parent, 'dmd'
+    FS.mkdirSync home
+    doc   = new Document { home, }
+    debug '^34-5^', { doc, }
+    debug '^34-5^', doc.cfg.home is home
+    T?.eq ( doc.get_doc_file_abspath '.'                ), "#{home_parent}/dmd"
+    T?.eq ( doc.get_doc_file_abspath 'foo.md'           ), "#{home_parent}/dmd/foo.md"
+    T?.eq ( doc.get_doc_file_abspath '/path/to/foo.md'  ), "/path/to/foo.md"
+    T?.eq ( doc.get_doc_file_abspath './path/to/foo.md' ), "#{home_parent}/dmd/path/to/foo.md"
+    T?.eq ( doc.get_doc_file_abspath 'path/to/foo.md'   ), "#{home_parent}/dmd/path/to/foo.md"
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @doc_add_and_read_file = ( T, done ) ->
   { DBay }      = require '../../../apps/dbay'
   { Document }  = require '../../../apps/datamill-v2/lib/document'
   #.........................................................................................................
-  do ->
-    doc   = new Document()
-    file  = doc.add_file { doc_fad_id: 'xtxt', doc_file_id: 'mytxt', doc_file_path: 'somewhere', }
-    debug '^34-5^', { file, }
+  GUY.temp.with_directory ({ path: home_parent, }) ->
+    home    = PATH.resolve home_parent, 'dmd'
+    FS.mkdirSync home
+    doc     = new Document { home, }
+    result  = []
+    debug '^34-5^', { doc, }
+    files   = [
+      { doc_file_id: 'ef', doc_file_path: 'empty-file.txt',                   }
+      { doc_file_id: '3n', doc_file_path: 'file-with-3-lines-no-eofnl.txt',   }
+      { doc_file_id: '3w', doc_file_path: 'file-with-3-lines-with-eofnl.txt', }
+      { doc_file_id: '1n', doc_file_path: 'file-with-single-nl.txt',          } ]
+    for { doc_file_id, doc_file_path, } in files
+      source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
+      target_path   = PATH.resolve home, doc_file_path
+      FS.cpSync source_path, target_path
+      file          = doc.add_file { doc_file_id, doc_file_path, }
+      result.push file
+    H.tabulate "files", result
+    H.tabulate "lines", doc.db "select * from doc_lines;"
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@doc_paragraphs = ( T, done ) ->
+  { DBay
+    SQL  }      = require '../../../apps/dbay'
+  { Document }  = require '../../../apps/datamill-v2/lib/document'
+  #.........................................................................................................
+  GUY.temp.with_directory ({ path: home_parent, }) ->
+    home    = PATH.resolve home_parent, 'dmd'
+    FS.mkdirSync home
+    doc     = new Document { home, }
+    result  = []
+    debug '^34-5^', { doc, }
+    files   = [
+      { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',           }
+      { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',    }
+      { doc_file_id: '3n', doc_file_path: 'file-with-3-lines-no-eofnl.txt',   }
+      { doc_file_id: '1n', doc_file_path: 'file-with-single-nl.txt',          } ]
+    for { doc_file_id, doc_file_path, } in files
+      source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
+      doc_file_path = PATH.basename doc_file_path
+      target_path   = PATH.resolve home, doc_file_path
+      FS.cpSync source_path, target_path
+      file          = doc.add_file { doc_file_id, doc_file_path, }
+      result.push file
+    H.tabulate "files", result
+    H.tabulate "lines", doc.db SQL"select * from doc_lines;"
+    #.......................................................................................................
+    return null
   #.........................................................................................................
   done?()
 
@@ -80,4 +150,9 @@ H                         = require '../../../lib/helpers'
 if require.main is module then do =>
   # test @doc_object_creation
   # test @doc_document_creation
-  @doc_add_and_read_file()
+  # @doc_file_path_resolution()
+  # test @doc_file_path_resolution
+  # @doc_add_and_read_file()
+  # test @doc_add_and_read_file
+  @doc_paragraphs()
+  test @doc_paragraphs
