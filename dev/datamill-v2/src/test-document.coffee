@@ -35,15 +35,15 @@ FS                        = require 'node:fs'
   { Document }  = require '../../../apps/datamill-v2/lib/document'
   T?.eq ( type_of Document ), 'class'
   #.........................................................................................................
-  do ->
+  GUY.temp.with_directory ({ path: home, }) ->
     db  = new DBay()
-    doc = new Document { db, }
+    doc = new Document { db, home, }
     T?.ok doc.db is db
     T?.ok doc.cfg.prefix is 'doc_'
     debug '^5534^', doc
   #.........................................................................................................
-  do ->
-    doc = new Document { prefix: 'doc_', }
+  GUY.temp.with_directory ({ path: home, }) ->
+    doc = new Document { prefix: 'doc_', home, }
     T?.eq ( type_of doc.db ), 'dbay'
     T?.ok doc.cfg.prefix is 'doc_'
   #.........................................................................................................
@@ -54,13 +54,13 @@ FS                        = require 'node:fs'
   { DBay }      = require '../../../apps/dbay'
   { Document }  = require '../../../apps/datamill-v2/lib/document'
   #.........................................................................................................
-  do ->
-    doc = new Document()
+  GUY.temp.with_directory ({ path: home, }) ->
+    doc = new Document { home, }
     T?.eq doc.get_doc_file_ids(), []
-    T?.eq doc.get_doc_fads()[ ... 3 ], [
-      { doc_fad_id: 'External_file_abc', doc_fad_name: 'External_file_abc',   comment: 'abstract base class for external files' },
-      { doc_fad_id: 'File_adapter_abc',  doc_fad_name: 'File_adapter_abc',    comment: 'abstract base class for files' },
-      { doc_fad_id: 'xtxt',              doc_fad_name: 'External_text_file',  comment: 'adapter for external text files' } ]
+    # T?.eq doc.get_doc_fads()[ ... 3 ], [
+    #   { doc_fad_id: 'External_file_abc', doc_fad_name: 'External_file_abc',   comment: 'abstract base class for external files' },
+    #   { doc_fad_id: 'File_adapter_abc',  doc_fad_name: 'File_adapter_abc',    comment: 'abstract base class for files' },
+    #   { doc_fad_id: 'xtxt',              doc_fad_name: 'External_text_file',  comment: 'adapter for external text files' } ]
   #.........................................................................................................
   done?()
 
@@ -97,10 +97,10 @@ FS                        = require 'node:fs'
     result  = []
     debug '^34-5^', { doc, }
     files   = [
-      { doc_file_id: 'ef', doc_file_path: 'empty-file.txt',                   }
-      { doc_file_id: '3n', doc_file_path: 'file-with-3-lines-no-eofnl.txt',   }
-      { doc_file_id: '3w', doc_file_path: 'file-with-3-lines-with-eofnl.txt', }
-      { doc_file_id: '1n', doc_file_path: 'file-with-single-nl.txt',          } ]
+      { doc_file_id: 'ef', doc_file_path: 'datamill/empty-file.txt',                   }
+      { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',   }
+      { doc_file_id: '3w', doc_file_path: 'datamill/file-with-3-lines-with-eofnl.txt', }
+      { doc_file_id: '1n', doc_file_path: 'datamill/file-with-single-nl.txt',          } ]
     for { doc_file_id, doc_file_path, } in files
       source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
       target_path   = PATH.resolve home, doc_file_path
@@ -127,10 +127,10 @@ FS                        = require 'node:fs'
     result  = []
     debug '^34-5^', { doc, }
     files   = [
-      { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',           }
-      { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',    }
-      { doc_file_id: '3n', doc_file_path: 'file-with-3-lines-no-eofnl.txt',   }
-      { doc_file_id: '1n', doc_file_path: 'file-with-single-nl.txt',          } ]
+      { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',                   }
+      { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
+      { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
+      { doc_file_id: '1n', doc_file_path: 'datamill/file-with-single-nl.txt',         } ]
     for { doc_file_id, doc_file_path, } in files
       source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
       doc_file_path = PATH.basename doc_file_path
@@ -148,11 +148,13 @@ FS                        = require 'node:fs'
 
 ############################################################################################################
 if require.main is module then do =>
+  # @doc_object_creation()
   # test @doc_object_creation
   # test @doc_document_creation
   # @doc_file_path_resolution()
   # test @doc_file_path_resolution
   # @doc_add_and_read_file()
   # test @doc_add_and_read_file
-  @doc_paragraphs()
-  test @doc_paragraphs
+  # @doc_paragraphs()
+  # test @doc_paragraphs
+  test @
