@@ -32,10 +32,13 @@
     if (T != null) {
       T.eq(type_of(Document), 'class');
     }
-    (function() {      //.........................................................................................................
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
       var db, doc;
       db = new DBay();
-      doc = new Document({db});
+      doc = new Document({db, home});
       if (T != null) {
         T.ok(doc.db === db);
       }
@@ -43,17 +46,21 @@
         T.ok(doc.cfg.prefix === 'doc_');
       }
       return debug('^5534^', doc);
-    })();
-    (function() {      //.........................................................................................................
+    });
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
       var doc;
       doc = new Document({
-        prefix: 'doc_'
+        prefix: 'doc_',
+        home
       });
       if (T != null) {
         T.eq(type_of(doc.db), 'dbay');
       }
       return T != null ? T.ok(doc.cfg.prefix === 'doc_') : void 0;
-    })();
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -62,30 +69,14 @@
     var DBay, Document;
     ({DBay} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
-    (function() {      //.........................................................................................................
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
       var doc;
-      doc = new Document();
-      if (T != null) {
-        T.eq(doc.get_doc_file_ids(), []);
-      }
-      return T != null ? T.eq(doc.get_doc_fads().slice(0, 3), [
-        {
-          doc_fad_id: 'External_file_abc',
-          doc_fad_name: 'External_file_abc',
-          comment: 'abstract base class for external files'
-        },
-        {
-          doc_fad_id: 'File_adapter_abc',
-          doc_fad_name: 'File_adapter_abc',
-          comment: 'abstract base class for files'
-        },
-        {
-          doc_fad_id: 'xtxt',
-          doc_fad_name: 'External_text_file',
-          comment: 'adapter for external text files'
-        }
-      ]) : void 0;
-    })();
+      doc = new Document({home});
+      return T != null ? T.eq(doc.get_doc_file_ids(), []) : void 0;
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -143,19 +134,19 @@
       files = [
         {
           doc_file_id: 'ef',
-          doc_file_path: 'empty-file.txt'
+          doc_file_path: 'datamill/empty-file.txt'
         },
         {
           doc_file_id: '3n',
-          doc_file_path: 'file-with-3-lines-no-eofnl.txt'
+          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
         },
         {
           doc_file_id: '3w',
-          doc_file_path: 'file-with-3-lines-with-eofnl.txt'
+          doc_file_path: 'datamill/file-with-3-lines-with-eofnl.txt'
         },
         {
           doc_file_id: '1n',
-          doc_file_path: 'file-with-single-nl.txt'
+          doc_file_path: 'datamill/file-with-single-nl.txt'
         }
       ];
       for (i = 0, len = files.length; i < len; i++) {
@@ -200,11 +191,11 @@
         },
         {
           doc_file_id: '3n',
-          doc_file_path: 'file-with-3-lines-no-eofnl.txt'
+          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
         },
         {
           doc_file_id: '1n',
-          doc_file_path: 'file-with-single-nl.txt'
+          doc_file_path: 'datamill/file-with-single-nl.txt'
         }
       ];
       for (i = 0, len = files.length; i < len; i++) {
@@ -227,14 +218,16 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
+      // @doc_object_creation()
       // test @doc_object_creation
       // test @doc_document_creation
       // @doc_file_path_resolution()
       // test @doc_file_path_resolution
       // @doc_add_and_read_file()
       // test @doc_add_and_read_file
-      this.doc_paragraphs();
-      return test(this.doc_paragraphs);
+      // @doc_paragraphs()
+      // test @doc_paragraphs
+      return test(this);
     })();
   }
 
