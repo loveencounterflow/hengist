@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay, DEMO, Demo, GUY, H, SQL, alert, br, debug, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var DBay, DEMO, Demo, Document, GUY, H, SQL, alert, br, create_document, debug, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -15,14 +15,59 @@
 
   ({isa, type_of} = types);
 
-  ({DBay} = require('../../../apps/dbay'));
+  ({DBay, SQL} = require('../../../apps/dbay'));
 
-  ({SQL} = DBay);
+  ({Document} = require('../../../apps/datamill-v2/lib/document'));
 
   H = require('../../../lib/helpers');
 
   br = function() {
     return echo('—————————————————————————————————————————————');
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  create_document = function(T, done) {
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home_parent
+      }) {
+      var doc, doc_file_id, doc_file_path, file, files, home, i, len, source_path, target_path;
+      home = PATH.resolve(home_parent, 'dmd');
+      FS.mkdirSync(home);
+      doc = new Document({home});
+      files = [
+        {
+          doc_file_id: 'sp',
+          doc_file_path: 'short-proposal.mkts.md'
+        },
+        {
+          doc_file_id: '3p',
+          doc_file_path: 'datamill/three-paragraphs.txt'
+        },
+        {
+          doc_file_id: '3n',
+          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
+        },
+        {
+          doc_file_id: '1n',
+          doc_file_path: 'datamill/file-with-single-nl.txt'
+        }
+      ];
+      for (i = 0, len = files.length; i < len; i++) {
+        ({doc_file_id, doc_file_path} = files[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
+        doc_file_path = PATH.basename(doc_file_path);
+        target_path = PATH.resolve(home, doc_file_path);
+        FS.cpSync(source_path, target_path);
+        file = doc.add_file({doc_file_id, doc_file_path});
+        result.push(file);
+      }
+      H.tabulate("files", result);
+      H.tabulate("lines", doc.db(SQL`select * from doc_lines;`));
+      //.......................................................................................................
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
@@ -38,22 +83,7 @@
       return null;
     }
 
-    // #---------------------------------------------------------------------------------------------------------
-    // _get_db: ->
-    //   db      = new DBay()
-    //   db SQL"""create table documents (
-    //     n1_lnr      integer not null,
-    //     n2_version  integer not null,
-    //     n3_part     integer not null,
-    //     line  text    not null,
-    //     primary key ( n1_lnr, n2_version, n3_part ) );"""
-    //   #.......................................................................................................
-    //   write_data  = db.prepare_insert { into: 'documents', on_conflict: { update: true, }, }
-    //   read_data   = db.prepare SQL"""select * from documents order by n1_lnr, n3_part;"""
-    //   db write_data, { n1_lnr: 1, n3_part: 1, n2_version: 1, line: "helo world", }
-    //   return { db, read_data, write_data, }
-
-      //---------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------
     create_datamill_pipeline() {
       var $initialize, $my_datamill, $process, HDML, Pipeline, db, p, prepare, read_data, show, write_data;
       ({DBay} = require('../../../apps/dbay'));
@@ -76,7 +106,7 @@ n3_part     integer not null,
 line  text    not null,
 primary key ( n1_lnr, n2_version, n3_part ) );`);
         //.....................................................................................................
-        write_data = db.prepare_insert({
+        write_data = db.alt.prepare_insert({
           into: 'documents',
           on_conflict: {
             update: true

@@ -214,7 +214,7 @@
   this.GUY_fs_walk_lines_yields_from_empty_file = function(T, done) {
     var GUY, i, id, len, line, lnr, path, paths, ref, result;
     GUY = require(H.guy_path);
-    paths = [['ef', '../../../assets/empty-file.txt'], ['3n', '../../../assets/file-with-3-lines-no-eofnl.txt'], ['3w', '../../../assets/file-with-3-lines-with-eofnl.txt'], ['1n', '../../../assets/file-with-single-nl.txt']];
+    paths = [['ef', '../../../assets/datamill/empty-file.txt'], ['3n', '../../../assets/datamill/file-with-3-lines-no-eofnl.txt'], ['3w', '../../../assets/datamill/file-with-3-lines-with-eofnl.txt'], ['1n', '../../../assets/datamill/file-with-single-nl.txt']];
     //.........................................................................................................
     result = [];
     for (i = 0, len = paths.length; i < len; i++) {
