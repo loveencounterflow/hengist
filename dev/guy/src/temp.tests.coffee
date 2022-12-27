@@ -179,11 +179,30 @@ declare.fs_exists
   debug '^43-7^', collector
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@GUY_temp_create_directory = ( T, done ) ->
+  GUY = require '../../../apps/guy'
+  #.........................................................................................................
+  do =>
+    try
+      { rm
+        path } = GUY.temp.create_directory { prefix: 'zzwhatever-', }
+      debug '^345-4^', { rm, path, }
+      T?.ok /\/zzwhatever-/.test path
+      T?.ok isa.fs_directory path
+    finally
+      rm?()
+    T?.ok not isa.fs_directory path
+  #.........................................................................................................
+  return done?()
+
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  @GUY_temp_create_directory()
+  test @GUY_temp_create_directory
+  # test @
 
 
