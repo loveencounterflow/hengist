@@ -22,8 +22,7 @@ GUY                       = require '../../../apps/guy'
 types                     = new ( require '../../../apps/intertype' ).Intertype()
 { isa
   type_of }               = types
-{ DBay
-  SQL }                   = require '../../../apps/dbay'
+{ SQL }                   = require '../../../apps/dbay'
 { Document }              = require '../../../apps/datamill-v2/lib/document'
 H                         = require '../../../lib/helpers'
 br                        = -> echo '—————————————————————————————————————————————'
@@ -41,6 +40,7 @@ create_document = ( T, done ) ->
   FS.mkdirSync home
   doc       = new Document { home, }
   files     = [
+    { doc_file_id: 'f1', doc_file_path: 'datamill/demo1.mkts.md',                   }
     { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',                   }
     { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
     { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
@@ -51,8 +51,8 @@ create_document = ( T, done ) ->
     target_path   = PATH.resolve home, doc_file_path
     FS.cpSync source_path, target_path
     file          = doc.add_file { doc_file_id, doc_file_path, }
-  H.tabulate "files", doc.db SQL"select * from doc_files;"
-  H.tabulate "lines", doc.db SQL"select * from doc_lines;"
+  # H.tabulate "files", doc.db SQL"select * from doc_files;"
+  # H.tabulate "lines", doc.db SQL"select * from doc_lines;"
   #.........................................................................................................
   read_data       = doc.db.prepare SQL"""select * from doc_lines order by 1, 2;"""
   ### NOTE writing postponed ###
@@ -68,14 +68,12 @@ class Demo
   datamill_server: ->
     { Datamill_server } = require '../../../apps/datamill-v2/lib/server'
     { doc }             = @create_datamill_pipeline()
-    server              = new Datamill_server { db: doc.db, }
+    server              = new Datamill_server { doc, }
     await server.start()
     return null
 
   #---------------------------------------------------------------------------------------------------------
   create_datamill_pipeline: ->
-    { DBay }                  = require '../../../apps/dbay'
-    { SQL  }                  = DBay
     { Pipeline }              = require '../../../apps/moonriver'
     { HDML }                  = require '../../../apps/hdml'
     #.......................................................................................................
@@ -83,7 +81,7 @@ class Demo
     #.......................................................................................................
     $initialize = ->
       p               = new Pipeline()
-      p.push _show    = ( d ) -> whisper '^34-1^', d
+      # p.push _show    = ( d ) -> whisper '^34-1^', d
       p.push _freeze  = ( d ) -> freeze d
       return p
     #.......................................................................................................
@@ -93,7 +91,7 @@ class Demo
       p.push foobar   = ( d, send ) -> send lets d, ( d ) ->
         d.line = HDML.pair 'div.foo', HDML.text d.line
         d.n2_version++
-      p.push _show    = ( d ) -> urge '^34-2^', d
+      # p.push _show    = ( d ) -> urge '^34-2^', d
       return p
     #.......................................................................................................
     $my_datamill = ( doc, read_data, write_data ) ->
@@ -107,12 +105,11 @@ class Demo
     { doc
       read_data
       write_data }  = create_document()
-    show doc
     p = $my_datamill doc, read_data, write_data
     info '^34-3^', p
     p.run()
     #.......................................................................................................
-    show doc
+    # show doc
     return { doc, }
 
 
