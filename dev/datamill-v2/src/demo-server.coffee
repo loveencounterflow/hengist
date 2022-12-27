@@ -3,7 +3,7 @@
 
 
 ############################################################################################################
-GUY                       = require 'guy'
+GUY                       = require '../../../apps/guy'
 { alert
   debug
   help
@@ -22,13 +22,43 @@ GUY                       = require 'guy'
 types                     = new ( require '../../../apps/intertype' ).Intertype()
 { isa
   type_of }               = types
-{ DBay }                  = require '../../../apps/dbay'
-{ SQL }                   = DBay
+{ DBay
+  SQL }                   = require '../../../apps/dbay'
+{ Document }              = require '../../../apps/datamill-v2/lib/document'
 H                         = require '../../../lib/helpers'
 br                        = -> echo '—————————————————————————————————————————————'
+PATH                      = require 'node:path'
+FS                        = require 'node:fs'
 
 
-
+#-----------------------------------------------------------------------------------------------------------
+create_document = ( T, done ) ->
+  { rm, path: home_parent, } = GUY.temp.create_directory { prefix: 'dmdoc-', }
+  warn "created #{home_parent}"
+  GUY.process.on_exit -> warn "removing #{home_parent}"; rm()
+  #.........................................................................................................
+  home      = PATH.resolve home_parent, 'dmd'
+  FS.mkdirSync home
+  doc       = new Document { home, }
+  files     = [
+    { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',                   }
+    { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
+    { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
+    { doc_file_id: '1n', doc_file_path: 'datamill/file-with-single-nl.txt',         } ]
+  for { doc_file_id, doc_file_path, } in files
+    source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
+    doc_file_path = PATH.basename doc_file_path
+    target_path   = PATH.resolve home, doc_file_path
+    FS.cpSync source_path, target_path
+    file          = doc.add_file { doc_file_id, doc_file_path, }
+  H.tabulate "files", doc.db SQL"select * from doc_files;"
+  H.tabulate "lines", doc.db SQL"select * from doc_lines;"
+  #.........................................................................................................
+  read_data       = doc.db.prepare SQL"""select * from doc_lines order by 1, 2;"""
+  ### NOTE writing postponed ###
+  # write_data      = doc.db.alt.prepare_insert { into: 'doc_lines', on_conflict: { update: true, }, }
+  write_data      = null
+  return { doc, read_data, write_data, }
 
 
 #===========================================================================================================
@@ -37,26 +67,10 @@ class Demo
   #---------------------------------------------------------------------------------------------------------
   datamill_server: ->
     { Datamill_server } = require '../../../apps/datamill-v2/lib/server'
-    # { db }              = @_get_db()
-    { db }              = @create_datamill_pipeline()
-    server              = new Datamill_server { db, }
+    { doc }             = @create_datamill_pipeline()
+    server              = new Datamill_server { db: doc.db, }
     await server.start()
     return null
-
-  # #---------------------------------------------------------------------------------------------------------
-  # _get_db: ->
-  #   db      = new DBay()
-  #   db SQL"""create table documents (
-  #     n1_lnr      integer not null,
-  #     n2_version  integer not null,
-  #     n3_part     integer not null,
-  #     line  text    not null,
-  #     primary key ( n1_lnr, n2_version, n3_part ) );"""
-  #   #.......................................................................................................
-  #   write_data  = db.prepare_insert { into: 'documents', on_conflict: { update: true, }, }
-  #   read_data   = db.prepare SQL"""select * from documents order by n1_lnr, n3_part;"""
-  #   db write_data, { n1_lnr: 1, n3_part: 1, n2_version: 1, line: "helo world", }
-  #   return { db, read_data, write_data, }
 
   #---------------------------------------------------------------------------------------------------------
   create_datamill_pipeline: ->
@@ -65,22 +79,7 @@ class Demo
     { Pipeline }              = require '../../../apps/moonriver'
     { HDML }                  = require '../../../apps/hdml'
     #.......................................................................................................
-    show = ( db ) -> H.tabulate "documents", db SQL"""select * from documents order by n1_lnr, n3_part;"""
-    #.......................................................................................................
-    prepare = ( db ) ->
-      db = new DBay()
-      # if ( db.all_rows SQL"select name from sqlite_schema where name = 'documents';" ).length is 0
-      db SQL"""create table documents (
-        n1_lnr      integer not null,
-        n2_version  integer not null,
-        n3_part     integer not null,
-        line  text    not null,
-        primary key ( n1_lnr, n2_version, n3_part ) );"""
-      #.....................................................................................................
-      write_data  = db.prepare_insert { into: 'documents', on_conflict: { update: true, }, }
-      read_data   = db.prepare SQL"""select * from documents order by n1_lnr, n3_part;"""
-      db write_data, { n1_lnr: 1, n3_part: 1, n2_version: 1, line: "helo world", }
-      return { db, read_data, write_data, }
+    show = ( doc ) -> H.tabulate "doc_lines", doc.db SQL"""select * from doc_lines order by 1, 2;"""
     #.......................................................................................................
     $initialize = ->
       p               = new Pipeline()
@@ -97,24 +96,24 @@ class Demo
       p.push _show    = ( d ) -> urge '^34-2^', d
       return p
     #.......................................................................................................
-    $my_datamill = ( db, read_data, write_data ) ->
+    $my_datamill = ( doc, read_data, write_data ) ->
       p = new Pipeline()
-      p.push source = -> yield from db read_data
+      p.push source = -> yield from doc.db read_data
       p.push $initialize()
       p.push $process()
-      p.push sink = ( d ) -> db write_data, d
+      # p.push sink = ( d ) -> doc.db write_data, d
       return p
     #.......................................................................................................
-    { db
+    { doc
       read_data
-      write_data }  = prepare()
-    show db
-    p = $my_datamill db, read_data, write_data
+      write_data }  = create_document()
+    show doc
+    p = $my_datamill doc, read_data, write_data
     info '^34-3^', p
     p.run()
     #.......................................................................................................
-    show db
-    return { db, }
+    show doc
+    return { doc, }
 
 
 #===========================================================================================================
@@ -125,7 +124,7 @@ DEMO = new Demo()
 if module is require.main then do =>
   await DEMO.datamill_server()
   # DEMO.create_datamill_pipeline()
-
+  # create_document()
 
 
 
