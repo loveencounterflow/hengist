@@ -281,12 +281,42 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_temp_create_directory = function(T, done) {
+    var GUY;
+    GUY = require('../../../apps/guy');
+    (() => {      //.........................................................................................................
+      var path, rm;
+      try {
+        ({rm, path} = GUY.temp.create_directory({
+          prefix: 'zzwhatever-'
+        }));
+        debug('^345-4^', {rm, path});
+        if (T != null) {
+          T.ok(/\/zzwhatever-/.test(path));
+        }
+        if (T != null) {
+          T.ok(isa.fs_directory(path));
+        }
+      } finally {
+        if (typeof rm === "function") {
+          rm();
+        }
+      }
+      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      this.GUY_temp_create_directory();
+      return test(this.GUY_temp_create_directory);
     })();
   }
+
+  // test @
 
 }).call(this);
 
