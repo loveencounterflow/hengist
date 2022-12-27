@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DEMO, Demo, Document, FS, GUY, H, PATH, SQL, alert, br, create_document, debug, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var DEMO, Demo, Document, FS, GUY, H, PATH, SQL, alert, br, create_document, debug, echo, freeze, help, info, inspect, isa, lets, log, mkdirp, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -29,23 +29,32 @@
 
   FS = require('node:fs');
 
+  mkdirp = require('mkdirp');
+
   //-----------------------------------------------------------------------------------------------------------
   create_document = function(T, done) {
-    var doc, doc_file_id, doc_file_path, file, files, home, home_parent, i, len, read_data, rm, source_path, target_path, write_data;
-    ({
-      rm,
-      path: home_parent
-    } = GUY.temp.create_directory({
-      prefix: 'dmdoc-'
-    }));
-    warn(`created ${home_parent}`);
-    GUY.process.on_exit(function() {
-      warn(`removing ${home_parent}`);
-      return rm();
-    });
+    var assets_home, data_home, doc, doc_file_id, doc_file_path, file, files, home, i, len, read_data, source_home, source_path, target_home, target_path, write_data;
+    // { rm, path: home_parent, } = GUY.temp.create_directory { prefix: 'dmdoc-', }
+    // GUY.process.on_exit -> warn "removing #{home_parent}"; rm()
+    assets_home = PATH.resolve(__dirname, '../../../assets');
+    data_home = PATH.resolve(__dirname, '../../../data');
+    source_home = PATH.resolve(assets_home, 'datamill');
+    target_home = PATH.resolve(data_home, 'datamill');
+    home = PATH.resolve(target_home, 'dmdoc');
+    info('^34-1^', 'assets_home: ', assets_home);
+    info('^34-1^', 'data_home:   ', data_home);
+    info('^34-1^', 'source_home: ', source_home);
+    info('^34-1^', 'target_home: ', target_home);
+    info('^34-1^', 'home:        ', home);
+    mkdirp.sync(target_home);
+    if (FS.existsSync(home)) {
+      FS.rmSync(home, {
+        recursive: true
+      });
+    }
+    mkdirp.sync(home);
+    warn(`created ${home}`);
     //.........................................................................................................
-    home = PATH.resolve(home_parent, 'dmd');
-    FS.mkdirSync(home);
     doc = new Document({home});
     files = [
       {
@@ -71,7 +80,7 @@
     ];
     for (i = 0, len = files.length; i < len; i++) {
       ({doc_file_id, doc_file_path} = files[i]);
-      source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
+      source_path = PATH.resolve(assets_home, doc_file_path);
       doc_file_path = PATH.basename(doc_file_path);
       target_path = PATH.resolve(home, doc_file_path);
       FS.cpSync(source_path, target_path);
