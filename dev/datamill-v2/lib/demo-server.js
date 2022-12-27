@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DBay, DEMO, Demo, Document, FS, GUY, H, PATH, SQL, alert, br, create_document, debug, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
+  var DEMO, Demo, Document, FS, GUY, H, PATH, SQL, alert, br, create_document, debug, echo, freeze, help, info, inspect, isa, lets, log, plain, praise, rpr, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -15,7 +15,7 @@
 
   ({isa, type_of} = types);
 
-  ({DBay, SQL} = require('../../../apps/dbay'));
+  ({SQL} = require('../../../apps/dbay'));
 
   ({Document} = require('../../../apps/datamill-v2/lib/document'));
 
@@ -49,6 +49,10 @@
     doc = new Document({home});
     files = [
       {
+        doc_file_id: 'f1',
+        doc_file_path: 'datamill/demo1.mkts.md'
+      },
+      {
         doc_file_id: 'sp',
         doc_file_path: 'short-proposal.mkts.md'
       },
@@ -73,8 +77,8 @@
       FS.cpSync(source_path, target_path);
       file = doc.add_file({doc_file_id, doc_file_path});
     }
-    H.tabulate("files", doc.db(SQL`select * from doc_files;`));
-    H.tabulate("lines", doc.db(SQL`select * from doc_lines;`));
+    // H.tabulate "files", doc.db SQL"select * from doc_files;"
+    // H.tabulate "lines", doc.db SQL"select * from doc_lines;"
     //.........................................................................................................
     read_data = doc.db.prepare(SQL`select * from doc_lines order by 1, 2;`);
     /* NOTE writing postponed */
@@ -90,9 +94,7 @@
       var Datamill_server, doc, server;
       ({Datamill_server} = require('../../../apps/datamill-v2/lib/server'));
       ({doc} = this.create_datamill_pipeline());
-      server = new Datamill_server({
-        db: doc.db
-      });
+      server = new Datamill_server({doc});
       await server.start();
       return null;
     }
@@ -100,8 +102,6 @@
     //---------------------------------------------------------------------------------------------------------
     create_datamill_pipeline() {
       var $initialize, $my_datamill, $process, HDML, Pipeline, doc, p, read_data, show, write_data;
-      ({DBay} = require('../../../apps/dbay'));
-      ({SQL} = DBay);
       ({Pipeline} = require('../../../apps/moonriver'));
       ({HDML} = require('../../../apps/hdml'));
       //.......................................................................................................
@@ -110,11 +110,9 @@
       };
       //.......................................................................................................
       $initialize = function() {
-        var _freeze, _show, p;
+        var _freeze, p;
         p = new Pipeline();
-        p.push(_show = function(d) {
-          return whisper('^34-1^', d);
-        });
+        // p.push _show    = ( d ) -> whisper '^34-1^', d
         p.push(_freeze = function(d) {
           return freeze(d);
         });
@@ -122,7 +120,7 @@
       };
       //.......................................................................................................
       $process = function() {
-        var _show, foobar, p;
+        var foobar, p;
         p = new Pipeline();
         p.push(foobar = function(d, send) {
           return send(lets(d, function(d) {
@@ -135,9 +133,7 @@
             return d.n2_version++;
           }));
         });
-        p.push(_show = function(d) {
-          return urge('^34-2^', d);
-        });
+        // p.push _show    = ( d ) -> urge '^34-2^', d
         return p;
       };
       //.......................................................................................................
@@ -154,12 +150,11 @@
       };
       //.......................................................................................................
       ({doc, read_data, write_data} = create_document());
-      show(doc);
       p = $my_datamill(doc, read_data, write_data);
       info('^34-3^', p);
       p.run();
       //.......................................................................................................
-      show(doc);
+      // show doc
       return {doc};
     }
 
