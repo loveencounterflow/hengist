@@ -146,10 +146,10 @@ matchers = freeze matchers
 @GUY_fs_walk_lines_yields_from_empty_file = ( T, done ) ->
   GUY     = require H.guy_path
   paths   = [
-    [ 'ef', '../../../assets/empty-file.txt',                   ]
-    [ '3n', '../../../assets/file-with-3-lines-no-eofnl.txt',   ]
-    [ '3w', '../../../assets/file-with-3-lines-with-eofnl.txt', ]
-    [ '1n', '../../../assets/file-with-single-nl.txt',          ], ]
+    [ 'ef', '../../../assets/datamill/empty-file.txt',                   ]
+    [ '3n', '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',   ]
+    [ '3w', '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', ]
+    [ '1n', '../../../assets/datamill/file-with-single-nl.txt',          ], ]
   #.........................................................................................................
   result  = []
   for [ id, path, ] in paths
