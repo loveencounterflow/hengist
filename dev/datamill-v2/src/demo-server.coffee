@@ -28,16 +28,28 @@ H                         = require '../../../lib/helpers'
 br                        = -> echo '—————————————————————————————————————————————'
 PATH                      = require 'node:path'
 FS                        = require 'node:fs'
+mkdirp                    = require 'mkdirp'
 
 
 #-----------------------------------------------------------------------------------------------------------
 create_document = ( T, done ) ->
-  { rm, path: home_parent, } = GUY.temp.create_directory { prefix: 'dmdoc-', }
-  warn "created #{home_parent}"
-  GUY.process.on_exit -> warn "removing #{home_parent}"; rm()
+  # { rm, path: home_parent, } = GUY.temp.create_directory { prefix: 'dmdoc-', }
+  # GUY.process.on_exit -> warn "removing #{home_parent}"; rm()
+  assets_home       = PATH.resolve __dirname, '../../../assets'
+  data_home         = PATH.resolve __dirname, '../../../data'
+  source_home       = PATH.resolve assets_home, 'datamill'
+  target_home       = PATH.resolve data_home, 'datamill'
+  home              = PATH.resolve target_home, 'dmdoc'
+  info '^34-1^', 'assets_home: ',  assets_home
+  info '^34-1^', 'data_home:   ',    data_home
+  info '^34-1^', 'source_home: ',  source_home
+  info '^34-1^', 'target_home: ',  target_home
+  info '^34-1^', 'home:        ',         home
+  mkdirp.sync target_home
+  FS.rmSync home, { recursive: true, } if FS.existsSync home
+  mkdirp.sync home
+  warn "created #{home}"
   #.........................................................................................................
-  home      = PATH.resolve home_parent, 'dmd'
-  FS.mkdirSync home
   doc       = new Document { home, }
   files     = [
     { doc_file_id: 'f1', doc_file_path: 'datamill/demo1.mkts.md',                   }
@@ -46,7 +58,7 @@ create_document = ( T, done ) ->
     { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
     { doc_file_id: '1n', doc_file_path: 'datamill/file-with-single-nl.txt',         } ]
   for { doc_file_id, doc_file_path, } in files
-    source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
+    source_path   = PATH.resolve assets_home, doc_file_path
     doc_file_path = PATH.basename doc_file_path
     target_path   = PATH.resolve home, doc_file_path
     FS.cpSync source_path, target_path
