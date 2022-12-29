@@ -87,7 +87,7 @@ FS                        = require 'node:fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @doc_add_and_read_file = ( T, done ) ->
-  { DBay }      = require '../../../apps/dbay'
+  { SQL }       = require '../../../apps/dbay'
   { Document }  = require '../../../apps/datamill-v2/lib/document'
   #.........................................................................................................
   GUY.temp.with_directory ({ path: home_parent, }) ->
@@ -108,7 +108,7 @@ FS                        = require 'node:fs'
       file          = doc.add_file { doc_file_id, doc_file_path, }
       result.push file
     H.tabulate "files", result
-    H.tabulate "lines", doc.db "select * from doc_lines;"
+    H.tabulate "lines", doc.db SQL"select * from doc_raw_lines;"
     #.......................................................................................................
     return null
   #.........................................................................................................
@@ -116,8 +116,7 @@ FS                        = require 'node:fs'
 
 #-----------------------------------------------------------------------------------------------------------
 @doc_paragraphs = ( T, done ) ->
-  { DBay
-    SQL  }      = require '../../../apps/dbay'
+  { SQL  }      = require '../../../apps/dbay'
   { Document }  = require '../../../apps/datamill-v2/lib/document'
   #.........................................................................................................
   GUY.temp.with_directory ({ path: home_parent, }) ->
@@ -139,7 +138,7 @@ FS                        = require 'node:fs'
       file          = doc.add_file { doc_file_id, doc_file_path, }
       result.push file
     H.tabulate "files", result
-    H.tabulate "lines", doc.db SQL"select * from doc_lines;"
+    H.tabulate "lines", doc.db SQL"select * from doc_raw_lines;"
     #.......................................................................................................
     return null
   #.........................................................................................................
