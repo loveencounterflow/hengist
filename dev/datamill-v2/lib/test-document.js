@@ -75,7 +75,7 @@
       }) {
       var doc;
       doc = new Document({home});
-      return T != null ? T.eq(doc.get_doc_file_ids(), []) : void 0;
+      return T != null ? T.eq(doc.get_doc_file_ids(), ['layout']) : void 0;
     });
     return typeof done === "function" ? done() : void 0;
   };
