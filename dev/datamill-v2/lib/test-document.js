@@ -298,11 +298,13 @@ order by doc_file_nr, doc_line_nr;`);
       // test @doc_add_and_read_file
       // @doc_paragraphs()
       // test @doc_paragraphs
-      // @doc_walk_concatenated_lines_of_files()
-      // test @doc_walk_concatenated_lines_of_files
-      return test(this);
+      this.doc_walk_concatenated_lines_of_files();
+      return test(this.doc_walk_concatenated_lines_of_files);
     })();
   }
+
+  // @doc_alternative_formulation()
+// test @
 
 }).call(this);
 
