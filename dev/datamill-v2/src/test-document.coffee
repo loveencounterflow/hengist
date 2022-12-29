@@ -144,6 +144,55 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@doc_walk_concatenated_lines_of_files = ( T, done ) ->
+  { SQL  }      = require '../../../apps/dbay'
+  { Document }  = require '../../../apps/datamill-v2/lib/document'
+  #.........................................................................................................
+  GUY.temp.with_directory ({ path: home_parent, }) ->
+    home    = PATH.resolve home_parent, 'dmd'
+    FS.mkdirSync home
+    doc     = new Document { home, }
+    result  = []
+    debug '^34-5^', { doc, }
+    files   = [
+      { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
+      { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
+      { doc_file_id: '1n', doc_file_path: 'datamill/file-with-single-nl.txt',         } ]
+    for { doc_file_id, doc_file_path, } in files
+      source_path   = PATH.resolve __dirname, '../../../assets/', doc_file_path
+      doc_file_path = PATH.basename doc_file_path
+      target_path   = PATH.resolve home, doc_file_path
+      FS.cpSync source_path, target_path
+      file          = doc.add_file { doc_file_id, doc_file_path, }
+      result.push file
+    do ->
+      doc._delete_file 'layout'
+      matcher = doc.db.all_rows SQL"""
+        select
+            dense_rank() over w as doc_file_nr,
+            *
+          from doc_raw_lines
+          window w as ( order by doc_file_id )
+          order by doc_file_id, doc_line_nr;"""
+      H.tabulate "matcher", matcher
+      T?.eq [ doc.walk_raw_lines()..., ], matcher
+    do ->
+      matcher = doc.db.all_rows SQL"""
+        select 1 as doc_file_nr, * from doc_raw_lines where doc_file_id = '1n'
+        union all
+        select 2 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3n'
+        union all
+        select 3 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3p'
+        order by doc_file_nr, doc_line_nr;"""
+      urge '^9856^', matcher
+      H.tabulate "matcher", matcher
+      T?.eq [ ( doc.walk_raw_lines '1n', '3n', '3p', )..., ], matcher
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -156,4 +205,6 @@ if require.main is module then do =>
   # test @doc_add_and_read_file
   # @doc_paragraphs()
   # test @doc_paragraphs
-  test @
+  @doc_walk_concatenated_lines_of_files()
+  test @doc_walk_concatenated_lines_of_files
+  # test @
