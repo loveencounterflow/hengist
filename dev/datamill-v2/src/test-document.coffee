@@ -179,16 +179,19 @@ FS                        = require 'node:fs'
       T?.eq [ doc.walk_raw_lines()..., ], matcher
     do ->
       matcher = doc.db.all_rows SQL"""
-        select 1 as doc_file_nr, * from doc_raw_lines where doc_file_id = '1n'
+        select 1 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '1n'
         union all
-        select 2 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3n'
+        select 2 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '3n'
         union all
-        select 3 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3p'
+        select 3 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '3p'
         order by doc_file_nr, doc_line_nr;"""
       urge '^9856^', matcher
       H.tabulate "matcher", matcher
-      T?.eq [ ( doc.walk_raw_lines '1n', '3n', '3p', )..., ], matcher
+      H.tabulate "select * from doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
+      H.tabulate "doc.walk_raw_lines '1n', '3n', '3p'", doc.walk_raw_lines '1n', '3n', '3p'
+      T?.eq [ ( doc.walk_raw_lines '1n', '3n', '3p' )..., ], matcher
     #.......................................................................................................
+    H.tabulate "view doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
     return null
   #.........................................................................................................
   done?()
@@ -205,6 +208,6 @@ if require.main is module then do =>
   # test @doc_add_and_read_file
   # @doc_paragraphs()
   # test @doc_paragraphs
-  @doc_walk_concatenated_lines_of_files()
-  test @doc_walk_concatenated_lines_of_files
-  # test @
+  # @doc_walk_concatenated_lines_of_files()
+  # test @doc_walk_concatenated_lines_of_files
+  test @
