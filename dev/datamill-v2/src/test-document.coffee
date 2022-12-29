@@ -56,7 +56,7 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   GUY.temp.with_directory ({ path: home, }) ->
     doc = new Document { home, }
-    T?.eq doc.get_doc_file_ids(), []
+    T?.eq doc.get_doc_file_ids(), [ 'layout', ]
     # T?.eq doc.get_doc_fads()[ ... 3 ], [
     #   { doc_fad_id: 'External_file_abc', doc_fad_name: 'External_file_abc',   comment: 'abstract base class for external files' },
     #   { doc_fad_id: 'File_adapter_abc',  doc_fad_name: 'File_adapter_abc',    comment: 'abstract base class for files' },
