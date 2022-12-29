@@ -118,8 +118,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.doc_add_and_read_file = function(T, done) {
-    var DBay, Document;
-    ({DBay} = require('../../../apps/dbay'));
+    var Document, SQL;
+    ({SQL} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
     //.........................................................................................................
     GUY.temp.with_directory(function({
@@ -158,7 +158,7 @@
         result.push(file);
       }
       H.tabulate("files", result);
-      H.tabulate("lines", doc.db("select * from doc_lines;"));
+      H.tabulate("lines", doc.db(SQL`select * from doc_raw_lines;`));
       //.......................................................................................................
       return null;
     });
@@ -167,8 +167,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.doc_paragraphs = function(T, done) {
-    var DBay, Document, SQL;
-    ({DBay, SQL} = require('../../../apps/dbay'));
+    var Document, SQL;
+    ({SQL} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
     //.........................................................................................................
     GUY.temp.with_directory(function({
@@ -208,7 +208,7 @@
         result.push(file);
       }
       H.tabulate("files", result);
-      H.tabulate("lines", doc.db(SQL`select * from doc_lines;`));
+      H.tabulate("lines", doc.db(SQL`select * from doc_raw_lines;`));
       //.......................................................................................................
       return null;
     });
