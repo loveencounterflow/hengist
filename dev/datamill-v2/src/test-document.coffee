@@ -166,23 +166,14 @@ FS                        = require 'node:fs'
       file          = doc.add_file { doc_file_id, doc_file_path, }
       result.push file
     do ->
-      doc._delete_file 'layout'
-      matcher = doc.db.all_rows SQL"""
-        select
-            dense_rank() over w as doc_file_nr,
-            *
-          from doc_raw_lines
-          window w as ( order by doc_file_id )
-          order by doc_file_id, doc_line_nr;"""
-      H.tabulate "matcher", matcher
-      T?.eq [ doc.walk_raw_lines()..., ], matcher
+      T?.eq [ ( doc.walk_raw_lines [] )..., ], []
     do ->
       matcher = doc.db.all_rows SQL"""
-        select 1 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '1n'
+        select 1 as doc_file_nr, * from doc_raw_lines where doc_file_id = '1n'
         union all
-        select 2 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '3n'
+        select 2 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3n'
         union all
-        select 3 as doc_file_nr, doc_file_id, doc_line_nr, doc_par_nr, doc_line_txt from doc_raw_lines where doc_file_id = '3p'
+        select 3 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3p'
         order by doc_file_nr, doc_line_nr;"""
       urge '^9856^', matcher
       H.tabulate "matcher", matcher
