@@ -42,10 +42,7 @@
       if (T != null) {
         T.ok(doc.db === db);
       }
-      if (T != null) {
-        T.ok(doc.cfg.prefix === 'doc_');
-      }
-      return debug('^5534^', doc);
+      return T != null ? T.ok(doc.cfg.prefix === 'doc_') : void 0;
     });
     //.........................................................................................................
     GUY.temp.with_directory(function({
@@ -93,8 +90,8 @@
       home = PATH.resolve(home_parent, 'dmd');
       FS.mkdirSync(home);
       doc = new Document({home});
-      debug('^34-5^', {doc});
-      debug('^34-5^', doc.cfg.home === home);
+      // debug '^34-5^', { doc, }
+      // debug '^34-5^', doc.cfg.home is home
       if (T != null) {
         T.eq(doc.get_doc_file_abspath('.'), `${home_parent}/dmd`);
       }
@@ -130,7 +127,7 @@
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
-      debug('^34-5^', {doc});
+      // debug '^34-5^', { doc, }
       files = [
         {
           doc_file_id: 'ef',
@@ -179,7 +176,7 @@
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
-      debug('^34-5^', {doc});
+      // debug '^34-5^', { doc, }
       files = [
         {
           doc_file_id: 'sp',
