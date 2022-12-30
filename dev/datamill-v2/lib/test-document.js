@@ -229,7 +229,7 @@
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
-      debug('^34-5^', {doc});
+      // debug '^34-5^', { doc, }
       files = [
         {
           doc_file_id: '3p',
@@ -286,6 +286,187 @@ order by doc_file_nr, doc_line_nr;`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.doc_loc_matcher = async function(T, done) {
+    var SQL, error, get_document_types, i, len, matcher, pattern, probe, probes_and_matchers;
+    ({SQL} = require('../../../apps/dbay'));
+    ({get_document_types} = require('../../../apps/datamill-v2/lib/types'));
+    types = get_document_types();
+    pattern = types.registry.doc_document_cfg.default.loc_marker_re;
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        "<dm:loc#prologue>",
+        [
+          {
+            left_slash: '',
+            doc_loc_name: 'prologue',
+            right_slash: ''
+          }
+        ]
+      ],
+      [
+        "<dm:loc#prologue/>",
+        [
+          {
+            left_slash: '',
+            doc_loc_name: 'prologue',
+            right_slash: '/'
+          }
+        ]
+      ],
+      [
+        "</dm:loc#prologue>",
+        [
+          {
+            left_slash: '/',
+            doc_loc_name: 'prologue',
+            right_slash: ''
+          }
+        ]
+      ],
+      [
+        "</dm:loc#prologue/>",
+        [
+          {
+            left_slash: '/',
+            doc_loc_name: 'prologue',
+            right_slash: '/'
+          }
+        ]
+      ],
+      [
+        "<dm:loc#L1/>xxx<dm:loc#L2/>",
+        [
+          {
+            left_slash: '',
+            doc_loc_name: 'L1',
+            right_slash: '/'
+          },
+          {
+            left_slash: '',
+            doc_loc_name: 'L2',
+            right_slash: '/'
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var m, result;
+          result = [...(probe.matchAll(pattern))];
+          result = (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              m = result[j];
+              results.push({...m.groups});
+            }
+            return results;
+          })();
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.doc_walk_locs = function(T, done) {
+    var Document, SQL;
+    ({SQL} = require('../../../apps/dbay'));
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
+      var doc, file, result;
+      doc = new Document({home});
+      file = doc.db.first_row(SQL`select * from doc_files where doc_file_id = 'layout';`);
+      result = [...(doc._walk_locs_of_file(file))];
+      H.tabulate("locations in `layout`", result);
+      return T != null ? T.eq(result, [
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 2,
+          doc_loc_name: 'prologue',
+          doc_loc_kind: 'start',
+          doc_loc_start: 0,
+          doc_loc_stop: 17,
+          doc_loc_mark: 17
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 10,
+          doc_loc_name: 'prologue',
+          doc_loc_kind: 'stop',
+          doc_loc_start: 0,
+          doc_loc_stop: 18,
+          doc_loc_mark: 0
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 12,
+          doc_loc_name: 'epilogue',
+          doc_loc_kind: 'start',
+          doc_loc_start: 0,
+          doc_loc_stop: 17,
+          doc_loc_mark: 17
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 12,
+          doc_loc_name: 'epilogue',
+          doc_loc_kind: 'stop',
+          doc_loc_start: 56,
+          doc_loc_stop: 74,
+          doc_loc_mark: 56
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 14,
+          doc_loc_name: 'empty',
+          doc_loc_kind: 'start',
+          doc_loc_start: 8,
+          doc_loc_stop: 22,
+          doc_loc_mark: 22
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 14,
+          doc_loc_name: 'empty',
+          doc_loc_kind: 'stop',
+          doc_loc_start: 22,
+          doc_loc_stop: 37,
+          doc_loc_mark: 22
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 15,
+          doc_loc_name: 'single',
+          doc_loc_kind: 'start',
+          doc_loc_start: 8,
+          doc_loc_stop: 24,
+          doc_loc_mark: 24
+        },
+        {
+          doc_file_id: 'layout',
+          doc_line_nr: 15,
+          doc_loc_name: 'single',
+          doc_loc_kind: 'stop',
+          doc_loc_start: 8,
+          doc_loc_stop: 24,
+          doc_loc_mark: 24
+        }
+      ]) : void 0;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -298,13 +479,16 @@ order by doc_file_nr, doc_line_nr;`);
       // test @doc_add_and_read_file
       // @doc_paragraphs()
       // test @doc_paragraphs
-      this.doc_walk_concatenated_lines_of_files();
-      return test(this.doc_walk_concatenated_lines_of_files);
+      // @doc_walk_locs()
+      // test @doc_walk_locs
+      // @doc_loc_matcher()
+      // test @doc_loc_matcher
+      // @doc_walk_concatenated_lines_of_files()
+      // test @doc_walk_concatenated_lines_of_files
+      // @doc_alternative_formulation()
+      return test(this);
     })();
   }
-
-  // @doc_alternative_formulation()
-// test @
 
 }).call(this);
 
