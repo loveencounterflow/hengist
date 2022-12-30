@@ -40,7 +40,6 @@ FS                        = require 'node:fs'
     doc = new Document { db, home, }
     T?.ok doc.db is db
     T?.ok doc.cfg.prefix is 'doc_'
-    debug '^5534^', doc
   #.........................................................................................................
   GUY.temp.with_directory ({ path: home, }) ->
     doc = new Document { prefix: 'doc_', home, }
@@ -73,8 +72,8 @@ FS                        = require 'node:fs'
     home  = PATH.resolve home_parent, 'dmd'
     FS.mkdirSync home
     doc   = new Document { home, }
-    debug '^34-5^', { doc, }
-    debug '^34-5^', doc.cfg.home is home
+    # debug '^34-5^', { doc, }
+    # debug '^34-5^', doc.cfg.home is home
     T?.eq ( doc.get_doc_file_abspath '.'                ), "#{home_parent}/dmd"
     T?.eq ( doc.get_doc_file_abspath 'foo.md'           ), "#{home_parent}/dmd/foo.md"
     T?.eq ( doc.get_doc_file_abspath '/path/to/foo.md'  ), "/path/to/foo.md"
@@ -95,7 +94,7 @@ FS                        = require 'node:fs'
     FS.mkdirSync home
     doc     = new Document { home, }
     result  = []
-    debug '^34-5^', { doc, }
+    # debug '^34-5^', { doc, }
     files   = [
       { doc_file_id: 'ef', doc_file_path: 'datamill/empty-file.txt',                   }
       { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',   }
@@ -124,7 +123,7 @@ FS                        = require 'node:fs'
     FS.mkdirSync home
     doc     = new Document { home, }
     result  = []
-    debug '^34-5^', { doc, }
+    # debug '^34-5^', { doc, }
     files   = [
       { doc_file_id: 'sp', doc_file_path: 'short-proposal.mkts.md',                   }
       { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
