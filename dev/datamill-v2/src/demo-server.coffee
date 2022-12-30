@@ -66,7 +66,7 @@ create_document = ( T, done ) ->
   # H.tabulate "files", doc.db SQL"select * from doc_files;"
   # H.tabulate "lines", doc.db SQL"select * from doc_lines;"
   #.........................................................................................................
-  read_data       = doc.db.prepare SQL"""select * from doc_lines order by 1, 2;"""
+  read_data       = doc.db.prepare SQL"""select * from doc_raw_lines;"""
   ### NOTE writing postponed ###
   # write_data      = doc.db.alt.prepare_insert { into: 'doc_lines', on_conflict: { update: true, }, }
   write_data      = null
