@@ -23,7 +23,32 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
-  debug require 'prql-js'
+  PRQL = require 'prql-js'
+  prql = "from employees select first_name"
+  info '^23-1^', rpr PRQL.compile  prql
+  info '^23-1^', rpr PRQL.to_sql   prql
+  info '^23-1^', rpr PRQL.to_json  prql
+  prql = """
+    from employees
+    filter start_date > @2021-01-01
+    derive [
+      gross_salary = salary + (tax ?? 0),
+      gross_cost = gross_salary + benefits_cost,
+    ]
+    filter gross_cost > 0
+    group [title, country] (
+      aggregate [
+        average gross_salary,
+        sum_gross_cost = sum gross_cost,
+      ]
+    )
+    filter sum_gross_cost > 100000
+    derive id = f"{title}_{country}"
+    derive country_code = s"LEFT(country, 2)"
+    sort [sum_gross_cost, -country]
+    take 1..20
+  """
+  urge '^23-1^', PRQL.to_sql prql
   return null
 
 
