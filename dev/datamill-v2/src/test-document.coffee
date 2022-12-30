@@ -154,7 +154,7 @@ FS                        = require 'node:fs'
     FS.mkdirSync home
     doc     = new Document { home, }
     result  = []
-    debug '^34-5^', { doc, }
+    # debug '^34-5^', { doc, }
     files   = [
       { doc_file_id: '3p', doc_file_path: 'datamill/three-paragraphs.txt',            }
       { doc_file_id: '3n', doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt',  }
@@ -196,6 +196,51 @@ FS                        = require 'node:fs'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@doc_loc_matcher = ( T, done ) ->
+  { SQL  }                = require '../../../apps/dbay'
+  { get_document_types }  = require '../../../apps/datamill-v2/lib/types'
+  types                   = get_document_types()
+  pattern                 = types.registry.doc_document_cfg.default.loc_marker_re
+  #.........................................................................................................
+  probes_and_matchers = [
+    [   "<dm:loc#prologue>", [ { left_slash: '',  doc_loc_name: 'prologue', right_slash: ''  }, ], ]
+    [  "<dm:loc#prologue/>", [ { left_slash: '',  doc_loc_name: 'prologue', right_slash: '/' }, ], ]
+    [  "</dm:loc#prologue>", [ { left_slash: '/', doc_loc_name: 'prologue', right_slash: ''  }, ], ]
+    [ "</dm:loc#prologue/>", [ { left_slash: '/', doc_loc_name: 'prologue', right_slash: '/' }, ], ]
+    [ "<dm:loc#L1/>xxx<dm:loc#L2/>", [ { left_slash: '', doc_loc_name: 'L1', right_slash: '/' }, { left_slash: '', doc_loc_name: 'L2', right_slash: '/' } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result  = [ ( probe.matchAll pattern )..., ]
+      result  = ( { m.groups..., } for m in result )
+      resolve result
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@doc_walk_locs = ( T, done ) ->
+  { SQL  }                = require '../../../apps/dbay'
+  { Document }            = require '../../../apps/datamill-v2/lib/document'
+  #.........................................................................................................
+  GUY.temp.with_directory ({ path: home, }) ->
+    doc     = new Document { home, }
+    file    = doc.db.first_row SQL"select * from doc_files where doc_file_id = 'layout';"
+    result  = [ ( doc._walk_locs_of_file file )..., ]
+    H.tabulate "locations in `layout`", result
+    T?.eq result, [
+        { doc_file_id: 'layout', doc_line_nr: 2, doc_loc_name: 'prologue', doc_loc_kind: 'start', doc_loc_start: 0, doc_loc_stop: 17, doc_loc_mark: 17 },
+        { doc_file_id: 'layout', doc_line_nr: 10, doc_loc_name: 'prologue', doc_loc_kind: 'stop', doc_loc_start: 0, doc_loc_stop: 18, doc_loc_mark: 0 },
+        { doc_file_id: 'layout', doc_line_nr: 12, doc_loc_name: 'epilogue', doc_loc_kind: 'start', doc_loc_start: 0, doc_loc_stop: 17, doc_loc_mark: 17 },
+        { doc_file_id: 'layout', doc_line_nr: 12, doc_loc_name: 'epilogue', doc_loc_kind: 'stop', doc_loc_start: 56, doc_loc_stop: 74, doc_loc_mark: 56 },
+        { doc_file_id: 'layout', doc_line_nr: 14, doc_loc_name: 'empty', doc_loc_kind: 'start', doc_loc_start: 8, doc_loc_stop: 22, doc_loc_mark: 22 },
+        { doc_file_id: 'layout', doc_line_nr: 14, doc_loc_name: 'empty', doc_loc_kind: 'stop', doc_loc_start: 22, doc_loc_stop: 37, doc_loc_mark: 22 },
+        { doc_file_id: 'layout', doc_line_nr: 15, doc_loc_name: 'single', doc_loc_kind: 'start', doc_loc_start: 8, doc_loc_stop: 24, doc_loc_mark: 24 },
+        { doc_file_id: 'layout', doc_line_nr: 15, doc_loc_name: 'single', doc_loc_kind: 'stop', doc_loc_start: 8, doc_loc_stop: 24, doc_loc_mark: 24 } ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -208,7 +253,11 @@ if require.main is module then do =>
   # test @doc_add_and_read_file
   # @doc_paragraphs()
   # test @doc_paragraphs
-  @doc_walk_concatenated_lines_of_files()
-  test @doc_walk_concatenated_lines_of_files
+  # @doc_walk_locs()
+  # test @doc_walk_locs
+  # @doc_loc_matcher()
+  # test @doc_loc_matcher
+  # @doc_walk_concatenated_lines_of_files()
+  # test @doc_walk_concatenated_lines_of_files
   # @doc_alternative_formulation()
-  # test @
+  test @
