@@ -39,32 +39,22 @@
       var db, doc;
       db = new DBay();
       doc = new Document({db, home});
-      if (T != null) {
-        T.ok(doc.db === db);
-      }
-      return T != null ? T.ok(doc.cfg.prefix === 'doc_') : void 0;
+      return T != null ? T.ok(doc.db === db) : void 0;
     });
     //.........................................................................................................
     GUY.temp.with_directory(function({
         path: home
       }) {
       var doc;
-      doc = new Document({
-        prefix: 'doc_',
-        home
-      });
-      if (T != null) {
-        T.eq(type_of(doc.db), 'dbay');
-      }
-      return T != null ? T.ok(doc.cfg.prefix === 'doc_') : void 0;
+      doc = new Document({home});
+      return T != null ? T.eq(type_of(doc.db), 'dbay') : void 0;
     });
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.doc_document_creation = function(T, done) {
-    var DBay, Document;
-    ({DBay} = require('../../../apps/dbay'));
+    var Document;
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
     //.........................................................................................................
     GUY.temp.with_directory(function({
@@ -72,15 +62,14 @@
       }) {
       var doc;
       doc = new Document({home});
-      return T != null ? T.eq(doc.get_doc_file_ids(), ['layout']) : void 0;
+      return T != null ? T.eq(doc.get_doc_src_ids(), ['layout']) : void 0;
     });
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.doc_file_path_resolution = function(T, done) {
-    var DBay, Document;
-    ({DBay} = require('../../../apps/dbay'));
+  this.doc_src_path_resolution = function(T, done) {
+    var Document;
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
     //.........................................................................................................
     GUY.temp.with_directory(function({
@@ -93,19 +82,19 @@
       // debug '^34-5^', { doc, }
       // debug '^34-5^', doc.cfg.home is home
       if (T != null) {
-        T.eq(doc.get_doc_file_abspath('.'), `${home_parent}/dmd`);
+        T.eq(doc.get_doc_src_abspath('.'), `${home_parent}/dmd`);
       }
       if (T != null) {
-        T.eq(doc.get_doc_file_abspath('foo.md'), `${home_parent}/dmd/foo.md`);
+        T.eq(doc.get_doc_src_abspath('foo.md'), `${home_parent}/dmd/foo.md`);
       }
       if (T != null) {
-        T.eq(doc.get_doc_file_abspath('/path/to/foo.md'), "/path/to/foo.md");
+        T.eq(doc.get_doc_src_abspath('/path/to/foo.md'), "/path/to/foo.md");
       }
       if (T != null) {
-        T.eq(doc.get_doc_file_abspath('./path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
+        T.eq(doc.get_doc_src_abspath('./path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
       }
       if (T != null) {
-        T.eq(doc.get_doc_file_abspath('path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
+        T.eq(doc.get_doc_src_abspath('path/to/foo.md'), `${home_parent}/dmd/path/to/foo.md`);
       }
       //.......................................................................................................
       return null;
@@ -114,7 +103,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.doc_add_and_read_file = function(T, done) {
+  this.doc_add_and_read_source = function(T, done) {
     var Document, SQL;
     ({SQL} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
@@ -122,39 +111,39 @@
     GUY.temp.with_directory(function({
         path: home_parent
       }) {
-      var doc, doc_file_id, doc_file_path, file, files, home, i, len, result, source_path, target_path;
+      var doc, doc_src_id, doc_src_path, home, i, len, result, source, source_path, sources, target_path;
       home = PATH.resolve(home_parent, 'dmd');
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
       // debug '^34-5^', { doc, }
-      files = [
+      sources = [
         {
-          doc_file_id: 'ef',
-          doc_file_path: 'datamill/empty-file.txt'
+          doc_src_id: 'ef',
+          doc_src_path: 'datamill/empty-file.txt'
         },
         {
-          doc_file_id: '3n',
-          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
+          doc_src_id: '3n',
+          doc_src_path: 'datamill/file-with-3-lines-no-eofnl.txt'
         },
         {
-          doc_file_id: '3w',
-          doc_file_path: 'datamill/file-with-3-lines-with-eofnl.txt'
+          doc_src_id: '3w',
+          doc_src_path: 'datamill/file-with-3-lines-with-eofnl.txt'
         },
         {
-          doc_file_id: '1n',
-          doc_file_path: 'datamill/file-with-single-nl.txt'
+          doc_src_id: '1n',
+          doc_src_path: 'datamill/file-with-single-nl.txt'
         }
       ];
-      for (i = 0, len = files.length; i < len; i++) {
-        ({doc_file_id, doc_file_path} = files[i]);
-        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
-        target_path = PATH.resolve(home, doc_file_path);
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        target_path = PATH.resolve(home, doc_src_path);
         FS.cpSync(source_path, target_path);
-        file = doc.add_file({doc_file_id, doc_file_path});
-        result.push(file);
+        source = doc.add_source({doc_src_id, doc_src_path});
+        result.push(source);
       }
-      H.tabulate("files", result);
+      H.tabulate("sources", result);
       H.tabulate("lines", doc.db(SQL`select * from doc_raw_lines;`));
       //.......................................................................................................
       return null;
@@ -171,40 +160,40 @@
     GUY.temp.with_directory(function({
         path: home_parent
       }) {
-      var doc, doc_file_id, doc_file_path, file, files, home, i, len, result, source_path, target_path;
+      var doc, doc_src_id, doc_src_path, home, i, len, result, source, source_path, sources, target_path;
       home = PATH.resolve(home_parent, 'dmd');
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
       // debug '^34-5^', { doc, }
-      files = [
+      sources = [
         {
-          doc_file_id: 'sp',
-          doc_file_path: 'short-proposal.mkts.md'
+          doc_src_id: 'sp',
+          doc_src_path: 'short-proposal.mkts.md'
         },
         {
-          doc_file_id: '3p',
-          doc_file_path: 'datamill/three-paragraphs.txt'
+          doc_src_id: '3p',
+          doc_src_path: 'datamill/three-paragraphs.txt'
         },
         {
-          doc_file_id: '3n',
-          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
+          doc_src_id: '3n',
+          doc_src_path: 'datamill/file-with-3-lines-no-eofnl.txt'
         },
         {
-          doc_file_id: '1n',
-          doc_file_path: 'datamill/file-with-single-nl.txt'
+          doc_src_id: '1n',
+          doc_src_path: 'datamill/file-with-single-nl.txt'
         }
       ];
-      for (i = 0, len = files.length; i < len; i++) {
-        ({doc_file_id, doc_file_path} = files[i]);
-        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
-        doc_file_path = PATH.basename(doc_file_path);
-        target_path = PATH.resolve(home, doc_file_path);
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        doc_src_path = PATH.basename(doc_src_path);
+        target_path = PATH.resolve(home, doc_src_path);
         FS.cpSync(source_path, target_path);
-        file = doc.add_file({doc_file_id, doc_file_path});
-        result.push(file);
+        source = doc.add_source({doc_src_id, doc_src_path});
+        result.push(source);
       }
-      H.tabulate("files", result);
+      H.tabulate("sources", result);
       H.tabulate("lines", doc.db(SQL`select * from doc_raw_lines;`));
       //.......................................................................................................
       return null;
@@ -221,54 +210,54 @@
     GUY.temp.with_directory(function({
         path: home_parent
       }) {
-      var doc, doc_file_id, doc_file_path, file, files, home, i, len, result, source_path, target_path;
+      var doc, doc_src_id, doc_src_path, home, i, len, result, source, source_path, sources, target_path;
       home = PATH.resolve(home_parent, 'dmd');
       FS.mkdirSync(home);
       doc = new Document({home});
       result = [];
       // debug '^34-5^', { doc, }
-      files = [
+      sources = [
         {
-          doc_file_id: '3p',
-          doc_file_path: 'datamill/three-paragraphs.txt'
+          doc_src_id: '3p',
+          doc_src_path: 'datamill/three-paragraphs.txt'
         },
         {
-          doc_file_id: '3n',
-          doc_file_path: 'datamill/file-with-3-lines-no-eofnl.txt'
+          doc_src_id: '3n',
+          doc_src_path: 'datamill/file-with-3-lines-no-eofnl.txt'
         },
         {
-          doc_file_id: '1n',
-          doc_file_path: 'datamill/file-with-single-nl.txt'
+          doc_src_id: '1n',
+          doc_src_path: 'datamill/file-with-single-nl.txt'
         }
       ];
-      for (i = 0, len = files.length; i < len; i++) {
-        ({doc_file_id, doc_file_path} = files[i]);
-        source_path = PATH.resolve(__dirname, '../../../assets/', doc_file_path);
-        doc_file_path = PATH.basename(doc_file_path);
-        target_path = PATH.resolve(home, doc_file_path);
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        source_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        doc_src_path = PATH.basename(doc_src_path);
+        target_path = PATH.resolve(home, doc_src_path);
         FS.cpSync(source_path, target_path);
-        file = doc.add_file({doc_file_id, doc_file_path});
-        result.push(file);
+        source = doc.add_source({doc_src_id, doc_src_path});
+        result.push(source);
       }
       (function() {
         return T != null ? T.eq([...(doc.walk_raw_lines([]))], []) : void 0;
       })();
       (function() {
         var matcher;
-        matcher = doc.db.all_rows(SQL`select 1 as doc_file_nr, * from doc_raw_lines where doc_file_id = '1n'
+        matcher = doc.db.all_rows(SQL`select 1 as doc_src_nr, * from doc_raw_lines where doc_src_id = '1n'
 union all
-select 2 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3n'
+select 2 as doc_src_nr, * from doc_raw_lines where doc_src_id = '3n'
 union all
-select 3 as doc_file_nr, * from doc_raw_lines where doc_file_id = '3p'
-order by doc_file_nr, doc_line_nr;`);
-        urge('^9856^', matcher);
-        H.tabulate("matcher", matcher);
-        H.tabulate("select * from doc_raw_lines", doc.db(SQL`select * from doc_raw_lines;`));
+select 3 as doc_src_nr, * from doc_raw_lines where doc_src_id = '3p'
+order by doc_src_nr, doc_line_nr;`);
+        // urge '^9856^', matcher
+        // H.tabulate "matcher", matcher
+        // H.tabulate "select * from doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
         H.tabulate("doc.walk_raw_lines '1n', '3n', '3p'", doc.walk_raw_lines('1n', '3n', '3p'));
         return T != null ? T.eq([...(doc.walk_raw_lines('1n', '3n', '3p'))], matcher) : void 0;
       })();
       //.......................................................................................................
-      H.tabulate("view doc_raw_lines", doc.db(SQL`select * from doc_raw_lines;`));
+      // H.tabulate "view doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
       return null;
     });
     return typeof done === "function" ? done() : void 0;
@@ -280,7 +269,7 @@ order by doc_file_nr, doc_line_nr;`);
     ({SQL} = require('../../../apps/dbay'));
     ({get_document_types} = require('../../../apps/datamill-v2/lib/types'));
     types = get_document_types();
-    pattern = types.registry.doc_document_cfg.default.loc_marker_re;
+    pattern = types.registry.doc_document_cfg.default._loc_marker_re;
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -288,7 +277,7 @@ order by doc_file_nr, doc_line_nr;`);
         [
           {
             left_slash: '',
-            doc_loc_name: 'prologue',
+            doc_loc_id: 'prologue',
             right_slash: ''
           }
         ]
@@ -298,7 +287,7 @@ order by doc_file_nr, doc_line_nr;`);
         [
           {
             left_slash: '',
-            doc_loc_name: 'prologue',
+            doc_loc_id: 'prologue',
             right_slash: '/'
           }
         ]
@@ -308,7 +297,7 @@ order by doc_file_nr, doc_line_nr;`);
         [
           {
             left_slash: '/',
-            doc_loc_name: 'prologue',
+            doc_loc_id: 'prologue',
             right_slash: ''
           }
         ]
@@ -318,7 +307,7 @@ order by doc_file_nr, doc_line_nr;`);
         [
           {
             left_slash: '/',
-            doc_loc_name: 'prologue',
+            doc_loc_id: 'prologue',
             right_slash: '/'
           }
         ]
@@ -328,12 +317,12 @@ order by doc_file_nr, doc_line_nr;`);
         [
           {
             left_slash: '',
-            doc_loc_name: 'L1',
+            doc_loc_id: 'L1',
             right_slash: '/'
           },
           {
             left_slash: '',
-            doc_loc_name: 'L2',
+            doc_loc_id: 'L2',
             right_slash: '/'
           }
         ],
@@ -365,6 +354,219 @@ order by doc_file_nr, doc_line_nr;`);
 
   //-----------------------------------------------------------------------------------------------------------
   this.doc_walk_locs = function(T, done) {
+    var Document, SQL, matcher;
+    ({SQL} = require('../../../apps/dbay'));
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    //.........................................................................................................
+    matcher = [
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 1,
+        doc_loc_id: '*',
+        doc_loc_kind: 'start',
+        doc_loc_start: 0,
+        doc_loc_stop: 0,
+        doc_loc_mark: 0
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 18,
+        doc_loc_id: '*',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 0,
+        doc_loc_stop: 0,
+        doc_loc_mark: 0
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 2,
+        doc_loc_id: 'prologue',
+        doc_loc_kind: 'start',
+        doc_loc_start: 0,
+        doc_loc_stop: 17,
+        doc_loc_mark: 17
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 10,
+        doc_loc_id: 'prologue',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 0,
+        doc_loc_stop: 18,
+        doc_loc_mark: 0
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 12,
+        doc_loc_id: 'epilogue',
+        doc_loc_kind: 'start',
+        doc_loc_start: 0,
+        doc_loc_stop: 17,
+        doc_loc_mark: 17
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 12,
+        doc_loc_id: 'epilogue',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 56,
+        doc_loc_stop: 74,
+        doc_loc_mark: 56
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 14,
+        doc_loc_id: 'empty',
+        doc_loc_kind: 'start',
+        doc_loc_start: 8,
+        doc_loc_stop: 22,
+        doc_loc_mark: 22
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 14,
+        doc_loc_id: 'empty',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 22,
+        doc_loc_stop: 37,
+        doc_loc_mark: 22
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 15,
+        doc_loc_id: 'single',
+        doc_loc_kind: 'start',
+        doc_loc_start: 8,
+        doc_loc_stop: 24,
+        doc_loc_mark: 24
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 15,
+        doc_loc_id: 'single',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 8,
+        doc_loc_stop: 24,
+        doc_loc_mark: 24
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'one',
+        doc_loc_kind: 'start',
+        doc_loc_start: 3,
+        doc_loc_stop: 15,
+        doc_loc_mark: 15
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'one',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 18,
+        doc_loc_stop: 31,
+        doc_loc_mark: 18
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'two',
+        doc_loc_kind: 'start',
+        doc_loc_start: 34,
+        doc_loc_stop: 46,
+        doc_loc_mark: 46
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'two',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 49,
+        doc_loc_stop: 62,
+        doc_loc_mark: 49
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'three',
+        doc_loc_kind: 'start',
+        doc_loc_start: 65,
+        doc_loc_stop: 79,
+        doc_loc_mark: 79
+      },
+      {
+        doc_src_id: 'lt',
+        doc_line_nr: 17,
+        doc_loc_id: 'three',
+        doc_loc_kind: 'stop',
+        doc_loc_start: 84,
+        doc_loc_stop: 99,
+        doc_loc_mark: 84
+      }
+    ];
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
+      var doc, doc_src_id, doc_src_path, i, len, source, sources;
+      doc = new Document({home});
+      sources = [
+        {
+          doc_src_id: 'lt',
+          doc_src_path: 'datamill/layout.dm.html'
+        }
+      ];
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        doc_src_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        source = doc.add_source({doc_src_id, doc_src_path});
+      }
+      (function() {
+        var result;
+        result = [...(doc._walk_locs_of_source(source))];
+        H.tabulate("locations in `layout.dm.html`", result);
+        H.tabulate("matcher", matcher);
+        if (T != null) {
+          T.eq(result, matcher);
+        }
+        return null;
+      })();
+      return (function() {
+        var result;
+        matcher.sort(function(a, b) {
+          if (a.doc_line_nr > b.doc_line_nr) {
+            return +1;
+          }
+          if (a.doc_line_nr < b.doc_line_nr) {
+            return -1;
+          }
+          if (a.doc_loc_start > b.doc_loc_start) {
+            return +1;
+          }
+          if (a.doc_loc_start < b.doc_loc_start) {
+            return -1;
+          }
+          return 0;
+        });
+        result = [
+          ...(doc.db.all_rows(SQL`select
+    *
+  from doc_locs
+  where doc_src_id = 'lt'
+  order by doc_line_nr, doc_loc_start;`))
+        ];
+        H.tabulate("locations in `layout`", result);
+        if (T != null) {
+          T.eq(result, matcher);
+        }
+        return null;
+      })();
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.___________doc_walk_lines_of_regions = function(T, done) {
     var Document, SQL;
     ({SQL} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
@@ -372,85 +574,26 @@ order by doc_file_nr, doc_line_nr;`);
     GUY.temp.with_directory(function({
         path: home
       }) {
-      var doc, file, result;
+      var doc, doc_src_id, doc_src_path, i, j, len, len1, line, ref, results, source, sources;
       doc = new Document({home});
-      file = doc.db.first_row(SQL`select * from doc_files where doc_file_id = 'layout';`);
-      result = [...(doc._walk_locs_of_file(file))];
-      H.tabulate("locations in `layout`", result);
-      return T != null ? T.eq(result, [
+      sources = [
         {
-          doc_file_id: 'layout',
-          doc_line_nr: 2,
-          doc_loc_name: 'prologue',
-          doc_loc_kind: 'start',
-          doc_loc_start: 0,
-          doc_loc_stop: 17,
-          doc_loc_mark: 17
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 10,
-          doc_loc_name: 'prologue',
-          doc_loc_kind: 'stop',
-          doc_loc_start: 0,
-          doc_loc_stop: 18,
-          doc_loc_mark: 0
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 12,
-          doc_loc_name: 'epilogue',
-          doc_loc_kind: 'start',
-          doc_loc_start: 0,
-          doc_loc_stop: 17,
-          doc_loc_mark: 17
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 12,
-          doc_loc_name: 'epilogue',
-          doc_loc_kind: 'stop',
-          doc_loc_start: 56,
-          doc_loc_stop: 74,
-          doc_loc_mark: 56
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 14,
-          doc_loc_name: 'empty',
-          doc_loc_kind: 'start',
-          doc_loc_start: 8,
-          doc_loc_stop: 22,
-          doc_loc_mark: 22
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 14,
-          doc_loc_name: 'empty',
-          doc_loc_kind: 'stop',
-          doc_loc_start: 22,
-          doc_loc_stop: 37,
-          doc_loc_mark: 22
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 15,
-          doc_loc_name: 'single',
-          doc_loc_kind: 'start',
-          doc_loc_start: 8,
-          doc_loc_stop: 24,
-          doc_loc_mark: 24
-        },
-        {
-          doc_file_id: 'layout',
-          doc_line_nr: 15,
-          doc_loc_name: 'single',
-          doc_loc_kind: 'stop',
-          doc_loc_start: 8,
-          doc_loc_stop: 24,
-          doc_loc_mark: 24
+          doc_src_id: 'lt',
+          doc_src_path: 'datamill/layout.dm.html'
         }
-      ]) : void 0;
+      ];
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        doc_src_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        source = doc.add_source({doc_src_id, doc_src_path});
+      }
+      ref = doc.walk_loc_lines('lt#prologue');
+      results = [];
+      for (j = 0, len1 = ref.length; j < len1; j++) {
+        line = ref[j];
+        results.push(debug('^56-1^', rpr(line)));
+      }
+      return results;
     });
     return typeof done === "function" ? done() : void 0;
   };
@@ -461,8 +604,8 @@ order by doc_file_nr, doc_line_nr;`);
       // @doc_object_creation()
       // test @doc_object_creation
       // test @doc_document_creation
-      // @doc_file_path_resolution()
-      // test @doc_file_path_resolution
+      // @doc_src_path_resolution()
+      // test @doc_src_path_resolution
       // @doc_add_and_read_file()
       // test @doc_add_and_read_file
       // @doc_paragraphs()
@@ -474,6 +617,7 @@ order by doc_file_nr, doc_line_nr;`);
       // @doc_walk_concatenated_lines_of_files()
       // test @doc_walk_concatenated_lines_of_files
       // @doc_alternative_formulation()
+      // @___________doc_walk_lines_of_regions()
       return test(this);
     })();
   }
