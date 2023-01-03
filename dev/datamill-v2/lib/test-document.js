@@ -383,8 +383,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'prologue',
         doc_loc_kind: 'start',
         doc_loc_start: 0,
-        doc_loc_stop: 17,
-        doc_loc_mark: 17
+        doc_loc_stop: 16,
+        doc_loc_mark: 16
       },
       {
         doc_src_id: 'lt',
@@ -392,7 +392,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'prologue',
         doc_loc_kind: 'stop',
         doc_loc_start: 0,
-        doc_loc_stop: 18,
+        doc_loc_stop: 17,
         doc_loc_mark: 0
       },
       {
@@ -401,8 +401,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'epilogue',
         doc_loc_kind: 'start',
         doc_loc_start: 0,
-        doc_loc_stop: 17,
-        doc_loc_mark: 17
+        doc_loc_stop: 16,
+        doc_loc_mark: 16
       },
       {
         doc_src_id: 'lt',
@@ -410,7 +410,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'epilogue',
         doc_loc_kind: 'stop',
         doc_loc_start: 56,
-        doc_loc_stop: 74,
+        doc_loc_stop: 73,
         doc_loc_mark: 56
       },
       {
@@ -419,8 +419,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'empty',
         doc_loc_kind: 'start',
         doc_loc_start: 8,
-        doc_loc_stop: 22,
-        doc_loc_mark: 22
+        doc_loc_stop: 21,
+        doc_loc_mark: 21
       },
       {
         doc_src_id: 'lt',
@@ -428,7 +428,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'empty',
         doc_loc_kind: 'stop',
         doc_loc_start: 22,
-        doc_loc_stop: 37,
+        doc_loc_stop: 36,
         doc_loc_mark: 22
       },
       {
@@ -437,8 +437,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'single',
         doc_loc_kind: 'start',
         doc_loc_start: 8,
-        doc_loc_stop: 24,
-        doc_loc_mark: 24
+        doc_loc_stop: 23,
+        doc_loc_mark: 23
       },
       {
         doc_src_id: 'lt',
@@ -446,8 +446,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'single',
         doc_loc_kind: 'stop',
         doc_loc_start: 8,
-        doc_loc_stop: 24,
-        doc_loc_mark: 24
+        doc_loc_stop: 23,
+        doc_loc_mark: 23
       },
       {
         doc_src_id: 'lt',
@@ -455,8 +455,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'one',
         doc_loc_kind: 'start',
         doc_loc_start: 3,
-        doc_loc_stop: 15,
-        doc_loc_mark: 15
+        doc_loc_stop: 14,
+        doc_loc_mark: 14
       },
       {
         doc_src_id: 'lt',
@@ -464,7 +464,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'one',
         doc_loc_kind: 'stop',
         doc_loc_start: 18,
-        doc_loc_stop: 31,
+        doc_loc_stop: 30,
         doc_loc_mark: 18
       },
       {
@@ -473,8 +473,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'two',
         doc_loc_kind: 'start',
         doc_loc_start: 34,
-        doc_loc_stop: 46,
-        doc_loc_mark: 46
+        doc_loc_stop: 45,
+        doc_loc_mark: 45
       },
       {
         doc_src_id: 'lt',
@@ -482,7 +482,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'two',
         doc_loc_kind: 'stop',
         doc_loc_start: 49,
-        doc_loc_stop: 62,
+        doc_loc_stop: 61,
         doc_loc_mark: 49
       },
       {
@@ -491,8 +491,8 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'three',
         doc_loc_kind: 'start',
         doc_loc_start: 65,
-        doc_loc_stop: 79,
-        doc_loc_mark: 79
+        doc_loc_stop: 78,
+        doc_loc_mark: 78
       },
       {
         doc_src_id: 'lt',
@@ -500,7 +500,7 @@ order by doc_src_nr, doc_line_nr;`);
         doc_loc_id: 'three',
         doc_loc_kind: 'stop',
         doc_loc_start: 84,
-        doc_loc_stop: 99,
+        doc_loc_stop: 98,
         doc_loc_mark: 84
       }
     ];
@@ -566,7 +566,7 @@ order by doc_src_nr, doc_line_nr;`);
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.___________doc_walk_lines_of_regions = function(T, done) {
+  this.doc_loc_markers_as_html_comments = function(T, done) {
     var Document, SQL;
     ({SQL} = require('../../../apps/dbay'));
     ({Document} = require('../../../apps/datamill-v2/lib/document'));
@@ -574,7 +574,7 @@ order by doc_src_nr, doc_line_nr;`);
     GUY.temp.with_directory(function({
         path: home
       }) {
-      var doc, doc_src_id, doc_src_path, i, j, len, len1, line, ref, results, source, sources;
+      var doc, doc_src_id, doc_src_path, i, len, source, sources;
       doc = new Document({home});
       sources = [
         {
@@ -587,13 +587,280 @@ order by doc_src_nr, doc_line_nr;`);
         doc_src_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
         source = doc.add_source({doc_src_id, doc_src_path});
       }
-      ref = doc.walk_loc_lines('lt#prologue');
-      results = [];
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        line = ref[j];
-        results.push(debug('^56-1^', rpr(line)));
+      (function() {        //.......................................................................................................
+        var doc_line_txt, ref, result, x;
+        result = [];
+        ref = doc.walk_raw_lines('lt');
+        for (x of ref) {
+          ({doc_src_id, doc_line_txt} = x);
+          result.push(doc._loc_markers_as_html_comments(doc_src_id, doc_line_txt));
+        }
+        // debug rpr result.at -1
+        if (T != null) {
+          T.eq(result, ['', "<!--(loc 'prologue'-->", "<script src='/public/browserified/mudom.js'></script>", "<script src='/public/socket.io.js'></script>", "<script src='/public/ops1.js'></script>", "<script src='/public/d3@7.js'></script>", "<script src='/public/plot@0.4.js'></script>", "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>", "<link rel=stylesheet href='/public/vogue.css'></script>", "<!--loc 'prologue')-->", '', "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->", '', "<!-- abc<!--(loc 'empty'--><!--loc 'empty')-->def -->", "<!-- ghi<!--(loc 'single')-->jkl -->", '', "abc<!--(loc 'one'-->ONE<!--loc 'one')-->def<!--(loc 'two'-->TWO<!--loc 'two')-->ghi<!--(loc 'three'-->THREE<!--loc 'three')-->xyz", '']);
+        }
+        return null;
+      })();
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.doc_walk_lines_of_regions = function(T, done) {
+    var Document, SQL;
+    ({SQL} = require('../../../apps/dbay'));
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    //.........................................................................................................
+    GUY.temp.with_directory(function({
+        path: home
+      }) {
+      var doc, doc_src_id, doc_src_path, i, len, source, sources;
+      doc = new Document({home});
+      sources = [
+        {
+          doc_src_id: 'lt',
+          doc_src_path: 'datamill/layout.dm.html'
+        }
+      ];
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        doc_src_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        source = doc.add_source({doc_src_id, doc_src_path});
       }
-      return results;
+      (function() {        //.......................................................................................................
+        H.tabulate("locs", doc.db(SQL`select * from doc_locs where doc_src_id = 'lt' order by doc_line_nr, doc_loc_start;`));
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#prologue'))];
+        H.tabulate("lt#prologue", result);
+        // whisper '^45-1^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 2,
+              doc_par_nr: 1,
+              doc_line_txt: "<!--(loc 'prologue'-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 3,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/browserified/mudom.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 4,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/socket.io.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 5,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/ops1.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 6,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/d3@7.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 7,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/plot@0.4.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 8,
+              doc_par_nr: 1,
+              doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 9,
+              doc_par_nr: 1,
+              doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 10,
+              doc_par_nr: 1,
+              doc_line_txt: "<!--loc 'prologue')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#epilogue'))];
+        H.tabulate("lt#epilogue", result);
+        // whisper '^45-2^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 12,
+              doc_par_nr: 2,
+              doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#two'))];
+        H.tabulate("lt#two", result);
+        // whisper '^45-3^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 17,
+              doc_par_nr: 4,
+              doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#empty'))];
+        H.tabulate("lt#empty", result);
+        // whisper '^45-4^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 14,
+              doc_par_nr: 3,
+              doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#single'))];
+        H.tabulate("lt#single", result);
+        // whisper '^45-5^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 15,
+              doc_par_nr: 3,
+              doc_line_txt: "<!--(loc 'single')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      (function() {        //.......................................................................................................
+        var result;
+        result = [...(doc.walk_raw_lines_2('lt#prologue', 'lt#epilogue', 'lt#two', 'lt#empty', 'lt#single'))];
+        H.tabulate("lt#single", result);
+        // whisper '^45-6^', '---------------------------------------'
+        // echo line for line in result
+        if (T != null) {
+          T.eq(result, [
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 2,
+              doc_par_nr: 1,
+              doc_line_txt: "<!--(loc 'prologue'-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 3,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/browserified/mudom.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 4,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/socket.io.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 5,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/ops1.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 6,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/d3@7.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 7,
+              doc_par_nr: 1,
+              doc_line_txt: "<script src='/public/plot@0.4.js'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 8,
+              doc_par_nr: 1,
+              doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 9,
+              doc_par_nr: 1,
+              doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 10,
+              doc_par_nr: 1,
+              doc_line_txt: "<!--loc 'prologue')-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 12,
+              doc_par_nr: 2,
+              doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 17,
+              doc_par_nr: 4,
+              doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 14,
+              doc_par_nr: 3,
+              doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->"
+            },
+            {
+              doc_src_id: 'lt',
+              doc_line_nr: 15,
+              doc_par_nr: 3,
+              doc_line_txt: "<!--(loc 'single')-->"
+            }
+          ]);
+        }
+        return null;
+      })();
+      return null;
     });
     return typeof done === "function" ? done() : void 0;
   };
@@ -617,7 +884,10 @@ order by doc_src_nr, doc_line_nr;`);
       // @doc_walk_concatenated_lines_of_files()
       // test @doc_walk_concatenated_lines_of_files
       // @doc_alternative_formulation()
-      // @___________doc_walk_lines_of_regions()
+      // @doc_walk_lines_of_regions()
+      // test @doc_walk_lines_of_regions
+      // @doc_loc_markers_as_html_comments()
+      // test @doc_loc_markers_as_html_comments
       return test(this);
     })();
   }
