@@ -158,20 +158,20 @@ FS                        = require 'node:fs'
       source        = doc.add_source { doc_src_id, doc_src_path, }
       result.push source
     do ->
-      T?.eq [ ( doc.walk_raw_lines [] )..., ], []
+      T?.eq [ ( doc.walk_region_lines [] )..., ], []
     do ->
       matcher = doc.db.all_rows SQL"""
-        select 1 as doc_src_nr, * from doc_raw_lines where doc_src_id = '1n'
+        select 1 as doc_region_nr, * from doc_raw_lines where doc_src_id = '1n'
         union all
-        select 2 as doc_src_nr, * from doc_raw_lines where doc_src_id = '3n'
+        select 2 as doc_region_nr, * from doc_raw_lines where doc_src_id = '3n'
         union all
-        select 3 as doc_src_nr, * from doc_raw_lines where doc_src_id = '3p'
-        order by doc_src_nr, doc_line_nr;"""
+        select 3 as doc_region_nr, * from doc_raw_lines where doc_src_id = '3p'
+        order by doc_region_nr, doc_line_nr;"""
       # urge '^9856^', matcher
       # H.tabulate "matcher", matcher
       # H.tabulate "select * from doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
-      H.tabulate "doc.walk_raw_lines '1n', '3n', '3p'", doc.walk_raw_lines '1n', '3n', '3p'
-      T?.eq [ ( doc.walk_raw_lines '1n', '3n', '3p' )..., ], matcher
+      H.tabulate "doc.walk_region_lines '1n', '3n', '3p'", doc.walk_region_lines '1n', '3n', '3p'
+      T?.eq [ ( doc.walk_region_lines '1n', '3n', '3p' )..., ], matcher
     #.......................................................................................................
     # H.tabulate "view doc_raw_lines", doc.db SQL"select * from doc_raw_lines;"
     return null
@@ -272,7 +272,7 @@ FS                        = require 'node:fs'
     #.......................................................................................................
     do ->
       result = []
-      for { doc_src_id, doc_line_txt, } from doc.walk_raw_lines 'lt'
+      for { doc_src_id, doc_line_txt, } from doc.walk_region_lines 'lt'
         result.push doc._loc_markers_as_html_comments doc_src_id, doc_line_txt
         # debug rpr result.at -1
       T?.eq result, [
@@ -318,82 +318,82 @@ FS                        = require 'node:fs'
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#prologue' )..., ]
+      result = [ ( doc.walk_region_lines 'lt#prologue' )..., ]
       H.tabulate "lt#prologue", result
       # whisper '^45-1^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 2, doc_par_nr: 1, doc_line_txt: "<!--(loc 'prologue'-->" }
-        { doc_src_id: 'lt', doc_line_nr: 3, doc_par_nr: 1, doc_line_txt: "<script src='/public/browserified/mudom.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 4, doc_par_nr: 1, doc_line_txt: "<script src='/public/socket.io.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 5, doc_par_nr: 1, doc_line_txt: "<script src='/public/ops1.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 6, doc_par_nr: 1, doc_line_txt: "<script src='/public/d3@7.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 7, doc_par_nr: 1, doc_line_txt: "<script src='/public/plot@0.4.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 8, doc_par_nr: 1, doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>" }
-        { doc_src_id: 'lt', doc_line_nr: 9, doc_par_nr: 1, doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 10, doc_par_nr: 1, doc_line_txt: "<!--loc 'prologue')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 2, doc_par_nr: 1, doc_line_txt: "<!--(loc 'prologue'-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 3, doc_par_nr: 1, doc_line_txt: "<script src='/public/browserified/mudom.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 4, doc_par_nr: 1, doc_line_txt: "<script src='/public/socket.io.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 5, doc_par_nr: 1, doc_line_txt: "<script src='/public/ops1.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 6, doc_par_nr: 1, doc_line_txt: "<script src='/public/d3@7.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 7, doc_par_nr: 1, doc_line_txt: "<script src='/public/plot@0.4.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 8, doc_par_nr: 1, doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 9, doc_par_nr: 1, doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 10, doc_par_nr: 1, doc_line_txt: "<!--loc 'prologue')-->" }
         ]
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#epilogue' )..., ]
+      result = [ ( doc.walk_region_lines 'lt#epilogue' )..., ]
       H.tabulate "lt#epilogue", result
       # whisper '^45-2^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 12, doc_par_nr: 2, doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 12, doc_par_nr: 2, doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->" }
         ]
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#two' )..., ]
+      result = [ ( doc.walk_region_lines 'lt#two' )..., ]
       H.tabulate "lt#two", result
       # whisper '^45-3^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 17, doc_par_nr: 4, doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 17, doc_par_nr: 4, doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->" }
         ]
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#empty' )..., ]
+      result = [ ( doc.walk_region_lines 'lt#empty' )..., ]
       H.tabulate "lt#empty", result
       # whisper '^45-4^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 14, doc_par_nr: 3, doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 14, doc_par_nr: 3, doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->" }
         ]
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#single' )..., ]
+      result = [ ( doc.walk_region_lines 'lt#single' )..., ]
       H.tabulate "lt#single", result
       # whisper '^45-5^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 15, doc_par_nr: 3, doc_line_txt: "<!--(loc 'single')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 15, doc_par_nr: 3, doc_line_txt: "<!--(loc 'single')-->" }
         ]
       return null
     #.......................................................................................................
     do ->
-      result = [ ( doc.walk_raw_lines_2 'lt#prologue', 'lt#epilogue', 'lt#two', 'lt#empty', 'lt#single', )..., ]
+      result = [ ( doc.walk_region_lines 'lt#prologue', 'lt#epilogue', 'lt#two', 'lt#empty', 'lt#single', )..., ]
       H.tabulate "lt#single", result
       # whisper '^45-6^', '---------------------------------------'
       # echo line for line in result
       T?.eq result, [
-        { doc_src_id: 'lt', doc_line_nr: 2, doc_par_nr: 1, doc_line_txt: "<!--(loc 'prologue'-->" }
-        { doc_src_id: 'lt', doc_line_nr: 3, doc_par_nr: 1, doc_line_txt: "<script src='/public/browserified/mudom.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 4, doc_par_nr: 1, doc_line_txt: "<script src='/public/socket.io.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 5, doc_par_nr: 1, doc_line_txt: "<script src='/public/ops1.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 6, doc_par_nr: 1, doc_line_txt: "<script src='/public/d3@7.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 7, doc_par_nr: 1, doc_line_txt: "<script src='/public/plot@0.4.js'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 8, doc_par_nr: 1, doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>" }
-        { doc_src_id: 'lt', doc_line_nr: 9, doc_par_nr: 1, doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>" }
-        { doc_src_id: 'lt', doc_line_nr: 10, doc_par_nr: 1, doc_line_txt: "<!--loc 'prologue')-->" }
-        { doc_src_id: 'lt', doc_line_nr: 12, doc_par_nr: 2, doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->" }
-        { doc_src_id: 'lt', doc_line_nr: 17, doc_par_nr: 4, doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->" }
-        { doc_src_id: 'lt', doc_line_nr: 14, doc_par_nr: 3, doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->" }
-        { doc_src_id: 'lt', doc_line_nr: 15, doc_par_nr: 3, doc_line_txt: "<!--(loc 'single')-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 2, doc_par_nr: 1, doc_line_txt: "<!--(loc 'prologue'-->" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 3, doc_par_nr: 1, doc_line_txt: "<script src='/public/browserified/mudom.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 4, doc_par_nr: 1, doc_line_txt: "<script src='/public/socket.io.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 5, doc_par_nr: 1, doc_line_txt: "<script src='/public/ops1.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 6, doc_par_nr: 1, doc_line_txt: "<script src='/public/d3@7.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 7, doc_par_nr: 1, doc_line_txt: "<script src='/public/plot@0.4.js'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 8, doc_par_nr: 1, doc_line_txt: "<link rel='icon' type='image/x-icon' href='/public/favicon.ico'>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 9, doc_par_nr: 1, doc_line_txt: "<link rel=stylesheet href='/public/vogue.css'></script>" }
+        { doc_region_nr: 1, doc_src_id: 'lt', doc_line_nr: 10, doc_par_nr: 1, doc_line_txt: "<!--loc 'prologue')-->" }
+        { doc_region_nr: 2, doc_src_id: 'lt', doc_line_nr: 12, doc_par_nr: 2, doc_line_txt: "<!--(loc 'epilogue'--><script src='/public/ops2.js'></script><!--loc 'epilogue')-->" }
+        { doc_region_nr: 3, doc_src_id: 'lt', doc_line_nr: 17, doc_par_nr: 4, doc_line_txt: "<!--(loc 'two'-->TWO<!--loc 'two')-->" }
+        { doc_region_nr: 4, doc_src_id: 'lt', doc_line_nr: 14, doc_par_nr: 3, doc_line_txt: "<!--(loc 'empty'--><!--loc 'empty')-->" }
+        { doc_region_nr: 5, doc_src_id: 'lt', doc_line_nr: 15, doc_par_nr: 3, doc_line_txt: "<!--(loc 'single')-->" }
         ]
       return null
     return null
