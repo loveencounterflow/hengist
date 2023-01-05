@@ -891,6 +891,200 @@ order by doc_region_nr, doc_line_nr;`);
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.doc_parse_htmlish = async function(T, done) {
+    var Document, HTMLISH;
+    // { SQL  }                = require '../../../apps/dbay'
+    ({Document} = require('../../../apps/datamill-v2/lib/document'));
+    ({HTMLISH} = require('../../../apps/datamill-v2/lib/htmlish-parser'));
+    //.........................................................................................................
+    await GUY.temp.with_directory(async function({
+        path: home
+      }) {
+      var doc, doc_src_id, doc_src_path, error, i, j, len, len1, matcher, probe, probes_and_matchers, source, sources;
+      doc = new Document({home});
+      sources = [
+        {
+          doc_src_id: 'lt',
+          doc_src_path: 'datamill/layout.dm.html'
+        }
+      ];
+      for (i = 0, len = sources.length; i < len; i++) {
+        ({doc_src_id, doc_src_path} = sources[i]);
+        doc_src_path = PATH.resolve(__dirname, '../../../assets/', doc_src_path);
+        source = doc.add_source({doc_src_id, doc_src_path});
+      }
+      //.......................................................................................................
+      probes_and_matchers = [
+        [
+          "<insert href='./foo.dm.md'>",
+          [
+            {
+              '$key': '<tag',
+              name: 'insert',
+              type: 'otag',
+              text: "<insert href='./foo.dm.md'>",
+              start: 0,
+              stop: 27,
+              atrs: {
+                href: './foo.dm.md'
+              },
+              '$vnr': [1,
+            1],
+              '$': '^Ω13^',
+              delta_lnr: 0,
+              col: 1
+            }
+          ],
+          null
+        ],
+        [
+          "<insert href='./foo.dm.md'/>",
+          [
+            {
+              '$key': '^tag',
+              name: 'insert',
+              type: 'stag',
+              text: "<insert href='./foo.dm.md'/>",
+              start: 0,
+              stop: 28,
+              atrs: {
+                href: './foo.dm.md'
+              },
+              '$vnr': [1,
+            1],
+              '$': '^Ω13^',
+              delta_lnr: 0,
+              col: 1
+            }
+          ],
+          null
+        ],
+        [
+          '<i>something</i>',
+          [
+            {
+              '$key': '<tag',
+              name: 'i',
+              type: 'otag',
+              text: '<i>',
+              start: 0,
+              stop: 3,
+              '$vnr': [1,
+            1],
+              '$': '^Ω14^',
+              delta_lnr: 0,
+              col: 1
+            },
+            {
+              '$key': '^text',
+              start: 3,
+              stop: 12,
+              text: 'something',
+              '$vnr': [1,
+            4],
+              '$': '^Ω2^',
+              delta_lnr: 0,
+              col: 4
+            },
+            {
+              '$key': '>tag',
+              name: 'i',
+              type: 'ctag',
+              text: '</i>',
+              start: 12,
+              stop: 16,
+              '$vnr': [1,
+            13],
+              '$': '^Ω15^',
+              delta_lnr: 0,
+              col: 13
+            }
+          ]
+        ],
+        [
+          '<em>&foo;</em>',
+          [
+            {
+              '$key': '<tag',
+              name: 'em',
+              type: 'otag',
+              text: '<em>',
+              start: 0,
+              stop: 4,
+              '$vnr': [1,
+            1],
+              '$': '^Ω14^',
+              delta_lnr: 0,
+              col: 1
+            },
+            {
+              '$key': '^entity',
+              start: 0,
+              stop: 5,
+              text: '&foo;',
+              '$vnr': [1,
+            5],
+              '$': '^Ω2^',
+              delta_lnr: 0,
+              col: 5,
+              type: 'named',
+              name: 'foo'
+            },
+            {
+              '$key': '>tag',
+              name: 'em',
+              type: 'ctag',
+              text: '</em>',
+              start: 9,
+              stop: 14,
+              '$vnr': [1,
+            10],
+              '$': '^Ω15^',
+              delta_lnr: 0,
+              col: 10
+            }
+          ],
+          null
+        ],
+        [
+          '<em#c123>',
+          [
+            {
+              '$key': '<tag',
+              name: 'em',
+              type: 'otag',
+              text: '<em>',
+              start: 0,
+              stop: 9,
+              '$vnr': [1,
+            1],
+              '$': '^Ω14^',
+              id: 'c123',
+              delta_lnr: 0,
+              col: 1
+            }
+          ]
+        ]
+      ];
+// [ '<em#c123>&foo;</em>', [
+// { '$key': '<tag', name: 'em', type: 'otag', text: '<em>', start: 0, stop: 9, '$vnr': [ 1, 1 ], '$': '^Ω14^', id: 'c123', delta_lnr: 0, col: 1 },
+//   { '$key': '^entity', start: 9, stop: 14, text: '&foo;', '$vnr': [ 1, 5 ], '$': '^Ω2^', delta_lnr: 0, col: 10, type: 'named', name: 'foo' },
+//   { '$key': '>tag', name: 'em', type: 'ctag', text: '</em>', start: 14, stop: 19, '$vnr': [ 1, 10 ], '$': '^Ω15^', delta_lnr: 0, col: 15 } ], null ]
+      for (j = 0, len1 = probes_and_matchers.length; j < len1; j++) {
+        [probe, matcher, error] = probes_and_matchers[j];
+        await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve) {
+            resolve(HTMLISH.parse(probe));
+            return debug('^34534857^', result);
+          });
+        });
+      }
+      return null;
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -914,9 +1108,11 @@ order by doc_region_nr, doc_line_nr;`);
       // test @doc_walk_lines_of_regions
       // @doc_loc_markers_as_html_comments()
       // test @doc_loc_markers_as_html_comments
-      return test(this);
+      return test(this.doc_parse_htmlish);
     })();
   }
+
+  // test @
 
 }).call(this);
 
