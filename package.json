@@ -41,6 +41,7 @@
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
     "commander": "8.3.0",
+    "compose-regexp": "^0.6.24",
     "convert-source-map": "^1.7.0",
     "cozo-node": "^0.3.0",
     "csv-parser": "^3.0.0",
