@@ -29,6 +29,7 @@ specifiers:
   command-line-args: ^5.1.1
   command-line-usage: ^6.1.0
   commander: 8.3.0
+  compose-regexp: ^0.6.24
   convert-source-map: ^1.7.0
   cozo-node: ^0.3.0
   csv-parser: ^3.0.0
@@ -185,6 +186,7 @@ dependencies:
   command-line-args: 5.2.1
   command-line-usage: 6.1.3
   commander: 8.3.0
+  compose-regexp: 0.6.24
   convert-source-map: 1.8.0
   cozo-node: 0.3.0
   csv-parser: 3.0.0
@@ -1574,6 +1576,10 @@ packages:
   /commander/8.3.0:
     resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
     engines: {node: '>= 12'}
+    dev: false
+
+  /compose-regexp/0.6.24:
+    resolution: {integrity: sha512-BKVUMfeb89UYjw1awfAY2Ymvm3pjSiodkbRN72XYrAREyLenUKL9L66bIcIeFSpEC1GODx9wIdDlUsPXa97akA==}
     dev: false
 
   /compress-brotli/1.3.8:
