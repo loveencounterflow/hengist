@@ -128,25 +128,25 @@ demo_htmlish = ->
   #.........................................................................................................
   add_lexeme = ( lexemes, mode, name, pattern ) ->
     help '^31-1^', ( to_width "#{mode}:#{name}", 20 ), GUY.trm.white pattern
-    lexemes.push n name, pattern
+    lexemes.push n "$#{name}", pattern
     return null
   #.........................................................................................................
   do =>
     lexemes = []
     mode    = 'plain'
-    add_lexeme lexemes, mode, '$escchr',      /\\(?<chr>.)/u
-    add_lexeme lexemes, mode, '$plain',       suffix '+', charSet.complement /[<`\\]/u
-    add_lexeme lexemes, mode, '$start_tag',   sequence ( notBehind '\\' ), /<(?<lslash>\/?)/u
-    add_lexeme lexemes, mode, '$E_backticks', /`+/
-    add_lexeme lexemes, mode, '$other',       /./u
-    modes[ mode ] = sticky unicode dot_matchall either lexemes...
+    add_lexeme lexemes, mode, 'escchr',       /\\(?<chr>.)/u
+    add_lexeme lexemes, mode, 'plain',        suffix '+', charSet.complement /[<`\\]/u
+    add_lexeme lexemes, mode, 'start_tag',    sequence ( notBehind '\\' ), /<(?<lslash>\/?)/u
+    add_lexeme lexemes, mode, 'E_backticks',  /`+/
+    add_lexeme lexemes, mode, 'other',        /./u
+    modes[ mode ] = sticky unicode dotall either lexemes...
   #.........................................................................................................
   do =>
     lexemes = []
     mode    = 'tag'
-    add_lexeme lexemes, mode, '$stop_tag',    sequence ( notBehind '\\' ), />/u
-    add_lexeme lexemes, mode, '$plain',       suffix '+', charSet.complement />/u
-    add_lexeme lexemes, mode, '$other',       /./u
+    add_lexeme lexemes, mode, 'stop_tag',     sequence ( notBehind '\\' ), />/u
+    add_lexeme lexemes, mode, 'plain',        suffix '+', charSet.complement />/u
+    add_lexeme lexemes, mode, 'other',        /./u
     modes[ mode ] = sticky unicode dot_matchall either lexemes...
   #.........................................................................................................
   probes        = [
