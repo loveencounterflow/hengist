@@ -39,15 +39,14 @@ truth                     = GUY.trm.truth.bind GUY.trm
   ref
   sequence
   suffix                } = require 'compose-regexp-commonjs'
-sticky                    = flags.add 'y'
-dot_matchall              = flags.add 's'
 H                         = require '../../../lib/helpers'
 
 
 #-----------------------------------------------------------------------------------------------------------
-unicode = ( x ) ->
-  return copy_regex x, { unicode: true, } if ( x instanceof RegExp )
-  return flags.add 'u', x
+unicode = ( x ) -> if ( x instanceof RegExp ) then copy_regex x, { unicode: true, } else flags.add 'u', x
+sticky  = ( x ) -> if ( x instanceof RegExp ) then copy_regex x, { sticky: true,  } else flags.add 'y', x
+dotall  = ( x ) -> if ( x instanceof RegExp ) then copy_regex x, { dotAll: true,  } else flags.add 's', x
+dotAll  = dotall
 
 
 #===========================================================================================================
