@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, Interlex, alert, atomic, bound, capture, charSet, copy_regex, debug, demo_1, demo_flags, demo_htmlish, dotAll, dotall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
+  var GUY, H, Interlex, alert, atomic, bound, capture, charSet, copy_regex, debug, demo_htmlish, dotAll, dotall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -55,74 +55,6 @@
   };
 
   dotAll = dotall;
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_1 = function() {
-    var lexemes, lexer, match, n, pattern, prv_last_idx, source, token;
-    lexemes = [];
-    n = namedCapture;
-    //.........................................................................................................
-    lexemes.push(n('$escchr', /\\(?<chr>.)/u));
-    lexemes.push(n('$backslash', '\\'));
-    lexemes.push(n('$backtick1', notBehind('`'), '`', notAhead('`')));
-    lexemes.push(n('$backtick3', notBehind('`'), '```', notAhead('`')));
-    lexemes.push(n('$E_backticks', /`+/));
-    lexemes.push(n('$digits', /\d+/));
-    lexemes.push(n('$tag', /<[^>]+>/));
-    lexemes.push(n('$nl', /\n/u));
-    //.........................................................................................................
-    lexemes.push(n('$ws', /[\u{000b}-\u{000d}\u{2000}-\u{200a}\u{0009}\u{0020}\u{0085}\u{00a0}\u{2028}\u{2029}\u{202f}\u{205f}\u{3000}]+/u));
-    lexemes.push(n('$letters', /\p{L}+/u));
-    lexemes.push(n('$other', /./u));
-    lexemes.push(n('$other_digits', /[0-9]+/));
-    //.........................................................................................................
-    pattern = sticky(unicode(dotall(either(...lexemes))));
-    source = `foo \`bar\` <i>1234\\</i>\n\\
-foo \`\`bar\`\`
-foo \`\`\`bar\`\`\`
-\\\`\x20\x20
-\\`;
-    lexer = new Interlex();
-    prv_last_idx = 0;
-    info('^30-33^', 0);
-    while ((match = source.match(pattern)) != null) {
-      if (pattern.lastIndex === prv_last_idx) {
-        warn('^30-33^', GUY.trm.reverse("detected loop, stopping"));
-        break;
-      }
-      token = lexer._token_from_match(prv_last_idx, match);
-      info('^30-33^', pattern.lastIndex, token);
-      if (token.key === 'nl') {
-        echo();
-      }
-      prv_last_idx = pattern.lastIndex;
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  demo_flags = function() {
-    var error;
-    info('^19-1^', unicode(dotall(/a/)));
-    info('^19-2^', dotall(unicode(/a/)));
-    info('^19-3^', flags.add('u', /a/));
-    try {
-      info('^19-4^', flags.add('u', /./));
-    } catch (error1) {
-      error = error1;
-      warn(GUY.trm.reverse(error.message));
-    }
-    try {
-      info('^19-5^', unicode(/./));
-    } catch (error1) {
-      error = error1;
-      warn(GUY.trm.reverse(error.message));
-    }
-    info('^19-6^', copy_regex(/./, {
-      unicode: true
-    }));
-    return null;
-  };
 
   //-----------------------------------------------------------------------------------------------------------
   demo_htmlish = function() {
