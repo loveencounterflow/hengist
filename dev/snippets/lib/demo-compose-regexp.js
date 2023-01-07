@@ -169,7 +169,7 @@ foo \`\`\`bar\`\`\`
       mode = 'plain';
       add_lexeme(lexemes, mode, 'escchr', /\\(?<chr>.)/u);
       add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/[<`\\]/u)));
-      add_lexeme(lexemes, mode, 'start_tag', sequence(notBehind('\\'), /<(?<lslash>\/?)/u));
+      add_lexeme(lexemes, mode, 'start_tag', /<(?<lslash>\/?)/u);
       add_lexeme(lexemes, mode, 'E_backticks', /`+/);
       add_lexeme(lexemes, mode, 'other', /./u);
       return modes[mode] = sticky(unicode(dotall(either(...lexemes))));
@@ -178,13 +178,14 @@ foo \`\`\`bar\`\`\`
       var lexemes, mode;
       lexemes = [];
       mode = 'tag';
+      add_lexeme(lexemes, mode, 'escchr', /\\(?<chr>.)/u);
       add_lexeme(lexemes, mode, 'stop_tag', sequence(notBehind('\\'), />/u));
-      add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/>/u)));
+      add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/[\\]/u)));
       add_lexeme(lexemes, mode, 'other', /./u);
       return modes[mode] = sticky(unicode(dotall(either(...lexemes))));
     })();
     //.........................................................................................................
-    probes = ["helo <bold>`world`</bold>", "helo \\<bold>`world`</bold>"];
+    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "helo \\<bold>`world`</bold>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
