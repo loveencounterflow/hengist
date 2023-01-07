@@ -181,7 +181,7 @@ foo \`\`\`bar\`\`\`
       add_lexeme(lexemes, mode, 'stop_tag', sequence(notBehind('\\'), />/u));
       add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/>/u)));
       add_lexeme(lexemes, mode, 'other', /./u);
-      return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
+      return modes[mode] = sticky(unicode(dotall(either(...lexemes))));
     })();
     //.........................................................................................................
     probes = ["helo <bold>`world`</bold>", "helo \\<bold>`world`</bold>"];
