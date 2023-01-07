@@ -136,7 +136,7 @@ demo_htmlish = ->
     mode    = 'plain'
     add_lexeme lexemes, mode, 'escchr',       /\\(?<chr>.)/u
     add_lexeme lexemes, mode, 'plain',        suffix '+', charSet.complement /[<`\\]/u
-    add_lexeme lexemes, mode, 'start_tag',    sequence ( notBehind '\\' ), /<(?<lslash>\/?)/u
+    add_lexeme lexemes, mode, 'start_tag',    /<(?<lslash>\/?)/u
     add_lexeme lexemes, mode, 'E_backticks',  /`+/
     add_lexeme lexemes, mode, 'other',        /./u
     modes[ mode ] = sticky unicode dotall either lexemes...
@@ -144,13 +144,16 @@ demo_htmlish = ->
   do =>
     lexemes = []
     mode    = 'tag'
+    add_lexeme lexemes, mode, 'escchr',       /\\(?<chr>.)/u
     add_lexeme lexemes, mode, 'stop_tag',     sequence ( notBehind '\\' ), />/u
-    add_lexeme lexemes, mode, 'plain',        suffix '+', charSet.complement />/u
+    add_lexeme lexemes, mode, 'plain',        suffix '+', charSet.complement /[\\]/u
     add_lexeme lexemes, mode, 'other',        /./u
     modes[ mode ] = sticky unicode dotall either lexemes...
   #.........................................................................................................
   probes        = [
     "helo <bold>`world`</bold>"
+    "<x v=\\> z=42>"
+    "<x v=\\> z=42\\>"
     "helo \\<bold>`world`</bold>"
     ]
   #.......................................................................................................
