@@ -91,7 +91,7 @@ demo_1 = ->
   lexemes.push n '$other',        /./u
   lexemes.push n '$other_digits', /[0-9]+/
   #.........................................................................................................
-  pattern       = sticky unicode dot_matchall either lexemes...
+  pattern       = sticky unicode dotall either lexemes...
   source        = """
     foo `bar` <i>1234\\</i>\n\\
     foo ``bar``
@@ -113,8 +113,8 @@ demo_1 = ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_flags = ->
-  info '^19-1^', unicode dot_matchall /a/
-  info '^19-2^', dot_matchall unicode /a/
+  info '^19-1^', unicode dotall /a/
+  info '^19-2^', dotall unicode /a/
   info '^19-3^', flags.add 'u', /a/
   try info '^19-4^', flags.add 'u', /./ catch error then warn GUY.trm.reverse error.message
   try info '^19-5^', ( unicode /./ ) catch error then warn GUY.trm.reverse error.message
