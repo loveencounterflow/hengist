@@ -148,8 +148,10 @@ foo \`\`\`bar\`\`\`
       var lexemes, mode;
       lexemes = [];
       mode = 'plain';
-      add_lexeme(lexemes, mode, '$plain', suffix('+', charSet.complement(/</u)));
+      add_lexeme(lexemes, mode, '$escchr', /\\(?<chr>.)/u);
+      add_lexeme(lexemes, mode, '$plain', suffix('+', charSet.complement(/[<`\\]/u)));
       add_lexeme(lexemes, mode, '$start_tag', sequence(notBehind('\\'), /<(?<lslash>\/?)/u));
+      add_lexeme(lexemes, mode, '$E_backticks', /`+/);
       add_lexeme(lexemes, mode, '$other', /./u);
       return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
     })();
@@ -163,7 +165,7 @@ foo \`\`\`bar\`\`\`
       return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
     })();
     //.........................................................................................................
-    probes = ["helo <bold>world</bold>"];
+    probes = ["helo <bold>`world`</bold>", "helo \\<bold>`world`</bold>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
@@ -199,7 +201,7 @@ foo \`\`\`bar\`\`\`
         }
         token = lexer._token_from_match(prv_last_idx, match, mode);
         tokens.push(token);
-        info('^31-11^', pattern.lastIndex, token);
+        // info '^31-11^', pattern.lastIndex, token
         //.....................................................................................................
         if (token.key.startsWith('start_')) {
           stack.push(mode);
@@ -221,7 +223,7 @@ foo \`\`\`bar\`\`\`
         }
         prv_last_idx = pattern.lastIndex;
       }
-      H.tabulate("tokens", tokens);
+      H.tabulate(`tokens of ${rpr(probe)}`, tokens);
     }
     //.......................................................................................................
     return null;
