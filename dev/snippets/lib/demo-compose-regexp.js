@@ -154,7 +154,7 @@ foo \`\`\`bar\`\`\`
   //-----------------------------------------------------------------------------------------------------------
   demo_htmlish = function() {
     /* TAINT uses code units, should use codepoints */
-    var add_lexeme, after, before, center, i, k, left, len, lexer, match, mid, mode, modes, n, old_last_idx, pattern, probe, probes, prv_last_idx, right, stack, token, tokens, v;
+    var add_lexeme, after, before, center, i, left, len, lexer, match, mid, mode, modes, n, old_last_idx, pattern, probe, probes, prv_last_idx, right, stack, token, tokens;
     n = namedCapture;
     modes = {};
     //.........................................................................................................
@@ -181,14 +181,8 @@ foo \`\`\`bar\`\`\`
       add_lexeme(lexemes, mode, 'stop_tag', sequence(notBehind('\\'), />/u));
       add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/>/u)));
       add_lexeme(lexemes, mode, 'other', /./u);
-      // modes[ mode ] = sticky unicode dotall either lexemes...
-      return modes[mode] = dotall(sticky(unicode(either(...lexemes))));
+      return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
     })();
-    for (k in modes) {
-      v = modes[k];
-      //.........................................................................................................
-      urge('^31-1^', k, v);
-    }
     //.........................................................................................................
     probes = ["helo <bold>`world`</bold>", "helo \\<bold>`world`</bold>"];
 //.......................................................................................................
