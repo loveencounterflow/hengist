@@ -185,7 +185,7 @@ foo \`\`\`bar\`\`\`
       return modes[mode] = sticky(unicode(dotall(either(...lexemes))));
     })();
     //.........................................................................................................
-    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "helo \\<bold>`world`</bold>"];
+    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "<c", "helo \\<bold>`world`</bold>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
@@ -244,6 +244,7 @@ foo \`\`\`bar\`\`\`
         prv_last_idx = pattern.lastIndex;
       }
       H.tabulate(`tokens of ${rpr(probe)}`, tokens);
+      debug('^31-1^', {stack, mode, prv_last_idx});
     }
     //.......................................................................................................
     return null;
