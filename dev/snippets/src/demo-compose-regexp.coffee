@@ -135,8 +135,10 @@ demo_htmlish = ->
   do =>
     lexemes = []
     mode    = 'plain'
-    add_lexeme lexemes, mode, '$plain',       suffix '+', charSet.complement /</u
+    add_lexeme lexemes, mode, '$escchr',      /\\(?<chr>.)/u
+    add_lexeme lexemes, mode, '$plain',       suffix '+', charSet.complement /[<`\\]/u
     add_lexeme lexemes, mode, '$start_tag',   sequence ( notBehind '\\' ), /<(?<lslash>\/?)/u
+    add_lexeme lexemes, mode, '$E_backticks', /`+/
     add_lexeme lexemes, mode, '$other',       /./u
     modes[ mode ] = sticky unicode dot_matchall either lexemes...
   #.........................................................................................................
@@ -149,7 +151,8 @@ demo_htmlish = ->
     modes[ mode ] = sticky unicode dot_matchall either lexemes...
   #.........................................................................................................
   probes        = [
-    "helo <bold>world</bold>"
+    "helo <bold>`world`</bold>"
+    "helo \\<bold>`world`</bold>"
     ]
   #.......................................................................................................
   for probe in probes
@@ -183,7 +186,7 @@ demo_htmlish = ->
         break
       token = lexer._token_from_match prv_last_idx, match, mode
       tokens.push token
-      info '^31-11^', pattern.lastIndex, token
+      # info '^31-11^', pattern.lastIndex, token
       #.....................................................................................................
       if token.key.startsWith 'start_'
         stack.push mode
@@ -201,7 +204,7 @@ demo_htmlish = ->
       #.....................................................................................................
       echo() if token.key is 'nl'
       prv_last_idx = pattern.lastIndex
-    H.tabulate "tokens", tokens
+    H.tabulate "tokens of #{rpr probe}", tokens
   #.......................................................................................................
   return null
 
