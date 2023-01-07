@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, Lexer, alert, atomic, bound, capture, charSet, copy_regex, debug, demo_1, demo_flags, demo_htmlish, dot_matchall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
+  var GUY, H, Lexer, alert, atomic, bound, capture, charSet, copy_regex, debug, demo_1, demo_flags, demo_htmlish, dotAll, dotall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -19,10 +19,6 @@
   //...........................................................................................................
   ({atomic, bound, capture, charSet, either, flags, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, ref, sequence, suffix} = require('compose-regexp-commonjs'));
 
-  sticky = flags.add('y');
-
-  dot_matchall = flags.add('s');
-
   H = require('../../../lib/helpers');
 
   //-----------------------------------------------------------------------------------------------------------
@@ -31,9 +27,32 @@
       return copy_regex(x, {
         unicode: true
       });
+    } else {
+      return flags.add('u', x);
     }
-    return flags.add('u', x);
   };
+
+  sticky = function(x) {
+    if (x instanceof RegExp) {
+      return copy_regex(x, {
+        sticky: true
+      });
+    } else {
+      return flags.add('y', x);
+    }
+  };
+
+  dotall = function(x) {
+    if (x instanceof RegExp) {
+      return copy_regex(x, {
+        dotAll: true
+      });
+    } else {
+      return flags.add('s', x);
+    }
+  };
+
+  dotAll = dotall;
 
   //===========================================================================================================
   Lexer = class Lexer {
@@ -84,7 +103,7 @@
     lexemes.push(n('$other', /./u));
     lexemes.push(n('$other_digits', /[0-9]+/));
     //.........................................................................................................
-    pattern = sticky(unicode(dot_matchall(either(...lexemes))));
+    pattern = sticky(unicode(dotall(either(...lexemes))));
     source = `foo \`bar\` <i>1234\\</i>\n\\
 foo \`\`bar\`\`
 foo \`\`\`bar\`\`\`
@@ -111,8 +130,8 @@ foo \`\`\`bar\`\`\`
   //-----------------------------------------------------------------------------------------------------------
   demo_flags = function() {
     var error;
-    info('^19-1^', unicode(dot_matchall(/a/)));
-    info('^19-2^', dot_matchall(unicode(/a/)));
+    info('^19-1^', unicode(dotall(/a/)));
+    info('^19-2^', dotall(unicode(/a/)));
     info('^19-3^', flags.add('u', /a/));
     try {
       info('^19-4^', flags.add('u', /./));
@@ -135,35 +154,41 @@ foo \`\`\`bar\`\`\`
   //-----------------------------------------------------------------------------------------------------------
   demo_htmlish = function() {
     /* TAINT uses code units, should use codepoints */
-    var add_lexeme, after, before, center, i, left, len, lexer, match, mid, mode, modes, n, old_last_idx, pattern, probe, probes, prv_last_idx, right, stack, token, tokens;
+    var add_lexeme, after, before, center, i, k, left, len, lexer, match, mid, mode, modes, n, old_last_idx, pattern, probe, probes, prv_last_idx, right, stack, token, tokens, v;
     n = namedCapture;
     modes = {};
     //.........................................................................................................
     add_lexeme = function(lexemes, mode, name, pattern) {
       help('^31-1^', to_width(`${mode}:${name}`, 20), GUY.trm.white(pattern));
-      lexemes.push(n(name, pattern));
+      lexemes.push(n(`$${name}`, pattern));
       return null;
     };
     (() => {      //.........................................................................................................
       var lexemes, mode;
       lexemes = [];
       mode = 'plain';
-      add_lexeme(lexemes, mode, '$escchr', /\\(?<chr>.)/u);
-      add_lexeme(lexemes, mode, '$plain', suffix('+', charSet.complement(/[<`\\]/u)));
-      add_lexeme(lexemes, mode, '$start_tag', sequence(notBehind('\\'), /<(?<lslash>\/?)/u));
-      add_lexeme(lexemes, mode, '$E_backticks', /`+/);
-      add_lexeme(lexemes, mode, '$other', /./u);
-      return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
+      add_lexeme(lexemes, mode, 'escchr', /\\(?<chr>.)/u);
+      add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/[<`\\]/u)));
+      add_lexeme(lexemes, mode, 'start_tag', sequence(notBehind('\\'), /<(?<lslash>\/?)/u));
+      add_lexeme(lexemes, mode, 'E_backticks', /`+/);
+      add_lexeme(lexemes, mode, 'other', /./u);
+      return modes[mode] = sticky(unicode(dotall(either(...lexemes))));
     })();
     (() => {      //.........................................................................................................
       var lexemes, mode;
       lexemes = [];
       mode = 'tag';
-      add_lexeme(lexemes, mode, '$stop_tag', sequence(notBehind('\\'), />/u));
-      add_lexeme(lexemes, mode, '$plain', suffix('+', charSet.complement(/>/u)));
-      add_lexeme(lexemes, mode, '$other', /./u);
-      return modes[mode] = sticky(unicode(dot_matchall(either(...lexemes))));
+      add_lexeme(lexemes, mode, 'stop_tag', sequence(notBehind('\\'), />/u));
+      add_lexeme(lexemes, mode, 'plain', suffix('+', charSet.complement(/>/u)));
+      add_lexeme(lexemes, mode, 'other', /./u);
+      // modes[ mode ] = sticky unicode dotall either lexemes...
+      return modes[mode] = dotall(sticky(unicode(either(...lexemes))));
     })();
+    for (k in modes) {
+      v = modes[k];
+      //.........................................................................................................
+      urge('^31-1^', k, v);
+    }
     //.........................................................................................................
     probes = ["helo <bold>`world`</bold>", "helo \\<bold>`world`</bold>"];
 //.......................................................................................................
