@@ -23,7 +23,7 @@ specifiers:
   cnd: 9.2.3
   coffee-lex: ^9.1.5
   coffeenode-diff: ^0.3.1
-  coffeescript: 2.6.1
+  coffeescript: 2.7.0
   cohex: ^1.0.5
   combinate: ^1.1.11
   command-line-args: ^5.1.1
@@ -182,7 +182,7 @@ dependencies:
   cnd: 9.2.3
   coffee-lex: 9.2.0
   coffeenode-diff: 0.3.1
-  coffeescript: 2.6.1
+  coffeescript: 2.7.0
   cohex: 1.0.5
   combinate: 1.1.11
   command-line-args: 5.2.1
@@ -1482,8 +1482,8 @@ packages:
       googlediff: 0.1.0
     dev: false
 
-  /coffeescript/2.6.1:
-    resolution: {integrity: sha512-GG5nkF93qII8HmHqnnibkgpp/SV7PSnSPiWsbinwya7nNOe95aE/x2xrKZJFks8Qpko3TNrC+/LahaKgrz5YCg==}
+  /coffeescript/2.7.0:
+    resolution: {integrity: sha512-hzWp6TUE2d/jCcN67LrW1eh5b/rSDKQK6oD6VMLlggYVUUFexgTH9z3dNYihzX4RMhze5FTUsUmOXViJKFQR/A==}
     engines: {node: '>=6'}
     hasBin: true
     dev: false
@@ -6192,7 +6192,7 @@ packages:
     version: 0.6.0
     dependencies:
       cnd: 9.2.1
-      coffeescript: 2.6.1
+      coffeescript: 2.7.0
       datom: 8.0.2
       executable: 4.1.1
       forever-parallel: 0.1.0
