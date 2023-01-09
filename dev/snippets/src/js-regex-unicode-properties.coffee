@@ -102,6 +102,7 @@ patterns    = []
 # patterns.push /^\p{Script=Hiragana}$/u
 # patterns.push /^\p{Script_Extensions=Katakana}$/u
 # patterns.push /^\p{Script=Katakana}$/u
+patterns.push /^\p{ID_Continue}$/u
 patterns.push /^\p{White_Space}$/u
 # patterns.push /^\p{Script_Extensions=Hangul}$/u
 for pattern in patterns
