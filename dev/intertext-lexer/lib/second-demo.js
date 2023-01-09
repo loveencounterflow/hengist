@@ -64,15 +64,16 @@
     modes = {};
     lexer = new Interlex();
     (() => {      //.........................................................................................................
+      /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
       var mode;
       mode = 'plain';
       lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
-      lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[<`\\]/u)));
+      lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[<`\\?]/u)));
       lexer.add_lexeme(mode, 'start_tag', /<(?<lslash>\/?)/u);
-      lexer.add_lexeme(mode, 'E_backticks', /`+/);
-      return lexer.add_lexeme(mode, 'other', /./u);
+      return lexer.add_lexeme(mode, 'E_backticks', /`+/);
     })();
-    (() => {      //.........................................................................................................
+    (() => {      // lexer.add_lexeme mode, 'other',        /./u
+      //.........................................................................................................
       var mode;
       mode = 'tag';
       lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
@@ -86,32 +87,46 @@
     //.........................................................................................................
     // "helo <bold>`world`</bold>"
     // "<x v=\\> z=42>"
-    // "<x v=\\> z=42\\>"
-    probes = ["a <b", "d <", "<", "<c"];
+    probes = ["<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", ""];
 //.......................................................................................................
 // "helo \\<bold>`world`</bold>"
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
       whisper('^31-1^', '————————————————————————————————————————————————————————————————————————');
-      debug('^31-2^', lexer.state);
       lexer.reset();
-      debug('^31-3^', lexer.state);
-      lexer.state.mode = 'plain'; // 'tag'
-      lexer.state.stack = [];
       pattern = lexer.registry[lexer.state.mode].pattern;
       tokens = [];
       max_index = probe.length - 1;
       while (true) {
         //.......................................................................................................
         if (lexer.state.prv_last_idx > max_index) {
-          help('^31-4^', match);
-          help('^31-5^', GUY.trm.reverse("reached end"));
+          /* reached end */
+          tokens.push({
+            mode: lexer.state.mode,
+            key: '$eof',
+            mk: `${lexer.state.mode}:$eof`,
+            value: '',
+            start: max_index + 1,
+            stop: max_index + 1,
+            x: null
+          });
           break;
         }
         match = probe.match(pattern);
         if (match == null) {
           /* TAINT complain if not at end or issue error token */
           warn('^31-6^', GUY.trm.reverse("no match"));
+          tokens.push({
+            mode: lexer.state.mode,
+            key: '$error',
+            mk: `${lexer.state.mode}:$error`,
+            value: '',
+            start: lexer.state.prv_last_idx,
+            stop: lexer.state.prv_last_idx,
+            x: {
+              code: 'nomatch'
+            }
+          });
           break;
         }
         if (pattern.lastIndex === lexer.state.prv_last_idx) {
