@@ -59,7 +59,7 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_htmlish = function() {
     /* TAINT uses code units, should use codepoints */
-    var after, before, center, i, left, len, lexer, match, max_index, mid, modes, n, old_last_idx, pattern, probe, probes, right, token, tokens;
+    var after, before, center, i, idx, j, left, len, len1, lexer, match, max_index, mid, modes, n, old_last_idx, pattern, probe, probes, right, token, tokens;
     n = namedCapture;
     modes = {};
     lexer = new Interlex();
@@ -69,7 +69,7 @@
       mode = 'plain';
       lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
       lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[<`\\?]/u)));
-      lexer.add_lexeme(mode, 'start_tag', /<(?<lslash>\/?)/u);
+      lexer.add_lexeme(mode, 'gosub_tag', /<(?<lslash>\/?)/u);
       return lexer.add_lexeme(mode, 'E_backticks', /`+/);
     })();
     (() => {      // lexer.add_lexeme mode, 'other',        /./u
@@ -77,8 +77,8 @@
       var mode;
       mode = 'tag';
       lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
-      lexer.add_lexeme(mode, 'stop_tag', />/u);
-      // lexer.add_lexeme mode, 'stop_tag',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
+      lexer.add_lexeme(mode, 'return', />/u);
+      // lexer.add_lexeme mode, 'return',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
       lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[>\\]/u)));
       return lexer.add_lexeme(mode, 'other', /./u);
     })();
@@ -115,7 +115,6 @@
         match = probe.match(pattern);
         if (match == null) {
           /* TAINT complain if not at end or issue error token */
-          warn('^31-6^', GUY.trm.reverse("no match"));
           tokens.push({
             mode: lexer.state.mode,
             key: '$error',
@@ -150,39 +149,55 @@
         tokens.push(token);
         // info '^31-12^', pattern.lastIndex, token
         //.....................................................................................................
-        if (token.key.startsWith('start_')) {
+        if (token.key.startsWith('gosub_')) {
           lexer.state.stack.push(lexer.state.mode);
-          lexer.state.mode = token.key.replace('start_', '');
+          lexer.state.mode = token.key.replace('gosub_', '');
           old_last_idx = pattern.lastIndex;
           pattern = lexer.registry[lexer.state.mode].pattern;
           pattern.lastIndex = old_last_idx;
         //.....................................................................................................
-        } else if (token.key.startsWith('stop_')) {
-          // error if lexer.state.stack.length < 1
+        } else if (token.key === 'return') {
           lexer.state.mode = lexer.state.stack.pop();
           old_last_idx = pattern.lastIndex;
           pattern = lexer.registry[lexer.state.mode].pattern;
           pattern.lastIndex = old_last_idx;
         }
-        if (token.key === 'nl') {
-          //.....................................................................................................
-          echo();
-        }
+        //.....................................................................................................
         lexer.state.prv_last_idx = pattern.lastIndex;
       }
-      debug('^31-13^', lexer.state);
+//.......................................................................................................
+      for (idx = j = 0, len1 = tokens.length; j < len1; idx = ++j) {
+        token = tokens[idx];
+        if (token.key !== '$error') {
+          continue;
+        }
+        token.key = GUY.trm.red(token.key);
+      }
       H.tabulate(`tokens of ${rpr(probe)}`, tokens);
     }
-    //.......................................................................................................
+    //.........................................................................................................
     return null;
   };
 
   //###########################################################################################################
   if (module === require.main) {
     (() => {
+      var i, idx, len, name, re, ref1, res, source;
       // demo_1()
       // demo_flags()
-      return demo_htmlish();
+      // demo_htmlish()
+      res = [/a(?<chr>.).*/u, /.*d(?<chr>.)/u];
+// re_2 = /(?<a>a(?<a𝔛b>.)).*(?<d>d(?<d𝔛b>.))/u
+      for (idx = i = 0, len = res.length; i < len; idx = ++i) {
+        re = res[idx];
+        name = `g${idx + 1}`;
+        source = re.source.replace(/(?<!\\)\(\?<([^>]+)>/gu, `(?<${name}𝔛$1>`);
+        source = `(?<${name}>${source})`;
+        res[idx] = new RegExp(source, re.flags);
+      }
+      debug('^45-1^', res);
+      debug('^45-1^', re = sequence(...res));
+      return urge({...((ref1 = 'abcdef'.match(re)) != null ? ref1.groups : void 0)});
     })();
   }
 
