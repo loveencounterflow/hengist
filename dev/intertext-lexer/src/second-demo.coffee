@@ -103,7 +103,6 @@ demo_htmlish = ->
       match = probe.match pattern
       unless match?
         ### TAINT complain if not at end or issue error token ###
-        warn '^31-6^', GUY.trm.reverse "no match"
         tokens.push { mode: lexer.state.mode, key: '$error', mk: "#{lexer.state.mode}:$error", \
           value: '', start: lexer.state.prv_last_idx, stop: lexer.state.prv_last_idx, x: { code: 'nomatch', }, }
         break
@@ -140,11 +139,13 @@ demo_htmlish = ->
         pattern           = lexer.registry[ lexer.state.mode ].pattern
         pattern.lastIndex = old_last_idx
       #.....................................................................................................
-      echo() if token.key is 'nl'
       lexer.state.prv_last_idx = pattern.lastIndex
-    debug '^31-13^', lexer.state
+    #.......................................................................................................
+    for token, idx in tokens
+      continue unless token.key is '$error'
+      token.key = GUY.trm.red token.key
     H.tabulate "tokens of #{rpr probe}", tokens
-  #.......................................................................................................
+  #.........................................................................................................
   return null
 
 
