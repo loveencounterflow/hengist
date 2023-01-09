@@ -60,15 +60,15 @@ demo_htmlish = ->
     mode    = 'plain'
     lexer.add_lexeme mode, 'escchr',       /\\(?<chr>.)/u
     lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[<`\\?]/u
-    lexer.add_lexeme mode, 'start_tag',    /<(?<lslash>\/?)/u
+    lexer.add_lexeme mode, 'gosub_tag',    /<(?<lslash>\/?)/u
     lexer.add_lexeme mode, 'E_backticks',  /`+/
     # lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
   do =>
     mode    = 'tag'
     lexer.add_lexeme mode, 'escchr',       /\\(?<chr>.)/u
-    lexer.add_lexeme mode, 'stop_tag',     />/u
-    # lexer.add_lexeme mode, 'stop_tag',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
+    lexer.add_lexeme mode, 'return',       />/u
+    # lexer.add_lexeme mode, 'return',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
     lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[>\\]/u
     lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
@@ -127,15 +127,14 @@ demo_htmlish = ->
       tokens.push token
       # info '^31-12^', pattern.lastIndex, token
       #.....................................................................................................
-      if token.key.startsWith 'start_'
+      if token.key.startsWith 'gosub_'
         lexer.state.stack.push lexer.state.mode
-        lexer.state.mode              = token.key.replace 'start_', ''
+        lexer.state.mode              = token.key.replace 'gosub_', ''
         old_last_idx      = pattern.lastIndex
         pattern           = lexer.registry[ lexer.state.mode ].pattern
         pattern.lastIndex = old_last_idx
       #.....................................................................................................
-      else if token.key.startsWith 'stop_'
-        # error if lexer.state.stack.length < 1
+      else if token.key is 'return'
         lexer.state.mode              = lexer.state.stack.pop()
         old_last_idx      = pattern.lastIndex
         pattern           = lexer.registry[ lexer.state.mode ].pattern
