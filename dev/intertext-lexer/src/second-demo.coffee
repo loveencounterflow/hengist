@@ -81,20 +81,17 @@ demo_htmlish = ->
     "a <b"
     "what? error?"
     "d <"
-    "<"
     "<c"
+    "<"
+    ""
     # "helo \\<bold>`world`</bold>"
     ]
   #.......................................................................................................
   for probe in probes
     whisper '^31-1^', '————————————————————————————————————————————————————————————————————————'
-    debug '^31-2^', lexer.state
     lexer.reset()
-    debug '^31-3^', lexer.state
-    lexer.state.mode    = 'plain' # 'tag'
-    lexer.state.stack   = []
-    pattern = lexer.registry[ lexer.state.mode ].pattern
-    tokens  = []
+    pattern   = lexer.registry[ lexer.state.mode ].pattern
+    tokens    = []
     max_index = probe.length - 1
     #.......................................................................................................
     loop
