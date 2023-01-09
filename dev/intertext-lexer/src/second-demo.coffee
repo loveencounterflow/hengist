@@ -56,12 +56,13 @@ demo_htmlish = ->
   lexer   = new Interlex()
   #.........................................................................................................
   do =>
+    ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
     mode    = 'plain'
     lexer.add_lexeme mode, 'escchr',       /\\(?<chr>.)/u
-    lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[<`\\]/u
+    lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[<`\\?]/u
     lexer.add_lexeme mode, 'start_tag',    /<(?<lslash>\/?)/u
     lexer.add_lexeme mode, 'E_backticks',  /`+/
-    lexer.add_lexeme mode, 'other',        /./u
+    # lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
   do =>
     mode    = 'tag'
@@ -76,8 +77,9 @@ demo_htmlish = ->
   probes        = [
     # "helo <bold>`world`</bold>"
     # "<x v=\\> z=42>"
-    # "<x v=\\> z=42\\>"
+    "<x v=\\> z=42\\>"
     "a <b"
+    "what? error?"
     "d <"
     "<"
     "<c"
@@ -97,13 +99,16 @@ demo_htmlish = ->
     #.......................................................................................................
     loop
       if lexer.state.prv_last_idx > max_index
-        help '^31-4^', match
-        help '^31-5^', GUY.trm.reverse "reached end"
+        ### reached end ###
+        tokens.push { mode: lexer.state.mode, key: '$eof', mk: "#{lexer.state.mode}:$eof", \
+          value: '', start: max_index + 1, stop: max_index + 1, x: null, }
         break
       match = probe.match pattern
       unless match?
         ### TAINT complain if not at end or issue error token ###
         warn '^31-6^', GUY.trm.reverse "no match"
+        tokens.push { mode: lexer.state.mode, key: '$error', mk: "#{lexer.state.mode}:$error", \
+          value: '', start: lexer.state.prv_last_idx, stop: lexer.state.prv_last_idx, x: { code: 'nomatch', }, }
         break
       if pattern.lastIndex is lexer.state.prv_last_idx
         if match?
