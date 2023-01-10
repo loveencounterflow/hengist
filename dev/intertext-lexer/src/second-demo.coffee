@@ -58,19 +58,18 @@ demo_htmlish = ->
   do =>
     ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
     mode    = 'plain'
-    lexer.add_lexeme mode, 'escchr',       /\\(?<chr>.)/u
-    lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[<`\\?]/u
-    lexer.add_lexeme mode, 'gosub_tag',    /<(?<lslash>\/?)/u
-    lexer.add_lexeme mode, 'E_backticks',  /`+/
+    lexer.add_lexeme { mode, tid: 'escchr',       pattern: ( /\\(?<chr>.)/u                             ), }
+    lexer.add_lexeme { mode, tid: 'text',         pattern: ( suffix '+', charSet.complement /[<`\\?]/u  ), }
+    lexer.add_lexeme { mode, tid: 'gosub_tag',    pattern: ( /<(?<lslash>\/?)/u                         ), }
+    lexer.add_lexeme { mode, tid: 'E_backticks',  pattern: ( /`+/                                       ), }
     # lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
   do =>
     mode    = 'tag'
-    lexer.add_lexeme mode, 'escchr',       /\\(?<chr>.)/u
-    lexer.add_lexeme mode, 'return',       />/u
-    # lexer.add_lexeme mode, 'return',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
-    lexer.add_lexeme mode, 'text',         suffix '+', charSet.complement /[>\\]/u
-    lexer.add_lexeme mode, 'other',        /./u
+    lexer.add_lexeme { mode, tid: 'escchr',       pattern: ( /\\(?<chr>.)/u                           ), }
+    lexer.add_lexeme { mode, tid: 'return',       pattern: ( />/u                                     ), }
+    lexer.add_lexeme { mode, tid: 'text',         pattern: ( suffix '+', charSet.complement /[>\\]/u  ), }
+    lexer.add_lexeme { mode, tid: 'other',        pattern: ( /./u                                     ), }
   #.........................................................................................................
   lexer.finalize()
   #.........................................................................................................
