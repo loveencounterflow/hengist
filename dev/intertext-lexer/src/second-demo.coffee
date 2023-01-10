@@ -153,18 +153,18 @@ demo_htmlish = ->
 if module is require.main then do =>
   # demo_1()
   # demo_flags()
-  # demo_htmlish()
-  res = [
-    /a(?<chr>.).*/u
-    /.*d(?<chr>.)/u
-    ]
-  # re_2 = /(?<a>a(?<a𝔛b>.)).*(?<d>d(?<d𝔛b>.))/u
-  for re, idx in res
-    name = "g#{idx + 1}"
-    source = re.source.replace /(?<!\\)\(\?<([^>]+)>/gu, "(?<#{name}𝔛$1>"
-    source = "(?<#{name}>#{source})"
-    res[ idx ] = new RegExp source, re.flags
-  debug '^45-1^', res
-  debug '^45-1^', re = sequence res...
-  urge { ( 'abcdef'.match re )?.groups..., }
+  demo_htmlish()
+  # res = [
+  #   /a(?<chr>.).*/u
+  #   /.*d(?<chr>.)/u
+  #   ]
+  # # re_2 = /(?<a>a(?<a𝔛b>.)).*(?<d>d(?<d𝔛b>.))/u
+  # for re, idx in res
+  #   name = "g#{idx + 1}"
+  #   source = re.source.replace /(?<!\\)\(\?<([^>]+)>/gu, "(?<#{name}𝔛$1>"
+  #   source = "(?<#{name}>#{source})"
+  #   res[ idx ] = new RegExp source, re.flags
+  # debug '^45-1^', res
+  # debug '^45-1^', re = sequence res...
+  # urge { ( 'abcdef'.match re )?.groups..., }
 
