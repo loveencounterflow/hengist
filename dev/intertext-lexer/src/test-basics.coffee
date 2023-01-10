@@ -53,7 +53,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     [ [ 'xxx',    /123/ug,        ], /123/ug,               ]
     [ [ 'xxx',    /123/guy,       ], /123/guy,              ]
     [ [ 'xxx',    /(?<a>x.)/gu    ], /(?<xxx𝔛a>x.)/gu,      ]
-    [ [ 'escchr', /\\(?<chr>.)/u  ], /(?<escchr𝔛chr>x.)/u,  ]
+    [ [ 'escchr', /\\(?<chr>.)/u  ], /\\(?<escchr𝔛chr>.)/u, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -61,6 +61,10 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       #.....................................................................................................
       resolve ( lexer._rename_groups probe... ), matcher
   #.........................................................................................................
+  # re = /((?<=\\\\)|(?<!\\))\(\?<([^>]+)>/gu
+  # debug '^46^', ( rpr /\\(?<x>)/.source ), rpr /\\(?<x>)/.source.replace re, '#'
+  # debug '^46^', ( rpr /\(?<x>\)/.source ), rpr /\(?<x>\)/.source.replace re, '#'
+  # debug '^46^', ( rpr /(?<x>)/.source   ), rpr /(?<x>)/.source.replace re, '#'
   done?()
   return null
 
