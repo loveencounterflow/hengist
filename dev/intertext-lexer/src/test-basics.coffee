@@ -68,6 +68,122 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@lex_tags = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex()
+  #.........................................................................................................
+  do =>
+    ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
+    lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
+    lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+    lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+    # lexer.add_lexeme mode, 'other',        /./u
+  #.........................................................................................................
+  do =>
+    mode    = 'tag'
+    lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
+    lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
+    lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
+    lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+  #.........................................................................................................
+  lexer.finalize()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo <bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 5, stop: 6, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 6, stop: 10, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 10, stop: 11, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 11, stop: 12, x: null }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 12, stop: 17, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 17, stop: 18, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 18, stop: 20, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 20, stop: 24, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 24, stop: 25, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 25, stop: 25, x: null } ], null ]
+    [ '<x v=\\> z=42>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', start: 1, stop: 5, x: null }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 5, stop: 7, x: { chr: '>' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', start: 7, stop: 12, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 12, stop: 13, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 13, stop: 13, x: null } ], null ]
+    [ '<x v=\\> z=42\\>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', start: 1, stop: 5, x: null }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 5, stop: 7, x: { chr: '>' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', start: 7, stop: 12, x: null }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 12, stop: 14, x: { chr: '>' } }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 14, stop: 14, x: null } ], null ]
+    [ 'a <b', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'a ', start: 0, stop: 2, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 2, stop: 3, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 3, stop: 4, x: null }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 4, stop: 4, x: null } ], null ]
+    [ 'what? error?', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'what', start: 0, stop: 4, x: null }, { mode: 'plain', tid: '$error', mk: 'plain:$error', jump: null, value: '', start: 4, stop: 4, x: { code: 'nomatch' } } ], null ]
+    [ 'd <', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'd ', start: 0, stop: 2, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 2, stop: 3, x: { lslash: null } }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 3, stop: 3, x: null } ], null ]
+    [ '<c', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'c', start: 1, stop: 2, x: null }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 2, stop: 2, x: null } ], null ]
+    [ '<', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 1, stop: 1, x: null } ], null ]
+    [ '', [ { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 0, stop: 0, x: null } ], null ]
+    [ 'helo \\<bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', start: 5, stop: 7, x: { chr: '<' } }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', start: 7, stop: 12, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 12, stop: 13, x: null }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 13, stop: 18, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 18, stop: 19, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 19, stop: 21, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 21, stop: 25, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 25, stop: 26, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 26, stop: 26, x: null } ], null ]
+    [ '<b>helo \\<bold>`world`</bold></b>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 1, stop: 2, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 2, stop: 3, x: null }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 3, stop: 8, x: null }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', start: 8, stop: 10, x: { chr: '<' } }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', start: 10, stop: 15, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 15, stop: 16, x: null }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 16, stop: 21, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 21, stop: 22, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 22, stop: 24, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 24, stop: 28, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 28, stop: 29, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 29, stop: 31, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 31, stop: 32, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 32, stop: 33, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 33, stop: 33, x: null } ], null ]
+    [ '<i><b></b></i>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', start: 1, stop: 2, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 2, stop: 3, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 3, stop: 4, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 4, stop: 5, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 5, stop: 6, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 6, stop: 8, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 8, stop: 9, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 9, stop: 10, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 10, stop: 12, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', start: 12, stop: 13, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 13, stop: 14, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 14, stop: 14, x: null } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve lexer.run probe
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@lex_tags_with_rpr = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex()
+  #.........................................................................................................
+  do =>
+    ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
+    lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
+    lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+    lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+    # lexer.add_lexeme mode, 'other',        /./u
+  #.........................................................................................................
+  do =>
+    mode    = 'tag'
+    lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
+    lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
+    lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
+    lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+  #.........................................................................................................
+  lexer.finalize()
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end^,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end^,(24:25),='>'][plain:$eof,(25:25),='']", null ]
+    [ '<x v=\\> z=42>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:end^,(12:13),='>'][plain:$eof,(13:13),='']", null ]
+    [ '<x v=\\> z=42\\>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:escchr,(12:14),='\\\\>',chr:'>'][tag:$eof,(14:14),='']", null ]
+    [ 'a <b', "[plain:text,(0:2),='a '][plain:tag>tag,(2:3),='<',lslash:null][tag:text,(3:4),='b'][tag:$eof,(4:4),='']", null ]
+    [ 'what? error?', "[plain:text,(0:4),='what'][plain:$error,(4:4),='',code:'nomatch']", null ]
+    [ 'd <', "[plain:text,(0:2),='d '][plain:tag>tag,(2:3),='<',lslash:null][tag:$eof,(3:3),='']", null ]
+    [ '<c', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='c'][tag:$eof,(2:2),='']", null ]
+    [ '<', "[plain:tag>tag,(0:1),='<',lslash:null][tag:$eof,(1:1),='']", null ]
+    [ '', "[plain:$eof,(0:0),='']", null ]
+    [ 'helo \\<bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:escchr,(5:7),='\\\\<',chr:'<'][plain:text,(7:12),='bold>'][plain:E_backticks,(12:13),='`'][plain:text,(13:18),='world'][plain:E_backticks,(18:19),='`'][plain:tag>tag,(19:21),='</',lslash:'/'][tag:text,(21:25),='bold'][tag:end^,(25:26),='>'][plain:$eof,(26:26),='']", null ]
+    [ '<b>helo \\<bold>`world`</bold></b>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='b'][tag:end^,(2:3),='>'][plain:text,(3:8),='helo '][plain:escchr,(8:10),='\\\\<',chr:'<'][plain:text,(10:15),='bold>'][plain:E_backticks,(15:16),='`'][plain:text,(16:21),='world'][plain:E_backticks,(21:22),='`'][plain:tag>tag,(22:24),='</',lslash:'/'][tag:text,(24:28),='bold'][tag:end^,(28:29),='>'][plain:tag>tag,(29:31),='</',lslash:'/'][tag:text,(31:32),='b'][tag:end^,(32:33),='>'][plain:$eof,(33:33),='']", null ]
+    [ '<i><b></b></i>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='i'][tag:end^,(2:3),='>'][plain:tag>tag,(3:4),='<',lslash:null][tag:text,(4:5),='b'][tag:end^,(5:6),='>'][plain:tag>tag,(6:8),='</',lslash:'/'][tag:text,(8:9),='b'][tag:end^,(9:10),='>'][plain:tag>tag,(10:12),='</',lslash:'/'][tag:text,(12:13),='i'][tag:end^,(13:14),='>'][plain:$eof,(14:14),='']", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      resolve ( lexer.rpr_token token for token from lexer.walk probe ).join ''
+  #.........................................................................................................
+  done?()
+  return null
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ############################################################################################################
