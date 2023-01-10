@@ -58,18 +58,18 @@ demo_htmlish = ->
   do =>
     ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
     mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'escchr',       pattern: ( /\\(?<chr>.)/u                             ), }
-    lexer.add_lexeme { mode, tid: 'text',         pattern: ( suffix '+', charSet.complement /[<`\\?]/u  ), }
-    lexer.add_lexeme { mode, tid: 'gosub_tag',    pattern: ( /<(?<lslash>\/?)/u                         ), }
-    lexer.add_lexeme { mode, tid: 'E_backticks',  pattern: ( /`+/                                       ), }
+    lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
+    lexer.add_lexeme { mode, tid: 'text',             pattern: ( suffix '+', charSet.complement /[<`\\?]/u  ), }
+    lexer.add_lexeme { mode, tid: 'tag', push: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+    lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
     # lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
   do =>
     mode    = 'tag'
-    lexer.add_lexeme { mode, tid: 'escchr',       pattern: ( /\\(?<chr>.)/u                           ), }
-    lexer.add_lexeme { mode, tid: 'return',       pattern: ( />/u                                     ), }
-    lexer.add_lexeme { mode, tid: 'text',         pattern: ( suffix '+', charSet.complement /[>\\]/u  ), }
-    lexer.add_lexeme { mode, tid: 'other',        pattern: ( /./u                                     ), }
+    lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
+    lexer.add_lexeme { mode, tid: 'end', pop: true, pattern: ( />/u                                     ), }
+    lexer.add_lexeme { mode, tid: 'text',           pattern: ( suffix '+', charSet.complement /[>\\]/u  ), }
+    lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
   #.........................................................................................................
   lexer.finalize()
   #.........................................................................................................
