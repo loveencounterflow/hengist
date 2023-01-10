@@ -78,7 +78,8 @@
       });
       lexer.add_lexeme({
         mode,
-        tid: 'gosub_tag',
+        tid: 'tag',
+        push: 'tag',
         pattern: /<(?<lslash>\/?)/u
       });
       return lexer.add_lexeme({
@@ -98,7 +99,8 @@
       });
       lexer.add_lexeme({
         mode,
-        tid: 'return',
+        tid: 'end',
+        pop: true,
         pattern: />/u
       });
       lexer.add_lexeme({
