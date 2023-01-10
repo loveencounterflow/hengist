@@ -50,7 +50,7 @@
       T.eq(lexer._metachr, '𝔛');
     }
     //.........................................................................................................
-    probes_and_matchers = [[['xxx', /123/], /123/], [['xxx', /123/ug], /123/ug], [['xxx', /123/guy], /123/guy], [['xxx', /(?<a>x.)/gu], /(?<xxx𝔛a>x.)/gu], [['escchr', /\\(?<chr>.)/u], /(?<escchr𝔛chr>x.)/u]];
+    probes_and_matchers = [[['xxx', /123/], /123/], [['xxx', /123/ug], /123/ug], [['xxx', /123/guy], /123/guy], [['xxx', /(?<a>x.)/gu], /(?<xxx𝔛a>x.)/gu], [['escchr', /\\(?<chr>.)/u], /\\(?<escchr𝔛chr>.)/u]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
