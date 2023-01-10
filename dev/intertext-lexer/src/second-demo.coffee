@@ -60,14 +60,14 @@ demo_htmlish = ->
     mode    = 'plain'
     lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
     lexer.add_lexeme { mode, tid: 'text',             pattern: ( suffix '+', charSet.complement /[<`\\?]/u  ), }
-    lexer.add_lexeme { mode, tid: 'tag', push: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+    lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
     lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
     # lexer.add_lexeme mode, 'other',        /./u
   #.........................................................................................................
   do =>
     mode    = 'tag'
     lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
-    lexer.add_lexeme { mode, tid: 'end', pop: true, pattern: ( />/u                                     ), }
+    lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
     lexer.add_lexeme { mode, tid: 'text',           pattern: ( suffix '+', charSet.complement /[>\\]/u  ), }
     lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
   #.........................................................................................................
@@ -85,6 +85,7 @@ demo_htmlish = ->
     ""
     "helo \\<bold>`world`</bold>"
     "<b>helo \\<bold>`world`</bold></b>"
+    "<i><b></b></i>"
     ]
   #.......................................................................................................
   for probe in probes
