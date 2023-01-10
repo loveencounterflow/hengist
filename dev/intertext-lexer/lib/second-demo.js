@@ -79,7 +79,7 @@
       lexer.add_lexeme({
         mode,
         tid: 'tag',
-        push: 'tag',
+        jump: 'tag',
         pattern: /<(?<lslash>\/?)/u
       });
       return lexer.add_lexeme({
@@ -100,7 +100,7 @@
       lexer.add_lexeme({
         mode,
         tid: 'end',
-        pop: true,
+        jump: '^',
         pattern: />/u
       });
       lexer.add_lexeme({
@@ -117,7 +117,7 @@
     //.........................................................................................................
     lexer.finalize();
     //.........................................................................................................
-    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", "", "helo \\<bold>`world`</bold>", "<b>helo \\<bold>`world`</bold></b>"];
+    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", "", "helo \\<bold>`world`</bold>", "<b>helo \\<bold>`world`</bold></b>", "<i><b></b></i>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
