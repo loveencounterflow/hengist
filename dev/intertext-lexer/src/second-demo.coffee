@@ -89,57 +89,7 @@ demo_htmlish = ->
   #.......................................................................................................
   for probe in probes
     whisper '^31-1^', '————————————————————————————————————————————————————————————————————————'
-    lexer.reset()
-    pattern   = lexer.registry[ lexer.state.mode ].pattern
-    tokens    = []
-    max_index = probe.length - 1
-    #.......................................................................................................
-    loop
-      if lexer.state.prv_last_idx > max_index
-        ### reached end ###
-        tokens.push { mode: lexer.state.mode, key: '$eof', mk: "#{lexer.state.mode}:$eof", \
-          value: '', start: max_index + 1, stop: max_index + 1, x: null, }
-        break
-      match = probe.match pattern
-      unless match?
-        ### TAINT complain if not at end or issue error token ###
-        tokens.push { mode: lexer.state.mode, key: '$error', mk: "#{lexer.state.mode}:$error", \
-          value: '', start: lexer.state.prv_last_idx, stop: lexer.state.prv_last_idx, x: { code: 'nomatch', }, }
-        break
-      if pattern.lastIndex is lexer.state.prv_last_idx
-        if match?
-          warn '^31-7^', { match.groups..., }
-          warn '^31-8^', token  = lexer._token_from_match lexer.state.prv_last_idx, match, lexer.state.mode
-          ### TAINT uses code units, should use codepoints ###
-          center = token.stop
-          left   = Math.max 0, center - 11
-          right  = Math.min probe.length, center + 11
-          before = probe[ left ... center ]
-          after  = probe[ center + 1 .. right ]
-          mid    = probe[ center ]
-          warn '^31-9^', { before, mid, after, }
-          warn '^31-10^', GUY.trm.reverse "pattern #{rpr token.key} matched empty string; stopping"
-        else
-          warn '^31-11^', GUY.trm.reverse "nothing matched; detected loop, stopping"
-        break
-      token = lexer._token_from_match lexer.state.prv_last_idx, match, lexer.state.mode
-      tokens.push token
-      # info '^31-12^', pattern.lastIndex, token
-      #.....................................................................................................
-      if token.key.startsWith 'gosub_'
-        lexer.state.stack.push lexer.state.mode
-        lexer.state.mode              = token.key.replace 'gosub_', ''
-        old_last_idx      = pattern.lastIndex
-        pattern           = lexer.registry[ lexer.state.mode ].pattern
-        pattern.lastIndex = old_last_idx
-      #.....................................................................................................
-      else if token.key is 'return'
-        lexer.state.mode              = lexer.state.stack.pop()
-        old_last_idx      = pattern.lastIndex
-        pattern           = lexer.registry[ lexer.state.mode ].pattern
-        pattern.lastIndex = old_last_idx
-      #.....................................................................................................
-      lexer.state.prv_last_idx = pattern.lastIndex
+    tokens    = lexer.run probe
     #.......................................................................................................
     for token, idx in tokens
       continue unless token.key is '$error'
