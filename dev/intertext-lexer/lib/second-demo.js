@@ -66,25 +66,56 @@
       /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
       var mode;
       mode = 'plain';
-      lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
-      lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[<`\\?]/u)));
-      lexer.add_lexeme(mode, 'gosub_tag', /<(?<lslash>\/?)/u);
-      return lexer.add_lexeme(mode, 'E_backticks', /`+/);
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'text',
+        pattern: suffix('+', charSet.complement(/[<`\\?]/u))
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'gosub_tag',
+        pattern: /<(?<lslash>\/?)/u
+      });
+      return lexer.add_lexeme({
+        mode,
+        tid: 'E_backticks',
+        pattern: /`+/
+      });
     })();
     (() => {      // lexer.add_lexeme mode, 'other',        /./u
       //.........................................................................................................
       var mode;
       mode = 'tag';
-      lexer.add_lexeme(mode, 'escchr', /\\(?<chr>.)/u);
-      lexer.add_lexeme(mode, 'return', />/u);
-      // lexer.add_lexeme mode, 'return',     either ( sequence ( notBehind '\\' ), />/u ), ( /^>/u )
-      lexer.add_lexeme(mode, 'text', suffix('+', charSet.complement(/[>\\]/u)));
-      return lexer.add_lexeme(mode, 'other', /./u);
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'return',
+        pattern: />/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'text',
+        pattern: suffix('+', charSet.complement(/[>\\]/u))
+      });
+      return lexer.add_lexeme({
+        mode,
+        tid: 'other',
+        pattern: /./u
+      });
     })();
     //.........................................................................................................
     lexer.finalize();
     //.........................................................................................................
-    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", "", "helo \\<bold>`world`</bold>"];
+    probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", "", "helo \\<bold>`world`</bold>", "<b>helo \\<bold>`world`</bold></b>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
       probe = probes[i];
