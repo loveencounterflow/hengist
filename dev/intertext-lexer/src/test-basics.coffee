@@ -161,31 +161,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   return null
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ############################################################################################################
 if require.main is module then do =>
   test @
