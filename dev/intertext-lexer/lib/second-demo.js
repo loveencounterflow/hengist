@@ -145,6 +145,11 @@
     lws = lws_pattern.source;
     lexer.add_lexeme({
       mode,
+      tid: 'nleot',
+      pattern: /(?<!\\)\n$/u // not preceded by backslash // newline, then EOT
+    });
+    lexer.add_lexeme({
+      mode,
       tid: 'escnl',
       pattern: /\\\n/u // newline preced by backslash
     });
@@ -161,8 +166,11 @@
       mode,
       tid: 'p',
       pattern: RegExp(`(?:\\\\\\n|.)+?(?=\\n${lws // one or more of escaped newline or any, non-greedy
-// preceding two newlines or EOT
-}*\\n|$)`, "u")
+// preceding...
+//   two or more newlines
+//   or newline at EOT
+//   or EOT
+}*\\n|\\n$|$)`, "u")
     });
     //.........................................................................................................
     probe = `first glorious
