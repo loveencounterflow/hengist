@@ -97,10 +97,21 @@ demo_htmlish = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-demo_paragraphs = ->
+new_toy_md_lexer = ( mode = 'plain' ) ->
+  lexer   = new Interlex { dotall: false, }
+  #.........................................................................................................
+  lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, }
+  lexer.add_lexeme { mode, tid: 'star1',  pattern: /(?<!\*)\*(?!\*)/u, }
+  lexer.add_lexeme { mode, tid: 'star2',  pattern: /(?<!\*)\*\*(?!\*)/u, }
+  lexer.add_lexeme { mode, tid: 'star3',  pattern: /(?<!\*)\*\*\*(?!\*)/u, }
+  lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*]+/u, }
+  #.........................................................................................................
+  return lexer
+
+#-----------------------------------------------------------------------------------------------------------
+new_md_paragraph_lexer = ( mode = 'plain' ) ->
   lexer   = new Interlex { dotall: true, }
   #.........................................................................................................
-  mode        = 'plain'
   lws_pattern = /// [ \u{2000}-\u{200a}
                       \u{0009}
                       \u{000b}-\u{000d}
@@ -127,34 +138,96 @@ demo_paragraphs = ->
                                                         \n $          |       #   or newline at EOT
                                                         $               )     #   or EOT
                                                       ///u, }
+  return lexer
+
+#-----------------------------------------------------------------------------------------------------------
+demo_paragraphs = ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
   #.........................................................................................................
   probe = """
     first glorious
     paragraph
 
     \x20\x20
-    second slightly longer
+    **second *slightly*** longer
     paragraph
     of text
 
     foo\\
     bar
 
+    ***a*b**
+
+    **a*b***
+
+    ***ab***
+
     x\\
 
     y
 
     """
-  # lexer._finalize()
-  # info '^59-1^', lexer.registry.plain.pattern
-  # urge '^59-2^', rpr probe.replace ///#{lws}+\n///mgu, '\n'
-  # probe = probe.replace ///#{lws}+$///mgu, ''
   urge '^59-3^', rpr probe
-  # re = /(?:.|(?:\n(?!\n)))*\n$\n$/muy
-  # urge '^59-3^', re.lastIndex, rpr probe.match re
-  # urge '^59-3^', re.lastIndex, rpr probe.match re
-  # urge '^59-4^', rpr probe.replace ///\s+?$///mgu, '\n'
-  H.tabulate "paragraphs", lexer.run probe
+  p_lexer   = new_md_paragraph_lexer  'p'
+  md_lexer  = new_toy_md_lexer        'md'
+  H.tabulate "paragraphs", p_lexer.run probe
+  #.........................................................................................................
+  state =
+    within_star1:   false
+    within_star2:   false
+    start_of_star1: null
+    start_of_star2: null
+  p = new Pipeline()
+  p.push [ probe, ]
+  p.push ( source, send ) -> send d for d from p_lexer.walk source
+  p.push ( d, send ) ->
+    return send d unless d.tid is 'p'
+    send e for e from md_lexer.walk d.value
+  p.push do ->
+    return ( d, send ) ->
+      return send d unless d.tid is 'star1'
+      if state.within_star1
+        send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
+        state.within_star1    = false
+        state.start_of_star1  = null
+      else
+        send { tid: 'html', value: '<i>' } # TAINT not a standard datom ###
+        state.within_star1    = true
+        state.start_of_star1  = d.start
+  p.push do ->
+    return ( d, send ) ->
+      return send d unless d.tid is 'star2'
+      if state.within_star2
+        send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
+        state.within_star2    = false
+        state.start_of_star2  = null
+      else
+        send { tid: 'html', value: '<b>' } # TAINT not a standard datom ###
+        state.within_star2    = true
+        state.start_of_star2  = d.start
+  p.push do ->
+    return ( d, send ) ->
+      return send d unless d.tid is 'star3'
+      if state.within_star1
+        if state.within_star2
+          if state.start_of_star1 <= state.start_of_star2
+            send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
+            send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
+          else
+            send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
+            send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
+          state.within_star1    = false
+          state.start_of_star1  = null
+          state.within_star2    = false
+          state.start_of_star2  = null
+      else
+        send { tid: 'html', value: '<xxxxxxxxx>' } # TAINT not a standard datom ###
+        state.within_star2 = true
+  H.tabulate "md", p.run()
   #.........................................................................................................
   return null
 
