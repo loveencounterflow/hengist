@@ -734,6 +734,17 @@ demo_strict_owner_with_proxy = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@GUY_props_assign_with_defaults = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  GUY.props.nonull_assign = ( first, others... ) ->
+    return Object.assign {}, first, ( @omit_nullish other for other in others )...
+  #.........................................................................................................
+  T?.eq ( GUY.props.nonull_assign { dotall: true, }, { dotall: null, }, { dotall: undefined, }  ), { dotall: true, }
+  T?.eq ( GUY.props.nonull_assign { dotall: true, }, { dotall: null, }, { dotall: false, }      ), { dotall: false, }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 demo_seal_freeze = ->
   GUY       = require '../../../apps/guy'
   do =>
@@ -773,8 +784,9 @@ if require.main is module then do =>
   # test @[ "guy.props.crossmerge()" ]
   # test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
   # demo_keys()
-  @[ "GUY.props.keys()" ]()
-  test @[ "GUY.props.keys()" ]
+  # @[ "GUY.props.keys()" ]()
+  # test @[ "GUY.props.keys()" ]
+  test @GUY_props_assign_with_defaults
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
