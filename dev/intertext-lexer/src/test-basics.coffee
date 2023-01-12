@@ -90,8 +90,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
     lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
   #.........................................................................................................
-  lexer.finalize()
-  #.........................................................................................................
   probes_and_matchers = [
     [ 'helo <bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 5, stop: 6, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 6, stop: 10, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 10, stop: 11, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 11, stop: 12, x: null }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 12, stop: 17, x: null }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 17, stop: 18, x: null }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 18, stop: 20, x: { lslash: '/' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 20, stop: 24, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 24, stop: 25, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 25, stop: 25, x: null } ], null ]
     [ '<x v=\\> z=42>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', start: 1, stop: 5, x: null }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 5, stop: 7, x: { chr: '>' } }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', start: 7, stop: 12, x: null }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: '^', value: '>', start: 12, stop: 13, x: null }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 13, stop: 13, x: null } ], null ]
@@ -135,8 +133,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
     lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
     lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
-  #.........................................................................................................
-  lexer.finalize()
   #.........................................................................................................
   probes_and_matchers = [
     [ 'helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end^,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end^,(24:25),='>'][plain:$eof,(25:25),='']", null ]
