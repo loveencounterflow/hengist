@@ -1830,6 +1830,48 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_assign_with_defaults = function(T, done) {
+    var GUY;
+    GUY = require('../../../apps/guy');
+    GUY.props.nonull_assign = function(first, ...others) {
+      var other;
+      return Object.assign({}, first, ...((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = others.length; i < len; i++) {
+          other = others[i];
+          results.push(this.omit_nullish(other));
+        }
+        return results;
+      }).call(this)));
+    };
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(GUY.props.nonull_assign({
+        dotall: true
+      }, {
+        dotall: null
+      }, {
+        dotall: void 0
+      }), {
+        dotall: true
+      });
+    }
+    if (T != null) {
+      T.eq(GUY.props.nonull_assign({
+        dotall: true
+      }, {
+        dotall: null
+      }, {
+        dotall: false
+      }), {
+        dotall: false
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_seal_freeze = function() {
     var GUY;
     GUY = require('../../../apps/guy');
@@ -1902,8 +1944,9 @@
       // test @[ "guy.props.crossmerge()" ]
       // test @[ "GUY.props.keys() works for all JS values, including null and undefined" ]
       // demo_keys()
-      this["GUY.props.keys()"]();
-      return test(this["GUY.props.keys()"]);
+      // @[ "GUY.props.keys()" ]()
+      // test @[ "GUY.props.keys()" ]
+      return test(this.GUY_props_assign_with_defaults);
     })();
   }
 

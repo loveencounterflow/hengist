@@ -140,13 +140,16 @@
   // patterns.push /^\p{Script=Hiragana}$/u
   // patterns.push /^\p{Script_Extensions=Katakana}$/u
   // patterns.push /^\p{Script=Katakana}$/u
-  patterns.push(/^\p{ID_Continue}$/u);
+  // patterns.push /^\p{ID_Continue}$/u
+  patterns.push(/^\p{Pattern_White_Space}$/u);
 
   patterns.push(/^\p{White_Space}$/u);
 
 // patterns.push /^\p{Script_Extensions=Hangul}$/u
   for (i = 0, len = patterns.length; i < len; i++) {
     pattern = patterns[i];
+    whisper('————————————————————————————');
+    whisper(pattern);
     show_ranges(ranges_from_pattern(pattern));
   }
 

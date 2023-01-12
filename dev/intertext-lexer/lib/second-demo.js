@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, Interlex, alert, atomic, bound, capture, charSet, copy_regex, debug, demo_htmlish, dotAll, dotall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
+  var GUY, H, Interlex, alert, atomic, bound, capture, charSet, compose, copy_regex, debug, demo_htmlish, demo_htmlish_with_paragraphs, demo_paragraphs, dotAll, dotall, echo, either, equals, flags, help, info, inspect, log, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, plain, praise, ref, rpr, sequence, sticky, suffix, to_width, truth, unicode, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -17,11 +17,11 @@
   ({to_width} = require('to-width'));
 
   //...........................................................................................................
-  ({atomic, bound, capture, charSet, either, flags, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, ref, sequence, suffix} = require('compose-regexp-commonjs'));
-
   H = require('../../../lib/helpers');
 
-  ({Interlex} = require('../../../apps/intertext-lexer'));
+  ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+
+  ({atomic, bound, capture, charSet, either, flags, lookAhead, lookBehind, maybe, namedCapture, noBound, notAhead, notBehind, ref, sequence, suffix} = compose);
 
   //-----------------------------------------------------------------------------------------------------------
   unicode = function(x) {
@@ -58,9 +58,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_htmlish = function() {
-    var i, idx, j, len, len1, lexer, modes, n, probe, probes, token, tokens;
-    n = namedCapture;
-    modes = {};
+    var i, idx, j, len, len1, lexer, probe, probes, token, tokens;
     lexer = new Interlex();
     (() => {      //.........................................................................................................
       /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
@@ -115,8 +113,6 @@
       });
     })();
     //.........................................................................................................
-    lexer.finalize();
-    //.........................................................................................................
     probes = ["helo <bold>`world`</bold>", "<x v=\\> z=42>", "<x v=\\> z=42\\>", "a <b", "what? error?", "d <", "<c", "<", "", "helo \\<bold>`world`</bold>", "<b>helo \\<bold>`world`</bold></b>", "<i><b></b></i>"];
 //.......................................................................................................
     for (i = 0, len = probes.length; i < len; i++) {
@@ -137,12 +133,79 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_paragraphs = function() {
+    var lexer, lws, lws_pattern, mode, probe;
+    lexer = new Interlex({
+      dotall: true
+    });
+    //.........................................................................................................
+    mode = 'plain';
+    lws_pattern = /[\u{2000}-\u{200a}\u{0009}\u{000b}-\u{000d}\u{0020}\u{0085}\u{00a0}\u{2028}\u{2029}\u{202f}\u{205f}\u{3000}]/u;
+    lws = lws_pattern.source;
+    // lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u    ), }
+    lexer.add_lexeme({
+      mode,
+      tid: 'escnl',
+      pattern: /\\\n/u
+    });
+    // lexer.add_lexeme { mode, tid: 'ws',               pattern: lws_pattern, }
+    // lexer.add_lexeme { mode, tid: 'nls',              pattern: ///  \n{2,} ///, }
+    lexer.add_lexeme({
+      mode,
+      tid: 'nls',
+      pattern: RegExp(`(?:${lws}*(?<!\\\\)\\n${lws}*){2,}`, "u")
+    });
+    // lexer.add_lexeme { mode, tid: 'nl1',              pattern: ( /\n/u                             ), }
+    // lexer.add_lexeme { mode, tid: 'nl',           pattern: ( /\\(?<chr>.)/u                             ), }
+    lexer.add_lexeme({
+      mode,
+      tid: 'p',
+      pattern: RegExp(`(?:\\\\\\n|.)+?(?=\\n${lws}*\\n|$)`, "u")
+    });
+    // debug '^59-1^', lexer.registry.plain
+    // lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+    // lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+    //.........................................................................................................
+    probe = `first glorious
+paragraph
+
+\x20\x20
+second slightly longer
+paragraph
+of text
+
+foo\\
+bar
+
+x\\
+
+y
+`;
+    // lexer._finalize()
+    // info '^59-1^', lexer.registry.plain.pattern
+    // urge '^59-2^', rpr probe.replace ///#{lws}+\n///mgu, '\n'
+    // probe = probe.replace ///#{lws}+$///mgu, ''
+    urge('^59-3^', rpr(probe));
+    // re = /(?:.|(?:\n(?!\n)))*\n$\n$/muy
+    // urge '^59-3^', re.lastIndex, rpr probe.match re
+    // urge '^59-3^', re.lastIndex, rpr probe.match re
+    // urge '^59-4^', rpr probe.replace ///\s+?$///mgu, '\n'
+    H.tabulate("paragraphs", lexer.run(probe));
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_htmlish_with_paragraphs = function() {};
+
   //###########################################################################################################
   if (module === require.main) {
     (() => {
       // demo_1()
       // demo_flags()
-      return demo_htmlish();
+      // demo_htmlish()
+      return demo_paragraphs();
     })();
   }
 
