@@ -23,6 +23,9 @@ truth                     = GUY.trm.truth.bind GUY.trm
   copy_regex }            = GUY.samesame
 { to_width }              = require 'to-width'
 #...........................................................................................................
+H                         = require '../../../lib/helpers'
+{ Interlex
+  compose  }              = require '../../../apps/intertext-lexer'
 { atomic
   bound
   capture
@@ -38,9 +41,7 @@ truth                     = GUY.trm.truth.bind GUY.trm
   notBehind
   ref
   sequence
-  suffix                } = require 'compose-regexp-commonjs'
-H                         = require '../../../lib/helpers'
-{ Interlex }              = require '../../../apps/intertext-lexer'
+  suffix                } = compose
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -51,8 +52,6 @@ dotAll  = dotall
 
 #-----------------------------------------------------------------------------------------------------------
 demo_htmlish = ->
-  n       = namedCapture
-  modes   = {}
   lexer   = new Interlex()
   #.........................................................................................................
   do =>
@@ -70,8 +69,6 @@ demo_htmlish = ->
     lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
     lexer.add_lexeme { mode, tid: 'text',           pattern: ( suffix '+', charSet.complement /[>\\]/u  ), }
     lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
-  #.........................................................................................................
-  lexer.finalize()
   #.........................................................................................................
   probes        = [
     "helo <bold>`world`</bold>"
@@ -99,12 +96,82 @@ demo_htmlish = ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+demo_paragraphs = ->
+  lexer   = new Interlex { dotall: true, }
+  #.........................................................................................................
+  mode        = 'plain'
+  lws_pattern = /// [ \u{2000}-\u{200a}
+                      \u{0009}
+                      \u{000b}-\u{000d}
+                      \u{0020}
+                      \u{0085}
+                      \u{00a0}
+                      \u{2028}
+                      \u{2029}
+                      \u{202f}
+                      \u{205f}
+                      \u{3000} ] ///u
+  lws = lws_pattern.source
+  # lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u    ), }
+  lexer.add_lexeme { mode, tid: 'escnl',           pattern: ( /\\\n/u    ), }
+  # lexer.add_lexeme { mode, tid: 'ws',               pattern: lws_pattern, }
+  # lexer.add_lexeme { mode, tid: 'nls',              pattern: ///  \n{2,} ///, }
+  lexer.add_lexeme { mode, tid: 'nls',              pattern: ( ///  (?:
+                                                                      #{lws}*
+                                                                      (?<! \\ ) \n
+                                                                      #{lws}*
+                                                                      ){2,} ///u ), }
+  # lexer.add_lexeme { mode, tid: 'nl1',              pattern: ( /\n/u                             ), }
+  # lexer.add_lexeme { mode, tid: 'nl',           pattern: ( /\\(?<chr>.)/u                             ), }
+  lexer.add_lexeme { mode, tid: 'p',                pattern: ///
+                                                                (?: \\\n | . )+?
+                                                                (?= \n #{lws}* \n | $ ) ///u, }
+  # debug '^59-1^', lexer.registry.plain
+  # lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+  # lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+  #.........................................................................................................
+  probe = """
+    first glorious
+    paragraph
+
+    \x20\x20
+    second slightly longer
+    paragraph
+    of text
+
+    foo\\
+    bar
+
+    x\\
+
+    y
+
+    """
+  # lexer._finalize()
+  # info '^59-1^', lexer.registry.plain.pattern
+  # urge '^59-2^', rpr probe.replace ///#{lws}+\n///mgu, '\n'
+  # probe = probe.replace ///#{lws}+$///mgu, ''
+  urge '^59-3^', rpr probe
+  # re = /(?:.|(?:\n(?!\n)))*\n$\n$/muy
+  # urge '^59-3^', re.lastIndex, rpr probe.match re
+  # urge '^59-3^', re.lastIndex, rpr probe.match re
+  # urge '^59-4^', rpr probe.replace ///\s+?$///mgu, '\n'
+  H.tabulate "paragraphs", lexer.run probe
+  #.........................................................................................................
+  return null
+
+
+#-----------------------------------------------------------------------------------------------------------
+demo_htmlish_with_paragraphs = ->
+
 
 ############################################################################################################
 if module is require.main then do =>
   # demo_1()
   # demo_flags()
-  demo_htmlish()
+  # demo_htmlish()
+  demo_paragraphs()
   # res = [
   #   /a(?<chr>.).*/u
   #   /.*d(?<chr>.)/u
