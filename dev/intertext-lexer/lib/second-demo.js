@@ -143,29 +143,27 @@
     mode = 'plain';
     lws_pattern = /[\u{2000}-\u{200a}\u{0009}\u{000b}-\u{000d}\u{0020}\u{0085}\u{00a0}\u{2028}\u{2029}\u{202f}\u{205f}\u{3000}]/u;
     lws = lws_pattern.source;
-    // lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u    ), }
     lexer.add_lexeme({
       mode,
       tid: 'escnl',
-      pattern: /\\\n/u
+      pattern: /\\\n/u // newline preced by backslash
     });
-    // lexer.add_lexeme { mode, tid: 'ws',               pattern: lws_pattern, }
-    // lexer.add_lexeme { mode, tid: 'nls',              pattern: ///  \n{2,} ///, }
     lexer.add_lexeme({
       mode,
       tid: 'nls',
-      pattern: RegExp(`(?:${lws}*(?<!\\\\)\\n${lws}*){2,}`, "u")
+      pattern: RegExp(`(?:${lws // any linear whitespace
+// newline not preceded by backslash
+// any linear whitespace
+// two or more
+}*(?<!\\\\)\\n${lws}*){2,}`, "u")
     });
-    // lexer.add_lexeme { mode, tid: 'nl1',              pattern: ( /\n/u                             ), }
-    // lexer.add_lexeme { mode, tid: 'nl',           pattern: ( /\\(?<chr>.)/u                             ), }
     lexer.add_lexeme({
       mode,
       tid: 'p',
-      pattern: RegExp(`(?:\\\\\\n|.)+?(?=\\n${lws}*\\n|$)`, "u")
+      pattern: RegExp(`(?:\\\\\\n|.)+?(?=\\n${lws // one or more of escaped newline or any, non-greedy
+// preceding two newlines or EOT
+}*\\n|$)`, "u")
     });
-    // debug '^59-1^', lexer.registry.plain
-    // lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
-    // lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
     //.........................................................................................................
     probe = `first glorious
 paragraph
