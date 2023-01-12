@@ -113,14 +113,19 @@ demo_paragraphs = ->
                       \u{205f}
                       \u{3000} ] ///u
   lws = lws_pattern.source
+  lexer.add_lexeme { mode, tid: 'nleot', pattern: ( /// (?<! \\ )             # not preceded by backslash
+                                                        \n $ ///u    ), }     # newline, then EOT
   lexer.add_lexeme { mode, tid: 'escnl', pattern: ( /\\\n/u    ), }           # newline preced by backslash
-  lexer.add_lexeme { mode, tid: 'nls',   pattern: ( ///  (?:  #{lws}*         # any linear whitespace
-                                                              (?<! \\ ) \n    # newline not preceded by backslash
-                                                              #{lws}*         # any linear whitespace
-                                                          ){2,}               # two or more
+  lexer.add_lexeme { mode, tid: 'nls',   pattern: ( /// (?:  #{lws}*          # any linear whitespace
+                                                             (?<! \\ ) \n     # newline not preceded by backslash
+                                                             #{lws}*          # any linear whitespace
+                                                        ){2,}                 # two or more
                                                               ///u ), }
   lexer.add_lexeme { mode, tid: 'p',     pattern: /// (?: \\\n | . )+?        # one or more of escaped newline or any, non-greedy
-                                                      (?= \n #{lws}* \n | $ ) # preceding two newlines or EOT
+                                                      (?=                     # preceding...
+                                                        \n #{lws}* \n |       #   two or more newlines
+                                                        \n $          |       #   or newline at EOT
+                                                        $               )     #   or EOT
                                                       ///u, }
   #.........................................................................................................
   probe = """
