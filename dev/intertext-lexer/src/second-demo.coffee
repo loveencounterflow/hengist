@@ -113,23 +113,15 @@ demo_paragraphs = ->
                       \u{205f}
                       \u{3000} ] ///u
   lws = lws_pattern.source
-  # lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u    ), }
-  lexer.add_lexeme { mode, tid: 'escnl',           pattern: ( /\\\n/u    ), }
-  # lexer.add_lexeme { mode, tid: 'ws',               pattern: lws_pattern, }
-  # lexer.add_lexeme { mode, tid: 'nls',              pattern: ///  \n{2,} ///, }
-  lexer.add_lexeme { mode, tid: 'nls',              pattern: ( ///  (?:
-                                                                      #{lws}*
-                                                                      (?<! \\ ) \n
-                                                                      #{lws}*
-                                                                      ){2,} ///u ), }
-  # lexer.add_lexeme { mode, tid: 'nl1',              pattern: ( /\n/u                             ), }
-  # lexer.add_lexeme { mode, tid: 'nl',           pattern: ( /\\(?<chr>.)/u                             ), }
-  lexer.add_lexeme { mode, tid: 'p',                pattern: ///
-                                                                (?: \\\n | . )+?
-                                                                (?= \n #{lws}* \n | $ ) ///u, }
-  # debug '^59-1^', lexer.registry.plain
-  # lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
-  # lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+  lexer.add_lexeme { mode, tid: 'escnl', pattern: ( /\\\n/u    ), }           # newline preced by backslash
+  lexer.add_lexeme { mode, tid: 'nls',   pattern: ( ///  (?:  #{lws}*         # any linear whitespace
+                                                              (?<! \\ ) \n    # newline not preceded by backslash
+                                                              #{lws}*         # any linear whitespace
+                                                          ){2,}               # two or more
+                                                              ///u ), }
+  lexer.add_lexeme { mode, tid: 'p',     pattern: /// (?: \\\n | . )+?        # one or more of escaped newline or any, non-greedy
+                                                      (?= \n #{lws}* \n | $ ) # preceding two newlines or EOT
+                                                      ///u, }
   #.........................................................................................................
   probe = """
     first glorious
