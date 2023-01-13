@@ -156,8 +156,119 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@parse_md_stars_markup = ( T, done ) ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  new_toy_md_lexer = ( mode = 'plain' ) ->
+    lexer   = new Interlex { dotall: false, }
+    #.........................................................................................................
+    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, }
+    lexer.add_lexeme { mode, tid: 'star1',  pattern: /(?<!\*)\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'star2',  pattern: /(?<!\*)\*\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'star3',  pattern: /(?<!\*)\*\*\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*]+/u, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ "*abc*", "<i>abc</i>", ]
+    [ "**def**", "<b>def</b>", ]
+    [ "***def***", "<b><i>def</i></b>", ]
+    [ "***abc*def**", "<b><i>abc</i>def</b>", ]
+    [ "***abc**def*", "<b><i>abc</i></b><i>def</i>", ]
+    ]
+  #.........................................................................................................
+  new_token = ( mode, tid, value, start, stop, x = null, lexeme = null ) ->
+    jump  = lexeme?.jump ? null
+    return { mode: mode, tid, mk: "#{mode}:#{tid}", jump, value, start, stop, x, }
+  #.........................................................................................................
+  $parse_md_stars = ->
+    within =
+      one:    false
+      two:    false
+    start_of =
+      one:    null
+      two:    null
+    #.......................................................................................................
+    enter = ( mode, start ) ->
+      within[   mode ] = true
+      start_of[ mode ] = start
+      return null
+    enter.one = ( start ) -> enter 'one', start
+    enter.two = ( start ) -> enter 'two', start
+    #.......................................................................................................
+    exit = ( mode ) ->
+      within[   mode ] = false
+      start_of[ mode ] = null
+      return null
+    exit.one = -> exit 'one'
+    exit.two = -> exit 'two'
+    #.......................................................................................................
+    return ( d, send ) ->
+      switch d.tid
+        when 'star1'
+          if within.one
+            send new_token mode, tid, '</i>', -1, -1
+            exit.one()
+          else
+            send new_token mode, tid, '<i>', -1, -1
+            enter.one d.start
+        when 'star2'
+          if within.two
+            send new_token mode, tid, '</b>', -1, -1
+            exit.two()
+          else
+            send new_token mode, tid, '<b>', -1, -1
+            enter.two d.start
+        when 'star3'
+          if within.one
+            if within.two
+              if start_of.one <= start_of.two
+                send new_token mode, tid, '</b>', -1, -1
+                send new_token mode, tid, '</i>', -1, -1
+              else
+                send new_token mode, tid, '</i>', -1, -1
+                send new_token mode, tid, '</b>', -1, -1
+              exit.one()
+              exit.two()
+          else
+            send new_token mode, tid, '<xxxxxxxxx>', -1, -1
+            enter.one d.start
+            enter.two d.start
+        else return send d
+  #.........................................................................................................
+  md_lexer  = new_toy_md_lexer 'md'
+  mode      = 'html'
+  tid       = 'tag'
+  p = new Pipeline()
+  p.push ( d, send ) ->
+    return send d unless d.tid is 'p'
+    send e for e from md_lexer.walk d.value
+  p.push $parse_md_stars()
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      p.send new_token 'plain', 'p', probe, 0, probe.length
+      result      = p.run()
+      result_rpr  = ( d.value for d in result ).join ''
+      urge '^08-1^', ( GUY.trm.white GUY.trm.reverse probe ), GUY.trm.yellow GUY.trm.reverse result_rpr
+      H.tabulate "#{probe} -> #{result_rpr}", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # @parse_md_stars_markup()
+  test @parse_md_stars_markup
 
