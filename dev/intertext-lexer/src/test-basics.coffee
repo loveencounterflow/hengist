@@ -187,13 +187,16 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     [ "***abc**def*", "<b><i>abc</i></b><i>def</i>", ]
     [ "*x***def**", "<i>x</i><b>def</b>", ]
     [ "**x***def*", "<b>x</b><i>def</i>", ]
+    [ "*", "<i>", ]
+    [ "**", "<b>", ]
+    [ "***", "<b><i>", ]
     ]
   #.........................................................................................................
-  new_token = ( token, mode, tid, value, start, stop, x = null, lexeme = null ) ->
+  new_token = ( ref, token, mode, tid, value, start, stop, x = null, lexeme = null ) ->
     jump      = lexeme?.jump ? null
     { start
       stop  } = token
-    return { mode: mode, tid, mk: "#{mode}:#{tid}", jump, value, start, stop, x, }
+    return { mode: mode, tid, mk: "#{mode}:#{tid}", jump, value, start, stop, x, $: ref, }
   #.........................................................................................................
   $parse_md_stars = ->
     within =
@@ -223,41 +226,42 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       switch d.tid
         #...................................................................................................
         when 'star1'
-          if within.one
-            send new_token d, mode, tid, '</i>'
-            exit.one()
-          else
-            send new_token d, mode, tid, '<i>'
-            enter.one d.start
+          if within.one then  exit.one();         send new_token '^æ1^', d, mode, tid, '</i>'
+          else                enter.one d.start;  send new_token '^æ2^', d, mode, tid, '<i>'
         #...................................................................................................
         when 'star2'
           if within.two
-            send new_token d, mode, tid, '</b>'
-            exit.two()
+            if within.one
+              if start_of.one > start_of.two
+                exit.one();         send new_token '^æ3^', d, mode, tid, '</i>'
+                exit.two();         send new_token '^æ4^', d, mode, tid, '</b>'
+                enter.one d.start;  send new_token '^æ5^', d, mode, tid, '<i>'
+              else
+                exit.two();         send new_token '^æ6^', d, mode, tid, '</b>'
+            else
+              exit.two();         send new_token '^æ7^', d, mode, tid, '</b>'
           else
-            send new_token d, mode, tid, '<b>'
-            enter.two d.start
+            enter.two d.start;  send new_token '^æ8^', d, mode, tid, '<b>'
         #...................................................................................................
         when 'star3'
           if within.one
             if within.two
-              if start_of.one >= start_of.two
-                send new_token d, mode, tid, '</i>'
-                send new_token d, mode, tid, '</b>'
+              if start_of.one > start_of.two
+                exit.one();       send new_token '^æ9^', d, mode, tid, '</i>'
+                exit.two();       send new_token '^æ10^', d, mode, tid, '</b>'
               else
-                send new_token d, mode, tid, '</b>'
-                send new_token d, mode, tid, '</i>'
-              exit.two()
-            exit.one()
+                exit.two();       send new_token '^æ11^', d, mode, tid, '</b>'
+                exit.one();       send new_token '^æ12^', d, mode, tid, '</i>'
+            else
+              exit.one();         send new_token '^æ13^', d, mode, tid, '</i>'
+              enter.two d.start;  send new_token '^æ14^', d, mode, tid, '<b>'
           else
             if within.two
-              send new_token d, mode, tid, '<AAA>'
-              enter.one d.start
-              enter.two d.start
+              exit.two();         send new_token '^æ15^', d, mode, tid, '</b>'
+              enter.one d.start;  send new_token '^æ16^', d, mode, tid, '<i>'
             else
-              send new_token d, mode, tid, '<BBB>'
-              enter.one d.start
-              enter.two d.start
+              enter.two d.start;  send new_token '^æ17^', d, mode, tid, '<b>'
+              enter.one d.start + 2;  send new_token '^æ18^', { start: d.start + 2, stop: d.stop, }, mode, tid, '<i>'
         #...................................................................................................
         else send d
       return null
@@ -265,19 +269,22 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   md_lexer  = new_toy_md_lexer 'md'
   mode      = 'html'
   tid       = 'tag'
-  p = new Pipeline()
-  p.push ( d, send ) ->
-    return send d unless d.tid is 'p'
-    send e for e from md_lexer.walk d.value
-  p.push $parse_md_stars()
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      p.send new_token { start: 0, stop: probe.length, }, 'plain', 'p', probe
+      #.....................................................................................................
+      p = new Pipeline()
+      p.push ( d, send ) ->
+        return send d unless d.tid is 'p'
+        send e for e from md_lexer.walk d.value
+      p.push $parse_md_stars()
+      #.....................................................................................................
+      p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', probe
       result      = p.run()
       result_rpr  = ( d.value for d in result ).join ''
-      urge '^08-1^', ( GUY.trm.white GUY.trm.reverse probe ), GUY.trm.yellow GUY.trm.reverse result_rpr
-      H.tabulate "#{probe} -> #{result_rpr}", result
+      # urge '^08-1^', ( GUY.trm.white GUY.trm.reverse probe ), GUY.trm.yellow GUY.trm.reverse result_rpr
+      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
+      #.....................................................................................................
       resolve result_rpr
   #.........................................................................................................
   done?()
