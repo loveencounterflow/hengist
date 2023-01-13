@@ -187,46 +187,6 @@ demo_paragraphs = ->
   p.push ( d, send ) ->
     return send d unless d.tid is 'p'
     send e for e from md_lexer.walk d.value
-  p.push do ->
-    return ( d, send ) ->
-      return send d unless d.tid is 'star1'
-      if state.within_star1
-        send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
-        state.within_star1    = false
-        state.start_of_star1  = null
-      else
-        send { tid: 'html', value: '<i>' } # TAINT not a standard datom ###
-        state.within_star1    = true
-        state.start_of_star1  = d.start
-  p.push do ->
-    return ( d, send ) ->
-      return send d unless d.tid is 'star2'
-      if state.within_star2
-        send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
-        state.within_star2    = false
-        state.start_of_star2  = null
-      else
-        send { tid: 'html', value: '<b>' } # TAINT not a standard datom ###
-        state.within_star2    = true
-        state.start_of_star2  = d.start
-  p.push do ->
-    return ( d, send ) ->
-      return send d unless d.tid is 'star3'
-      if state.within_star1
-        if state.within_star2
-          if state.start_of_star1 <= state.start_of_star2
-            send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
-            send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
-          else
-            send { tid: 'html', value: '</i>' } # TAINT not a standard datom ###
-            send { tid: 'html', value: '</b>' } # TAINT not a standard datom ###
-          state.within_star1    = false
-          state.start_of_star1  = null
-          state.within_star2    = false
-          state.start_of_star2  = null
-      else
-        send { tid: 'html', value: '<xxxxxxxxx>' } # TAINT not a standard datom ###
-        state.within_star2 = true
   H.tabulate "md", p.run()
   #.........................................................................................................
   return null
