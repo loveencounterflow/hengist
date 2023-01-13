@@ -1119,10 +1119,198 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_md_stars_markup = async function(T, done) {
+    var $, $parse_md_stars, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, mode, new_token, new_toy_md_lexer, p, probe, probes_and_matchers, tid, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    new_toy_md_lexer = function(mode = 'plain') {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star1',
+        pattern: /(?<!\*)\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star2',
+        pattern: /(?<!\*)\*\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star3',
+        pattern: /(?<!\*)\*\*\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'other',
+        pattern: /[^*]+/u
+      });
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"]];
+    //.........................................................................................................
+    new_token = function(mode, tid, value, start, stop, x = null, lexeme = null) {
+      var jump, ref;
+      jump = (ref = lexeme != null ? lexeme.jump : void 0) != null ? ref : null;
+      return {
+        mode: mode,
+        tid,
+        mk: `${mode}:${tid}`,
+        jump,
+        value,
+        start,
+        stop,
+        x
+      };
+    };
+    //.........................................................................................................
+    $parse_md_stars = function() {
+      var enter, exit, start_of, within;
+      within = {
+        one: false,
+        two: false
+      };
+      start_of = {
+        one: null,
+        two: null
+      };
+      //.......................................................................................................
+      enter = function(mode, start) {
+        within[mode] = true;
+        start_of[mode] = start;
+        return null;
+      };
+      enter.one = function(start) {
+        return enter('one', start);
+      };
+      enter.two = function(start) {
+        return enter('two', start);
+      };
+      //.......................................................................................................
+      exit = function(mode) {
+        within[mode] = false;
+        start_of[mode] = null;
+        return null;
+      };
+      exit.one = function() {
+        return exit('one');
+      };
+      exit.two = function() {
+        return exit('two');
+      };
+      //.......................................................................................................
+      return function(d, send) {
+        switch (d.tid) {
+          case 'star1':
+            if (within.one) {
+              send(new_token(mode, tid, '</i>', -1, -1));
+              return exit.one();
+            } else {
+              send(new_token(mode, tid, '<i>', -1, -1));
+              return enter.one(d.start);
+            }
+            break;
+          case 'star2':
+            if (within.two) {
+              send(new_token(mode, tid, '</b>', -1, -1));
+              return exit.two();
+            } else {
+              send(new_token(mode, tid, '<b>', -1, -1));
+              return enter.two(d.start);
+            }
+            break;
+          case 'star3':
+            if (within.one) {
+              if (within.two) {
+                if (start_of.one <= start_of.two) {
+                  send(new_token(mode, tid, '</b>', -1, -1));
+                  send(new_token(mode, tid, '</i>', -1, -1));
+                } else {
+                  send(new_token(mode, tid, '</i>', -1, -1));
+                  send(new_token(mode, tid, '</b>', -1, -1));
+                }
+                exit.one();
+                return exit.two();
+              }
+            } else {
+              send(new_token(mode, tid, '<xxxxxxxxx>', -1, -1));
+              enter.one(d.start);
+              return enter.two(d.start);
+            }
+            break;
+          default:
+            return send(d);
+        }
+      };
+    };
+    //.........................................................................................................
+    md_lexer = new_toy_md_lexer('md');
+    mode = 'html';
+    tid = 'tag';
+    p = new Pipeline();
+    p.push(function(d, send) {
+      var e, ref, results;
+      if (d.tid !== 'p') {
+        return send(d);
+      }
+      ref = md_lexer.walk(d.value);
+      results = [];
+      for (e of ref) {
+        results.push(send(e));
+      }
+      return results;
+    });
+    p.push($parse_md_stars());
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, result, result_rpr;
+          p.send(new_token('plain', 'p', probe, 0, probe.length));
+          result = p.run();
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              results.push(d.value);
+            }
+            return results;
+          })()).join('');
+          urge('^08-1^', GUY.trm.white(GUY.trm.reverse(probe)), GUY.trm.yellow(GUY.trm.reverse(result_rpr)));
+          H.tabulate(`${probe} -> ${result_rpr}`, result);
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @parse_md_stars_markup()
+      return test(this.parse_md_stars_markup);
     })();
   }
 
