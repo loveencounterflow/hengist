@@ -31,9 +31,9 @@
 
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "_XEMITTER: _" ] = ( T, done ) ->
-  //   DATOM                     = require '../../../apps/datom'
+  //   { DATOM }                 = require '../../../apps/datom'
   //   { new_datom
-  //     select }                = DATOM.export()
+  //     select }                = DATOM
   //   #.........................................................................................................
   //   probes_and_matchers = [
   //     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -48,11 +48,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this["XEMITTER: public API shape"] = function(T, done) {
-    var DATOM, XE, arity_of, isa, k, known_keys, new_datom, new_xemitter, select, type_of, types, validate;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, new_xemitter, select} = DATOM.export());
+    var DATOM, XE, isa, k, known_keys, new_datom, new_xemitter, select, type_of, types, validate;
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, new_xemitter, select} = DATOM);
     types = DATOM.types;
-    ({isa, validate, arity_of, type_of} = types);
+    ({isa, validate, type_of} = types);
     //.........................................................................................................
     XE = new_xemitter();
     T.ok(isa.asyncfunction(XE.emit));
@@ -66,7 +66,7 @@
     T.eq(XE.listen_to.length, 2);
     T.eq(XE.listen_to_all.length, 1);
     T.eq(XE.listen_to_unheard.length, 1);
-    known_keys = ['emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard'];
+    known_keys = ['types', 'emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard'];
     T.eq((function() {
       var results;
       results = [];
@@ -84,8 +84,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["XEMITTER: emit equivalently accepts key, value or datom"] = async function(T, done) {
     var DATOM, XE, count, error, new_datom, new_xemitter, pattern, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, new_xemitter, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, new_xemitter, select} = DATOM);
     //.........................................................................................................
     count = 0;
     XE = new_xemitter();
@@ -128,8 +128,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["XEMITTER: throws when more than one contractor is added for given event key"] = function(T, done) {
     var DATOM, XE, new_datom, new_xemitter, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, new_xemitter, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, new_xemitter, select} = DATOM);
     XE = new_xemitter();
     //.........................................................................................................
     XE.contract('^mykey', function(d) {});
@@ -144,8 +144,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["XEMITTER: can listen to events that have no specific listener"] = async function(T, done) {
     var DATOM, XE, keys, new_datom, new_xemitter, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, new_xemitter, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, new_xemitter, select} = DATOM);
     XE = new_xemitter();
     //.........................................................................................................
     keys = {
@@ -185,8 +185,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["XEMITTER: delegation"] = async function(T, done) {
     var DATOM, XE, keys, new_datom, new_xemitter, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, new_xemitter, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, new_xemitter, select} = DATOM);
     XE = new_xemitter();
     //.........................................................................................................
     keys = {

@@ -111,8 +111,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["select 2"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -302,8 +302,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["select ignores values other than PODs"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [[[null, '^number'], false], [[123, '^number'], false]];
 //.........................................................................................................
@@ -330,8 +330,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["new_datom complains when value has `$key`"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -377,8 +377,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["xxx"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -415,8 +415,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["new_datom (default settings)"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -576,8 +576,8 @@
   //-----------------------------------------------------------------------------------------------------------
   this["wrap_datom"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select, wrap_datom;
-    DATOM = require('../../../apps/datom');
-    ({new_datom, wrap_datom, select} = DATOM.export());
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, wrap_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -617,7 +617,7 @@
     DATOM = new (require('../../../apps/datom')).Datom({
       merge_values: false
     });
-    ({new_datom, select} = DATOM.export());
+    ({new_datom, select} = DATOM);
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -794,13 +794,13 @@
     });
     ({
       new_datom: new_datom_freeze
-    } = DATOM_FREEZE.export());
+    } = DATOM_FREEZE);
     DATOM_NOFREEZE = new (require('../../../apps/datom')).Datom({
       freeze: false
     });
     ({
       new_datom: new_datom_nofreeze
-    } = DATOM_NOFREEZE.export());
+    } = DATOM_NOFREEZE);
     //.........................................................................................................
     T.ok(Object.isFrozen(new_datom_freeze('^mykey')));
     T.ok(!Object.isFrozen(new_datom_nofreeze('^mykey')));
