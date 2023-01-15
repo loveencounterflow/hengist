@@ -26,7 +26,7 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "fresh_datom (freeze)" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   probes_and_matchers = [
     [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
     [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
@@ -45,7 +45,7 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "fresh_datom (nofreeze)" ] = ( T, done ) ->
-  DATOM = ( require '../../../apps/datom' ).new { freeze: false, }
+  DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
   probes_and_matchers = [
     [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
     [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]

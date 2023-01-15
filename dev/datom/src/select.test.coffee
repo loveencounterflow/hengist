@@ -100,9 +100,9 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "select 2" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [[ {$key:'^number',$value:42,$stamped:true}, '^number#stamped:*'],true]
@@ -133,9 +133,9 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "select ignores values other than PODs" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [[ null, '^number',],false]
@@ -155,9 +155,9 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "new_datom complains when value has `$key`" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [["^number",{"$value":123,}],{"$key":"^number","$value":123},null]
@@ -173,9 +173,9 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "xxx" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -190,9 +190,9 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "new_datom (default settings)" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [["^number",null],{"$key":"^number"},null]
@@ -217,10 +217,10 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "wrap_datom" ] = ( T, done ) ->
-  DATOM = require '../../../apps/datom'
+  { DATOM } = require '../../../apps/datom'
   { new_datom
     wrap_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [["^text",'helo'],{"$key":"^wrapper","$value":{"$key":"^text","$value":"helo"}},null]
@@ -240,7 +240,7 @@ jr                        = JSON.stringify
 @[ "new_datom (without value merging)" ] = ( T, done ) ->
   DATOM                     = new ( require '../../../apps/datom' ).Datom { merge_values: false, }
   { new_datom
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
     [["^number",null],{"$key":"^number"},null]
@@ -266,9 +266,9 @@ jr                        = JSON.stringify
 #-----------------------------------------------------------------------------------------------------------
 @[ "freezing" ] = ( T, done ) ->
   DATOM_FREEZE                        = new ( require '../../../apps/datom' ).Datom { freeze: true, }
-  { new_datom: new_datom_freeze, }    = DATOM_FREEZE.export()
+  { new_datom: new_datom_freeze, }    = DATOM_FREEZE
   DATOM_NOFREEZE                      = new ( require '../../../apps/datom' ).Datom { freeze: false, }
-  { new_datom: new_datom_nofreeze, }  = DATOM_NOFREEZE.export()
+  { new_datom: new_datom_nofreeze, }  = DATOM_NOFREEZE
   #.........................................................................................................
   T.ok      Object.isFrozen new_datom_freeze    '^mykey'
   T.ok not  Object.isFrozen new_datom_nofreeze  '^mykey'

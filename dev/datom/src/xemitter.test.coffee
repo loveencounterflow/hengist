@@ -20,9 +20,9 @@ jr                        = JSON.stringify
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "_XEMITTER: _" ] = ( T, done ) ->
-#   DATOM                     = require '../../../apps/datom'
+#   { DATOM }                 = require '../../../apps/datom'
 #   { new_datom
-#     select }                = DATOM.export()
+#     select }                = DATOM
 #   #.........................................................................................................
 #   probes_and_matchers = [
 #     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -37,14 +37,13 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "XEMITTER: public API shape" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
+  { DATOM }                 = require '../../../apps/datom'
   { new_datom
     new_xemitter
-    select }                = DATOM.export()
+    select }                = DATOM
   types                     = DATOM.types
   { isa
     validate
-    arity_of
     type_of }               = types
   #.........................................................................................................
   XE = new_xemitter()
@@ -59,17 +58,17 @@ jr                        = JSON.stringify
   T.eq XE.listen_to.length,         2
   T.eq XE.listen_to_all.length,     1
   T.eq XE.listen_to_unheard.length, 1
-  known_keys = [ 'emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard', ]
+  known_keys = [ 'types', 'emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard', ]
   T.eq ( k for k of XE when ( not k.startsWith '_' ) and ( k not in known_keys ) ), []
   done()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "XEMITTER: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
+  { DATOM }                 = require '../../../apps/datom'
   { new_datom
     new_xemitter
-    select }                = DATOM.export()
+    select }                = DATOM
   #.........................................................................................................
   count = 0
   XE    = new_xemitter()
@@ -96,10 +95,10 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "XEMITTER: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
+  { DATOM }                 = require '../../../apps/datom'
   { new_datom
     new_xemitter
-    select }                = DATOM.export()
+    select }                = DATOM
   XE                        = new_xemitter()
   #.........................................................................................................
   XE.contract '^mykey', ( d ) ->
@@ -110,10 +109,10 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "XEMITTER: can listen to events that have no specific listener" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
+  { DATOM }                 = require '../../../apps/datom'
   { new_datom
     new_xemitter
-    select }                = DATOM.export()
+    select }                = DATOM
   XE                        = new_xemitter()
   #.........................................................................................................
   keys =
@@ -140,10 +139,10 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "XEMITTER: delegation" ] = ( T, done ) ->
-  DATOM                     = require '../../../apps/datom'
+  { DATOM }                 = require '../../../apps/datom'
   { new_datom
     new_xemitter
-    select }                = DATOM.export()
+    select }                = DATOM
   XE                        = new_xemitter()
   #.........................................................................................................
   keys = { listen: [], all: [], contract: [] }
