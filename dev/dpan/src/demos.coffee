@@ -133,7 +133,8 @@ get_pkg_infos = ( dpan ) ->
   home_path             = process.env.HOME
   sub_paths             = [
     # 'temp/linuxtimemachine-backups/enceladus/jzr/*/package.json'
-    'jzr/*/package.json'
+    # 'jzr/*/package.json'
+    'jzr/*/.git'
     # 'io/*/package.json'
     # 'io/mingkwai-rack/*/package.json'
     ]
