@@ -1121,7 +1121,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_md_stars_markup = async function(T, done) {
-    var $, $parse_md_stars, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, mode, new_token, new_toy_md_lexer, probe, probes_and_matchers, tid, transforms;
+    var $, $parse_md_stars, DATOM, Interlex, Pipeline, compose, error, first, i, last, len, lets, matcher, md_lexer, mode, new_datom, new_token, new_toy_md_lexer, probe, probes_and_matchers, stamp, tid, transforms;
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom, lets, stamp} = DATOM);
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -1162,23 +1164,48 @@
       return lexer;
     };
     //.........................................................................................................
-    probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["**x*def*x**", "<b>x<i>def</i>x</b>"], ["*x**def**x*", "<i>x<b>def</b>x</i>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"], ["*x***def**", "<i>x</i><b>def</b>"], ["**x***def*", "<b>x</b><i>def</i>"], ["*", "<i>"], ["**", "<b>"], ["***", "<b><i>"]];
+    // [ "*abc*", "<i>abc</i>", ]
+    // [ "**def**", "<b>def</b>", ]
+    // [ "***def***", "<b><i>def</i></b>", ]
+    // [ "**x*def*x**", "<b>x<i>def</i>x</b>", ]
+    // [ "*x**def**x*", "<i>x<b>def</b>x</i>", ]
+    // [ "***abc*def**", "<b><i>abc</i>def</b>", ]
+    // [ "***abc**def*", "<b><i>abc</i></b><i>def</i>", ]
+    // [ "*x***def**", "<i>x</i><b>def</b>", ]
+    // [ "**x***def*", "<b>x</b><i>def</i>", ]
+    // [ "*", "<i>", ]
+    // [ "**", "<b>", ]
+    probes_and_matchers = [["***", "<b><i>"]];
     //.........................................................................................................
-    new_token = function(ref, token, mode, tid, value, start, stop, x = null, lexeme = null) {
+    new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
+      /* TAINT recreation of `Interlex::new_token()` */
       var jump, ref1;
       jump = (ref1 = lexeme != null ? lexeme.jump : void 0) != null ? ref1 : null;
       ({start, stop} = token);
-      return {
-        mode: mode,
+      debug('^46887^', {
+        mode,
         tid,
         mk: `${mode}:${tid}`,
         jump,
+        name,
         value,
         start,
         stop,
         x,
         $: ref
-      };
+      });
+      return new_datom(`^${mode}`, {
+        mode,
+        tid,
+        mk: `${mode}:${tid}`,
+        jump,
+        name,
+        value,
+        start,
+        stop,
+        x,
+        $: ref
+      });
     };
     //.........................................................................................................
     $parse_md_stars = function() {
@@ -1222,73 +1249,76 @@
         switch (d.tid) {
           //...................................................................................................
           case 'star1':
+            send(stamp(d));
             if (within.one) {
               exit.one();
-              send(new_token('^æ1^', d, mode, tid, '</i>'));
+              send(new_token('^æ1^', d, mode, tid, 'i', '</i>'));
             } else {
               enter.one(d.start);
-              send(new_token('^æ2^', d, mode, tid, '<i>'));
+              send(new_token('^æ2^', d, mode, tid, 'i', '<i>'));
             }
             break;
           //...................................................................................................
           case 'star2':
+            send(stamp(d));
             if (within.two) {
               if (within.one) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(new_token('^æ3^', d, mode, tid, '</i>'));
+                  send(new_token('^æ3^', d, mode, tid, 'i', '</i>'));
                   exit.two();
-                  send(new_token('^æ4^', d, mode, tid, '</b>'));
+                  send(new_token('^æ4^', d, mode, tid, 'b', '</b>'));
                   enter.one(d.start);
-                  send(new_token('^æ5^', d, mode, tid, '<i>'));
+                  send(new_token('^æ5^', d, mode, tid, 'i', '<i>'));
                 } else {
                   exit.two();
-                  send(new_token('^æ6^', d, mode, tid, '</b>'));
+                  send(new_token('^æ6^', d, mode, tid, 'b', '</b>'));
                 }
               } else {
                 exit.two();
-                send(new_token('^æ7^', d, mode, tid, '</b>'));
+                send(new_token('^æ7^', d, mode, tid, 'b', '</b>'));
               }
             } else {
               enter.two(d.start);
-              send(new_token('^æ8^', d, mode, tid, '<b>'));
+              send(new_token('^æ8^', d, mode, tid, 'b', '<b>'));
             }
             break;
           //...................................................................................................
           case 'star3':
+            send(stamp(d));
             if (within.one) {
               if (within.two) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(new_token('^æ9^', d, mode, tid, '</i>'));
+                  send(new_token('^æ9^', d, mode, tid, 'i', '</i>'));
                   exit.two();
-                  send(new_token('^æ10^', d, mode, tid, '</b>'));
+                  send(new_token('^æ10^', d, mode, tid, 'b', '</b>'));
                 } else {
                   exit.two();
-                  send(new_token('^æ11^', d, mode, tid, '</b>'));
+                  send(new_token('^æ11^', d, mode, tid, 'b', '</b>'));
                   exit.one();
-                  send(new_token('^æ12^', d, mode, tid, '</i>'));
+                  send(new_token('^æ12^', d, mode, tid, 'i', '</i>'));
                 }
               } else {
                 exit.one();
-                send(new_token('^æ13^', d, mode, tid, '</i>'));
+                send(new_token('^æ13^', d, mode, tid, 'i', '</i>'));
                 enter.two(d.start);
-                send(new_token('^æ14^', d, mode, tid, '<b>'));
+                send(new_token('^æ14^', d, mode, tid, 'b', '<b>'));
               }
             } else {
               if (within.two) {
                 exit.two();
-                send(new_token('^æ15^', d, mode, tid, '</b>'));
+                send(new_token('^æ15^', d, mode, tid, 'b', '</b>'));
                 enter.one(d.start);
-                send(new_token('^æ16^', d, mode, tid, '<i>'));
+                send(new_token('^æ16^', d, mode, tid, 'i', '<i>'));
               } else {
                 enter.two(d.start);
-                send(new_token('^æ17^', d, mode, tid, '<b>'));
+                send(new_token('^æ17^', d, mode, tid, 'b', '<b>'));
                 enter.one(d.start + 2);
                 send(new_token('^æ18^', {
                   start: d.start + 2,
                   stop: d.stop
-                }, mode, tid, '<i>'));
+                }, mode, tid, 'i', '<i>'));
               }
             }
             break;
@@ -1308,7 +1338,7 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var d, j, len1, p, result, result_rpr;
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
@@ -1328,18 +1358,23 @@
           p.send(new_token('^æ19^', {
             start: 0,
             stop: probe.length
-          }, 'plain', 'p', probe));
+          }, 'plain', 'p', null, probe));
           result = p.run();
           result_rpr = ((function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
               d = result[j];
-              results.push(d.value);
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
             }
             return results;
           })()).join('');
-          // urge '^08-1^', ( GUY.trm.white GUY.trm.reverse probe ), GUY.trm.yellow GUY.trm.reverse result_rpr
+          for (j = 0, len1 = result.length; j < len1; j++) {
+            d = result[j];
+            urge('^08-1^', (Object.keys(d)).sort());
+          }
           H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
           //.....................................................................................................
           return resolve(result_rpr);
