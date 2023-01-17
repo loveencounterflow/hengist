@@ -1164,18 +1164,7 @@
       return lexer;
     };
     //.........................................................................................................
-    // [ "*abc*", "<i>abc</i>", ]
-    // [ "**def**", "<b>def</b>", ]
-    // [ "***def***", "<b><i>def</i></b>", ]
-    // [ "**x*def*x**", "<b>x<i>def</i>x</b>", ]
-    // [ "*x**def**x*", "<i>x<b>def</b>x</i>", ]
-    // [ "***abc*def**", "<b><i>abc</i>def</b>", ]
-    // [ "***abc**def*", "<b><i>abc</i></b><i>def</i>", ]
-    // [ "*x***def**", "<i>x</i><b>def</b>", ]
-    // [ "**x***def*", "<b>x</b><i>def</i>", ]
-    // [ "*", "<i>", ]
-    // [ "**", "<b>", ]
-    probes_and_matchers = [["***", "<b><i>"]];
+    probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["**x*def*x**", "<b>x<i>def</i>x</b>"], ["*x**def**x*", "<i>x<b>def</b>x</i>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"], ["*x***def**", "<i>x</i><b>def</b>"], ["**x***def*", "<b>x</b><i>def</i>"], ["*", "<i>"], ["**", "<b>"], ["***", "<b><i>"]];
     //.........................................................................................................
     new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
       /* TAINT recreation of `Interlex::new_token()` */
