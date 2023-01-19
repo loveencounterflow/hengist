@@ -396,26 +396,24 @@ $parse_md_star = ->
   first               = Symbol 'first'
   last                = Symbol 'last'
   #.........................................................................................................
-  #.........................................................................................................
   new_toy_md_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { dotall: false, }
-    XXXXXX_backtick_count = null
+    lexer           = new Interlex { dotall: false, }
+    backtick_count  = null
     #.........................................................................................................
-    jpcs = ({ token, lexeme, match, lexer, }) ->
+    jpcs = ({ token, match, lexer, }) ->
       # debug '^35-1^', match
-      XXXXXX_backtick_count = token.value.length
+      backtick_count = token.value.length
       return 'literal'
     #.........................................................................................................
-    jlcs = ({ token, lexeme, match, lexer, }) ->
+    jlcs = ({ token, match, lexer, }) ->
       # debug '^35-3^', match
-      if token.value.length is XXXXXX_backtick_count
-        XXXXXX_backtick_count = null
+      if token.value.length is backtick_count
+        backtick_count = null
         return '^'
-      else
-        ### TAINT setting `token.md` should not have to be done manually ###
-        token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
-        debug '^345^', token
-        return { token, }
+      ### TAINT setting `token.mk` should not have to be done manually ###
+      token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
+      # debug '^345^', token
+      return { token, }
     #.........................................................................................................
     lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
     lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
