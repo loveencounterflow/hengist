@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var $parse_md_star, DATOM, GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_token, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -33,12 +33,81 @@
     });
   };
 
-  // #.........................................................................................................
-  // probes_and_matchers = [
-  //   ]
-  // #.........................................................................................................
-  // for [ probe, matcher, error, ] in probes_and_matchers
-  //   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  ({DATOM} = require('../../../apps/datom'));
+
+  ({new_datom, lets, stamp} = DATOM);
+
+  //===========================================================================================================
+
+  //-----------------------------------------------------------------------------------------------------------
+  new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
+    /* TAINT recreation of `Interlex::new_token()` */
+    var jump, ref1;
+    jump = (ref1 = lexeme != null ? lexeme.jump : void 0) != null ? ref1 : null;
+    ({start, stop} = token);
+    return new_datom(`^${mode}`, {
+      mode,
+      tid,
+      mk: `${mode}:${tid}`,
+      jump,
+      name,
+      value,
+      start,
+      stop,
+      x,
+      $: ref
+    });
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  $parse_md_star = function() {
+    var enter, exit, start_of, within;
+    //.........................................................................................................
+    within = {
+      one: false
+    };
+    start_of = {
+      one: null
+    };
+    //.........................................................................................................
+    enter = function(mode, start) {
+      within[mode] = true;
+      start_of[mode] = start;
+      return null;
+    };
+    enter.one = function(start) {
+      return enter('one', start);
+    };
+    //.........................................................................................................
+    exit = function(mode) {
+      within[mode] = false;
+      start_of[mode] = null;
+      return null;
+    };
+    exit.one = function() {
+      return exit('one');
+    };
+    //.........................................................................................................
+    return function(d, send) {
+      switch (d.tid) {
+        //.....................................................................................................
+        case 'star1':
+          send(stamp(d));
+          if (within.one) {
+            exit.one();
+            send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
+          } else {
+            enter.one(d.start);
+            send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
+          }
+          break;
+        default:
+          //.....................................................................................................
+          send(d);
+      }
+      return null;
+    };
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.simple = async function(T, done) {
@@ -141,7 +210,8 @@
             value: 'helo ',
             start: 0,
             stop: 5,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -153,7 +223,8 @@
             stop: 6,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -163,7 +234,8 @@
             value: 'bold',
             start: 6,
             stop: 10,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -173,7 +245,8 @@
             value: '>',
             start: 10,
             stop: 11,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -183,7 +256,8 @@
             value: '`',
             start: 11,
             stop: 12,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -193,7 +267,8 @@
             value: 'world',
             start: 12,
             stop: 17,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -203,7 +278,8 @@
             value: '`',
             start: 17,
             stop: 18,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -215,7 +291,8 @@
             stop: 20,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -225,7 +302,8 @@
             value: 'bold',
             start: 20,
             stop: 24,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -235,7 +313,8 @@
             value: '>',
             start: 24,
             stop: 25,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -245,7 +324,8 @@
             value: '',
             start: 25,
             stop: 25,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -263,7 +343,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -273,7 +354,8 @@
             value: 'x v=',
             start: 1,
             stop: 5,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -285,7 +367,8 @@
             stop: 7,
             x: {
               chr: '>'
-            }
+            },
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -295,7 +378,8 @@
             value: ' z=42',
             start: 7,
             stop: 12,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -305,7 +389,8 @@
             value: '>',
             start: 12,
             stop: 13,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -315,7 +400,8 @@
             value: '',
             start: 13,
             stop: 13,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -333,7 +419,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -343,7 +430,8 @@
             value: 'x v=',
             start: 1,
             stop: 5,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -355,7 +443,8 @@
             stop: 7,
             x: {
               chr: '>'
-            }
+            },
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -365,7 +454,8 @@
             value: ' z=42',
             start: 7,
             stop: 12,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -377,7 +467,8 @@
             stop: 14,
             x: {
               chr: '>'
-            }
+            },
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -387,7 +478,8 @@
             value: '',
             start: 14,
             stop: 14,
-            x: null
+            x: null,
+            '$key': '^tag'
           }
         ],
         null
@@ -403,7 +495,8 @@
             value: 'a ',
             start: 0,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -415,7 +508,8 @@
             stop: 3,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -425,7 +519,8 @@
             value: 'b',
             start: 3,
             stop: 4,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -435,7 +530,8 @@
             value: '',
             start: 4,
             stop: 4,
-            x: null
+            x: null,
+            '$key': '^tag'
           }
         ],
         null
@@ -451,7 +547,8 @@
             value: 'what',
             start: 0,
             stop: 4,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -463,7 +560,8 @@
             stop: 4,
             x: {
               code: 'nomatch'
-            }
+            },
+            '$key': '^plain'
           }
         ],
         null
@@ -479,7 +577,8 @@
             value: 'd ',
             start: 0,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -491,7 +590,8 @@
             stop: 3,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -501,7 +601,8 @@
             value: '',
             start: 3,
             stop: 3,
-            x: null
+            x: null,
+            '$key': '^tag'
           }
         ],
         null
@@ -519,7 +620,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -529,7 +631,8 @@
             value: 'c',
             start: 1,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -539,7 +642,8 @@
             value: '',
             start: 2,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^tag'
           }
         ],
         null
@@ -557,7 +661,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -567,7 +672,8 @@
             value: '',
             start: 1,
             stop: 1,
-            x: null
+            x: null,
+            '$key': '^tag'
           }
         ],
         null
@@ -583,7 +689,8 @@
             value: '',
             start: 0,
             stop: 0,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -599,7 +706,8 @@
             value: 'helo ',
             start: 0,
             stop: 5,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -611,7 +719,8 @@
             stop: 7,
             x: {
               chr: '<'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -621,7 +730,8 @@
             value: 'bold>',
             start: 7,
             stop: 12,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -631,7 +741,8 @@
             value: '`',
             start: 12,
             stop: 13,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -641,7 +752,8 @@
             value: 'world',
             start: 13,
             stop: 18,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -651,7 +763,8 @@
             value: '`',
             start: 18,
             stop: 19,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -663,7 +776,8 @@
             stop: 21,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -673,7 +787,8 @@
             value: 'bold',
             start: 21,
             stop: 25,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -683,7 +798,8 @@
             value: '>',
             start: 25,
             stop: 26,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -693,7 +809,8 @@
             value: '',
             start: 26,
             stop: 26,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -711,7 +828,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -721,7 +839,8 @@
             value: 'b',
             start: 1,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -731,7 +850,8 @@
             value: '>',
             start: 2,
             stop: 3,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -741,7 +861,8 @@
             value: 'helo ',
             start: 3,
             stop: 8,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -753,7 +874,8 @@
             stop: 10,
             x: {
               chr: '<'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -763,7 +885,8 @@
             value: 'bold>',
             start: 10,
             stop: 15,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -773,7 +896,8 @@
             value: '`',
             start: 15,
             stop: 16,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -783,7 +907,8 @@
             value: 'world',
             start: 16,
             stop: 21,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -793,7 +918,8 @@
             value: '`',
             start: 21,
             stop: 22,
-            x: null
+            x: null,
+            '$key': '^plain'
           },
           {
             mode: 'plain',
@@ -805,7 +931,8 @@
             stop: 24,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -815,7 +942,8 @@
             value: 'bold',
             start: 24,
             stop: 28,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -825,7 +953,8 @@
             value: '>',
             start: 28,
             stop: 29,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -837,7 +966,8 @@
             stop: 31,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -847,7 +977,8 @@
             value: 'b',
             start: 31,
             stop: 32,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -857,7 +988,8 @@
             value: '>',
             start: 32,
             stop: 33,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -867,7 +999,8 @@
             value: '',
             start: 33,
             stop: 33,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -885,7 +1018,8 @@
             stop: 1,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -895,7 +1029,8 @@
             value: 'i',
             start: 1,
             stop: 2,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -905,7 +1040,8 @@
             value: '>',
             start: 2,
             stop: 3,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -917,7 +1053,8 @@
             stop: 4,
             x: {
               lslash: null
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -927,7 +1064,8 @@
             value: 'b',
             start: 4,
             stop: 5,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -937,7 +1075,8 @@
             value: '>',
             start: 5,
             stop: 6,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -949,7 +1088,8 @@
             stop: 8,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -959,7 +1099,8 @@
             value: 'b',
             start: 8,
             stop: 9,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -969,7 +1110,8 @@
             value: '>',
             start: 9,
             stop: 10,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -981,7 +1123,8 @@
             stop: 12,
             x: {
               lslash: '/'
-            }
+            },
+            '$key': '^plain'
           },
           {
             mode: 'tag',
@@ -991,7 +1134,8 @@
             value: 'i',
             start: 12,
             stop: 13,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'tag',
@@ -1001,7 +1145,8 @@
             value: '>',
             start: 13,
             stop: 14,
-            x: null
+            x: null,
+            '$key': '^tag'
           },
           {
             mode: 'plain',
@@ -1011,7 +1156,8 @@
             value: '',
             start: 14,
             stop: 14,
-            x: null
+            x: null,
+            '$key': '^plain'
           }
         ],
         null
@@ -1022,7 +1168,10 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          return resolve(lexer.run(probe));
+          var result;
+          result = lexer.run(probe);
+          H.tabulate(rpr(probe), result);
+          return resolve(result);
         });
       });
     }
@@ -1121,9 +1270,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_md_stars_markup = async function(T, done) {
-    var $, $parse_md_stars, DATOM, Interlex, Pipeline, compose, error, first, i, last, len, lets, matcher, md_lexer, mode, new_datom, new_token, new_toy_md_lexer, probe, probes_and_matchers, stamp, tid, transforms;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, lets, stamp} = DATOM);
+    var $, $parse_md_stars, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -1166,37 +1313,6 @@
     //.........................................................................................................
     probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["**x*def*x**", "<b>x<i>def</i>x</b>"], ["*x**def**x*", "<i>x<b>def</b>x</i>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"], ["*x***def**", "<i>x</i><b>def</b>"], ["**x***def*", "<b>x</b><i>def</i>"], ["*", "<i>"], ["**", "<b>"], ["***", "<b><i>"]];
     //.........................................................................................................
-    new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
-      /* TAINT recreation of `Interlex::new_token()` */
-      var jump, ref1;
-      jump = (ref1 = lexeme != null ? lexeme.jump : void 0) != null ? ref1 : null;
-      ({start, stop} = token);
-      debug('^46887^', {
-        mode,
-        tid,
-        mk: `${mode}:${tid}`,
-        jump,
-        name,
-        value,
-        start,
-        stop,
-        x,
-        $: ref
-      });
-      return new_datom(`^${mode}`, {
-        mode,
-        tid,
-        mk: `${mode}:${tid}`,
-        jump,
-        name,
-        value,
-        start,
-        stop,
-        x,
-        $: ref
-      });
-    };
-    //.........................................................................................................
     $parse_md_stars = function() {
       var enter, exit, start_of, within;
       within = {
@@ -1233,18 +1349,16 @@
       };
       //.......................................................................................................
       return function(d, send) {
-        /* TAINT consider to `send stamp d` to preserve original token; needed if stored in DB, also
-             provides trail which tokens were caused by which markup */
         switch (d.tid) {
           //...................................................................................................
           case 'star1':
             send(stamp(d));
             if (within.one) {
               exit.one();
-              send(new_token('^æ1^', d, mode, tid, 'i', '</i>'));
+              send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
             } else {
               enter.one(d.start);
-              send(new_token('^æ2^', d, mode, tid, 'i', '<i>'));
+              send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
             }
             break;
           //...................................................................................................
@@ -1254,22 +1368,22 @@
               if (within.one) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(new_token('^æ3^', d, mode, tid, 'i', '</i>'));
+                  send(new_token('^æ3^', d, 'html', 'tag', 'i', '</i>'));
                   exit.two();
-                  send(new_token('^æ4^', d, mode, tid, 'b', '</b>'));
+                  send(new_token('^æ4^', d, 'html', 'tag', 'b', '</b>'));
                   enter.one(d.start);
-                  send(new_token('^æ5^', d, mode, tid, 'i', '<i>'));
+                  send(new_token('^æ5^', d, 'html', 'tag', 'i', '<i>'));
                 } else {
                   exit.two();
-                  send(new_token('^æ6^', d, mode, tid, 'b', '</b>'));
+                  send(new_token('^æ6^', d, 'html', 'tag', 'b', '</b>'));
                 }
               } else {
                 exit.two();
-                send(new_token('^æ7^', d, mode, tid, 'b', '</b>'));
+                send(new_token('^æ7^', d, 'html', 'tag', 'b', '</b>'));
               }
             } else {
               enter.two(d.start);
-              send(new_token('^æ8^', d, mode, tid, 'b', '<b>'));
+              send(new_token('^æ8^', d, 'html', 'tag', 'b', '<b>'));
             }
             break;
           //...................................................................................................
@@ -1279,35 +1393,35 @@
               if (within.two) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(new_token('^æ9^', d, mode, tid, 'i', '</i>'));
+                  send(new_token('^æ9^', d, 'html', 'tag', 'i', '</i>'));
                   exit.two();
-                  send(new_token('^æ10^', d, mode, tid, 'b', '</b>'));
+                  send(new_token('^æ10^', d, 'html', 'tag', 'b', '</b>'));
                 } else {
                   exit.two();
-                  send(new_token('^æ11^', d, mode, tid, 'b', '</b>'));
+                  send(new_token('^æ11^', d, 'html', 'tag', 'b', '</b>'));
                   exit.one();
-                  send(new_token('^æ12^', d, mode, tid, 'i', '</i>'));
+                  send(new_token('^æ12^', d, 'html', 'tag', 'i', '</i>'));
                 }
               } else {
                 exit.one();
-                send(new_token('^æ13^', d, mode, tid, 'i', '</i>'));
+                send(new_token('^æ13^', d, 'html', 'tag', 'i', '</i>'));
                 enter.two(d.start);
-                send(new_token('^æ14^', d, mode, tid, 'b', '<b>'));
+                send(new_token('^æ14^', d, 'html', 'tag', 'b', '<b>'));
               }
             } else {
               if (within.two) {
                 exit.two();
-                send(new_token('^æ15^', d, mode, tid, 'b', '</b>'));
+                send(new_token('^æ15^', d, 'html', 'tag', 'b', '</b>'));
                 enter.one(d.start);
-                send(new_token('^æ16^', d, mode, tid, 'i', '<i>'));
+                send(new_token('^æ16^', d, 'html', 'tag', 'i', '<i>'));
               } else {
                 enter.two(d.start);
-                send(new_token('^æ17^', d, mode, tid, 'b', '<b>'));
+                send(new_token('^æ17^', d, 'html', 'tag', 'b', '<b>'));
                 enter.one(d.start + 2);
                 send(new_token('^æ18^', {
                   start: d.start + 2,
                   stop: d.stop
-                }, mode, tid, 'i', '<i>'));
+                }, 'html', 'tag', 'i', '<i>'));
               }
             }
             break;
@@ -1320,8 +1434,6 @@
     };
     //.........................................................................................................
     md_lexer = new_toy_md_lexer('md');
-    mode = 'html';
-    tid = 'tag';
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -1376,14 +1488,294 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_nested_codespan = async function(T, done) {
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    new_toy_md_lexer = function(mode = 'plain') {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'escchr',
+        jump: null,
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'star1',
+        jump: null,
+        pattern: /(?<!\*)\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'codespan',
+        jump: 'literal',
+        pattern: /(?<!`)`(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'other',
+        jump: null,
+        pattern: /[^*`\\]+/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'codespan',
+        jump: '^',
+        pattern: /(?<!`)`(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'text',
+        jump: null,
+        pattern: /(?:\\`|[^`])+/u
+      });
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* \\`*bar*\\` baz', '<i>foo</i> \\`<i>bar</i>\\` baz', null]];
+    //.........................................................................................................
+    $parse_md_codespan = function() {
+      return function(d, send) {
+        if (d.mk === 'plain:codespan') {
+          send(stamp(d));
+          return send(new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+        }
+        if (d.mk === 'literal:codespan') {
+          send(stamp(d));
+          return send(new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+        }
+        send(d);
+        return null;
+      };
+    };
+    //.........................................................................................................
+    md_lexer = new_toy_md_lexer('md');
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, p, result, result_rpr;
+          //.....................................................................................................
+          p = new Pipeline();
+          p.push(function(d, send) {
+            var e, ref1, results;
+            if (d.tid !== 'p') {
+              return send(d);
+            }
+            ref1 = md_lexer.walk(d.value);
+            results = [];
+            for (e of ref1) {
+              results.push(send(e));
+            }
+            return results;
+          });
+          p.push($parse_md_star());
+          p.push($parse_md_codespan());
+          //.....................................................................................................
+          p.send(new_token('^æ19^', {
+            start: 0,
+            stop: probe.length
+          }, 'plain', 'p', null, probe));
+          result = p.run();
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          //.....................................................................................................
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.markup_with_variable_length = async function(T, done) {
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    //.........................................................................................................
+    new_toy_md_lexer = function(mode = 'plain') {
+      var XXXXXX_backtick_count, jlcs, jpcs, lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      XXXXXX_backtick_count = null;
+      //.........................................................................................................
+      jpcs = function({token, lexeme, match, lexer}) {
+        // debug '^35-1^', match
+        XXXXXX_backtick_count = token.value.length;
+        return 'literal';
+      };
+      //.........................................................................................................
+      jlcs = function({token, lexeme, match, lexer}) {
+        // debug '^35-3^', match
+        if (token.value.length === XXXXXX_backtick_count) {
+          XXXXXX_backtick_count = null;
+          return '^';
+        } else {
+          token = lets(token, function(token) {
+            token.tid = 'text';
+            return token.mk = `${token.mode}:text`;
+          });
+          debug('^345^', token);
+          return {token};
+        }
+      };
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'escchr',
+        jump: null,
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'star1',
+        jump: null,
+        pattern: /(?<!\*)\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'codespan',
+        jump: jpcs,
+        pattern: /(?<!`)`+(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'other',
+        jump: null,
+        pattern: /[^*`\\]+/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'codespan',
+        jump: jlcs,
+        pattern: /(?<!`)`+(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'text',
+        jump: null,
+        pattern: /(?:\\`|[^`])+/u
+      });
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null], ['*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null]];
+    //.........................................................................................................
+    $parse_md_codespan = function() {
+      return function(d, send) {
+        switch (d.mk) {
+          case 'plain:codespan':
+            send(stamp(d));
+            send(new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+            break;
+          case 'literal:codespan':
+            send(stamp(d));
+            send(new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+            break;
+          default:
+            send(d);
+        }
+        return null;
+      };
+    };
+    //.........................................................................................................
+    md_lexer = new_toy_md_lexer('md');
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, p, result, result_rpr;
+          //.....................................................................................................
+          p = new Pipeline();
+          p.push(function(d, send) {
+            var e, ref1, results;
+            if (d.tid !== 'p') {
+              return send(d);
+            }
+            ref1 = md_lexer.walk(d.value);
+            results = [];
+            for (e of ref1) {
+              results.push(send(e));
+            }
+            return results;
+          });
+          p.push($parse_md_star());
+          p.push($parse_md_codespan());
+          //.....................................................................................................
+          p.send(new_token('^æ19^', {
+            start: 0,
+            stop: probe.length
+          }, 'plain', 'p', null, probe));
+          result = p.run();
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          //.....................................................................................................
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @parse_md_stars_markup()
-      return test(this.parse_md_stars_markup);
+      return test(this);
     })();
   }
+
+  // test @lex_tags
+// @parse_md_stars_markup()
+// test @parse_md_stars_markup
+// test @parse_nested_codespan
+// @markup_with_variable_length()
+// test @markup_with_variable_length
+// @_demo_markup_with_variable_length()
 
 }).call(this);
 
