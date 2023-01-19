@@ -1620,33 +1620,31 @@
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
-    //.........................................................................................................
     new_toy_md_lexer = function(mode = 'plain') {
-      var XXXXXX_backtick_count, jlcs, jpcs, lexer;
+      var backtick_count, jlcs, jpcs, lexer;
       lexer = new Interlex({
         dotall: false
       });
-      XXXXXX_backtick_count = null;
+      backtick_count = null;
       //.........................................................................................................
-      jpcs = function({token, lexeme, match, lexer}) {
+      jpcs = function({token, match, lexer}) {
         // debug '^35-1^', match
-        XXXXXX_backtick_count = token.value.length;
+        backtick_count = token.value.length;
         return 'literal';
       };
       //.........................................................................................................
-      jlcs = function({token, lexeme, match, lexer}) {
+      jlcs = function({token, match, lexer}) {
         // debug '^35-3^', match
-        if (token.value.length === XXXXXX_backtick_count) {
-          XXXXXX_backtick_count = null;
+        if (token.value.length === backtick_count) {
+          backtick_count = null;
           return '^';
-        } else {
-          token = lets(token, function(token) {
-            token.tid = 'text';
-            return token.mk = `${token.mode}:text`;
-          });
-          debug('^345^', token);
-          return {token};
         }
+        token = lets(token, function(token) {
+          token.tid = 'text';
+          return token.mk = `${token.mode}:text`;
+        });
+        // debug '^345^', token
+        return {token};
       };
       //.........................................................................................................
       lexer.add_lexeme({
