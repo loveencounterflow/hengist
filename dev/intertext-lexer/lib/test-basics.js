@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $parse_md_star, DATOM, GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_token, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var $parse_md_star, $parse_md_stars, DATOM, GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_token, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -109,6 +109,129 @@
     };
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  $parse_md_stars = function() {
+    var enter, exit, parse_md_stars, start_of, within;
+    within = {
+      one: false,
+      two: false
+    };
+    start_of = {
+      one: null,
+      two: null
+    };
+    //.........................................................................................................
+    enter = function(mode, start) {
+      within[mode] = true;
+      start_of[mode] = start;
+      return null;
+    };
+    enter.one = function(start) {
+      return enter('one', start);
+    };
+    enter.two = function(start) {
+      return enter('two', start);
+    };
+    //.........................................................................................................
+    exit = function(mode) {
+      within[mode] = false;
+      start_of[mode] = null;
+      return null;
+    };
+    exit.one = function() {
+      return exit('one');
+    };
+    exit.two = function() {
+      return exit('two');
+    };
+    //.........................................................................................................
+    return parse_md_stars = function(d, send) {
+      switch (d.tid) {
+        //.....................................................................................................
+        case 'star1':
+          send(stamp(d));
+          if (within.one) {
+            exit.one();
+            send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
+          } else {
+            enter.one(d.start);
+            send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
+          }
+          break;
+        //.....................................................................................................
+        case 'star2':
+          send(stamp(d));
+          if (within.two) {
+            if (within.one) {
+              if (start_of.one > start_of.two) {
+                exit.one();
+                send(new_token('^æ3^', d, 'html', 'tag', 'i', '</i>'));
+                exit.two();
+                send(new_token('^æ4^', d, 'html', 'tag', 'b', '</b>'));
+                enter.one(d.start);
+                send(new_token('^æ5^', d, 'html', 'tag', 'i', '<i>'));
+              } else {
+                exit.two();
+                send(new_token('^æ6^', d, 'html', 'tag', 'b', '</b>'));
+              }
+            } else {
+              exit.two();
+              send(new_token('^æ7^', d, 'html', 'tag', 'b', '</b>'));
+            }
+          } else {
+            enter.two(d.start);
+            send(new_token('^æ8^', d, 'html', 'tag', 'b', '<b>'));
+          }
+          break;
+        //.....................................................................................................
+        case 'star3':
+          send(stamp(d));
+          if (within.one) {
+            if (within.two) {
+              if (start_of.one > start_of.two) {
+                exit.one();
+                send(new_token('^æ9^', d, 'html', 'tag', 'i', '</i>'));
+                exit.two();
+                send(new_token('^æ10^', d, 'html', 'tag', 'b', '</b>'));
+              } else {
+                exit.two();
+                send(new_token('^æ11^', d, 'html', 'tag', 'b', '</b>'));
+                exit.one();
+                send(new_token('^æ12^', d, 'html', 'tag', 'i', '</i>'));
+              }
+            } else {
+              exit.one();
+              send(new_token('^æ13^', d, 'html', 'tag', 'i', '</i>'));
+              enter.two(d.start);
+              send(new_token('^æ14^', d, 'html', 'tag', 'b', '<b>'));
+            }
+          } else {
+            if (within.two) {
+              exit.two();
+              send(new_token('^æ15^', d, 'html', 'tag', 'b', '</b>'));
+              enter.one(d.start);
+              send(new_token('^æ16^', d, 'html', 'tag', 'i', '<i>'));
+            } else {
+              enter.two(d.start);
+              send(new_token('^æ17^', d, 'html', 'tag', 'b', '<b>'));
+              enter.one(d.start + 2);
+              send(new_token('^æ18^', {
+                start: d.start + 2,
+                stop: d.stop
+              }, 'html', 'tag', 'i', '<i>'));
+            }
+          }
+          break;
+        default:
+          //.....................................................................................................
+          send(d);
+      }
+      return null;
+    };
+  };
+
+  //===========================================================================================================
+  // TESTS
   //-----------------------------------------------------------------------------------------------------------
   this.simple = async function(T, done) {
     var Interlex, error, i, len, lexer, matcher, probe, probes_and_matchers;
@@ -1438,7 +1561,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_md_stars_markup = async function(T, done) {
-    var $, $parse_md_stars, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    var $, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -1480,126 +1603,6 @@
     };
     //.........................................................................................................
     probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["**x*def*x**", "<b>x<i>def</i>x</b>"], ["*x**def**x*", "<i>x<b>def</b>x</i>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"], ["*x***def**", "<i>x</i><b>def</b>"], ["**x***def*", "<b>x</b><i>def</i>"], ["*", "<i>"], ["**", "<b>"], ["***", "<b><i>"]];
-    //.........................................................................................................
-    $parse_md_stars = function() {
-      var enter, exit, start_of, within;
-      within = {
-        one: false,
-        two: false
-      };
-      start_of = {
-        one: null,
-        two: null
-      };
-      //.......................................................................................................
-      enter = function(mode, start) {
-        within[mode] = true;
-        start_of[mode] = start;
-        return null;
-      };
-      enter.one = function(start) {
-        return enter('one', start);
-      };
-      enter.two = function(start) {
-        return enter('two', start);
-      };
-      //.......................................................................................................
-      exit = function(mode) {
-        within[mode] = false;
-        start_of[mode] = null;
-        return null;
-      };
-      exit.one = function() {
-        return exit('one');
-      };
-      exit.two = function() {
-        return exit('two');
-      };
-      //.......................................................................................................
-      return function(d, send) {
-        switch (d.tid) {
-          //...................................................................................................
-          case 'star1':
-            send(stamp(d));
-            if (within.one) {
-              exit.one();
-              send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
-            } else {
-              enter.one(d.start);
-              send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
-            }
-            break;
-          //...................................................................................................
-          case 'star2':
-            send(stamp(d));
-            if (within.two) {
-              if (within.one) {
-                if (start_of.one > start_of.two) {
-                  exit.one();
-                  send(new_token('^æ3^', d, 'html', 'tag', 'i', '</i>'));
-                  exit.two();
-                  send(new_token('^æ4^', d, 'html', 'tag', 'b', '</b>'));
-                  enter.one(d.start);
-                  send(new_token('^æ5^', d, 'html', 'tag', 'i', '<i>'));
-                } else {
-                  exit.two();
-                  send(new_token('^æ6^', d, 'html', 'tag', 'b', '</b>'));
-                }
-              } else {
-                exit.two();
-                send(new_token('^æ7^', d, 'html', 'tag', 'b', '</b>'));
-              }
-            } else {
-              enter.two(d.start);
-              send(new_token('^æ8^', d, 'html', 'tag', 'b', '<b>'));
-            }
-            break;
-          //...................................................................................................
-          case 'star3':
-            send(stamp(d));
-            if (within.one) {
-              if (within.two) {
-                if (start_of.one > start_of.two) {
-                  exit.one();
-                  send(new_token('^æ9^', d, 'html', 'tag', 'i', '</i>'));
-                  exit.two();
-                  send(new_token('^æ10^', d, 'html', 'tag', 'b', '</b>'));
-                } else {
-                  exit.two();
-                  send(new_token('^æ11^', d, 'html', 'tag', 'b', '</b>'));
-                  exit.one();
-                  send(new_token('^æ12^', d, 'html', 'tag', 'i', '</i>'));
-                }
-              } else {
-                exit.one();
-                send(new_token('^æ13^', d, 'html', 'tag', 'i', '</i>'));
-                enter.two(d.start);
-                send(new_token('^æ14^', d, 'html', 'tag', 'b', '<b>'));
-              }
-            } else {
-              if (within.two) {
-                exit.two();
-                send(new_token('^æ15^', d, 'html', 'tag', 'b', '</b>'));
-                enter.one(d.start);
-                send(new_token('^æ16^', d, 'html', 'tag', 'i', '<i>'));
-              } else {
-                enter.two(d.start);
-                send(new_token('^æ17^', d, 'html', 'tag', 'b', '<b>'));
-                enter.one(d.start + 2);
-                send(new_token('^æ18^', {
-                  start: d.start + 2,
-                  stop: d.stop
-                }, 'html', 'tag', 'i', '<i>'));
-              }
-            }
-            break;
-          default:
-            //...................................................................................................
-            send(d);
-        }
-        return null;
-      };
-    };
     //.........................................................................................................
     md_lexer = new_toy_md_lexer('md');
 //.........................................................................................................
@@ -1650,6 +1653,145 @@
         });
       });
     }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_line_by_line = function(T, done) {
+    var $, Interlex, Pipeline, compose, d, first, last, line, md_lexer, new_toy_md_lexer, new_toy_parser, parser, probe, ref1, ref2, result, result_rpr, token, transforms, walk_lines;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    probe = `*the
+first*
+paragraph
+
+the
+**second** paragraph`;
+    //.........................................................................................................
+    new_toy_md_lexer = function(mode = 'plain') {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false,
+        end_token: false
+      });
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star1',
+        pattern: /(?<!\*)\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star2',
+        pattern: /(?<!\*)\*\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star3',
+        pattern: /(?<!\*)\*\*\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'other',
+        pattern: /[^*]+/u
+      });
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    new_toy_parser = function(lexer) {
+      var p;
+      p = new Pipeline();
+      p.push(function(d) {
+        return urge('^79-1^', rpr(d));
+      });
+      p.push(function(d, send) {
+        var e, ref1, results;
+        if (!isa.text(d)) {
+          return send(d);
+        }
+        ref1 = lexer.walk(d);
+        results = [];
+        for (e of ref1) {
+          // send new_token = ref: 'x1', token, mode, tid, name, value, start, stop
+          // send new_datom { }
+          results.push(send(e));
+        }
+        return results;
+      });
+      p.push($parse_md_stars());
+      return p;
+    };
+    //.........................................................................................................
+    /* TAINT use upcoming implementation in `guy` */
+    walk_lines = function*(text, cfg) {
+      var R, Y/* internal error */, last_position, match, pattern, template;
+      validate.text(text);
+      template = {
+        keep_newlines: true
+      };
+      cfg = {...template, ...cfg};
+      pattern = /.*?(\n|$)/suy;
+      last_position = text.length - 1;
+      while (true) {
+        if (pattern.lastIndex > last_position) {
+          break;
+        }
+        if ((match = text.match(pattern)) == null) {
+          break;
+        }
+        Y = match[0];
+        if (!cfg.keep_newlines) {
+          Y = Y.slice(0, Y.length - 1);
+        }
+        yield Y;
+      }
+      R = walk_lines();
+      R.reset = function() {
+        return pattern.lastIndex = 0;
+      };
+      return R;
+    };
+    //.........................................................................................................
+    md_lexer = new_toy_md_lexer('md');
+    parser = new_toy_parser(md_lexer);
+    //.........................................................................................................
+    result = [];
+    ref1 = walk_lines(probe);
+    for (line of ref1) {
+      parser.send(line);
+      ref2 = parser.walk();
+      for (d of ref2) {
+        result.push(d);
+        info('^79-10^', rpr(d));
+      }
+    }
+    //.........................................................................................................
+    H.tabulate("parse line by line", result);
+    // debug '^79-11^', result_rpr = ( md_lexer.rpr_token token for token in result ).join ''
+    result_rpr = ((function() {
+      var i, len, ref3, results;
+      results = [];
+      for (i = 0, len = result.length; i < len; i++) {
+        token = result[i];
+        if ((ref3 = !token.$stamped) != null ? ref3 : false) {
+          results.push(token.value);
+        }
+      }
+      return results;
+    })()).join('');
+    debug('^79-11^', '\n' + result_rpr);
     if (typeof done === "function") {
       done();
     }
@@ -1936,11 +2078,13 @@
       // test @using_strings_for_patterns
       // @cannot_return_from_initial_mode()
       // test @cannot_return_from_initial_mode
-      return test(this.using_lexer_without_lexemes);
+      // test @using_lexer_without_lexemes
+      // test @lex_tags
+      return this.parse_line_by_line();
     })();
   }
 
-  // test @lex_tags
+  // test @parse_line_by_line
 // @parse_md_stars_markup()
 // test @parse_md_stars_markup
 // test @parse_nested_codespan
