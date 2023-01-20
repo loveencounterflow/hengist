@@ -107,6 +107,86 @@ $parse_md_star = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@using_strings_for_patterns = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex()
+  lexer.add_lexeme { mode: 'sql', tid: 'select',  pattern: 'select',    }
+  lexer.add_lexeme { mode: 'sql', tid: 'from',    pattern: 'from',      }
+  lexer.add_lexeme { mode: 'sql', tid: 'star',    pattern: '*',         }
+  lexer.add_lexeme { mode: 'sql', tid: 'ws',      pattern: /\s+/u,      }
+  lexer.add_lexeme { mode: 'sql', tid: 'other',   pattern: /\S+/u,      }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'|$eof:''", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # do =>
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      #.....................................................................................................
+      result      = lexer.run probe
+      result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join '|'
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@using_lexer_without_lexemes = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex }  = require '../../../apps/intertext-lexer'
+  probes_and_matchers = [
+    [ '', "$eof:''", null ]
+    [ 'select * from t;', "$error:''", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # do =>
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new Interlex()
+      result      = lexer.run probe
+      result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join '|'
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@cannot_return_from_initial_mode = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex } = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  get_lexer = ->
+    lexer = new Interlex()
+    lexer.add_lexeme { mode: 'base',  tid: 'a',             pattern: 'a', }
+    lexer.add_lexeme { mode: 'base',  tid: 'b', jump: 'up', pattern: 'b', }
+    lexer.add_lexeme { mode: 'up',    tid: 'c',             pattern: 'c', }
+    lexer.add_lexeme { mode: 'up',    tid: 'd', jump: '^',  pattern: 'd', }
+    lexer.add_lexeme { mode: 'base',  tid: 'e', jump: '^',  pattern: 'e', }
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'abc', "base:a:'a'|base:b:'b'|up:c:'c'|up:$eof:''", null ]
+    [ 'abcde', null, "unable to jump back from initial state" ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # do =>
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      #.....................................................................................................
+      lexer       = get_lexer()
+      result      = lexer.run probe
+      result_rpr  = ( "#{t.mk}:#{rpr t.value}" for t in result ).join '|'
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @lex_tags = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
@@ -399,12 +479,12 @@ $parse_md_star = ->
   new_toy_md_lexer = ( mode = 'plain' ) ->
     lexer           = new Interlex { dotall: false, }
     backtick_count  = null
-    #.........................................................................................................
+    #.......................................................................................................
     jpcs = ({ token, match, lexer, }) ->
       # debug '^35-1^', match
       backtick_count = token.value.length
       return 'literal'
-    #.........................................................................................................
+    #.......................................................................................................
     jlcs = ({ token, match, lexer, }) ->
       # debug '^35-3^', match
       if token.value.length is backtick_count
@@ -414,14 +494,14 @@ $parse_md_star = ->
       token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
       # debug '^345^', token
       return { token, }
-    #.........................................................................................................
+    #.......................................................................................................
     lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
     lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
     lexer.add_lexeme { mode: 'plain',   tid: 'codespan',  jump: jpcs,       pattern:  /(?<!`)`+(?!`)/u,   }
     lexer.add_lexeme { mode: 'plain',   tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
     lexer.add_lexeme { mode: 'literal', tid: 'codespan',  jump: jlcs,       pattern:  /(?<!`)`+(?!`)/u,   }
     lexer.add_lexeme { mode: 'literal', tid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
-    #.........................................................................................................
+    #.......................................................................................................
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
@@ -473,7 +553,12 @@ $parse_md_star = ->
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # @using_strings_for_patterns()
+  # test @using_strings_for_patterns
+  # @cannot_return_from_initial_mode()
+  # test @cannot_return_from_initial_mode
+  test @using_lexer_without_lexemes
   # test @lex_tags
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
