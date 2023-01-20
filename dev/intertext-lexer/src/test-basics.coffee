@@ -407,6 +407,81 @@ $parse_md_stars = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@parse_line_by_line = ( T, done ) ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  probe = """
+    *the
+    first*
+    paragraph
+
+    the
+    **second** paragraph
+    """
+  #.........................................................................................................
+  new_toy_md_lexer = ( mode = 'plain' ) ->
+    lexer   = new Interlex { dotall: false, end_token: false, }
+    #.........................................................................................................
+    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, }
+    lexer.add_lexeme { mode, tid: 'star1',  pattern: /(?<!\*)\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'star2',  pattern: /(?<!\*)\*\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'star3',  pattern: /(?<!\*)\*\*\*(?!\*)/u, }
+    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*]+/u, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  new_toy_parser = ( lexer ) ->
+    p = new Pipeline()
+    p.push ( d ) -> urge '^79-1^', rpr d
+    p.push ( d, send ) ->
+      return send d unless isa.text d
+      # send new_token = ref: 'x1', token, mode, tid, name, value, start, stop
+      # send new_datom { }
+      send e for e from lexer.walk d
+    p.push $parse_md_stars()
+    return p
+  #.........................................................................................................
+  ### TAINT use upcoming implementation in `guy` ###
+  walk_lines = ( text, cfg ) ->
+    validate.text text
+    template      = { keep_newlines: true, }
+    cfg           = { template..., cfg..., }
+    pattern       = /.*?(\n|$)/suy
+    last_position = text.length - 1
+    loop
+      break if pattern.lastIndex > last_position
+      break unless ( match = text.match pattern )? ### internal error ###
+      Y = match[ 0 ]
+      Y = Y[ ... Y.length - 1 ] unless cfg.keep_newlines
+      yield Y
+    R = walk_lines()
+    R.reset = -> pattern.lastIndex = 0
+    return R
+  #.........................................................................................................
+  md_lexer  = new_toy_md_lexer 'md'
+  parser    = new_toy_parser md_lexer
+  #.........................................................................................................
+  result    = []
+  for line from walk_lines probe
+    parser.send line
+    for d from parser.walk()
+      result.push d
+      info '^79-10^', rpr d
+  #.........................................................................................................
+  H.tabulate "parse line by line", result
+  # debug '^79-11^', result_rpr = ( md_lexer.rpr_token token for token in result ).join ''
+  result_rpr = ( token.value for token in result when not token.$stamped ? false ).join ''
+  debug '^79-11^', '\n' + result_rpr
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @parse_nested_codespan = ( T, done ) ->
   { Pipeline,         \
     $,
@@ -561,8 +636,10 @@ if require.main is module then do =>
   # test @using_strings_for_patterns
   # @cannot_return_from_initial_mode()
   # test @cannot_return_from_initial_mode
-  test @using_lexer_without_lexemes
+  # test @using_lexer_without_lexemes
   # test @lex_tags
+  @parse_line_by_line()
+  # test @parse_line_by_line
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
   # test @parse_nested_codespan
