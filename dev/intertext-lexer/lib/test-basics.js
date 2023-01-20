@@ -137,6 +137,174 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.using_strings_for_patterns = async function(T, done) {
+    var Interlex, error, i, len, lexer, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    lexer = new Interlex();
+    lexer.add_lexeme({
+      mode: 'sql',
+      tid: 'select',
+      pattern: 'select'
+    });
+    lexer.add_lexeme({
+      mode: 'sql',
+      tid: 'from',
+      pattern: 'from'
+    });
+    lexer.add_lexeme({
+      mode: 'sql',
+      tid: 'star',
+      pattern: '*'
+    });
+    lexer.add_lexeme({
+      mode: 'sql',
+      tid: 'ws',
+      pattern: /\s+/u
+    });
+    lexer.add_lexeme({
+      mode: 'sql',
+      tid: 'other',
+      pattern: /\S+/u
+    });
+    //.........................................................................................................
+    probes_and_matchers = [['select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'|$eof:''", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // do =>
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result, result_rpr, t;
+          //.....................................................................................................
+          result = lexer.run(probe);
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              results.push(`${t.tid}:${rpr(t.value)}`);
+            }
+            return results;
+          })()).join('|');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, result);
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.using_lexer_without_lexemes = async function(T, done) {
+    var Interlex, error, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    probes_and_matchers = [['', "$eof:''", null], ['select * from t;', "$error:''", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // do =>
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var lexer, result, result_rpr, t;
+          lexer = new Interlex();
+          result = lexer.run(probe);
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              results.push(`${t.tid}:${rpr(t.value)}`);
+            }
+            return results;
+          })()).join('|');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, result);
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.cannot_return_from_initial_mode = async function(T, done) {
+    var Interlex, error, get_lexer, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    get_lexer = function() {
+      var lexer;
+      lexer = new Interlex();
+      lexer.add_lexeme({
+        mode: 'base',
+        tid: 'a',
+        pattern: 'a'
+      });
+      lexer.add_lexeme({
+        mode: 'base',
+        tid: 'b',
+        jump: 'up',
+        pattern: 'b'
+      });
+      lexer.add_lexeme({
+        mode: 'up',
+        tid: 'c',
+        pattern: 'c'
+      });
+      lexer.add_lexeme({
+        mode: 'up',
+        tid: 'd',
+        jump: '^',
+        pattern: 'd'
+      });
+      lexer.add_lexeme({
+        mode: 'base',
+        tid: 'e',
+        jump: '^',
+        pattern: 'e'
+      });
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [['abc', "base:a:'a'|base:b:'b'|up:c:'c'|up:$eof:''", null], ['abcde', null, "unable to jump back from initial state"]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // do =>
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var lexer, result, result_rpr, t;
+          //.....................................................................................................
+          lexer = get_lexer();
+          result = lexer.run(probe);
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              results.push(`${t.mk}:${rpr(t.value)}`);
+            }
+            return results;
+          })()).join('|');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, result);
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.lex_tags = async function(T, done) {
     var Interlex, c, error, i, len, lexer, matcher, probe, probes_and_matchers;
     ({
@@ -1626,13 +1794,13 @@
         dotall: false
       });
       backtick_count = null;
-      //.........................................................................................................
+      //.......................................................................................................
       jpcs = function({token, match, lexer}) {
         // debug '^35-1^', match
         backtick_count = token.value.length;
         return 'literal';
       };
-      //.........................................................................................................
+      //.......................................................................................................
       jlcs = function({token, match, lexer}) {
         // debug '^35-3^', match
         if (token.value.length === backtick_count) {
@@ -1646,7 +1814,7 @@
         // debug '^345^', token
         return {token};
       };
-      //.........................................................................................................
+      //.......................................................................................................
       lexer.add_lexeme({
         mode: 'plain',
         tid: 'escchr',
@@ -1683,7 +1851,7 @@
         jump: null,
         pattern: /(?:\\`|[^`])+/u
       });
-      //.........................................................................................................
+      //.......................................................................................................
       return lexer;
     };
     //.........................................................................................................
@@ -1763,7 +1931,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @using_strings_for_patterns()
+      // test @using_strings_for_patterns
+      // @cannot_return_from_initial_mode()
+      // test @cannot_return_from_initial_mode
+      return test(this.using_lexer_without_lexemes);
     })();
   }
 
