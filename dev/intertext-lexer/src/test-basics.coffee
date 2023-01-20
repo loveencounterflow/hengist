@@ -78,7 +78,79 @@ $parse_md_star = ->
       else send d
     return null
 
+#-----------------------------------------------------------------------------------------------------------
+$parse_md_stars = ->
+  within =
+    one:    false
+    two:    false
+  start_of =
+    one:    null
+    two:    null
+  #.........................................................................................................
+  enter = ( mode, start ) ->
+    within[   mode ] = true
+    start_of[ mode ] = start
+    return null
+  enter.one = ( start ) -> enter 'one', start
+  enter.two = ( start ) -> enter 'two', start
+  #.........................................................................................................
+  exit = ( mode ) ->
+    within[   mode ] = false
+    start_of[ mode ] = null
+    return null
+  exit.one = -> exit 'one'
+  exit.two = -> exit 'two'
+  #.........................................................................................................
+  return parse_md_stars = ( d, send ) ->
+    switch d.tid
+      #.....................................................................................................
+      when 'star1'
+        send stamp d
+        if within.one then  exit.one();         send new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
+        else                enter.one d.start;  send new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
+      #.....................................................................................................
+      when 'star2'
+        send stamp d
+        if within.two
+          if within.one
+            if start_of.one > start_of.two
+              exit.one();         send new_token '^æ3^', d, 'html', 'tag', 'i', '</i>'
+              exit.two();         send new_token '^æ4^', d, 'html', 'tag', 'b', '</b>'
+              enter.one d.start;  send new_token '^æ5^', d, 'html', 'tag', 'i', '<i>'
+            else
+              exit.two();         send new_token '^æ6^', d, 'html', 'tag', 'b', '</b>'
+          else
+            exit.two();         send new_token '^æ7^', d, 'html', 'tag', 'b', '</b>'
+        else
+          enter.two d.start;  send new_token '^æ8^', d, 'html', 'tag', 'b', '<b>'
+      #.....................................................................................................
+      when 'star3'
+        send stamp d
+        if within.one
+          if within.two
+            if start_of.one > start_of.two
+              exit.one();       send new_token '^æ9^', d, 'html', 'tag', 'i', '</i>'
+              exit.two();       send new_token '^æ10^', d, 'html', 'tag', 'b', '</b>'
+            else
+              exit.two();       send new_token '^æ11^', d, 'html', 'tag', 'b', '</b>'
+              exit.one();       send new_token '^æ12^', d, 'html', 'tag', 'i', '</i>'
+          else
+            exit.one();         send new_token '^æ13^', d, 'html', 'tag', 'i', '</i>'
+            enter.two d.start;  send new_token '^æ14^', d, 'html', 'tag', 'b', '<b>'
+        else
+          if within.two
+            exit.two();         send new_token '^æ15^', d, 'html', 'tag', 'b', '</b>'
+            enter.one d.start;  send new_token '^æ16^', d, 'html', 'tag', 'i', '<i>'
+          else
+            enter.two d.start;  send new_token '^æ17^', d, 'html', 'tag', 'b', '<b>'
+            enter.one d.start + 2;  send new_token '^æ18^', { start: d.start + 2, stop: d.stop, }, 'html', 'tag', 'i', '<i>'
+      #.....................................................................................................
+      else send d
+    return null
 
+
+#===========================================================================================================
+# TESTS
 #-----------------------------------------------------------------------------------------------------------
 @simple = ( T, done ) ->
   # T?.halt_on_error()
@@ -311,75 +383,6 @@ $parse_md_star = ->
     [ "**", "<b>", ]
     [ "***", "<b><i>", ]
     ]
-  #.........................................................................................................
-  $parse_md_stars = ->
-    within =
-      one:    false
-      two:    false
-    start_of =
-      one:    null
-      two:    null
-    #.......................................................................................................
-    enter = ( mode, start ) ->
-      within[   mode ] = true
-      start_of[ mode ] = start
-      return null
-    enter.one = ( start ) -> enter 'one', start
-    enter.two = ( start ) -> enter 'two', start
-    #.......................................................................................................
-    exit = ( mode ) ->
-      within[   mode ] = false
-      start_of[ mode ] = null
-      return null
-    exit.one = -> exit 'one'
-    exit.two = -> exit 'two'
-    #.......................................................................................................
-    return ( d, send ) ->
-      switch d.tid
-        #...................................................................................................
-        when 'star1'
-          send stamp d
-          if within.one then  exit.one();         send new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
-          else                enter.one d.start;  send new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
-        #...................................................................................................
-        when 'star2'
-          send stamp d
-          if within.two
-            if within.one
-              if start_of.one > start_of.two
-                exit.one();         send new_token '^æ3^', d, 'html', 'tag', 'i', '</i>'
-                exit.two();         send new_token '^æ4^', d, 'html', 'tag', 'b', '</b>'
-                enter.one d.start;  send new_token '^æ5^', d, 'html', 'tag', 'i', '<i>'
-              else
-                exit.two();         send new_token '^æ6^', d, 'html', 'tag', 'b', '</b>'
-            else
-              exit.two();         send new_token '^æ7^', d, 'html', 'tag', 'b', '</b>'
-          else
-            enter.two d.start;  send new_token '^æ8^', d, 'html', 'tag', 'b', '<b>'
-        #...................................................................................................
-        when 'star3'
-          send stamp d
-          if within.one
-            if within.two
-              if start_of.one > start_of.two
-                exit.one();       send new_token '^æ9^', d, 'html', 'tag', 'i', '</i>'
-                exit.two();       send new_token '^æ10^', d, 'html', 'tag', 'b', '</b>'
-              else
-                exit.two();       send new_token '^æ11^', d, 'html', 'tag', 'b', '</b>'
-                exit.one();       send new_token '^æ12^', d, 'html', 'tag', 'i', '</i>'
-            else
-              exit.one();         send new_token '^æ13^', d, 'html', 'tag', 'i', '</i>'
-              enter.two d.start;  send new_token '^æ14^', d, 'html', 'tag', 'b', '<b>'
-          else
-            if within.two
-              exit.two();         send new_token '^æ15^', d, 'html', 'tag', 'b', '</b>'
-              enter.one d.start;  send new_token '^æ16^', d, 'html', 'tag', 'i', '<i>'
-            else
-              enter.two d.start;  send new_token '^æ17^', d, 'html', 'tag', 'b', '<b>'
-              enter.one d.start + 2;  send new_token '^æ18^', { start: d.start + 2, stop: d.stop, }, 'html', 'tag', 'i', '<i>'
-        #...................................................................................................
-        else send d
-      return null
   #.........................................................................................................
   md_lexer  = new_toy_md_lexer 'md'
   #.........................................................................................................
