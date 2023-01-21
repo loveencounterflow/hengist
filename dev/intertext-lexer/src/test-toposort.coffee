@@ -93,12 +93,15 @@ show = ( topograph ) ->
     return null
   #.........................................................................................................
   finalize = ->
+    ### TAINT might as well not materialize list as we check for name collision (?) ###
     names = [ topograph.precedents.keys()..., ]
     for name from names
       for x from anyother.before.keys()
+        continue if x is name
         debug '^08-5^', { name, x, }
         LTSORT.add topograph, x, name
       for x from anyother.after.keys()
+        continue if x is name
         debug '^08-5^', { name, x, }
         LTSORT.add topograph, name, x
     return null
