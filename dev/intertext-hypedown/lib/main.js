@@ -338,6 +338,8 @@
     })();
   }
 
+  use(toposort(to(order(lexers && transforms))));
+
 }).call(this);
 
 //# sourceMappingURL=main.js.map
