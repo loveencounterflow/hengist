@@ -119,16 +119,23 @@
     };
     //.........................................................................................................
     finalize = function() {
+      /* TAINT might as well not materialize list as we check for name collision (?) */
       var name, names, ref, ref1, x;
       names = [...topograph.precedents.keys()];
       for (name of names) {
         ref = anyother.before.keys();
         for (x of ref) {
+          if (x === name) {
+            continue;
+          }
           debug('^08-5^', {name, x});
           LTSORT.add(topograph, x, name);
         }
         ref1 = anyother.after.keys();
         for (x of ref1) {
+          if (x === name) {
+            continue;
+          }
           debug('^08-5^', {name, x});
           LTSORT.add(topograph, name, x);
         }
