@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, PATH, SQL, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, show, stamp, test, type_of, types, urge, validate, warn, whisper;
+  var DATOM, GUY, H, PATH, SQL, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, show, stamp, test, type_of, types, urge, validate, warn, whisper,
+    indexOf = [].indexOf;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -33,7 +34,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show = function(topograph) {
-    var LTSORT, dependencies, error, ordering;
+    var LTSORT, dependencies, error, name, ordering, precedents, ref, table, x, y;
     LTSORT = require('../../../apps/ltsort');
     try {
       dependencies = LTSORT.group(topograph);
@@ -57,7 +58,23 @@
       warn('^08-3^', GUY.trm.reverse(error.message));
     }
     // throw new DBay_sqlm_circular_references_error '^dbay/dbm@4^', name, ref_name
-    info('^08-4^', ordering);
+    table = [];
+    ref = topograph.precedents.entries();
+    for (y of ref) {
+      [name, precedents] = y;
+      precedents = precedents.join(', ');
+      table.push({name, precedents});
+    }
+    H.tabulate("topograph", table);
+    info('^08-4^', ((function() {
+      var i, len, results;
+      results = [];
+      for (i = 0, len = ordering.length; i < len; i++) {
+        x = ordering[i];
+        results.push(GUY.trm.yellow(x));
+      }
+      return results;
+    })()).join(GUY.trm.grey(' => ')));
     return null;
   };
 
@@ -65,18 +82,15 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.toposort = function(T, done) {
-    /* TAINT simplify to single set? */
-    var LTSORT, add_lexeme, anyother, finalize, lexemes, topograph;
+    var LTSORT, add_lexeme, antecedents, finalize, lexemes, subsequents, topograph;
     // T?.halt_on_error()
     LTSORT = require('../../../apps/ltsort');
     topograph = LTSORT.new_graph({
       loners: true
     });
     lexemes = [];
-    anyother = {
-      before: new Set(),
-      after: new Set()
-    };
+    antecedents = [];
+    subsequents = [];
     //.........................................................................................................
     add_lexeme = function(cfg) {
       var after, before, d, i, j, len, len1, name;
@@ -101,7 +115,9 @@
         for (i = 0, len = after.length; i < len; i++) {
           d = after[i];
           if (d === '*') {
-            anyother.after.add(name);
+            if (indexOf.call(subsequents, name) < 0) {
+              subsequents.push(name);
+            }
             continue;
           }
           LTSORT.add(topograph, d, name);
@@ -109,7 +125,9 @@
         for (j = 0, len1 = before.length; j < len1; j++) {
           d = before[j];
           if (d === '*') {
-            anyother.before.add(name);
+            if (indexOf.call(antecedents, name) < 0) {
+              antecedents.unshift(name);
+            }
             continue;
           }
           LTSORT.add(topograph, name, d);
@@ -119,30 +137,43 @@
     };
     //.........................................................................................................
     finalize = function() {
-      /* TAINT might as well not materialize list as we check for name collision (?) */
-      var name, names, ref, ref1, x;
+      var antecedent, i, idx, j, k, l, len, len1, len2, len3, name, names, ref, ref1, subsequent;
       names = [...topograph.precedents.keys()];
-      for (name of names) {
-        ref = anyother.before.keys();
-        for (x of ref) {
-          if (x === name) {
+      for (idx = i = 0, len = antecedents.length; i < len; idx = ++i) {
+        antecedent = antecedents[idx];
+        help('^08-5^', antecedent, antecedents.slice(0, idx));
+        ref = [...names, ...antecedents.slice(0, idx), ...subsequents];
+        for (j = 0, len1 = ref.length; j < len1; j++) {
+          name = ref[j];
+          if (antecedent === name) {
             continue;
           }
-          debug('^08-5^', {name, x});
-          LTSORT.add(topograph, x, name);
+          LTSORT.add(topograph, antecedent, name);
         }
-        ref1 = anyother.after.keys();
-        for (x of ref1) {
-          if (x === name) {
+      }
+      for (idx = k = 0, len2 = subsequents.length; k < len2; idx = ++k) {
+        subsequent = subsequents[idx];
+        warn('^08-6^', subsequent, subsequents.slice(0, idx));
+        ref1 = [...names, ...subsequents.slice(0, idx), ...antecedents];
+        for (l = 0, len3 = ref1.length; l < len3; l++) {
+          name = ref1[l];
+          if (subsequent === name) {
             continue;
           }
-          debug('^08-5^', {name, x});
-          LTSORT.add(topograph, name, x);
+          LTSORT.add(topograph, name, subsequent);
         }
       }
       return null;
     };
     //.........................................................................................................
+    add_lexeme({
+      name: 'getup',
+      before: '*'
+    });
+    add_lexeme({
+      name: 'brushteeth',
+      before: '*'
+    });
     add_lexeme({
       name: 'shop',
       before: '*'
@@ -152,7 +183,16 @@
       before: 'eat'
     });
     add_lexeme({
+      name: 'serve',
+      after: 'cook',
+      before: 'eat'
+    });
+    add_lexeme({
       name: 'dishes',
+      after: '*'
+    });
+    add_lexeme({
+      name: 'sleep',
       after: '*'
     });
     add_lexeme({
@@ -160,7 +200,7 @@
       after: 'cook'
     });
     //.........................................................................................................
-    debug('^08-6^', anyother);
+    debug('^08-1^', {antecedents, subsequents});
     finalize();
     show(topograph);
     if (typeof done === "function") {
