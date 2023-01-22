@@ -50,7 +50,12 @@ show = ( topograph ) ->
     throw error unless ( error.message.match /detected cycle involving node/ )?
     warn '^08-3^', GUY.trm.reverse error.message
     # throw new DBay_sqlm_circular_references_error '^dbay/dbm@4^', name, ref_name
-  info '^08-4^', ordering
+  table = []
+  for [ name, precedents, ] from topograph.precedents.entries()
+    precedents = precedents.join ', '
+    table.push { name, precedents, }
+  H.tabulate "topograph", table
+  info '^08-4^', ( GUY.trm.yellow x for x in ordering ).join GUY.trm.grey ' => '
   return null
 
 
@@ -62,10 +67,8 @@ show = ( topograph ) ->
   LTSORT                    = require '../../../apps/ltsort'
   topograph                 = LTSORT.new_graph { loners: true, }
   lexemes                   = []
-  ### TAINT simplify to single set? ###
-  anyother                  =
-    before: new Set()
-    after:  new Set()
+  antecedents               = []
+  subsequents               = []
   #.........................................................................................................
   add_lexeme = ( cfg ) ->
     cfg         = { { name, after, before, }..., cfg..., }
@@ -82,36 +85,40 @@ show = ( topograph ) ->
     else
       for d in after
         if d is '*'
-          anyother.after.add name
+          subsequents.push name unless name in subsequents
           continue
         LTSORT.add topograph, d, name
       for d in before
         if d is '*'
-          anyother.before.add name
+          antecedents.unshift name unless name in antecedents
           continue
         LTSORT.add topograph, name, d
     return null
   #.........................................................................................................
   finalize = ->
-    ### TAINT might as well not materialize list as we check for name collision (?) ###
     names = [ topograph.precedents.keys()..., ]
-    for name from names
-      for x from anyother.before.keys()
-        continue if x is name
-        debug '^08-5^', { name, x, }
-        LTSORT.add topograph, x, name
-      for x from anyother.after.keys()
-        continue if x is name
-        debug '^08-5^', { name, x, }
-        LTSORT.add topograph, name, x
+    for antecedent, idx in antecedents
+      help '^08-5^', antecedent, antecedents[ ... idx ]
+      for name in [ names..., antecedents[ ... idx ]..., subsequents..., ]
+        continue if antecedent is name
+        LTSORT.add topograph, antecedent, name
+    for subsequent, idx in subsequents
+      warn '^08-6^', subsequent, subsequents[ ... idx ]
+      for name in [ names..., subsequents[ ... idx ]..., antecedents..., ]
+        continue if subsequent is name
+        LTSORT.add topograph, name, subsequent
     return null
   #.........................................................................................................
-  add_lexeme { name: 'shop',    before: '*', }
-  add_lexeme { name: 'cook',    before: 'eat', }
-  add_lexeme { name: 'dishes',  after: '*', }
-  add_lexeme { name: 'eat',     after: 'cook', }
+  add_lexeme { name: 'getup',       before: '*', }
+  add_lexeme { name: 'brushteeth',  before: '*', }
+  add_lexeme { name: 'shop',        before: '*', }
+  add_lexeme { name: 'cook',        before: 'eat', }
+  add_lexeme { name: 'serve', after: 'cook', before: 'eat', }
+  add_lexeme { name: 'dishes',      after: '*', }
+  add_lexeme { name: 'sleep',       after: '*', }
+  add_lexeme { name: 'eat',         after: 'cook', }
   #.........................................................................................................
-  debug '^08-6^', anyother
+  debug '^08-1^', { antecedents, subsequents, }
   finalize()
   show topograph
   #.........................................................................................................
