@@ -62,39 +62,75 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
   return new_datom "^#{mode}", { mode, tid, mk: "#{mode}:#{tid}", jump, name, value, start, stop, x, $: ref, }
 
 
+
 #===========================================================================================================
 #
-#-----------------------------------------------------------------------------------------------------------
-add_backslash_escape = ( lexer, base_mode ) ->
-  lexer.add_lexeme { mode: base_mode,   tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
-  return null
+#===========================================================================================================
+class _Lexemes
 
-#-----------------------------------------------------------------------------------------------------------
-add_catchall = ( lexer, base_mode ) ->
-  lexer.add_lexeme { mode: base_mode,   tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
-  return null
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( cfg ) ->
+    GUY.props.hide @, 'types', ( require '../../../apps/intertext-lexer/lib/types' ).get_base_types()
+    @cfg = { mode: 'std', cfg..., }
+    #.......................................................................................................
+    for tid in Object.getOwnPropertyNames @constructor
+      continue if tid in [ 'length', 'name', 'prototype', ]
+      lexeme = @constructor[ tid ]
+      #.....................................................................................................
+      switch type = @types.type_of lexeme
+        when 'object' then @[ tid ] = { @cfg..., lexeme..., }
+        when 'list'   then @[ tid ] = ( { @cfg..., lx..., } for lx in lexeme )
+        #...................................................................................................
+        when 'function'
+          lexeme = lexeme.call @
+          switch subtype = type_of lexeme
+            when 'object' then  @[ tid ] = { @cfg..., lexeme..., }
+            when 'list'   then  @[ tid ] = ( { @cfg..., lx..., } for lx in lexeme )
+            else throw new Error "^849687388^ expected an object or a list of objects, found a #{type}"
+        #...................................................................................................
+        else throw new Error "^849687349^ expected an object or a function, found a #{type}"
+    return undefined
 
-#-----------------------------------------------------------------------------------------------------------
-add_variable_codespans = ( lexer, base_mode, own_mode ) ->
-  backtick_count  = null
-  #.......................................................................................................
-  entry_handler = ({ token, match, lexer, }) ->
-    backtick_count = token.value.length
-    return own_mode
-  #.......................................................................................................
-  exit_handler = ({ token, match, lexer, }) ->
-    if token.value.length is backtick_count
-      backtick_count = null
-      return '^'
-    ### TAINT setting `token.mk` should not have to be done manually ###
-    token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
-    return { token, }
-  #.......................................................................................................
-  lexer.add_lexeme { mode: base_mode, tid: 'codespan',  jump: entry_handler,  pattern:  /(?<!`)`+(?!`)/u,   }
-  lexer.add_lexeme { mode: own_mode,  tid: 'codespan',  jump: exit_handler,   pattern:  /(?<!`)`+(?!`)/u,   }
-  lexer.add_lexeme { mode: own_mode,  tid: 'text',      jump: null,           pattern:  /(?:\\`|[^`])+/u,   }
-  #.......................................................................................................
-  return null
+
+#===========================================================================================================
+class Standard_lexemes extends _Lexemes
+
+  #---------------------------------------------------------------------------------------------------------
+  @backslash_escape:  { tid: 'escchr', jump: null, pattern: /\\(?<chr>.)/u, }
+  @catchall:          { tid: 'other',  jump: null, pattern: /[^*`\\]+/u, }
+
+
+#===========================================================================================================
+class Markdown_lexemes extends _Lexemes
+
+  #---------------------------------------------------------------------------------------------------------
+  ### TAINT handle CFG format which in this case includes `codespan_mode` ###
+  constructor: ( cfg ) ->
+    super { codespan_mode: 'codespan', cfg..., }
+    return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  @variable_codespan: ->
+    backtick_count  = null
+    #.......................................................................................................
+    entry_handler = ({ token, match, lexer, }) =>
+      backtick_count = token.value.length
+      return @cfg.codespan_mode
+    #.......................................................................................................
+    exit_handler = ({ token, match, lexer, }) ->
+      if token.value.length is backtick_count
+        backtick_count = null
+        return '^'
+      ### TAINT setting `token.mk` should not have to be done manually ###
+      token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
+      return { token, }
+    #.......................................................................................................
+    info '^3532^', @cfg
+    return [
+      { mode: @cfg.mode,          tid: 'codespan',  jump: entry_handler,  pattern:  /(?<!`)`+(?!`)/u,   }
+      { mode: @cfg.codespan_mode, tid: 'codespan',  jump: exit_handler,   pattern:  /(?<!`)`+(?!`)/u,   }
+      { mode: @cfg.codespan_mode, tid: 'text',      jump: null,           pattern:  /(?:\\`|[^`])+/u,   }
+      ]
 
 #-----------------------------------------------------------------------------------------------------------
 add_star1 = ( lexer, base_mode ) ->
@@ -105,10 +141,14 @@ add_star1 = ( lexer, base_mode ) ->
 #===========================================================================================================
 new_hypedown_lexer = ( mode = 'plain' ) ->
   lexer = new Interlex { dotall: false, }
-  add_backslash_escape    lexer, 'base'
-  add_star1               lexer, 'base'
-  add_variable_codespans  lexer, 'base', 'codespan'
-  add_catchall            lexer, 'base'
+  standard_lexemes = new Standard_lexemes()
+  debug '^99-2^', standard_lexemes.backslash_escape
+  markdown_lexemes = new Markdown_lexemes()
+  debug '^99-4^', markdown_lexemes.variable_codespan
+  # add_backslash_escape    lexer, 'base'
+  # add_star1               lexer, 'base'
+  # add_variable_codespans  lexer, 'base', 'codespan'
+  # add_catchall            lexer, 'base'
   return lexer
 
 #===========================================================================================================
