@@ -1,7 +1,6 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, PATH, SQL, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, show, stamp, test, type_of, types, urge, validate, warn, whisper,
-    indexOf = [].indexOf;
+  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, show, stamp, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -13,16 +12,9 @@
   //...........................................................................................................
   test = require('../../../apps/guy-test');
 
-  PATH = require('path');
-
-  // FS                        = require 'fs'
   types = new (require('../../../apps/intertype')).Intertype();
 
   ({isa, equals, type_of, validate} = types);
-
-  SQL = String.raw;
-
-  guy = require('../../../apps/guy');
 
   H = require('../../../lib/helpers');
 
@@ -81,128 +73,97 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.toposort = function(T, done) {
-    var LTSORT, add_lexeme, antecedents, finalize, lexemes, subsequents, topograph;
-    // T?.halt_on_error()
-    LTSORT = require('../../../apps/ltsort');
-    topograph = LTSORT.new_graph({
-      loners: true
-    });
-    lexemes = [];
-    antecedents = [];
-    subsequents = [];
+  this.parse_stars_using_toposort = async function(T, done) {
+    var $, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
     //.........................................................................................................
-    add_lexeme = function(cfg) {
-      var after, before, d, i, j, len, len1, name;
-      cfg = {...{name, after, before}, ...cfg};
-      ({name, after, before} = cfg);
-      validate.nonempty.text(name);
-      if (after == null) {
-        after = [];
-      }
-      if (before == null) {
-        before = [];
-      }
-      if (!isa.list(after)) {
-        after = [after];
-      }
-      if (!isa.list(before)) {
-        before = [before];
-      }
-      if ((before.length === 0) && (after.length === 0)) {
-        LTSORT.add(topograph, name);
-      } else {
-        for (i = 0, len = after.length; i < len; i++) {
-          d = after[i];
-          if (d === '*') {
-            if (indexOf.call(subsequents, name) < 0) {
-              subsequents.push(name);
-            }
-            continue;
-          }
-          LTSORT.add(topograph, d, name);
-        }
-        for (j = 0, len1 = before.length; j < len1; j++) {
-          d = before[j];
-          if (d === '*') {
-            if (indexOf.call(antecedents, name) < 0) {
-              antecedents.unshift(name);
-            }
-            continue;
-          }
-          LTSORT.add(topograph, name, d);
-        }
-      }
-      return null;
+    new_toy_md_lexer = function(mode = 'plain') {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode,
+        tid: 'star1',
+        pattern: /\*{1}/u,
+        after: 'star2'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star2',
+        pattern: /\*{2}/u,
+        before: 'star1',
+        after: 'star3'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star3',
+        pattern: /\*{3}/u,
+        before: '*'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u,
+        before: '*'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'other',
+        pattern: /[^*\\]+/u,
+        after: '*'
+      });
+      //.........................................................................................................
+      return lexer;
     };
     //.........................................................................................................
-    finalize = function() {
-      var antecedent, i, idx, j, k, l, len, len1, len2, len3, name, names, ref, ref1, subsequent;
-      names = [...topograph.precedents.keys()];
-      for (idx = i = 0, len = antecedents.length; i < len; idx = ++i) {
-        antecedent = antecedents[idx];
-        help('^08-5^', antecedent, antecedents.slice(0, idx));
-        ref = [...names, ...antecedents.slice(0, idx), ...subsequents];
-        for (j = 0, len1 = ref.length; j < len1; j++) {
-          name = ref[j];
-          if (antecedent === name) {
-            continue;
+    probes_and_matchers = [["*abc*", "[md:star1,(0:1),='*'][md:other,(1:4),='abc'][md:star1,(4:5),='*'][md:$eof,(5:5),='']"], ['*abc\\*', "[md:star1,(0:1),='*'][md:other,(1:4),='abc'][md:escchr,(4:6),='\\\\*',chr:'*'][md:$eof,(6:6),='']", null], ['**abc**', "[md:star2,(0:2),='**'][md:other,(2:5),='abc'][md:star2,(5:7),='**'][md:$eof,(7:7),='']", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var lexer, result, result_rpr, t, tid;
+          lexer = new_toy_md_lexer('md');
+          if (T != null) {
+            T.eq((function() {
+              var results;
+              results = [];
+              for (tid in lexer.registry.md.lexemes) {
+                results.push(tid);
+              }
+              return results;
+            })(), ['star1', 'star2', 'star3', 'escchr', 'other']);
           }
-          LTSORT.add(topograph, antecedent, name);
-        }
-      }
-      for (idx = k = 0, len2 = subsequents.length; k < len2; idx = ++k) {
-        subsequent = subsequents[idx];
-        warn('^08-6^', subsequent, subsequents.slice(0, idx));
-        ref1 = [...names, ...subsequents.slice(0, idx), ...antecedents];
-        for (l = 0, len3 = ref1.length; l < len3; l++) {
-          name = ref1[l];
-          if (subsequent === name) {
-            continue;
+          result = lexer.run(probe);
+          if (T != null) {
+            T.eq((function() {
+              var results;
+              results = [];
+              for (tid in lexer.registry.md.lexemes) {
+                results.push(tid);
+              }
+              return results;
+            })(), ['escchr', 'star3', 'star2', 'star1', 'other']);
           }
-          LTSORT.add(topograph, name, subsequent);
-        }
-      }
-      return null;
-    };
-    //.........................................................................................................
-    add_lexeme({
-      name: 'getup',
-      before: '*'
-    });
-    add_lexeme({
-      name: 'brushteeth',
-      before: '*'
-    });
-    add_lexeme({
-      name: 'shop',
-      before: '*'
-    });
-    add_lexeme({
-      name: 'cook',
-      before: 'eat'
-    });
-    add_lexeme({
-      name: 'serve',
-      after: 'cook',
-      before: 'eat'
-    });
-    add_lexeme({
-      name: 'dishes',
-      after: '*'
-    });
-    add_lexeme({
-      name: 'sleep',
-      after: '*'
-    });
-    add_lexeme({
-      name: 'eat',
-      after: 'cook'
-    });
-    //.........................................................................................................
-    debug('^08-1^', {antecedents, subsequents});
-    finalize();
-    show(topograph);
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              results.push(lexer.rpr_token(t));
+            }
+            return results;
+          })()).join('');
+          //.....................................................................................................
+          return resolve(result_rpr);
+        });
+      });
+    }
     if (typeof done === "function") {
       done();
     }
@@ -212,11 +173,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return this.toposort();
+      return test(this.parse_stars_using_toposort);
     })();
   }
 
-  // test @
+  // @toposort()
+// test @
 
 }).call(this);
 
