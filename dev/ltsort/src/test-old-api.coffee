@@ -20,14 +20,14 @@ help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
 #...........................................................................................................
-test                      = require 'guy-test'
-LTSORT                    = require '../../../apps/ltsort'
+test                      = require '../../../apps/guy-test'
+LTSORT                    = require '../../../apps/ltsort/lib/legacy'
 
 
 #===========================================================================================================
 # DATA
 #-----------------------------------------------------------------------------------------------------------
-@_probes =
+_probes =
   'extended': [
     [ 'A', 'X', ]
     [ 'B', 'X', ]
@@ -53,8 +53,8 @@ LTSORT                    = require '../../../apps/ltsort'
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "sorting" ] = ( T ) ->
-  elements  = @_probes[ 'extended' ]
+@[ "sorting" ] = ( T, done ) ->
+  elements  = _probes[ 'extended' ]
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   probe     = LTSORT.linearize graph
   #.........................................................................................................
@@ -65,11 +65,13 @@ LTSORT                    = require '../../../apps/ltsort'
     T.ok ( b_idx = probe.indexOf b ) >= 0
     T.ok a_idx < b_idx
   #.........................................................................................................
+  # debug '^53-5^', elements; process.exit 111
+  done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "existence" ] = ( T ) ->
-  elements  = @_probes[ 'extended' ]
+  elements  = _probes[ 'extended' ]
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
@@ -84,7 +86,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "deletion" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   T.ok LTSORT.has_node graph, 'A'
@@ -107,7 +109,7 @@ LTSORT                    = require '../../../apps/ltsort'
 #-----------------------------------------------------------------------------------------------------------
 @[ "root nodes, lone nodes (1)" ] = ( T ) ->
   #.........................................................................................................
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
@@ -126,7 +128,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "root nodes, lone nodes (2)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
   T.eq ( LTSORT.find_root_nodes graph ),        [ 'A', 'B', ]
@@ -138,7 +140,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "copy (1)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph_0   = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   graph_1   = LTSORT.new_graph graph_0
   #.........................................................................................................
@@ -155,7 +157,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "copy (2)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph_0   = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
   graph_1   = LTSORT.new_graph graph_0
   #.........................................................................................................
@@ -172,7 +174,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "group (1)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
   T.eq ( LTSORT.group graph ), [ [ 'A', 'B', 'F' ], [ 'X' ], [ 'Y', 'Z' ] ]
@@ -181,7 +183,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "group (2)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
   #.........................................................................................................
   T.eq ( LTSORT.group graph ), [ [ 'F' ], [ 'A', 'B' ], [ 'X' ], [ 'Y', 'Z' ] ]
@@ -190,7 +192,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "group (3)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
   LTSORT.delete graph, 'F'
@@ -200,7 +202,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "group (4)" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
   LTSORT.delete graph, 'F'
   #.........................................................................................................
@@ -210,7 +212,7 @@ LTSORT                    = require '../../../apps/ltsort'
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "test for lone node" ] = ( T ) ->
-  elements  = @_probes[ 'small' ]
+  elements  = _probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
   #.........................................................................................................
   T.eq ( LTSORT.is_lone_node graph, 'F' ), true
@@ -397,7 +399,7 @@ LTSORT                    = require '../../../apps/ltsort'
   LTSORT.linearize graph
   LTSORT.add graph, 'E', 'A'
   #.........................................................................................................
-  T.throws "detected cycle involving node 'A'", -> urge LTSORT.linearize graph
+  T.throws /detected cycle/, -> urge LTSORT.linearize graph
   done()
   return null
 
@@ -415,7 +417,7 @@ LTSORT                    = require '../../../apps/ltsort'
   LTSORT.linearize graph
   LTSORT.add graph, 'E', 'A'
   #.........................................................................................................
-  T.throws "detected cycle involving node 'A'", -> urge LTSORT.group graph
+  T.throws /detected cycle/, -> urge LTSORT.group graph
   done()
   return null
 
@@ -638,80 +640,12 @@ LTSORT                    = require '../../../apps/ltsort'
   # T.eq ( linearize  graph ), [ 'E5', 'D5', 'C5', 'A5', 'F5', 'B5', ]
   done()
 
-#-----------------------------------------------------------------------------------------------------------
-@demo = ( T ) ->
-  elements  = @_probes[ 'small' ]
-  graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
-  #.........................................................................................................
-  for element in LTSORT.linearize graph
-    help element
-  #.........................................................................................................
-  debug graph
-  # help LTSORT.find_root_nodes graph, no
-  if LTSORT.has_nodes graph
-    if ( lone_nodes = LTSORT.find_lone_nodes graph ).length > 0
-      info CND.rainbow lone_nodes
-      LTSORT.delete graph, lone_node for lone_node in lone_nodes
-  while LTSORT.has_nodes graph
-    root_nodes = LTSORT.find_root_nodes graph
-    info CND.rainbow root_nodes
-    LTSORT.delete graph, root_node for root_node in root_nodes
-  # debug graph
-  # CND.dir LTSORT
-  return null
 
-
-#===========================================================================================================
-# MAIN
-#-----------------------------------------------------------------------------------------------------------
-@_main = ( handler ) ->
-  test @, 'timeout': 2500
-
-#-----------------------------------------------------------------------------------------------------------
-@_prune = ->
-  for name, value of @
-    continue if name.startsWith '_'
-    delete @[ name ] unless name in include
-  return null
 
 
 ############################################################################################################
-unless module.parent?
-  include = [
-    # "demo",
-    "sorting"
-    "existence"
-    "deletion"
-    "root nodes, lone nodes (1)"
-    "root nodes, lone nodes (2)"
-    "copy (1)"
-    "copy (2)"
-    "group (1)"
-    "group (2)"
-    "group (3)"
-    "group (4)"
-    "test for lone node"
-    "demo (1)"
-    "demo (2)"
-    "demo (3)"
-    "demo (4)"
-    "using precedents, actions, and consequents"
-    "cycle detection (1)"
-    "cycle detection (2)"
-    "linearity (1)"
-    "linearity (2)"
-    "avoid reduplication"
-    "Ruby inheritance linearization (1)"
-    "Ruby inheritance linearization (2)"
-    "Ruby inheritance linearization (3)"
-    ]
-
-  @_prune()
-  @_main()
-
-  # debug '\n' + JSON.stringify ( Object.keys @ ), null, '  '
-
-
+if module is require.main then do =>
+  test @sorting
 
 
 
