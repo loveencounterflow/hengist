@@ -19,15 +19,11 @@ GUY                       = require 'guy'
   log     }               = GUY.trm
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
-PATH                      = require 'path'
-# FS                        = require 'fs'
 types                     = new ( require '../../../apps/intertype' ).Intertype
 { isa
   equals
   type_of
   validate }              = types
-SQL                       = String.raw
-guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
 { DATOM }                 = require '../../../apps/datom'
 { new_datom
@@ -62,71 +58,50 @@ show = ( topograph ) ->
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@toposort = ( T, done ) ->
-  # T?.halt_on_error()
-  LTSORT                    = require '../../../apps/ltsort'
-  topograph                 = LTSORT.new_graph { loners: true, }
-  lexemes                   = []
-  antecedents               = []
-  subsequents               = []
+@parse_stars_using_toposort = ( T, done ) ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
   #.........................................................................................................
-  add_lexeme = ( cfg ) ->
-    cfg         = { { name, after, before, }..., cfg..., }
-    { name
-      after
-      before  } = cfg
-    validate.nonempty.text name
-    after      ?= []
-    before     ?= []
-    after       = [ after,  ] unless isa.list after
-    before      = [ before, ] unless isa.list before
-    if ( before.length is 0 ) and ( after.length is 0 )
-      LTSORT.add topograph, name
-    else
-      for d in after
-        if d is '*'
-          subsequents.push name unless name in subsequents
-          continue
-        LTSORT.add topograph, d, name
-      for d in before
-        if d is '*'
-          antecedents.unshift name unless name in antecedents
-          continue
-        LTSORT.add topograph, name, d
-    return null
+  new_toy_md_lexer = ( mode = 'plain' ) ->
+    lexer   = new Interlex { dotall: false, }
+    #.........................................................................................................
+    lexer.add_lexeme { mode, tid: 'star1',  pattern: /\*{1}/u, after: 'star2', }
+    lexer.add_lexeme { mode, tid: 'star2',  pattern: /\*{2}/u, before: 'star1', after: 'star3', }
+    lexer.add_lexeme { mode, tid: 'star3',  pattern: /\*{3}/u, before: '*', }
+    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, before: '*', }
+    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*\\]+/u, after: '*', }
+    #.........................................................................................................
+    return lexer
   #.........................................................................................................
-  finalize = ->
-    names = [ topograph.precedents.keys()..., ]
-    for antecedent, idx in antecedents
-      help '^08-5^', antecedent, antecedents[ ... idx ]
-      for name in [ names..., antecedents[ ... idx ]..., subsequents..., ]
-        continue if antecedent is name
-        LTSORT.add topograph, antecedent, name
-    for subsequent, idx in subsequents
-      warn '^08-6^', subsequent, subsequents[ ... idx ]
-      for name in [ names..., subsequents[ ... idx ]..., antecedents..., ]
-        continue if subsequent is name
-        LTSORT.add topograph, name, subsequent
-    return null
+  probes_and_matchers = [
+    [ "*abc*", "[md:star1,(0:1),='*'][md:other,(1:4),='abc'][md:star1,(4:5),='*'][md:$eof,(5:5),='']", ]
+    [ '*abc\\*', "[md:star1,(0:1),='*'][md:other,(1:4),='abc'][md:escchr,(4:6),='\\\\*',chr:'*'][md:$eof,(6:6),='']", null ]
+    [ '**abc**', "[md:star2,(0:2),='**'][md:other,(2:5),='abc'][md:star2,(5:7),='**'][md:$eof,(7:7),='']", null ]
+    ]
   #.........................................................................................................
-  add_lexeme { name: 'getup',       before: '*', }
-  add_lexeme { name: 'brushteeth',  before: '*', }
-  add_lexeme { name: 'shop',        before: '*', }
-  add_lexeme { name: 'cook',        before: 'eat', }
-  add_lexeme { name: 'serve', after: 'cook', before: 'eat', }
-  add_lexeme { name: 'dishes',      after: '*', }
-  add_lexeme { name: 'sleep',       after: '*', }
-  add_lexeme { name: 'eat',         after: 'cook', }
-  #.........................................................................................................
-  debug '^08-1^', { antecedents, subsequents, }
-  finalize()
-  show topograph
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new_toy_md_lexer 'md'
+      T?.eq ( tid for tid of lexer.registry.md.lexemes ), [ 'star1', 'star2', 'star3', 'escchr', 'other', ]
+      result      = lexer.run probe
+      T?.eq ( tid for tid of lexer.registry.md.lexemes ), [ 'escchr', 'star3', 'star2', 'star1', 'other' ]
+      result_rpr  = ( lexer.rpr_token t for t in result ).join ''
+      #.....................................................................................................
+      resolve result_rpr
   #.........................................................................................................
   done?()
   return null
 
 
+
+
 ############################################################################################################
 if require.main is module then do =>
-  @toposort()
+  test @parse_stars_using_toposort
+  # @toposort()
   # test @
