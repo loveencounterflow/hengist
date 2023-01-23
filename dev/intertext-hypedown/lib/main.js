@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, $parse_md_codespan, $parse_md_star, DATOM, GUY, H, Interlex, PATH, Pipeline, SQL, add_backslash_escape, add_catchall, add_star1, add_variable_codespans, after, alert, compose, debug, demo, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_hypedown_lexer, new_hypedown_parser, new_token, plain, praise, rpr, show_lexer_as_table, stamp, test, transforms, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
+  var $, $parse_md_codespan, $parse_md_star, DATOM, GUY, H, Interlex, Markdown_lexemes, PATH, Pipeline, SQL, Standard_lexemes, _Lexemes, add_star1, after, alert, compose, debug, demo, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_hypedown_lexer, new_hypedown_parser, new_token, plain, praise, rpr, show_lexer_as_table, stamp, test, transforms, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -82,70 +82,150 @@
 
   //===========================================================================================================
 
-  //-----------------------------------------------------------------------------------------------------------
-  add_backslash_escape = function(lexer, base_mode) {
-    lexer.add_lexeme({
-      mode: base_mode,
+  //===========================================================================================================
+  _Lexemes = class _Lexemes {
+    //---------------------------------------------------------------------------------------------------------
+    constructor(cfg) {
+      var i, len, lexeme, lx, ref1, subtype, tid, type;
+      GUY.props.hide(this, 'types', (require('../../../apps/intertext-lexer/lib/types')).get_base_types());
+      this.cfg = {
+        mode: 'std',
+        ...cfg
+      };
+      ref1 = Object.getOwnPropertyNames(this.constructor);
+      //.......................................................................................................
+      for (i = 0, len = ref1.length; i < len; i++) {
+        tid = ref1[i];
+        if (tid === 'length' || tid === 'name' || tid === 'prototype') {
+          continue;
+        }
+        lexeme = this.constructor[tid];
+        //.....................................................................................................
+        switch (type = this.types.type_of(lexeme)) {
+          case 'object':
+            this[tid] = {...this.cfg, ...lexeme};
+            break;
+          case 'list':
+            this[tid] = (function() {
+              var j, len1, results;
+              results = [];
+              for (j = 0, len1 = lexeme.length; j < len1; j++) {
+                lx = lexeme[j];
+                results.push({...this.cfg, ...lx});
+              }
+              return results;
+            }).call(this);
+            break;
+          //...................................................................................................
+          case 'function':
+            lexeme = lexeme.call(this);
+            switch (subtype = type_of(lexeme)) {
+              case 'object':
+                this[tid] = {...this.cfg, ...lexeme};
+                break;
+              case 'list':
+                this[tid] = (function() {
+                  var j, len1, results;
+                  results = [];
+                  for (j = 0, len1 = lexeme.length; j < len1; j++) {
+                    lx = lexeme[j];
+                    results.push({...this.cfg, ...lx});
+                  }
+                  return results;
+                }).call(this);
+                break;
+              default:
+                throw new Error(`^849687388^ expected an object or a list of objects, found a ${type}`);
+            }
+            break;
+          default:
+            //...................................................................................................
+            throw new Error(`^849687349^ expected an object or a function, found a ${type}`);
+        }
+      }
+      return void 0;
+    }
+
+  };
+
+  Standard_lexemes = (function() {
+    //===========================================================================================================
+    class Standard_lexemes extends _Lexemes {};
+
+    //---------------------------------------------------------------------------------------------------------
+    Standard_lexemes.backslash_escape = {
       tid: 'escchr',
       jump: null,
       pattern: /\\(?<chr>.)/u
-    });
-    return null;
-  };
+    };
 
-  //-----------------------------------------------------------------------------------------------------------
-  add_catchall = function(lexer, base_mode) {
-    lexer.add_lexeme({
-      mode: base_mode,
+    Standard_lexemes.catchall = {
       tid: 'other',
       jump: null,
       pattern: /[^*`\\]+/u
-    });
-    return null;
-  };
+    };
 
-  //-----------------------------------------------------------------------------------------------------------
-  add_variable_codespans = function(lexer, base_mode, own_mode) {
-    var backtick_count, entry_handler, exit_handler;
-    backtick_count = null;
-    //.......................................................................................................
-    entry_handler = function({token, match, lexer}) {
-      backtick_count = token.value.length;
-      return own_mode;
-    };
-    //.......................................................................................................
-    exit_handler = function({token, match, lexer}) {
-      if (token.value.length === backtick_count) {
-        backtick_count = null;
-        return '^';
-      }
-      token = lets(token, function(token) {
-        token.tid = 'text';
-        return token.mk = `${token.mode}:text`;
+    return Standard_lexemes;
+
+  }).call(this);
+
+  //===========================================================================================================
+  Markdown_lexemes = class Markdown_lexemes extends _Lexemes {
+    //---------------------------------------------------------------------------------------------------------
+    /* TAINT handle CFG format which in this case includes `codespan_mode` */
+    constructor(cfg) {
+      super({
+        codespan_mode: 'codespan',
+        ...cfg
       });
-      return {token};
-    };
-    //.......................................................................................................
-    lexer.add_lexeme({
-      mode: base_mode,
-      tid: 'codespan',
-      jump: entry_handler,
-      pattern: /(?<!`)`+(?!`)/u
-    });
-    lexer.add_lexeme({
-      mode: own_mode,
-      tid: 'codespan',
-      jump: exit_handler,
-      pattern: /(?<!`)`+(?!`)/u
-    });
-    lexer.add_lexeme({
-      mode: own_mode,
-      tid: 'text',
-      jump: null,
-      pattern: /(?:\\`|[^`])+/u
-    });
-    //.......................................................................................................
-    return null;
+      return void 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    static variable_codespan() {
+      var backtick_count, entry_handler, exit_handler;
+      backtick_count = null;
+      //.......................................................................................................
+      entry_handler = ({token, match, lexer}) => {
+        backtick_count = token.value.length;
+        return this.cfg.codespan_mode;
+      };
+      //.......................................................................................................
+      exit_handler = function({token, match, lexer}) {
+        if (token.value.length === backtick_count) {
+          backtick_count = null;
+          return '^';
+        }
+        token = lets(token, function(token) {
+          token.tid = 'text';
+          return token.mk = `${token.mode}:text`;
+        });
+        return {token};
+      };
+      //.......................................................................................................
+      info('^3532^', this.cfg);
+      return [
+        {
+          mode: this.cfg.mode,
+          tid: 'codespan',
+          jump: entry_handler,
+          pattern: /(?<!`)`+(?!`)/u
+        },
+        {
+          mode: this.cfg.codespan_mode,
+          tid: 'codespan',
+          jump: exit_handler,
+          pattern: /(?<!`)`+(?!`)/u
+        },
+        {
+          mode: this.cfg.codespan_mode,
+          tid: 'text',
+          jump: null,
+          pattern: /(?:\\`|[^`])+/u
+        }
+      ];
+    }
+
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -161,14 +241,18 @@
 
   //===========================================================================================================
   new_hypedown_lexer = function(mode = 'plain') {
-    var lexer;
+    var lexer, markdown_lexemes, standard_lexemes;
     lexer = new Interlex({
       dotall: false
     });
-    add_backslash_escape(lexer, 'base');
-    add_star1(lexer, 'base');
-    add_variable_codespans(lexer, 'base', 'codespan');
-    add_catchall(lexer, 'base');
+    standard_lexemes = new Standard_lexemes();
+    debug('^99-2^', standard_lexemes.backslash_escape);
+    markdown_lexemes = new Markdown_lexemes();
+    debug('^99-4^', markdown_lexemes.variable_codespan);
+    // add_backslash_escape    lexer, 'base'
+    // add_star1               lexer, 'base'
+    // add_variable_codespans  lexer, 'base', 'codespan'
+    // add_catchall            lexer, 'base'
     return lexer;
   };
 
