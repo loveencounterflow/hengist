@@ -84,66 +84,134 @@
 
   //===========================================================================================================
   _Lexemes = class _Lexemes {
+    /*
+    * lexemes declared as *static* members (i.e. as class attributes) will be compiled
+    * lexemes declared as *instance* members will be left as-is
+    * use prefix
+      `@lx_*` for string, regex, or object
+      `@lxs_*` for list of objects
+      `@get_lx_*()` for function that returns an object
+      `@get_lxs_*()` for function that returns list of objects
+    * TID (the lexeme's name) will default to the part after the prefix
+
+    ```coffee
+    class ClassWithStaticMethod
+      @staticProperty: 'someValue'
+      @staticMethod: () ->
+        return 'static method has been called.'
+    ```
+
+    ```js
+    class ClassWithStaticMethod {
+      static staticProperty = 'someValue';
+      static staticMethod() {
+        return 'static method has been called.'; } }
+    ```
+
+     */
     //---------------------------------------------------------------------------------------------------------
     constructor(cfg) {
-      var i, len, lexeme, lx, ref1, subtype, tid, type;
+      var k, lexeme_keys, ref1, v;
       GUY.props.hide(this, 'types', (require('../../../apps/intertext-lexer/lib/types')).get_base_types());
+      /* TAINT must separate `cfg` items for the instance from defaults for the lexeme */
       this.cfg = {
         mode: 'std',
         ...cfg
       };
-      ref1 = Object.getOwnPropertyNames(this.constructor);
-      //.......................................................................................................
-      for (i = 0, len = ref1.length; i < len; i++) {
-        tid = ref1[i];
-        if (tid === 'length' || tid === 'name' || tid === 'prototype') {
-          continue;
-        }
-        lexeme = this.constructor[tid];
-        //.....................................................................................................
-        switch (type = this.types.type_of(lexeme)) {
-          case 'object':
-            this[tid] = {...this.cfg, ...lexeme};
-            break;
-          case 'list':
-            this[tid] = (function() {
-              var j, len1, results;
-              results = [];
-              for (j = 0, len1 = lexeme.length; j < len1; j++) {
-                lx = lexeme[j];
-                results.push({...this.cfg, ...lx});
-              }
-              return results;
-            }).call(this);
-            break;
-          //...................................................................................................
-          case 'function':
-            lexeme = lexeme.call(this);
-            switch (subtype = type_of(lexeme)) {
-              case 'object':
-                this[tid] = {...this.cfg, ...lexeme};
-                break;
-              case 'list':
-                this[tid] = (function() {
-                  var j, len1, results;
-                  results = [];
-                  for (j = 0, len1 = lexeme.length; j < len1; j++) {
-                    lx = lexeme[j];
-                    results.push({...this.cfg, ...lx});
-                  }
-                  return results;
-                }).call(this);
-                break;
-              default:
-                throw new Error(`^849687388^ expected an object or a list of objects, found a ${type}`);
-            }
-            break;
-          default:
-            //...................................................................................................
-            throw new Error(`^849687349^ expected an object or a function, found a ${type}`);
+      this._lexeme_default = {...this.types.registry.ilx_add_lexeme_cfg.default};
+      lexeme_keys = new Set(Object.keys(this._lexeme_default));
+      ref1 = this.cfg;
+      for (k in ref1) {
+        v = ref1[k];
+        if (lexeme_keys.has(k)) {
+          this._lexeme_default[k] = v;
         }
       }
+      this._compile_lexemes();
       return void 0;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _compile_list_of_lexemes(tid, list_of_lexemes) {
+      var idx, lexeme;
+      return (function() {
+        var i, len, results;
+        results = [];
+        for (idx = i = 0, len = list_of_lexemes.length; i < len; idx = ++i) {
+          lexeme = list_of_lexemes[idx];
+          results.push(this._compile_lexeme(`${tid}_${idx + 1}`, lexeme));
+        }
+        return results;
+      }).call(this);
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _compile_lexeme(tid, lexeme) {
+      if (this.types.isa.ilx_pattern(lexeme)) {
+        lexeme = {
+          tid,
+          pattern: lexeme
+        };
+      }
+      if (this.types.isa.object(lexeme)) {
+        lexeme = {...this._lexeme_default, ...lexeme};
+      }
+      this.types.validate.ilx_add_lexeme_cfg(lexeme);
+      return lexeme;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _compile_lexemes() {
+      var error, get, i, is_function, len, lexeme, lx_type, match, number, ref1, tid, xtid;
+      ref1 = Object.getOwnPropertyNames(this.constructor);
+      for (i = 0, len = ref1.length; i < len; i++) {
+        xtid = ref1[i];
+        if ((match = xtid.match(/^(?<get>get_|)(?<number>lxs?_)(?<tid>.+)$/)) == null) {
+          continue;
+        }
+        ({get, number, tid} = match.groups);
+        is_function = get !== '';
+        number = number === 'lx_' ? 'singular' : 'plural';
+        lexeme = this.constructor[xtid];
+        lx_type = this.types.type_of(lexeme);
+        urge('^324^', {xtid, tid, number, lexeme});
+        try {
+          if (is_function) {
+            null;
+          } else {
+            if (number === 'singular') {
+              if (lx_type === 'list') {
+                throw new Error(`^238947^ must use prefix 'lxs_' for list of lexemes; got ${rpr(xtid)}`);
+              }
+              lexeme = this._compile_lexeme(tid, lexeme);
+            } else {
+              lexeme = this._compile_list_of_lexemes(tid, lexeme);
+            }
+          }
+        } catch (error1) {
+          error = error1;
+          if (error.constructor.name !== 'Intertype_validation_error') {
+            throw error;
+          }
+          // error.message
+          throw error;
+        }
+        debug('^2124^', lexeme);
+      }
+      // #.....................................................................................................
+      // switch type = @types.type_of lexeme
+      //   when 'object' then @[ tid ] = { @cfg..., lexeme..., }
+      //   when 'list'   then @[ tid ] = ( { @cfg..., lx..., } for lx in lexeme )
+      //   #...................................................................................................
+      //   when 'function'
+      //     lexeme = lexeme.call @
+      //     switch subtype = type_of lexeme
+      //       when 'object' then  @[ tid ] = lexeme ### NOTE lexemes returned by functions should be complete ###
+      //       when 'list'   then  @[ tid ] = lexeme ### NOTE lexemes returned by functions should be complete ###
+      //       else throw new Error "^849687388^ expected an object or a list of objects, found a #{type}"
+      //   #...................................................................................................
+      //   else throw new Error "^849687349^ expected an object or a function, found a #{type}"
+      return null;
     }
 
   };
@@ -153,17 +221,23 @@
     class Standard_lexemes extends _Lexemes {};
 
     //---------------------------------------------------------------------------------------------------------
-    Standard_lexemes.backslash_escape = {
+    Standard_lexemes.lx_backslash_escape = {
       tid: 'escchr',
       jump: null,
       pattern: /\\(?<chr>.)/u
     };
 
-    Standard_lexemes.catchall = {
+    Standard_lexemes.lx_catchall = {
       tid: 'other',
       jump: null,
       pattern: /[^*`\\]+/u
     };
+
+    Standard_lexemes.lx_foo = 'foo';
+
+    Standard_lexemes.lx_bar = /bar/;
+
+    Standard_lexemes.lxs_something = ['foo', /bar/, 'baz'];
 
     return Standard_lexemes;
 
@@ -182,7 +256,7 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    static variable_codespan() {
+    static get_lxs_variable_codespan(cfg) {
       var backtick_count, entry_handler, exit_handler;
       backtick_count = null;
       //.......................................................................................................
@@ -241,14 +315,15 @@
 
   //===========================================================================================================
   new_hypedown_lexer = function(mode = 'plain') {
-    var lexer, markdown_lexemes, standard_lexemes;
+    var lexer, standard_lexemes;
     lexer = new Interlex({
       dotall: false
     });
     standard_lexemes = new Standard_lexemes();
-    debug('^99-2^', standard_lexemes.backslash_escape);
-    markdown_lexemes = new Markdown_lexemes();
-    debug('^99-4^', markdown_lexemes.variable_codespan);
+    process.exit(111);
+    // debug '^99-2^', standard_lexemes.backslash_escape
+    // markdown_lexemes = new Markdown_lexemes()
+    // debug '^99-4^', markdown_lexemes.variable_codespan
     // add_backslash_escape    lexer, 'base'
     // add_star1               lexer, 'base'
     // add_variable_codespans  lexer, 'base', 'codespan'
