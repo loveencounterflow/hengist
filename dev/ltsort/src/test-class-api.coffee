@@ -100,14 +100,14 @@ show = ( topograph ) ->
   g.add { name: 'getup',                                    }
   g.add { name: 'brushteeth',                               }
   g.add { name: 'shop',                                     }
-  g.add { name: 'cook',                   before: 'eat',    }
-  g.add { name: 'serve',  after: 'cook',  before: 'eat',    }
-  g.add { name: 'dishes', after: 'eat',   before: 'sleep',  }
+  g.add { name: 'cook',                   precedes: 'eat',    }
+  g.add { name: 'serve',  needs: 'cook',  precedes: 'eat',    }
+  g.add { name: 'dishes', needs: 'eat',   precedes: 'sleep',  }
   g.add { name: 'loner1',                                   }
   g.add { name: 'loner2',                                   }
   g.add { name: 'loner3',                                   }
   g.add { name: 'sleep',                                    }
-  g.add { name: 'eat',    after: [ 'cook', 'shop', ],       }
+  g.add { name: 'eat',    needs: [ 'cook', 'shop', ],       }
   #.........................................................................................................
   do ->
     result      = g.linearize()
@@ -124,14 +124,14 @@ show = ( topograph ) ->
   { Ltsort }  = require '../../../apps/ltsort'
   g           = new Ltsort()
   #.........................................................................................................
-  g.add { name: 'cook',                       before: 'eat',  }
-  g.add { name: 'serve',      after: 'cook',  before: 'eat',  }
-  g.add { name: 'eat',        after: [ 'cook', 'shop', ],     }
-  g.add { name: 'shop',                       before: '*',    }
-  g.add { name: 'brushteeth',                 before: '*',    }
-  g.add { name: 'getup',                      before: '*',    }
-  g.add { name: 'dishes',     after: '*',                     }
-  g.add { name: 'sleep',      after: '*',                     }
+  g.add { name: 'cook',                       precedes: 'eat',  }
+  g.add { name: 'serve',      needs: 'cook',  precedes: 'eat',  }
+  g.add { name: 'eat',        needs: [ 'cook', 'shop', ],     }
+  g.add { name: 'shop',                       precedes: '*',    }
+  g.add { name: 'brushteeth',                 precedes: '*',    }
+  g.add { name: 'getup',                      precedes: '*',    }
+  g.add { name: 'dishes',     needs: '*',                     }
+  g.add { name: 'sleep',      needs: '*',                     }
   g.add { name: 'loner1',                                     }
   g.add { name: 'loner2',                                     }
   g.add { name: 'loner3',                                     }
@@ -151,15 +151,15 @@ show = ( topograph ) ->
   { Ltsort }  = require '../../../apps/ltsort'
   #.........................................................................................................
   g           = new Ltsort()
-  g.add { name: 't1',   before: '*',    }
-  g.add { name: 't2',   before: '*',    }
-  g.add { name: 't3',   before: '*',    }
+  g.add { name: 't1',   precedes: '*',    }
+  g.add { name: 't2',   precedes: '*',    }
+  g.add { name: 't3',   precedes: '*',    }
   g.add { name: 'middle',               }
   T?.eq g.linearize(),  [ 't3', 't2', 't1', 'middle' ]
-  g.add { name: 'bully-t3-before', before: 't3',  }
-  g.add { name: 'bully-t3-after', after: 't3',  }
+  g.add { name: 'bully-t3-precedes', precedes: 't3',  }
+  g.add { name: 'bully-t3-needs', needs: 't3',  }
   debug '^23-1^', g.precedents
-  T?.eq ( g.linearize() ), [ 'bully-t3-before', 't3', 't2', 't1', 'bully-t3-after', 'middle' ]
+  T?.eq ( g.linearize() ), [ 'bully-t3-precedes', 't3', 't2', 't1', 'bully-t3-needs', 'middle' ]
   #.........................................................................................................
   done?()
 
@@ -169,16 +169,16 @@ show = ( topograph ) ->
   { Ltsort }  = require '../../../apps/ltsort'
   #.........................................................................................................
   g           = new Ltsort()
-  g.add { name: 't3',   after: '*',    }
-  g.add { name: 't2',   after: '*',    }
-  g.add { name: 't1',   after: '*',    }
+  g.add { name: 't3',   needs: '*',    }
+  g.add { name: 't2',   needs: '*',    }
+  g.add { name: 't1',   needs: '*',    }
   g.add { name: 'middle',               }
   T?.eq ( g.linearize() ), [ 't3', 't2', 't1', 'middle', ]
-  g.add { name: 'middle', after: 't3', before: 't2', }
+  g.add { name: 'middle', needs: 't3', precedes: 't2', }
   T?.eq ( g.linearize() ), [ 't3', 'middle', 't2', 't1', ]
-  g.add { name: 'bully-t1-after', after: 't1',  }
-  g.add { name: 'bully-t1-before', before: 't1',  }
-  T?.eq ( g.linearize() ), [ 't3', 'middle', 't2', 'bully-t1-before', 't1', 'bully-t1-after' ]
+  g.add { name: 'bully-t1-needs', needs: 't1',  }
+  g.add { name: 'bully-t1-precedes', precedes: 't1',  }
+  T?.eq ( g.linearize() ), [ 't3', 'middle', 't2', 'bully-t1-precedes', 't1', 'bully-t1-needs' ]
   #.........................................................................................................
   done?()
 
@@ -188,13 +188,13 @@ show = ( topograph ) ->
   { Ltsort }  = require '../../../apps/ltsort'
   #.........................................................................................................
   g           = new Ltsort()
-  g.add { name: 'top3',     before: '*',  }
-  g.add { name: 'top2',     before: '*',  }
-  g.add { name: 'top1',     before: '*',  }
-  g.add { name: 'bottom3',  after: '*',   }
-  g.add { name: 'bottom2',  after: '*',   }
-  g.add { name: 'bottom1',  after: '*',   }
-  g.add { name: 'middle',   after: 'top3', before: 'bottom3', }
+  g.add { name: 'top3',     precedes: '*',  }
+  g.add { name: 'top2',     precedes: '*',  }
+  g.add { name: 'top1',     precedes: '*',  }
+  g.add { name: 'bottom3',  needs: '*',   }
+  g.add { name: 'bottom2',  needs: '*',   }
+  g.add { name: 'bottom1',  needs: '*',   }
+  g.add { name: 'middle',   needs: 'top3', precedes: 'bottom3', }
   T?.eq g.linearize(),  [ 'top1', 'top2', 'top3', 'middle', 'bottom3', 'bottom2', 'bottom1' ]
   #.........................................................................................................
   done?()

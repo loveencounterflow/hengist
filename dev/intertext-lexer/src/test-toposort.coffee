@@ -70,11 +70,11 @@ show = ( topograph ) ->
   new_toy_md_lexer = ( mode = 'plain' ) ->
     lexer   = new Interlex { dotall: false, }
     #.........................................................................................................
-    lexer.add_lexeme { mode, tid: 'star1',  pattern: /\*{1}/u, after: 'star2', }
-    lexer.add_lexeme { mode, tid: 'star2',  pattern: /\*{2}/u, before: 'star1', after: 'star3', }
-    lexer.add_lexeme { mode, tid: 'star3',  pattern: /\*{3}/u, before: '*', }
-    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, before: '*', }
-    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*\\]+/u, after: '*', }
+    lexer.add_lexeme { mode, tid: 'star1',  pattern: /\*{1}/u, needs: 'star2', }
+    lexer.add_lexeme { mode, tid: 'star2',  pattern: /\*{2}/u, precedes: 'star1', needs: 'star3', }
+    lexer.add_lexeme { mode, tid: 'star3',  pattern: /\*{3}/u, precedes: '*', }
+    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, precedes: '*', }
+    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*\\]+/u, needs: '*', }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
