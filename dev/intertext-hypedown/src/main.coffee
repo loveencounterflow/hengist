@@ -65,18 +65,25 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
 
 
 #===========================================================================================================
-class Standard_lexemes extends Syntax
+class Standard_sx extends Syntax
+
+  #---------------------------------------------------------------------------------------------------------
+  @mode: 'standard'
 
   #---------------------------------------------------------------------------------------------------------
   @lx_backslash_escape:  { tid: 'escchr', jump: null, pattern: /\\(?<chr>.)/u, }
   @lx_catchall:          { tid: 'other',  jump: null, pattern: /[^*`\\]+/u, }
   @lx_foo: 'foo'
   @lx_bar: /bar/
-  # @lxs_something: [ 'foo', /bar/, 'baz', ]
+  @lx_something: [ 'foo', /bar/, 'baz', ]
+  @lx_xxx: -> 'xxx'
 
 
 #===========================================================================================================
-class Markdown_lexemes extends Syntax
+class Markdown_sx extends Syntax
+
+  #---------------------------------------------------------------------------------------------------------
+  @mode: 'md'
 
   #---------------------------------------------------------------------------------------------------------
   ### TAINT handle CFG format which in this case includes `codespan_mode` ###
@@ -85,7 +92,7 @@ class Markdown_lexemes extends Syntax
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  @get_lxs_variable_codespan: ( cfg ) ->
+  @lx_variable_codespan: ( cfg ) ->
     backtick_count  = null
     #.......................................................................................................
     entry_handler = ({ token, match, lexer, }) =>
@@ -100,7 +107,7 @@ class Markdown_lexemes extends Syntax
       token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
       return { token, }
     #.......................................................................................................
-    info '^3532^', @cfg
+    # info '^3531^', @cfg
     return [
       { mode: @cfg.mode,          tid: 'codespan',  jump: entry_handler,  pattern:  /(?<!`)`+(?!`)/u,   }
       { mode: @cfg.codespan_mode, tid: 'codespan',  jump: exit_handler,   pattern:  /(?<!`)`+(?!`)/u,   }
@@ -115,14 +122,25 @@ add_star1 = ( lexer, base_mode ) ->
 
 #===========================================================================================================
 new_hypedown_lexer = ( mode = 'plain' ) ->
-  lexer = new Interlex { dotall: false, }
-  standard_lexemes = new Standard_lexemes()
-  debug '^3534^', ( k for k of Standard_lexemes )
-  debug '^3534^', ( k for k of standard_lexemes )
+  lexer             = new Interlex { dotall: false, }
+  standard_sx       = new Standard_sx()
+  info '^35-1^', standard_sx
+  markdown_sx       = new Markdown_sx { mode: 'markdown', codespan_mode: 'cspan', }
+  lexemes_lst       = []
+  standard_sx.add_lexemes lexemes_lst
+  info '^35-1^', standard_sx
+  markdown_sx.add_lexemes lexemes_lst
+  info '^35-2^', rpr lexeme for lexeme in lexemes_lst
+  lexemes_obj       = {}
+  standard_sx.add_lexemes lexemes_obj
+  markdown_sx.add_lexemes lexemes_obj
+  info '^35-3^', ( k.padEnd 30 ), ( GUY.trm.gold lexeme ) for k, lexeme of lexemes_obj
+  info '^35-4^', standard_sx
+  standard_sx.add_lexemes()
+  info '^35-6^', standard_sx
   process.exit 111
-  # debug '^99-2^', standard_lexemes.backslash_escape
-  # markdown_lexemes = new Markdown_lexemes()
-  # debug '^99-4^', markdown_lexemes.variable_codespan
+  # debug '^99-2^', standard_sx.backslash_escape
+  # debug '^99-4^', markdown_sx.variable_codespan
   # add_backslash_escape    lexer, 'base'
   # add_star1               lexer, 'base'
   # add_variable_codespans  lexer, 'base', 'codespan'
