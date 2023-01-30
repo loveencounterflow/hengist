@@ -115,72 +115,64 @@
 
   }).call(this);
 
-  Markdown_sx = (function() {
-    //===========================================================================================================
-    class Markdown_sx extends Syntax {
-      //---------------------------------------------------------------------------------------------------------
-      /* TAINT handle CFG format which in this case includes `codespan_mode` */
-      constructor(cfg) {
-        super({
-          codespan_mode: 'codespan',
-          ...cfg
-        });
-        return void 0;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      static lx_variable_codespan(cfg) {
-        var backtick_count, entry_handler, exit_handler;
-        backtick_count = null;
-        //.......................................................................................................
-        entry_handler = ({token, match, lexer}) => {
-          backtick_count = token.value.length;
-          return this.cfg.codespan_mode;
-        };
-        //.......................................................................................................
-        exit_handler = function({token, match, lexer}) {
-          if (token.value.length === backtick_count) {
-            backtick_count = null;
-            return '^';
-          }
-          token = lets(token, function(token) {
-            token.tid = 'text';
-            return token.mk = `${token.mode}:text`;
-          });
-          return {token};
-        };
-        return [
-          {
-            //.......................................................................................................
-            // info '^3531^', @cfg
-            mode: this.cfg.mode,
-            tid: 'codespan',
-            jump: entry_handler,
-            pattern: /(?<!`)`+(?!`)/u
-          },
-          {
-            mode: this.cfg.codespan_mode,
-            tid: 'codespan',
-            jump: exit_handler,
-            pattern: /(?<!`)`+(?!`)/u
-          },
-          {
-            mode: this.cfg.codespan_mode,
-            tid: 'text',
-            jump: null,
-            pattern: /(?:\\`|[^`])+/u
-          }
-        ];
-      }
-
-    };
+  //===========================================================================================================
+  Markdown_sx = class Markdown_sx extends Syntax {
+    //---------------------------------------------------------------------------------------------------------
+    /* TAINT handle CFG format which in this case includes `codespan_mode` */
+    constructor(cfg) {
+      super({
+        codespan_mode: 'codespan',
+        ...cfg
+      });
+      return void 0;
+    }
 
     //---------------------------------------------------------------------------------------------------------
-    Markdown_sx.mode = 'md';
+    static lx_variable_codespan(cfg) {
+      var backtick_count, entry_handler, exit_handler;
+      backtick_count = null;
+      //.......................................................................................................
+      entry_handler = ({token, match, lexer}) => {
+        backtick_count = token.value.length;
+        return this.cfg.codespan_mode;
+      };
+      //.......................................................................................................
+      exit_handler = function({token, match, lexer}) {
+        if (token.value.length === backtick_count) {
+          backtick_count = null;
+          return '^';
+        }
+        token = lets(token, function(token) {
+          token.tid = 'text';
+          return token.mk = `${token.mode}:text`;
+        });
+        return {token};
+      };
+      return [
+        {
+          //.......................................................................................................
+          // info '^3531^', @cfg
+          mode: this.cfg.mode,
+          tid: 'codespan',
+          jump: entry_handler,
+          pattern: /(?<!`)`+(?!`)/u
+        },
+        {
+          mode: this.cfg.codespan_mode,
+          tid: 'codespan',
+          jump: exit_handler,
+          pattern: /(?<!`)`+(?!`)/u
+        },
+        {
+          mode: this.cfg.codespan_mode,
+          tid: 'text',
+          jump: null,
+          pattern: /(?:\\`|[^`])+/u
+        }
+      ];
+    }
 
-    return Markdown_sx;
-
-  }).call(this);
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   add_star1 = function(lexer, base_mode) {
@@ -195,14 +187,14 @@
 
   //===========================================================================================================
   new_hypedown_lexer = function(mode = 'plain') {
-    var i, k, len, lexeme, lexemes_lst, lexemes_obj, lexer, markdown_sx, standard_sx;
+    var d, i, j, k, len, len1, lexeme, lexemes_lst, lexemes_obj, lexer, markdown_sx, ref1, standard_sx;
     lexer = new Interlex({
       dotall: false
     });
     standard_sx = new Standard_sx();
     info('^35-1^', standard_sx);
     markdown_sx = new Markdown_sx({
-      mode: 'markdown',
+      mode: 'standard',
       codespan_mode: 'cspan'
     });
     lexemes_lst = [];
@@ -223,6 +215,15 @@
     info('^35-4^', standard_sx);
     standard_sx.add_lexemes();
     info('^35-6^', standard_sx);
+    for (j = 0, len1 = lexemes_lst.length; j < len1; j++) {
+      lexeme = lexemes_lst[j];
+      lexer.add_lexeme(lexeme);
+    }
+    ref1 = lexer.walk("`helo` world");
+    for (d of ref1) {
+      // debug '^35-1^', lexer.registry
+      help('^35-1^', d);
+    }
     process.exit(111);
     // debug '^99-2^', standard_sx.backslash_escape
     // debug '^99-4^', markdown_sx.variable_codespan
