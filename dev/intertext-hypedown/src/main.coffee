@@ -83,9 +83,6 @@ class Standard_sx extends Syntax
 class Markdown_sx extends Syntax
 
   #---------------------------------------------------------------------------------------------------------
-  @mode: 'md'
-
-  #---------------------------------------------------------------------------------------------------------
   ### TAINT handle CFG format which in this case includes `codespan_mode` ###
   constructor: ( cfg ) ->
     super { codespan_mode: 'codespan', cfg..., }
@@ -125,7 +122,7 @@ new_hypedown_lexer = ( mode = 'plain' ) ->
   lexer             = new Interlex { dotall: false, }
   standard_sx       = new Standard_sx()
   info '^35-1^', standard_sx
-  markdown_sx       = new Markdown_sx { mode: 'markdown', codespan_mode: 'cspan', }
+  markdown_sx       = new Markdown_sx { mode: 'standard', codespan_mode: 'cspan', }
   lexemes_lst       = []
   standard_sx.add_lexemes lexemes_lst
   info '^35-1^', standard_sx
@@ -138,6 +135,9 @@ new_hypedown_lexer = ( mode = 'plain' ) ->
   info '^35-4^', standard_sx
   standard_sx.add_lexemes()
   info '^35-6^', standard_sx
+  lexer.add_lexeme lexeme for lexeme in lexemes_lst
+  # debug '^35-1^', lexer.registry
+  help '^35-1^', d for d from lexer.walk "`helo` world"
   process.exit 111
   # debug '^99-2^', standard_sx.backslash_escape
   # debug '^99-4^', markdown_sx.variable_codespan
