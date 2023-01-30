@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $, $parse_md_codespan, $parse_md_star, DATOM, GUY, H, Interlex, Markdown_lexemes, PATH, Pipeline, SQL, Standard_lexemes, Syntax, add_star1, after, alert, compose, debug, demo, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_hypedown_lexer, new_hypedown_parser, new_token, plain, praise, rpr, show_lexer_as_table, stamp, test, transforms, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
+  var $, $parse_md_codespan, $parse_md_star, DATOM, GUY, H, Interlex, Markdown_sx, PATH, Pipeline, SQL, Standard_sx, Syntax, add_star1, after, alert, compose, debug, demo, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_hypedown_lexer, new_hypedown_parser, new_token, plain, praise, rpr, show_lexer_as_table, stamp, test, transforms, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -80,91 +80,107 @@
     });
   };
 
-  Standard_lexemes = (function() {
+  Standard_sx = (function() {
     //===========================================================================================================
-    class Standard_lexemes extends Syntax {};
+    class Standard_sx extends Syntax {
+      static lx_xxx() {
+        return 'xxx';
+      }
+
+    };
 
     //---------------------------------------------------------------------------------------------------------
-    Standard_lexemes.lx_backslash_escape = {
+    Standard_sx.mode = 'standard';
+
+    //---------------------------------------------------------------------------------------------------------
+    Standard_sx.lx_backslash_escape = {
       tid: 'escchr',
       jump: null,
       pattern: /\\(?<chr>.)/u
     };
 
-    Standard_lexemes.lx_catchall = {
+    Standard_sx.lx_catchall = {
       tid: 'other',
       jump: null,
       pattern: /[^*`\\]+/u
     };
 
-    Standard_lexemes.lx_foo = 'foo';
+    Standard_sx.lx_foo = 'foo';
 
-    Standard_lexemes.lx_bar = /bar/;
+    Standard_sx.lx_bar = /bar/;
 
-    return Standard_lexemes;
+    Standard_sx.lx_something = ['foo', /bar/, 'baz'];
+
+    return Standard_sx;
 
   }).call(this);
 
-  // @lxs_something: [ 'foo', /bar/, 'baz', ]
-
+  Markdown_sx = (function() {
     //===========================================================================================================
-  Markdown_lexemes = class Markdown_lexemes extends Syntax {
-    //---------------------------------------------------------------------------------------------------------
-    /* TAINT handle CFG format which in this case includes `codespan_mode` */
-    constructor(cfg) {
-      super({
-        codespan_mode: 'codespan',
-        ...cfg
-      });
-      return void 0;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    static get_lxs_variable_codespan(cfg) {
-      var backtick_count, entry_handler, exit_handler;
-      backtick_count = null;
-      //.......................................................................................................
-      entry_handler = ({token, match, lexer}) => {
-        backtick_count = token.value.length;
-        return this.cfg.codespan_mode;
-      };
-      //.......................................................................................................
-      exit_handler = function({token, match, lexer}) {
-        if (token.value.length === backtick_count) {
-          backtick_count = null;
-          return '^';
-        }
-        token = lets(token, function(token) {
-          token.tid = 'text';
-          return token.mk = `${token.mode}:text`;
+    class Markdown_sx extends Syntax {
+      //---------------------------------------------------------------------------------------------------------
+      /* TAINT handle CFG format which in this case includes `codespan_mode` */
+      constructor(cfg) {
+        super({
+          codespan_mode: 'codespan',
+          ...cfg
         });
-        return {token};
-      };
-      //.......................................................................................................
-      info('^3532^', this.cfg);
-      return [
-        {
-          mode: this.cfg.mode,
-          tid: 'codespan',
-          jump: entry_handler,
-          pattern: /(?<!`)`+(?!`)/u
-        },
-        {
-          mode: this.cfg.codespan_mode,
-          tid: 'codespan',
-          jump: exit_handler,
-          pattern: /(?<!`)`+(?!`)/u
-        },
-        {
-          mode: this.cfg.codespan_mode,
-          tid: 'text',
-          jump: null,
-          pattern: /(?:\\`|[^`])+/u
-        }
-      ];
-    }
+        return void 0;
+      }
 
-  };
+      //---------------------------------------------------------------------------------------------------------
+      static lx_variable_codespan(cfg) {
+        var backtick_count, entry_handler, exit_handler;
+        backtick_count = null;
+        //.......................................................................................................
+        entry_handler = ({token, match, lexer}) => {
+          backtick_count = token.value.length;
+          return this.cfg.codespan_mode;
+        };
+        //.......................................................................................................
+        exit_handler = function({token, match, lexer}) {
+          if (token.value.length === backtick_count) {
+            backtick_count = null;
+            return '^';
+          }
+          token = lets(token, function(token) {
+            token.tid = 'text';
+            return token.mk = `${token.mode}:text`;
+          });
+          return {token};
+        };
+        return [
+          {
+            //.......................................................................................................
+            // info '^3531^', @cfg
+            mode: this.cfg.mode,
+            tid: 'codespan',
+            jump: entry_handler,
+            pattern: /(?<!`)`+(?!`)/u
+          },
+          {
+            mode: this.cfg.codespan_mode,
+            tid: 'codespan',
+            jump: exit_handler,
+            pattern: /(?<!`)`+(?!`)/u
+          },
+          {
+            mode: this.cfg.codespan_mode,
+            tid: 'text',
+            jump: null,
+            pattern: /(?:\\`|[^`])+/u
+          }
+        ];
+      }
+
+    };
+
+    //---------------------------------------------------------------------------------------------------------
+    Markdown_sx.mode = 'md';
+
+    return Markdown_sx;
+
+  }).call(this);
 
   //-----------------------------------------------------------------------------------------------------------
   add_star1 = function(lexer, base_mode) {
@@ -179,31 +195,37 @@
 
   //===========================================================================================================
   new_hypedown_lexer = function(mode = 'plain') {
-    var k, lexer, standard_lexemes;
+    var i, k, len, lexeme, lexemes_lst, lexemes_obj, lexer, markdown_sx, standard_sx;
     lexer = new Interlex({
       dotall: false
     });
-    standard_lexemes = new Standard_lexemes();
-    debug('^3534^', (function() {
-      var results;
-      results = [];
-      for (k in Standard_lexemes) {
-        results.push(k);
-      }
-      return results;
-    })());
-    debug('^3534^', (function() {
-      var results;
-      results = [];
-      for (k in standard_lexemes) {
-        results.push(k);
-      }
-      return results;
-    })());
+    standard_sx = new Standard_sx();
+    info('^35-1^', standard_sx);
+    markdown_sx = new Markdown_sx({
+      mode: 'markdown',
+      codespan_mode: 'cspan'
+    });
+    lexemes_lst = [];
+    standard_sx.add_lexemes(lexemes_lst);
+    info('^35-1^', standard_sx);
+    markdown_sx.add_lexemes(lexemes_lst);
+    for (i = 0, len = lexemes_lst.length; i < len; i++) {
+      lexeme = lexemes_lst[i];
+      info('^35-2^', rpr(lexeme));
+    }
+    lexemes_obj = {};
+    standard_sx.add_lexemes(lexemes_obj);
+    markdown_sx.add_lexemes(lexemes_obj);
+    for (k in lexemes_obj) {
+      lexeme = lexemes_obj[k];
+      info('^35-3^', k.padEnd(30), GUY.trm.gold(lexeme));
+    }
+    info('^35-4^', standard_sx);
+    standard_sx.add_lexemes();
+    info('^35-6^', standard_sx);
     process.exit(111);
-    // debug '^99-2^', standard_lexemes.backslash_escape
-    // markdown_lexemes = new Markdown_lexemes()
-    // debug '^99-4^', markdown_lexemes.variable_codespan
+    // debug '^99-2^', standard_sx.backslash_escape
+    // debug '^99-4^', markdown_sx.variable_codespan
     // add_backslash_escape    lexer, 'base'
     // add_star1               lexer, 'base'
     // add_variable_codespans  lexer, 'base', 'codespan'

@@ -90,32 +90,32 @@
         mode,
         tid: 'star1',
         pattern: /\*{1}/u,
-        after: 'star2'
+        needs: 'star2'
       });
       lexer.add_lexeme({
         mode,
         tid: 'star2',
         pattern: /\*{2}/u,
-        before: 'star1',
-        after: 'star3'
+        precedes: 'star1',
+        needs: 'star3'
       });
       lexer.add_lexeme({
         mode,
         tid: 'star3',
         pattern: /\*{3}/u,
-        before: '*'
+        precedes: '*'
       });
       lexer.add_lexeme({
         mode,
         tid: 'escchr',
         pattern: /\\(?<chr>.)/u,
-        before: '*'
+        precedes: '*'
       });
       lexer.add_lexeme({
         mode,
         tid: 'other',
         pattern: /[^*\\]+/u,
-        after: '*'
+        needs: '*'
       });
       //.........................................................................................................
       return lexer;

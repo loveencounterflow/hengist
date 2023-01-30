@@ -152,17 +152,17 @@
     });
     g.add({
       name: 'cook',
-      before: 'eat'
+      precedes: 'eat'
     });
     g.add({
       name: 'serve',
-      after: 'cook',
-      before: 'eat'
+      needs: 'cook',
+      precedes: 'eat'
     });
     g.add({
       name: 'dishes',
-      after: 'eat',
-      before: 'sleep'
+      needs: 'eat',
+      precedes: 'sleep'
     });
     g.add({
       name: 'loner1'
@@ -178,7 +178,7 @@
     });
     g.add({
       name: 'eat',
-      after: ['cook', 'shop']
+      needs: ['cook', 'shop']
     });
     (function() {      //.........................................................................................................
       var result;
@@ -203,36 +203,36 @@
     //.........................................................................................................
     g.add({
       name: 'cook',
-      before: 'eat'
+      precedes: 'eat'
     });
     g.add({
       name: 'serve',
-      after: 'cook',
-      before: 'eat'
+      needs: 'cook',
+      precedes: 'eat'
     });
     g.add({
       name: 'eat',
-      after: ['cook', 'shop']
+      needs: ['cook', 'shop']
     });
     g.add({
       name: 'shop',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'brushteeth',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'getup',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'dishes',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'sleep',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'loner1'
@@ -266,15 +266,15 @@
     g = new Ltsort();
     g.add({
       name: 't1',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 't2',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 't3',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'middle'
@@ -283,16 +283,16 @@
       T.eq(g.linearize(), ['t3', 't2', 't1', 'middle']);
     }
     g.add({
-      name: 'bully-t3-before',
-      before: 't3'
+      name: 'bully-t3-precedes',
+      precedes: 't3'
     });
     g.add({
-      name: 'bully-t3-after',
-      after: 't3'
+      name: 'bully-t3-needs',
+      needs: 't3'
     });
     debug('^23-1^', g.precedents);
     if (T != null) {
-      T.eq(g.linearize(), ['bully-t3-before', 't3', 't2', 't1', 'bully-t3-after', 'middle']);
+      T.eq(g.linearize(), ['bully-t3-precedes', 't3', 't2', 't1', 'bully-t3-needs', 'middle']);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -305,15 +305,15 @@
     g = new Ltsort();
     g.add({
       name: 't3',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 't2',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 't1',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'middle'
@@ -323,22 +323,22 @@
     }
     g.add({
       name: 'middle',
-      after: 't3',
-      before: 't2'
+      needs: 't3',
+      precedes: 't2'
     });
     if (T != null) {
       T.eq(g.linearize(), ['t3', 'middle', 't2', 't1']);
     }
     g.add({
-      name: 'bully-t1-after',
-      after: 't1'
+      name: 'bully-t1-needs',
+      needs: 't1'
     });
     g.add({
-      name: 'bully-t1-before',
-      before: 't1'
+      name: 'bully-t1-precedes',
+      precedes: 't1'
     });
     if (T != null) {
-      T.eq(g.linearize(), ['t3', 'middle', 't2', 'bully-t1-before', 't1', 'bully-t1-after']);
+      T.eq(g.linearize(), ['t3', 'middle', 't2', 'bully-t1-precedes', 't1', 'bully-t1-needs']);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -351,32 +351,32 @@
     g = new Ltsort();
     g.add({
       name: 'top3',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'top2',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'top1',
-      before: '*'
+      precedes: '*'
     });
     g.add({
       name: 'bottom3',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'bottom2',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'bottom1',
-      after: '*'
+      needs: '*'
     });
     g.add({
       name: 'middle',
-      after: 'top3',
-      before: 'bottom3'
+      needs: 'top3',
+      precedes: 'bottom3'
     });
     if (T != null) {
       T.eq(g.linearize(), ['top1', 'top2', 'top3', 'middle', 'bottom3', 'bottom2', 'bottom1']);
