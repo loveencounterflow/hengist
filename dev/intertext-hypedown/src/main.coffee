@@ -136,7 +136,7 @@ new_hypedown_lexer = ( mode = 'plain' ) ->
   standard_sx.add_lexemes()
   info '^35-6^', standard_sx
   lexer.add_lexeme lexeme for lexeme in lexemes_lst
-  # debug '^35-1^', lexer.registry
+  console.log '^35-1^', ( require 'util' ).inspect lexemes_obj
   help '^35-1^', d for d from lexer.walk "`helo` world"
   process.exit 111
   # debug '^99-2^', standard_sx.backslash_escape
