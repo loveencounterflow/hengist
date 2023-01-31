@@ -219,9 +219,9 @@
       lexeme = lexemes_lst[j];
       lexer.add_lexeme(lexeme);
     }
+    console.log('^35-1^', (require('util')).inspect(lexemes_obj));
     ref1 = lexer.walk("`helo` world");
     for (d of ref1) {
-      // debug '^35-1^', lexer.registry
       help('^35-1^', d);
     }
     process.exit(111);
