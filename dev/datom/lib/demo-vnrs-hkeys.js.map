@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/demo-vnrs-hkeys.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,UAAA,EAAA,SAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA,EAAA,GAAA,EAAA,KAAA,EAAA,MAAA,EAAA,GAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,CAAA,CAAE,KAAF,EACE,KADF,EAEE,IAFF,EAGE,IAHF,EAIE,KAJF,EAKE,MALF,EAME,IANF,EAOE,IAPF,EAQE,OARF,CAAA,GAQ4B,GAAG,CAAC,GAAG,CAAC,WAAR,CAAoB,qBAApB,CAR5B;;EASA,CAAA,CAAE,GAAF,EACE,OADF,EAEE,IAFF,EAGE,GAHF,CAAA,GAG4B,GAAG,CAAC,GAHhC,EAdA;;;;;;;;;EA6BA,SAAA,GAAY,QAAA,CAAA,CAAA,EAAA;;;AACZ,QAAA;IAEE,CAAA,GAAI;MAAE,OAAA,EAAS,CAAX;MAAc,OAAA,EAAS;IAAvB;AACJ,WAAO;EAJG,EA7BZ;;;EAoCA,UAAA,GAAa,QAAA,CAAA,CAAA,EAAA;;;;;;;;;AACb,QAAA;IAQE,CAAA,GAAI;MAAE,WAAA,EAAa,OAAf;MAAwB,SAAA,EAAW;IAAnC;AACJ,WAAO;EAVI,EApCb;;;EAkDA,IAAG,MAAA,KAAU,OAAO,CAAC,IAArB;IAAkC,CAAA,CAAA,CAAA,GAAA;MAChC,SAAA,CAAA;aACA,UAAA,CAAA;IAFgC,CAAA,IAAlC;;AAlDA",
+  "sourcesContent": [
+    "\n\n'use strict'\n\n\n############################################################################################################\nGUY                       = require 'guy'\n{ alert\n  debug\n  help\n  info\n  plain\n  praise\n  urge\n  warn\n  whisper }               = GUY.trm.get_loggers 'DATOM/DEMO-VNR-HKEY'\n{ rpr\n  inspect\n  echo\n  log     }               = GUY.trm\n\n\n###\n\nVectorial Numbers (VNRs)\nHierarchical Keys (HKeys)\n\n\n###\n\n#-----------------------------------------------------------------------------------------------------------\ndemo_vnrs = ->\n  ###\n  ###\n  d = { $v1_lnr: 1, $v2_col: 1, }\n  return null\n\n#-----------------------------------------------------------------------------------------------------------\ndemo_hkeys = ->\n  ###\n  'lexer:plain:text'\n  'lexer:html:tag:start:em'\n  'lexer:md:markup:stars3'\n  'lexer:md:text'\n  'mdnish:html:tag:start:em'\n  'mdnish:html:tag:stop:em'\n  ###\n  d = { $kr1_origin: 'lexer', $kr2_mode: 'html', }\n  return null\n\n\n#===========================================================================================================\nif module is require.main then do =>\n  demo_vnrs()\n  demo_hkeys()\n\n"
+  ]
+}
