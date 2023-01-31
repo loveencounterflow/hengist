@@ -1,0 +1,91 @@
+
+'use strict'
+
+
+############################################################################################################
+GUY                       = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'INTERTEXT-LEXER/TESTS/BASICS'
+{ rpr
+  inspect
+  echo
+  log     }               = GUY.trm
+#...........................................................................................................
+test                      = require '../../../apps/guy-test'
+PATH                      = require 'path'
+# FS                        = require 'fs'
+types                     = new ( require 'intertype' ).Intertype
+{ isa
+  equals
+  type_of
+  validate
+  validate_list_of }      = types.export()
+# SQL                       = String.raw
+H                         = require '../../../lib/helpers'
+# after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
+
+
+#===========================================================================================================
+#
+#-----------------------------------------------------------------------------------------------------------
+show_lexer_as_table = ( title, lexer ) ->
+  lexemes = []
+  for mode, entry of lexer.registry
+    for tid, lexeme of entry.lexemes
+      lexemes.push lexeme
+  H.tabulate title, lexemes
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo = ->
+  { Hypedown_parser } = require '../../../apps/hypedown'
+  probes_and_matchers = [
+    [ "*abc*", "<i>abc</i>", ]
+    [ 'helo `world`!', 'helo <code>world</code>!', null ]
+    [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null ]
+    [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    p = new Hypedown_parser()
+    p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+    result      = p.run()
+    result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+    # urge '^08-1^', ( Object.keys d ).sort() for d in result
+    H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+### TAINT use upcoming implementation in `guy` ###
+walk_lines = ( text, cfg ) ->
+  validate.text text
+  template      = { keep_newlines: true, }
+  cfg           = { template..., cfg..., }
+  pattern       = /.*?(\n|$)/suy
+  last_position = text.length - 1
+  loop
+    break if pattern.lastIndex > last_position
+    break unless ( match = text.match pattern )? ### internal error ###
+    Y = match[ 0 ]
+    Y = Y[ ... Y.length - 1 ] unless cfg.keep_newlines
+    yield Y
+  R = walk_lines()
+  R.reset = -> pattern.lastIndex = 0
+  return R
+
+
+############################################################################################################
+if require.main is module then do =>
+  demo()
+
+
