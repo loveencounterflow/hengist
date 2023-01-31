@@ -24,6 +24,7 @@
     "acorn": "^8.7.1",
     "acorn-loose": "^8.3.0",
     "acorn-walk": "^8.2.0",
+    "all-the-package-repos": "^2.0.707",
     "argparse": "^2.0.1",
     "astring": "^1.8.3",
     "bytewise": "^1.1.0",

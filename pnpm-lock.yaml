@@ -12,6 +12,7 @@ specifiers:
   acorn: ^8.7.1
   acorn-loose: ^8.3.0
   acorn-walk: ^8.2.0
+  all-the-package-repos: ^2.0.707
   argparse: ^2.0.1
   astring: ^1.8.3
   bytewise: ^1.1.0
@@ -171,6 +172,7 @@ dependencies:
   acorn: 8.7.1
   acorn-loose: 8.3.0
   acorn-walk: 8.2.0
+  all-the-package-repos: 2.0.707
   argparse: 2.0.1
   astring: 1.8.3
   bytewise: 1.1.0
@@ -925,6 +927,14 @@ packages:
       uri-js: 4.4.1
     dev: false
 
+  /all-the-package-repos/2.0.707:
+    resolution: {integrity: sha512-5kgiQobYWvrL/LedpH/txxvTvIyqjFei98SQRCKVvbVj2dMDi1S8Af4HgzNVU68vpF+ca7t2GqA6ux/y3HgbwA==}
+    hasBin: true
+    dependencies:
+      count-array-values: 1.2.1
+      pad: 2.3.0
+    dev: false
+
   /amator/1.1.0:
     resolution: {integrity: sha512-V5+aH8pe+Z3u/UG3L3pG3BaFQGXAyXHVQDroRwjPHdh08bcUEchAVsU1MCuJSCaU5o60wTK6KaE6te5memzgYw==}
     dependencies:
@@ -1642,6 +1652,11 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /count-array-values/1.2.1:
+    resolution: {integrity: sha512-PBvhjw9jrlivP5gr/d9C3JVplp3TAAZVQ7LvJ85RsNEvo2SyMusaqB+4f7sPvihPqNtj6eVbYPz/i0ATPmn1kA==}
+    engines: {node: '>=0.10'}
+    dev: false
 
   /cozo-node/0.3.0:
     resolution: {integrity: sha512-3CI4nK999hi2zAlygQzIjRzGOSC+1wPAhkSH6UFh4Ke3YNtq8fGqoynqmIllFn+bOPau0AJqsgJVhgfMCBxyfg==}
@@ -4452,6 +4467,13 @@ packages:
 
   /packet-reader/1.0.0:
     resolution: {integrity: sha512-HAKu/fG3HpHFO0AA8WE8q2g+gBJaZ9MG7fcKk+IJPLTGAD6Psw4443l+9DGRbOIh3/aXr7Phy0TjilYivJo5XQ==}
+    dev: false
+
+  /pad/2.3.0:
+    resolution: {integrity: sha512-lxrgnOG5AXmzMRT1O5urWtYFxHnFSE+QntgTHij1nvS4W+ubhQLmQRHmZXDeEvk9I00itAixLqU9Q6fE0gW3sw==}
+    engines: {node: '>= 4.0.0'}
+    dependencies:
+      wcwidth: 1.0.1
     dev: false
 
   /pako/0.2.9:
