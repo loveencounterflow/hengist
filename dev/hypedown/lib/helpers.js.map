@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/helpers.coffee"
+  ],
+  "names": [],
+  "mappings": "AAC4G;EAAA;AAAA,MAAA,GAAA,EAAA,CAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA,EAAA,GAAA,EAAA,KAAA,EAAA,MAAA,EAAA,GAAA,EAAA,mBAAA,EAAA,IAAA,EAAA,IAAA,EAAA;;EAC5G,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,CAAA,CAAE,KAAF,EACE,KADF,EAEE,IAFF,EAGE,IAHF,EAIE,KAJF,EAKE,MALF,EAME,IANF,EAOE,IAPF,EAQE,OARF,CAAA,GAQ4B,GAAG,CAAC,GAAG,CAAC,WAAR,CAAoB,wBAApB,CAR5B;;EASA,CAAA,CAAE,GAAF,EACE,OADF,EAEE,IAFF,EAGE,GAHF,CAAA,GAG4B,GAAG,CAAC,GAHhC,EAX4G;;;;;;;;;EAsB5G,CAAA,GAA4B,OAAA,CAAQ,sBAAR,EAtBgF;;;;;EA6B5G,mBAAA,GAAsB,QAAA,CAAE,KAAF,EAAS,KAAT,CAAA;AACtB,QAAA,KAAA,EAAA,MAAA,EAAA,OAAA,EAAA,IAAA,EAAA,GAAA,EAAA,IAAA,EAAA;IAAE,OAAA,GAAU;AACV;IAAA,KAAA,WAAA;;AACE;MAAA,KAAA,WAAA;;QACE,OAAO,CAAC,IAAR,CAAa,MAAb;MADF;IADF;IAGA,CAAC,CAAC,QAAF,CAAW,KAAX,EAAkB,OAAlB;AACA,WAAO;EANa,EA7BsF;;;EAuC5G,MAAM,CAAC,OAAP,GAAiB,CAAE,GAAA,CAAF,EAAQ,mBAAR;AAvC2F",
+  "sourcesContent": [
+    "\n############################################################################################################\nGUY                       = require 'guy'\n{ alert\n  debug\n  help\n  info\n  plain\n  praise\n  urge\n  warn\n  whisper }               = GUY.trm.get_loggers 'HYPEDOWN/TESTS/HELPERS'\n{ rpr\n  inspect\n  echo\n  log     }               = GUY.trm\n#...........................................................................................................\n# types                     = new ( require 'intertype' ).Intertype\n# { isa\n#   equals\n#   type_of\n#   validate\n#   validate_list_of }      = types.export()\nH                         = require '../../../lib/helpers'\n\n\n\n#===========================================================================================================\n#\n#-----------------------------------------------------------------------------------------------------------\nshow_lexer_as_table = ( title, lexer ) ->\n  lexemes = []\n  for mode, entry of lexer.registry\n    for tid, lexeme of entry.lexemes\n      lexemes.push lexeme\n  H.tabulate title, lexemes\n  return null\n\n\n#===========================================================================================================\nmodule.exports = { H..., show_lexer_as_table, }\n\n\n"
+  ]
+}

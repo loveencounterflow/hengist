@@ -28,20 +28,10 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 # SQL                       = String.raw
-H                         = require '../../../lib/helpers'
+H                         = require './helpers'
 # after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 
 
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-show_lexer_as_table = ( title, lexer ) ->
-  lexemes = []
-  for mode, entry of lexer.registry
-    for tid, lexeme of entry.lexemes
-      lexemes.push lexeme
-  H.tabulate title, lexemes
-  return null
 
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
@@ -59,10 +49,10 @@ demo = ->
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
-    # show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
+    # H.show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
     # debug '^23-1^', t for t from lexer.walk probe
     p           = new Hypedown_parser()
-    # show_lexer_as_table "Hypedown_parser lexer", p.lexer
+    # H.show_lexer_as_table "Hypedown_parser lexer", p.lexer
     p.send XXX_new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
     result      = p.run()
     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
