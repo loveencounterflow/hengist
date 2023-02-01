@@ -45,14 +45,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
-    var Hypedown_parser, d, error, i, len, matcher, p, probe, probes_and_matchers, result, result_rpr;
-    ({Hypedown_parser} = require('../../../apps/hypedown'));
+    var Hypedown_lexer, Hypedown_parser, XXX_new_token, d, error, i, len, matcher, p, probe, probes_and_matchers, result, result_rpr;
+    ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
     probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null], ['*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
+      // show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
+      // debug '^23-1^', t for t from lexer.walk probe
       p = new Hypedown_parser();
-      p.send(new_token('^æ19^', {
+      // show_lexer_as_table "Hypedown_parser lexer", p.lexer
+      p.send(XXX_new_token('^æ19^', {
         start: 0,
         stop: probe.length
       }, 'plain', 'p', null, probe));
