@@ -45,7 +45,9 @@ show_lexer_as_table = ( title, lexer ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo = ->
-  { Hypedown_parser } = require '../../../apps/hypedown'
+  { XXX_new_token
+    Hypedown_lexer
+    Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
     [ "*abc*", "<i>abc</i>", ]
     [ 'helo `world`!', 'helo <code>world</code>!', null ]
@@ -57,8 +59,11 @@ demo = ->
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
-    p = new Hypedown_parser()
-    p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+    # show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
+    # debug '^23-1^', t for t from lexer.walk probe
+    p           = new Hypedown_parser()
+    # show_lexer_as_table "Hypedown_parser lexer", p.lexer
+    p.send XXX_new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
     result      = p.run()
     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
     # urge '^08-1^', ( Object.keys d ).sort() for d in result
