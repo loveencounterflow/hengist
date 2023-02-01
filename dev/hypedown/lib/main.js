@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, PATH, alert, debug, demo, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, show_lexer_as_table, test, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
+  var GUY, H, PATH, alert, debug, demo, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -20,28 +20,9 @@
   ({isa, equals, type_of, validate, validate_list_of} = types.export());
 
   // SQL                       = String.raw
-  H = require('../../../lib/helpers');
+  H = require('./helpers');
 
   // after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  show_lexer_as_table = function(title, lexer) {
-    var entry, lexeme, lexemes, mode, ref, ref1, tid;
-    lexemes = [];
-    ref = lexer.registry;
-    for (mode in ref) {
-      entry = ref[mode];
-      ref1 = entry.lexemes;
-      for (tid in ref1) {
-        lexeme = ref1[tid];
-        lexemes.push(lexeme);
-      }
-    }
-    H.tabulate(title, lexemes);
-    return null;
-  };
 
   //-----------------------------------------------------------------------------------------------------------
   demo = function() {
@@ -51,10 +32,10 @@
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
-      // show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
+      // H.show_lexer_as_table "Hypedown lexer", lexer = new Hypedown_lexer()
       // debug '^23-1^', t for t from lexer.walk probe
       p = new Hypedown_parser();
-      // show_lexer_as_table "Hypedown_parser lexer", p.lexer
+      // H.show_lexer_as_table "Hypedown_parser lexer", p.lexer
       p.send(XXX_new_token('^æ19^', {
         start: 0,
         stop: probe.length
