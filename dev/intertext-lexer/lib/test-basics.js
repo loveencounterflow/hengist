@@ -532,7 +532,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 10,
             stop: 11,
@@ -600,7 +600,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 24,
             stop: 25,
@@ -676,7 +676,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 12,
             stop: 13,
@@ -1085,7 +1085,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 25,
             stop: 26,
@@ -1137,7 +1137,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 2,
             stop: 3,
@@ -1240,7 +1240,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 28,
             stop: 29,
@@ -1275,7 +1275,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 32,
             stop: 33,
@@ -1327,7 +1327,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 2,
             stop: 3,
@@ -1362,7 +1362,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 5,
             stop: 6,
@@ -1397,7 +1397,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 9,
             stop: 10,
@@ -1432,7 +1432,7 @@
             mode: 'tag',
             tid: 'end',
             mk: 'tag:end',
-            jump: '^',
+            jump: 'plain',
             value: '>',
             start: 13,
             stop: 14,
@@ -1461,7 +1461,7 @@
         return new Promise(function(resolve, reject) {
           var result;
           result = lexer.run(probe);
-          H.tabulate(rpr(probe), result);
+          // H.tabulate ( rpr probe ), result
           return resolve(result);
         });
       });
@@ -1534,7 +1534,7 @@
       });
     })();
     //.........................................................................................................
-    probes_and_matchers = [['helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end^,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end^,(24:25),='>'][plain:$eof,(25:25),='']", null], ['<x v=\\> z=42>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:end^,(12:13),='>'][plain:$eof,(13:13),='']", null], ['<x v=\\> z=42\\>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:escchr,(12:14),='\\\\>',chr:'>'][tag:$eof,(14:14),='']", null], ['a <b', "[plain:text,(0:2),='a '][plain:tag>tag,(2:3),='<',lslash:null][tag:text,(3:4),='b'][tag:$eof,(4:4),='']", null], ['what? error?', "[plain:text,(0:4),='what'][plain:$error,(4:4),='',code:'nomatch']", null], ['d <', "[plain:text,(0:2),='d '][plain:tag>tag,(2:3),='<',lslash:null][tag:$eof,(3:3),='']", null], ['<c', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='c'][tag:$eof,(2:2),='']", null], ['<', "[plain:tag>tag,(0:1),='<',lslash:null][tag:$eof,(1:1),='']", null], ['', "[plain:$eof,(0:0),='']", null], ['helo \\<bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:escchr,(5:7),='\\\\<',chr:'<'][plain:text,(7:12),='bold>'][plain:E_backticks,(12:13),='`'][plain:text,(13:18),='world'][plain:E_backticks,(18:19),='`'][plain:tag>tag,(19:21),='</',lslash:'/'][tag:text,(21:25),='bold'][tag:end^,(25:26),='>'][plain:$eof,(26:26),='']", null], ['<b>helo \\<bold>`world`</bold></b>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='b'][tag:end^,(2:3),='>'][plain:text,(3:8),='helo '][plain:escchr,(8:10),='\\\\<',chr:'<'][plain:text,(10:15),='bold>'][plain:E_backticks,(15:16),='`'][plain:text,(16:21),='world'][plain:E_backticks,(21:22),='`'][plain:tag>tag,(22:24),='</',lslash:'/'][tag:text,(24:28),='bold'][tag:end^,(28:29),='>'][plain:tag>tag,(29:31),='</',lslash:'/'][tag:text,(31:32),='b'][tag:end^,(32:33),='>'][plain:$eof,(33:33),='']", null], ['<i><b></b></i>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='i'][tag:end^,(2:3),='>'][plain:tag>tag,(3:4),='<',lslash:null][tag:text,(4:5),='b'][tag:end^,(5:6),='>'][plain:tag>tag,(6:8),='</',lslash:'/'][tag:text,(8:9),='b'][tag:end^,(9:10),='>'][plain:tag>tag,(10:12),='</',lslash:'/'][tag:text,(12:13),='i'][tag:end^,(13:14),='>'][plain:$eof,(14:14),='']", null]];
+    probes_and_matchers = [['helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end>plain,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end>plain,(24:25),='>'][plain:$eof,(25:25),='']", null], ['<x v=\\> z=42>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:end>plain,(12:13),='>'][plain:$eof,(13:13),='']", null], ['<x v=\\> z=42\\>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:escchr,(12:14),='\\\\>',chr:'>'][tag:$eof,(14:14),='']", null], ['a <b', "[plain:text,(0:2),='a '][plain:tag>tag,(2:3),='<',lslash:null][tag:text,(3:4),='b'][tag:$eof,(4:4),='']", null], ['what? error?', "[plain:text,(0:4),='what'][plain:$error,(4:4),='',code:'nomatch']", null], ['d <', "[plain:text,(0:2),='d '][plain:tag>tag,(2:3),='<',lslash:null][tag:$eof,(3:3),='']", null], ['<c', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='c'][tag:$eof,(2:2),='']", null], ['<', "[plain:tag>tag,(0:1),='<',lslash:null][tag:$eof,(1:1),='']", null], ['', "[plain:$eof,(0:0),='']", null], ['helo \\<bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:escchr,(5:7),='\\\\<',chr:'<'][plain:text,(7:12),='bold>'][plain:E_backticks,(12:13),='`'][plain:text,(13:18),='world'][plain:E_backticks,(18:19),='`'][plain:tag>tag,(19:21),='</',lslash:'/'][tag:text,(21:25),='bold'][tag:end>plain,(25:26),='>'][plain:$eof,(26:26),='']", null], ['<b>helo \\<bold>`world`</bold></b>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='b'][tag:end>plain,(2:3),='>'][plain:text,(3:8),='helo '][plain:escchr,(8:10),='\\\\<',chr:'<'][plain:text,(10:15),='bold>'][plain:E_backticks,(15:16),='`'][plain:text,(16:21),='world'][plain:E_backticks,(21:22),='`'][plain:tag>tag,(22:24),='</',lslash:'/'][tag:text,(24:28),='bold'][tag:end>plain,(28:29),='>'][plain:tag>tag,(29:31),='</',lslash:'/'][tag:text,(31:32),='b'][tag:end>plain,(32:33),='>'][plain:$eof,(33:33),='']", null], ['<i><b></b></i>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='i'][tag:end>plain,(2:3),='>'][plain:tag>tag,(3:4),='<',lslash:null][tag:text,(4:5),='b'][tag:end>plain,(5:6),='>'][plain:tag>tag,(6:8),='</',lslash:'/'][tag:text,(8:9),='b'][tag:end>plain,(9:10),='>'][plain:tag>tag,(10:12),='</',lslash:'/'][tag:text,(12:13),='i'][tag:end>plain,(13:14),='>'][plain:$eof,(14:14),='']", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -2079,12 +2079,13 @@ the
       // @cannot_return_from_initial_mode()
       // test @cannot_return_from_initial_mode
       // test @using_lexer_without_lexemes
-      // test @lex_tags
-      return this.parse_line_by_line();
+      return test(this.lex_tags);
     })();
   }
 
-  // test @parse_line_by_line
+  // test @lex_tags_with_rpr
+// @parse_line_by_line()
+// test @parse_line_by_line
 // @parse_md_stars_markup()
 // test @parse_md_stars_markup
 // test @parse_nested_codespan
