@@ -628,6 +628,63 @@ $parse_md_stars = ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@match_with_lookbehind = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex { dotall: true, }
+  #.........................................................................................................
+  do =>
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'b_after_a',        pattern: ( /(?<=a)b/u           ), }
+    # lexer.add_lexeme { mode, tid: 'other_a',          pattern: ( /a/u                             ), }
+    # lexer.add_lexeme { mode, tid: 'other_b',          pattern: ( /b/u                             ), }
+    lexer.add_lexeme { mode, tid: 'other',            pattern: ( /((?<!a)b|[^b])+/u   ), }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'foobar abracadabra', "[plain:other,(0:8),='foobar a'][plain:b_after_a,(8:9),='b'][plain:other,(9:15),='racada'][plain:b_after_a,(15:16),='b'][plain:other,(16:18),='ra'][plain:$eof,(18:18),='']", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result      = lexer.run probe
+      result_rpr  = ( lexer.rpr_token token for token in result ).join ''
+      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@match_start_of_line = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex { dotall: true, }
+  #.........................................................................................................
+  do =>
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'b_after_nl',       pattern: ( /(?<=\n)b/u          ), }
+    lexer.add_lexeme { mode, tid: 'b_first',          pattern: ( /^b/u                ), }
+    lexer.add_lexeme { mode, tid: 'other',            pattern: ( /((?<!\n)b|[^b])+/u  ), }
+  #.........................................................................................................
+  probes_and_matchers = [
+    # [ "helo\nworld", null, ]
+    # [ "above\n# headline\n\nbelow", null, ]
+    [ 'foobar \nbracad\nbra', "[plain:other,(0:8),='foobar \\n'][plain:b_after_nl,(8:9),='b'][plain:other,(9:15),='racad\\n'][plain:b_after_nl,(15:16),='b'][plain:other,(16:18),='ra'][plain:$eof,(18:18),='']", null ]
+    [ 'b', "[plain:b_first,(0:1),='b'][plain:$eof,(1:1),='']", null ]
+    [ '\nb', "[plain:other,(0:1),='\\n'][plain:b_after_nl,(1:2),='b'][plain:$eof,(2:2),='']", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result      = lexer.run probe
+      result_rpr  = ( lexer.rpr_token token for token in result ).join ''
+      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -637,9 +694,9 @@ if require.main is module then do =>
   # @cannot_return_from_initial_mode()
   # test @cannot_return_from_initial_mode
   # test @using_lexer_without_lexemes
-  test @lex_tags
+  # test @lex_tags
   # test @lex_tags_with_rpr
-  # @parse_line_by_line()
+  @parse_line_by_line()
   # test @parse_line_by_line
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
@@ -647,4 +704,5 @@ if require.main is module then do =>
   # @markup_with_variable_length()
   # test @markup_with_variable_length
   # @_demo_markup_with_variable_length()
-
+  # test @match_start_of_line
+  # test @match_with_lookbehind
