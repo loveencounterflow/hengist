@@ -210,79 +210,25 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_fs_walk_lines_yields_from_empty_file = function(T, done) {
-    var GUY, chunk_size, i, id, j, len, line, lnr, matcher, path, paths, ref, result;
-    GUY = require(H.guy_path);
-    paths = [['fw', '../../../assets/a-few-words.txt'], ['ef', '../../../assets/datamill/empty-file.txt'], ['1n', '../../../assets/datamill/file-with-single-nl.txt'], ['3n', '../../../assets/datamill/file-with-3-lines-no-eofnl.txt'], ['3w', '../../../assets/datamill/file-with-3-lines-with-eofnl.txt']];
-    //.........................................................................................................
-    matcher = ["fw#1:Ångström's", "fw#2:éclair", "fw#3:éclair's", "fw#4:éclairs", "fw#5:éclat", "fw#6:éclat's", "fw#7:élan", "fw#8:élan's", "fw#9:émigré", "fw#10:émigré's", 'ef#1:', '1n#1:', '1n#2:', '3n#1:1', '3n#2:2', '3n#3:3', '3w#1:1', '3w#2:2', '3w#3:3', '3w#4:'];
-//.........................................................................................................
-    for (chunk_size = i = 1; i <= 200; chunk_size = i += +10) {
-      result = [];
-      for (j = 0, len = paths.length; j < len; j++) {
-        [id, path] = paths[j];
-        // whisper '^45-1^', '----------------------------------'
-        path = PATH.resolve(PATH.join(__dirname, path));
-        lnr = 0;
-        ref = GUY.fs.walk_lines(path, {chunk_size});
-        for (line of ref) {
-          lnr++;
-          result.push(`${id}#${lnr}:${line}`);
-        }
-      }
-      if (T != null) {
-        T.eq(result, matcher);
-      }
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @GUY_fs_walk_lines_with_custom_newline = ( T, done ) ->
-  //   GUY     = require H.guy_path
-  //   GUY.temp.with_file ({ path, }) ->
-  //     FS.writeFileSync path, "foo𠀀𠀐bar𠀀𠀐baz𠀀𠀐"
-  //     #.......................................................................................................
-  //     # for chunk_size in [ 1 .. 5 ] by +1
-  //     for chunk_size in [ 1 .. 1 ] by +1
-  //       result  = []
-  //       lnr     = 0
-  //       for line from GUY.fs.walk_lines path, { chunk_size, newline: '𠀀𠀐', }
-  //         lnr++
-  //         debug '^4323^', "##{lnr}:#{line}"
-  //         result.push "##{lnr}:#{line}"
-  //       T?.eq result, [ '#1:foo', '#2:bar', '#3:baz', '#4:', ]
-  //   #.........................................................................................................
-  //   done?()
-  //   return null
-
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @, { timeout: 5000, }
-      // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
-      // test @[ "guy.fs.get_content_hash" ]
-      // @[ "guy.fs.get_content_hash" ]()
-      // test @[ "guy.props.def(), .hide()" ]
-      // @[ "configurator" ]()
-      // test @[ "await with async steampipes" ]
-      // test @[ "nowait with async steampipes" ]
-      // test @[ "use-call" ]
-      // @[ "await with async steampipes" ]()
-      // @[ "demo" ]()
-      // @[ "nowait" ]()
-      // @GUY_fs_walk_lines_with_custom_newline()
-      // test @GUY_fs_walk_lines_with_custom_newline
-      // @GUY_fs_walk_lines_yields_from_empty_file()
-      return test(this.GUY_fs_walk_lines_yields_from_empty_file);
+      return test(this);
     })();
   }
 
-  // @GUY_fs_get_content_hash()
+  // test @[ "guy.fs.walk_circular_lines() can iterate given number of loops" ]
+// test @[ "guy.fs.get_content_hash" ]
+// @[ "guy.fs.get_content_hash" ]()
+// test @[ "guy.props.def(), .hide()" ]
+// @[ "configurator" ]()
+// test @[ "await with async steampipes" ]
+// test @[ "nowait with async steampipes" ]
+// test @[ "use-call" ]
+// @[ "await with async steampipes" ]()
+// @[ "demo" ]()
+// @[ "nowait" ]()
+// @GUY_fs_get_content_hash()
 // test @GUY_fs_get_content_hash
 
 }).call(this);
