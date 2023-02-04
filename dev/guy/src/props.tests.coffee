@@ -736,8 +736,6 @@ demo_strict_owner_with_proxy = ->
 #-----------------------------------------------------------------------------------------------------------
 @GUY_props_assign_with_defaults = ( T, done ) ->
   GUY       = require '../../../apps/guy'
-  GUY.props.nonull_assign = ( first, others... ) ->
-    return Object.assign {}, first, ( @omit_nullish other for other in others )...
   #.........................................................................................................
   T?.eq ( GUY.props.nonull_assign { dotall: true, }, { dotall: null, }, { dotall: undefined, }  ), { dotall: true, }
   T?.eq ( GUY.props.nonull_assign { dotall: true, }, { dotall: null, }, { dotall: false, }      ), { dotall: false, }
