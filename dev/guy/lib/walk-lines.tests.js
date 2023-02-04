@@ -50,31 +50,268 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
-  this.GUY_fs_walk_lines_yields_from_empty_file = function(T, done) {
-    var GUY, chunk_size, i, j, len, len1, line, lnr, matcher, path, probe, probes_and_matchers, ref, ref1, result;
+  this.GUY_fs_walk_lines = function(T, done) {
+    var GUY, cfg, chunk_size, i, j, len, line, lnr, matcher, matcher_2, path, probe, probes_and_matchers, ref, ref1, result, result_2, text;
     GUY = require(H.guy_path);
-    probes_and_matchers = [['../../../assets/a-few-words.txt', ["1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's"]], ['../../../assets/datamill/empty-file.txt', ['1:']], ['../../../assets/datamill/file-with-single-nl.txt', ['1:', '2:']], ['../../../assets/datamill/file-with-3-lines-no-eofnl.txt', ['1:1', '2:2', '3:3']], ['../../../assets/datamill/file-with-3-lines-with-eofnl.txt', ['1:1', '2:2', '3:3', '4:']], ['../../../assets/datamill/windows-crlf.txt', ['1:this', '2:file', '3:written', '4:on', '5:MS Notepad']], ['../../../assets/datamill/mixed-usage.txt', ['1:all', '2:bases', '3:', '4:are belong', '5:to us', '6:']]];
+    probes_and_matchers = [
+      [['../../../assets/a-few-words.txt',
+      null],
+      ["1:Ångström's",
+      "2:éclair",
+      "3:éclair's",
+      "4:éclairs",
+      "5:éclat",
+      "6:éclat's",
+      "7:élan",
+      "8:élan's",
+      "9:émigré",
+      "10:émigré's"]],
+      [['../../../assets/datamill/empty-file.txt',
+      null],
+      ['1:']],
+      [['../../../assets/datamill/file-with-single-nl.txt',
+      null],
+      ['1:',
+      '2:']],
+      [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt',
+      null],
+      ['1:1',
+      '2:2',
+      '3:3']],
+      [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt',
+      null],
+      ['1:1',
+      '2:2',
+      '3:3',
+      '4:']],
+      [['../../../assets/datamill/windows-crlf.txt',
+      null],
+      ['1:this',
+      '2:file',
+      '3:written',
+      '4:on',
+      '5:MS Notepad']],
+      [['../../../assets/datamill/mixed-usage.txt',
+      null],
+      ['1:all',
+      '2:bases',
+      '3:',
+      '4:are belong',
+      '5:to us',
+      '6:']],
+      [['../../../assets/datamill/all-empty-mixed.txt',
+      null],
+      ['1:',
+      '2:',
+      '3:',
+      '4:',
+      '5:',
+      '6:']],
+      [['../../../assets/datamill/lines-with-trailing-spcs.txt',
+      null],
+      ['1:line',
+      '2:with',
+      '3:trailing',
+      '4:whitespace']],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: true
+          }
+        ],
+        ['1:line',
+        '2:with',
+        '3:trailing',
+        '4:whitespace']
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: false
+          }
+        ],
+        ['1:line   ',
+        '2:with   ',
+        '3:trailing\t\t',
+        '4:whitespace\u3000 ']
+      ]
+    ];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher] = probes_and_matchers[i];
-      ref = [20];
-      // for chunk_size in [ 1 .. 200 ] by +10
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        chunk_size = ref[j];
+      for (chunk_size = j = 1; j <= 200; chunk_size = j += +10) {
+        // for chunk_size in [ 200 ]
         result = [];
+        result_2 = [];
         // whisper '^45-1^', '----------------------------------'
-        path = PATH.resolve(PATH.join(__dirname, probe));
+        [path, cfg] = probe;
+        path = PATH.resolve(PATH.join(__dirname, path));
+        text = FS.readFileSync(path, {
+          encoding: 'utf-8'
+        });
+        matcher_2 = text.split(/\r\n|\r|\n/u);
+        if ((ref = cfg != null ? cfg.trim : void 0) != null ? ref : true) {
+          matcher_2 = (function() {
+            var k, len1, results;
+            results = [];
+            for (k = 0, len1 = matcher_2.length; k < len1; k++) {
+              line = matcher_2[k];
+              results.push(line.trimEnd());
+            }
+            return results;
+          })();
+        }
         lnr = 0;
-        ref1 = GUY.fs.walk_lines(path, {chunk_size});
+        ref1 = GUY.fs.walk_lines(path, {chunk_size, ...cfg});
         for (line of ref1) {
           lnr++;
           result.push(`${lnr}:${line}`);
+          result_2.push(line);
         }
-        urge('^35-1^', result);
-        help('^35-2^', matcher);
+        // urge '^35-1^', result
+        // help '^35-2^', matcher
         if (T != null) {
           T.eq(result, matcher);
         }
+        if (T != null) {
+          T.eq(result_2, matcher_2);
+        }
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_str_walk_lines = function(T, done) {
+    var GUY, cfg, i, len, line, lnr, matcher, matcher_2, path, probe, probes_and_matchers, ref, ref1, result, result_2, text;
+    GUY = require(H.guy_path);
+    probes_and_matchers = [
+      [['../../../assets/a-few-words.txt',
+      null],
+      ["1:Ångström's",
+      "2:éclair",
+      "3:éclair's",
+      "4:éclairs",
+      "5:éclat",
+      "6:éclat's",
+      "7:élan",
+      "8:élan's",
+      "9:émigré",
+      "10:émigré's"]],
+      [['../../../assets/datamill/empty-file.txt',
+      null],
+      ['1:']],
+      [['../../../assets/datamill/file-with-single-nl.txt',
+      null],
+      ['1:',
+      '2:']],
+      [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt',
+      null],
+      ['1:1',
+      '2:2',
+      '3:3']],
+      [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt',
+      null],
+      ['1:1',
+      '2:2',
+      '3:3',
+      '4:']],
+      [['../../../assets/datamill/windows-crlf.txt',
+      null],
+      ['1:this',
+      '2:file',
+      '3:written',
+      '4:on',
+      '5:MS Notepad']],
+      [['../../../assets/datamill/mixed-usage.txt',
+      null],
+      ['1:all',
+      '2:bases',
+      '3:',
+      '4:are belong',
+      '5:to us',
+      '6:']],
+      [['../../../assets/datamill/all-empty-mixed.txt',
+      null],
+      ['1:',
+      '2:',
+      '3:',
+      '4:',
+      '5:',
+      '6:']],
+      [['../../../assets/datamill/lines-with-trailing-spcs.txt',
+      null],
+      ['1:line',
+      '2:with',
+      '3:trailing',
+      '4:whitespace']],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: true
+          }
+        ],
+        ['1:line',
+        '2:with',
+        '3:trailing',
+        '4:whitespace']
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: false
+          }
+        ],
+        ['1:line   ',
+        '2:with   ',
+        '3:trailing\t\t',
+        '4:whitespace\u3000 ']
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher] = probes_and_matchers[i];
+      result = [];
+      result_2 = [];
+      [path, cfg] = probe;
+      path = PATH.resolve(PATH.join(__dirname, path));
+      text = FS.readFileSync(path, {
+        encoding: 'utf-8'
+      });
+      matcher_2 = text.split(/\r\n|\r|\n/u);
+      if ((ref = cfg != null ? cfg.trim : void 0) != null ? ref : true) {
+        matcher_2 = (function() {
+          var j, len1, results;
+          results = [];
+          for (j = 0, len1 = matcher_2.length; j < len1; j++) {
+            line = matcher_2[j];
+            results.push(line.trimEnd());
+          }
+          return results;
+        })();
+      }
+      lnr = 0;
+      ref1 = GUY.str.walk_lines(text, cfg);
+      for (line of ref1) {
+        lnr++;
+        result.push(`${lnr}:${line}`);
+        result_2.push(line);
+      }
+      // whisper '^35-1^', rpr text
+      // urge '^35-1^', result
+      // help '^35-2^', matcher
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+      if (T != null) {
+        T.eq(result_2, matcher_2);
       }
     }
     if (typeof done === "function") {
@@ -105,12 +342,11 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      return this.GUY_fs_walk_lines_yields_from_empty_file();
+      return test(this);
     })();
   }
 
-  // test @GUY_fs_walk_lines_yields_from_empty_file
+  // test @GUY_fs_walk_lines
 
 }).call(this);
 

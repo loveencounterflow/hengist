@@ -291,7 +291,7 @@
       pattern: /\S+/u
     });
     //.........................................................................................................
-    probes_and_matchers = [['select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'|$eof:''", null]];
+    probes_and_matchers = [['select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -334,7 +334,9 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var lexer, result, result_rpr, t;
-          lexer = new Interlex();
+          lexer = new Interlex({
+            end_token: true
+          });
           result = lexer.run(probe);
           result_rpr = ((function() {
             var j, len1, results;
@@ -364,7 +366,9 @@
     //.........................................................................................................
     get_lexer = function() {
       var lexer;
-      lexer = new Interlex();
+      lexer = new Interlex({
+        end_token: true
+      });
       lexer.add_lexeme({
         mode: 'base',
         tid: 'a',
@@ -435,7 +439,9 @@
       Interlex,
       compose: c
     } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex();
+    lexer = new Interlex({
+      end_token: true
+    });
     (() => {      //.........................................................................................................
       /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
       var mode;
@@ -1480,7 +1486,9 @@
       Interlex,
       compose: c
     } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex();
+    lexer = new Interlex({
+      end_token: true
+    });
     (() => {      //.........................................................................................................
       /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
       var mode;
@@ -2098,7 +2106,7 @@ the
       });
     })();
     //.........................................................................................................
-    probes_and_matchers = [['foobar abracadabra', "[plain:other,(0:8),='foobar a'][plain:b_after_a,(8:9),='b'][plain:other,(9:15),='racada'][plain:b_after_a,(15:16),='b'][plain:other,(16:18),='ra'][plain:$eof,(18:18),='']", null]];
+    probes_and_matchers = [['foobar abracadabra', "[plain:other,(0:8),='foobar a'][plain:b_after_a,(8:9),='b'][plain:other,(9:15),='racada'][plain:b_after_a,(15:16),='b'][plain:other,(16:18),='ra']", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -2135,7 +2143,8 @@ the
       compose: c
     } = require('../../../apps/intertext-lexer'));
     lexer = new Interlex({
-      dotall: true
+      dotall: true,
+      end_token: true
     });
     (() => {      //.........................................................................................................
       var mode;

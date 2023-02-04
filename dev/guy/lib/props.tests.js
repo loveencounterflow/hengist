@@ -1833,18 +1833,6 @@
   this.GUY_props_assign_with_defaults = function(T, done) {
     var GUY;
     GUY = require('../../../apps/guy');
-    GUY.props.nonull_assign = function(first, ...others) {
-      var other;
-      return Object.assign({}, first, ...((function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = others.length; i < len; i++) {
-          other = others[i];
-          results.push(this.omit_nullish(other));
-        }
-        return results;
-      }).call(this)));
-    };
     //.........................................................................................................
     if (T != null) {
       T.eq(GUY.props.nonull_assign({
