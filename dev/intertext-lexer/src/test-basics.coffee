@@ -190,7 +190,7 @@ $parse_md_stars = ->
   lexer.add_lexeme { mode: 'sql', tid: 'other',   pattern: /\S+/u,      }
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'|$eof:''", null ]
+    [ 'select * from t;', "select:'select'|ws:' '|star:'*'|ws:' '|from:'from'|ws:' '|other:'t;'", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -217,7 +217,7 @@ $parse_md_stars = ->
   for [ probe, matcher, error, ] in probes_and_matchers
     # do =>
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new Interlex()
+      lexer       = new Interlex { end_token: true, }
       result      = lexer.run probe
       result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join '|'
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result
@@ -232,7 +232,7 @@ $parse_md_stars = ->
   { Interlex } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
   get_lexer = ->
-    lexer = new Interlex()
+    lexer = new Interlex { end_token: true, }
     lexer.add_lexeme { mode: 'base',  tid: 'a',             pattern: 'a', }
     lexer.add_lexeme { mode: 'base',  tid: 'b', jump: 'up', pattern: 'b', }
     lexer.add_lexeme { mode: 'up',    tid: 'c',             pattern: 'c', }
@@ -262,7 +262,7 @@ $parse_md_stars = ->
 @lex_tags = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex()
+  lexer = new Interlex { end_token: true, }
   #.........................................................................................................
   do =>
     ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
@@ -308,7 +308,7 @@ $parse_md_stars = ->
 @lex_tags_with_rpr = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex()
+  lexer = new Interlex { end_token: true, }
   #.........................................................................................................
   do =>
     ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
@@ -642,7 +642,7 @@ $parse_md_stars = ->
     lexer.add_lexeme { mode, tid: 'other',            pattern: ( /((?<!a)b|[^b])+/u   ), }
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'foobar abracadabra', "[plain:other,(0:8),='foobar a'][plain:b_after_a,(8:9),='b'][plain:other,(9:15),='racada'][plain:b_after_a,(15:16),='b'][plain:other,(16:18),='ra'][plain:$eof,(18:18),='']", null ]
+    [ 'foobar abracadabra', "[plain:other,(0:8),='foobar a'][plain:b_after_a,(8:9),='b'][plain:other,(9:15),='racada'][plain:b_after_a,(15:16),='b'][plain:other,(16:18),='ra']", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -659,7 +659,7 @@ $parse_md_stars = ->
 @match_start_of_line = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { dotall: true, }
+  lexer = new Interlex { dotall: true, end_token: true, }
   #.........................................................................................................
   do =>
     mode    = 'plain'
