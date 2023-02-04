@@ -35,32 +35,86 @@ types                     = new ( require 'intertype' ).Intertype
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@GUY_fs_walk_lines_yields_from_empty_file = ( T, done ) ->
+@GUY_fs_walk_lines = ( T, done ) ->
   GUY     = require H.guy_path
   probes_and_matchers = [
-    [ '../../../assets/a-few-words.txt',                            [ "1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's", ], ]
-    [ '../../../assets/datamill/empty-file.txt',                    [ '1:',                                                                                                                           ], ]
-    [ '../../../assets/datamill/file-with-single-nl.txt',           [ '1:', '2:',                                                                                                                     ], ]
-    [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',    [ '1:1', '2:2', '3:3',                                                                                                            ], ]
-    [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt',  [ '1:1', '2:2', '3:3', '4:',                                                                                                      ], ]
-    [ '../../../assets/datamill/windows-crlf.txt',                  [ '1:this', '2:file', '3:written', '4:on', '5:MS Notepad'                                                                         ], ]
-    [ '../../../assets/datamill/mixed-usage.txt',                   [ '1:all', '2:bases', '3:', '4:are belong', '5:to us', '6:' ], ]
+    [ [ '../../../assets/a-few-words.txt',                           null,              ], [ "1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's", ], ]
+    [ [ '../../../assets/datamill/empty-file.txt',                   null,              ], [ '1:',                                                                                                                           ], ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt',          null,              ], [ '1:', '2:',                                                                                                                     ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',   null,              ], [ '1:1', '2:2', '3:3',                                                                                                            ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null,              ], [ '1:1', '2:2', '3:3', '4:',                                                                                                      ], ]
+    [ [ '../../../assets/datamill/windows-crlf.txt',                 null,              ], [ '1:this', '2:file', '3:written', '4:on', '5:MS Notepad'                                                                         ], ]
+    [ [ '../../../assets/datamill/mixed-usage.txt',                  null,              ], [ '1:all', '2:bases', '3:', '4:are belong', '5:to us', '6:' ], ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt',              null,              ], [ '1:', '2:', '3:', '4:', '5:', '6:', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     null,              ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: true, },   ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: false, },  ], [ '1:line   ', '2:with   ', '3:trailing\t\t', '4:whitespace\u3000 ', ], ]
     ]
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
-    # for chunk_size in [ 1 .. 200 ] by +10
-    for chunk_size in [ 20 ]
-      result  = []
+    for chunk_size in [ 1 .. 200 ] by +10
+    # for chunk_size in [ 200 ]
+      result    = []
+      result_2  = []
       # whisper '^45-1^', '----------------------------------'
-      path  = PATH.resolve PATH.join __dirname, probe
-      lnr   = 0
-      for line from GUY.fs.walk_lines path, { chunk_size, }
+      [ path
+        cfg ]   = probe
+      path      = PATH.resolve PATH.join __dirname, path
+      text      = FS.readFileSync path, { encoding: 'utf-8', }
+      matcher_2 = text.split /\r\n|\r|\n/u
+      matcher_2 = ( line.trimEnd() for line in matcher_2 ) if ( cfg?.trim ? true )
+      lnr       = 0
+      for line from GUY.fs.walk_lines path, { chunk_size, cfg..., }
         lnr++
         result.push "#{lnr}:#{line}"
-      urge '^35-1^', result
-      help '^35-2^', matcher
+        result_2.push line
+      # urge '^35-1^', result
+      # help '^35-2^', matcher
       T?.eq result, matcher
+      T?.eq result_2, matcher_2
   #.........................................................................................................
+  # debug '^45-1^', '\r\r\n\r\n\n\n'.split /\r\n|\r|\n/
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_str_walk_lines = ( T, done ) ->
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt',                           null,              ], [ "1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's", ], ]
+    [ [ '../../../assets/datamill/empty-file.txt',                   null,              ], [ '1:',                                                                                                                           ], ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt',          null,              ], [ '1:', '2:',                                                                                                                     ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',   null,              ], [ '1:1', '2:2', '3:3',                                                                                                            ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null,              ], [ '1:1', '2:2', '3:3', '4:',                                                                                                      ], ]
+    [ [ '../../../assets/datamill/windows-crlf.txt',                 null,              ], [ '1:this', '2:file', '3:written', '4:on', '5:MS Notepad'                                                                         ], ]
+    [ [ '../../../assets/datamill/mixed-usage.txt',                  null,              ], [ '1:all', '2:bases', '3:', '4:are belong', '5:to us', '6:' ], ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt',              null,              ], [ '1:', '2:', '3:', '4:', '5:', '6:', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     null,              ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: true, },   ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: false, },  ], [ '1:line   ', '2:with   ', '3:trailing\t\t', '4:whitespace\u3000 ', ], ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    result    = []
+    result_2  = []
+    [ path
+      cfg ]   = probe
+    path      = PATH.resolve PATH.join __dirname, path
+    text      = FS.readFileSync path, { encoding: 'utf-8', }
+    matcher_2 = text.split /\r\n|\r|\n/u
+    matcher_2 = ( line.trimEnd() for line in matcher_2 ) if ( cfg?.trim ? true )
+    lnr       = 0
+    for line from GUY.str.walk_lines text, cfg
+      lnr++
+      result.push "#{lnr}:#{line}"
+      result_2.push line
+    # whisper '^35-1^', rpr text
+    # urge '^35-1^', result
+    # help '^35-2^', matcher
+    T?.eq result, matcher
+    T?.eq result_2, matcher_2
+  #.........................................................................................................
+  # debug '^45-1^', '\r\r\n\r\n\n\n'.split /\r\n|\r|\n/
   done?()
   return null
 
@@ -87,8 +141,6 @@ types                     = new ( require 'intertype' ).Intertype
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  @GUY_fs_walk_lines_yields_from_empty_file()
-  # test @GUY_fs_walk_lines_yields_from_empty_file
-
+  test @
+  # test @GUY_fs_walk_lines
 
