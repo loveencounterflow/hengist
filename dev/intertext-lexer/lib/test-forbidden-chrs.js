@@ -40,36 +40,117 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.add_forbidden_chrs = function(T, done) {
-    var Interlex, c, lexer;
-    ({
-      // T?.halt_on_error()
-      Interlex,
-      compose: c
-    } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex();
-    (() => {      //.........................................................................................................
-      var catchall, exclude, forbidden, i, len, mode, probe, ref, results;
+  this.add_reserved_chrs = async function(T, done) {
+    var Interlex, add_lexemes;
+    // T?.halt_on_error()
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    add_lexemes = function(lexer) {
+      var mode;
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'star1',
-        pattern: /(?<!\*)\*(?!\*)/u,
-        forbidden: '*'
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u,
+        reserved: '\\'
       });
-      // lexer.new_pattern_
-      exclude = c.charSet.complement.bind(c.charSet);
-      // debug pattern = c.charSet.union ( exclude '*' ), ( exclude 'x' )
-      forbidden = /[*x#]/;
-      catchall = c.suffix('*', exclude(forbidden));
-      debug({forbidden, catchall});
-      ref = ['helo', 'helo*x', '*x'];
+      lexer.add_lexeme({
+        mode,
+        tid: 'star2',
+        pattern: /(?<!\*)\*\*(?!\*)/u,
+        reserved: '*'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'heading',
+        pattern: /^(?<hashes>#+)\s+/u,
+        reserved: '#'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'word',
+        pattern: /\p{Letter}+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'number_symbol',
+        pattern: /#(?=\p{Number})/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'number',
+        pattern: /\p{Number}+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'ws',
+        pattern: /\s+/u
+      });
+      lexer.add_catchall_lexeme({mode});
+      lexer.add_reserved_lexeme({mode});
+      return null;
+    };
+    await (async() => {      //.........................................................................................................
+      var error, i, len, matcher, probe, probes_and_matchers, results;
+      probes_and_matchers = [['helo', "word:'helo'", null], ['helo*x', "word:'helo'$reserved:'*'word:'x'", null], ['*x', "$reserved:'*'word:'x'", null], ['## question #1 and a hash: #', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:':'ws:' '$reserved:'#'", null], ['## question #1 and a hash: \\#', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:':'ws:' 'escchr:'\\\\#'", null], [':.;*#', "$catchall:':'$catchall:'.'$catchall:';'$reserved:'*'$reserved:'#'", null]];
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        probe = ref[i];
-        debug(GUY.trm.reverse(GUY.trm.steel(probe)));
-        help(probe.match(catchall));
-        results.push(warn(probe.match(forbidden)));
+      for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+        [probe, matcher, error] = probes_and_matchers[i];
+        results.push((await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve, reject) {
+            var lexer, result, result_rpr, t;
+            lexer = new Interlex({
+              catchall_concat: false,
+              reserved_concat: false
+            });
+            add_lexemes(lexer);
+            // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
+            result = lexer.run(probe);
+            // H.tabulate ( rpr probe ), result
+            result_rpr = ((function() {
+              var j, len1, results1;
+              results1 = [];
+              for (j = 0, len1 = result.length; j < len1; j++) {
+                t = result[j];
+                results1.push(`${t.tid}:${rpr(t.value)}`);
+              }
+              return results1;
+            })()).join('');
+            return resolve(result_rpr);
+          });
+        })));
+      }
+      return results;
+    })();
+    await (async() => {      //.........................................................................................................
+      var error, i, len, matcher, probe, probes_and_matchers, results;
+      probes_and_matchers = [['helo', "word:'helo'", null], ['helo*x', "word:'helo'$reserved:'*'word:'x'", null], ['*x', "$reserved:'*'word:'x'", null], ['## question #1 and a hash: #', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:': '$reserved:'#'", null], ['## question #1 and a hash: \\#', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:': 'escchr:'\\\\#'", null], [':.;*#', "$catchall:':.;'$reserved:'*#'", null]];
+      results = [];
+      for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+        [probe, matcher, error] = probes_and_matchers[i];
+        results.push((await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve, reject) {
+            var lexer, result, result_rpr, t;
+            lexer = new Interlex({
+              catchall_concat: true,
+              reserved_concat: true
+            });
+            add_lexemes(lexer);
+            // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
+            result = lexer.run(probe);
+            // H.tabulate ( rpr probe ), result
+            result_rpr = ((function() {
+              var j, len1, results1;
+              results1 = [];
+              for (j = 0, len1 = result.length; j < len1; j++) {
+                t = result[j];
+                results1.push(`${t.tid}:${rpr(t.value)}`);
+              }
+              return results1;
+            })()).join('');
+            return resolve(result_rpr);
+          });
+        })));
       }
       return results;
     })();
@@ -82,7 +163,8 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return this.add_forbidden_chrs();
+      // @add_reserved_chrs()
+      return test(this.add_reserved_chrs);
     })();
   }
 

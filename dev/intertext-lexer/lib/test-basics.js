@@ -1669,7 +1669,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_line_by_line = function(T, done) {
-    var $, Interlex, Pipeline, compose, d, first, last, line, md_lexer, new_toy_md_lexer, new_toy_parser, parser, probe, ref1, ref2, result, result_rpr, token, transforms, walk_lines;
+    var $, Interlex, Pipeline, compose, d, first, last, line, md_lexer, new_toy_md_lexer, new_toy_parser, parser, probe, ref1, ref2, result, result_rpr, token, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -1742,41 +1742,11 @@ the
       return p;
     };
     //.........................................................................................................
-    /* TAINT use upcoming implementation in `guy` */
-    walk_lines = function*(text, cfg) {
-      var R, Y/* internal error */, last_position, match, pattern, template;
-      validate.text(text);
-      template = {
-        keep_newlines: true
-      };
-      cfg = {...template, ...cfg};
-      pattern = /.*?(\n|$)/suy;
-      last_position = text.length - 1;
-      while (true) {
-        if (pattern.lastIndex > last_position) {
-          break;
-        }
-        if ((match = text.match(pattern)) == null) {
-          break;
-        }
-        Y = match[0];
-        if (!cfg.keep_newlines) {
-          Y = Y.slice(0, Y.length - 1);
-        }
-        yield Y;
-      }
-      R = walk_lines();
-      R.reset = function() {
-        return pattern.lastIndex = 0;
-      };
-      return R;
-    };
-    //.........................................................................................................
     md_lexer = new_toy_md_lexer('md');
     parser = new_toy_parser(md_lexer);
     //.........................................................................................................
     result = [];
-    ref1 = walk_lines(probe);
+    ref1 = GUY.str.walk_lines(probe);
     for (line of ref1) {
       parser.send(line);
       ref2 = parser.walk();
@@ -2196,6 +2166,61 @@ the
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.match_end_of_line = function(T, done) {
+    var Interlex, c, lexer, line, matcher, probe, ref1, ref2, result, result_rpr, token;
+    ({
+      // T?.halt_on_error()
+      Interlex,
+      compose: c
+    } = require('../../../apps/intertext-lexer'));
+    lexer = new Interlex();
+    (() => {      //.........................................................................................................
+      var mode;
+      mode = 'plain';
+      lexer.add_lexeme({
+        mode,
+        tid: 'eol',
+        pattern: /$/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'ws',
+        pattern: /\s+/u
+      });
+      return lexer.add_lexeme({
+        mode,
+        tid: 'word',
+        pattern: /\S+/u
+      });
+    })();
+    //.........................................................................................................
+    probe = `A line by line
+lexing
+probe\x20\x20\x20`;
+    matcher = ["[plain:word,(0:1),='A']", "[plain:ws,(1:2),=' ']", "[plain:word,(2:6),='line']", "[plain:ws,(6:7),=' ']", "[plain:word,(7:9),='by']", "[plain:ws,(9:10),=' ']", "[plain:word,(10:14),='line']", "[plain:eol,(14:14),='']", "[plain:word,(0:6),='lexing']", "[plain:eol,(6:6),='']", "[plain:word,(0:5),='probe']", "[plain:eol,(5:5),='']"];
+    //.........................................................................................................
+    result = [];
+    result_rpr = [];
+    ref1 = GUY.str.walk_lines(probe);
+    for (line of ref1) {
+      ref2 = lexer.walk(line);
+      for (token of ref2) {
+        result.push(token);
+        result_rpr.push(lexer.rpr_token(token));
+      }
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(result_rpr, matcher);
+    }
+    H.tabulate(rpr(probe), result);
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -2207,7 +2232,10 @@ the
       // test @using_lexer_without_lexemes
       // test @lex_tags
       // test @lex_tags_with_rpr
-      return this.parse_line_by_line();
+      // @parse_line_by_line()
+      // test @parse_line_by_line
+      // @match_end_of_line()
+      return test(this.match_end_of_line);
     })();
   }
 

@@ -76,7 +76,24 @@
       T.eq(GUY.str.escape_for_regex(''), '');
     }
     if (T != null) {
-      T.eq(GUY.str.escape_for_regex('.*+?^${}()|[]\\'), '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\');
+      T.eq(GUY.str.escape_for_regex('xy.*+?^${}()|[]\\'), 'xy\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.guy_str_escape_for_regex_class = function(T, done) {
+    var GUY;
+    // T?.halt_on_error()
+    GUY = require(H.guy_path);
+    if (T != null) {
+      T.eq(GUY.str.escape_for_regex_class(''), '');
+    }
+    if (T != null) {
+      T.eq(GUY.str.escape_for_regex_class('xy.*+?^${}()|[]\\/'), 'xy.*+?\\^${}()|[\\]\\\\/');
+    }
+    if (T != null) {
+      T.eq(GUY.str.escape_for_regex_class('^-[]/'), '\\^\\-[\\]\\/');
     }
     return typeof done === "function" ? done() : void 0;
   };
