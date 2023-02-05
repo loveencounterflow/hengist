@@ -59,7 +59,7 @@ specifiers:
   get-source: ^2.0.11
   glob: 7.2.0
   got: ^11.8.2
-  guy: '12'
+  guy: ^12.9.0
   guy-test: 5.0.1
   hamt: ^2.2.2
   hashbow: ^1.1.1
@@ -219,7 +219,7 @@ dependencies:
   get-source: 2.0.12
   glob: 7.2.0
   got: 11.8.5
-  guy: 12.0.0_ht6cs7t3bgv2a4e27mplshtqbi
+  guy: 12.9.0_wiwzbpu5ljcwujsfzaprojuquu
   guy-test: 5.0.1_4prdxtoba2tordf5bhh3dou7hy
   hamt: 2.2.2
   hashbow: 1.1.1
@@ -2731,19 +2731,21 @@ packages:
       letsfreezethat: 3.1.0
     dev: false
 
-  /guy/12.0.0_ht6cs7t3bgv2a4e27mplshtqbi:
-    resolution: {integrity: sha512-r/y6jCVEeg+QlXZaJEHW+Z5ByWyQivGzLMMDkErjbFRepVh0ssBSoVGj+Vn4NgmGhGlBjmNfAWhsifzHhl58gw==}
+  /guy/12.9.0_wiwzbpu5ljcwujsfzaprojuquu:
+    resolution: {integrity: sha512-SpCsTj+NxIsj9xcWWxYdnjmJxV7ywqo5lgfIN7DsPHjQGbZUsqhPlymodAi6UhmBhbzxj3gpHyZYCA/65Zdm+A==}
     peerDependencies:
       acorn: ^8.7.1
       acorn-loose: ^8.3.0
       acorn-walk: ^8.2.0
       astring: ^1.8.3
+      dayjs: ^1.11.7
       tmp: ^0.2.1
     dependencies:
       acorn: 8.7.1
       acorn-loose: 8.3.0
       acorn-walk: 8.2.0
       astring: 1.8.3
+      dayjs: 1.11.3
       intertype-legacy: 7.7.1
       letsfreezethat: 3.1.0
       tmp: 0.2.1
