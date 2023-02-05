@@ -49,7 +49,16 @@ types                     = new ( require 'intertype' ).Intertype
   # T?.halt_on_error()
   GUY     = require H.guy_path
   T?.eq ( GUY.str.escape_for_regex ''                 ), ''
-  T?.eq ( GUY.str.escape_for_regex '.*+?^${}()|[]\\'  ), '\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\'
+  T?.eq ( GUY.str.escape_for_regex 'xy.*+?^${}()|[]\\'  ), 'xy\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\'
+  return done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@guy_str_escape_for_regex_class = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY     = require H.guy_path
+  T?.eq ( GUY.str.escape_for_regex_class ''                     ), ''
+  T?.eq ( GUY.str.escape_for_regex_class 'xy.*+?^${}()|[]\\/'   ), 'xy.*+?\\^${}()|[\\]\\\\/'
+  T?.eq ( GUY.str.escape_for_regex_class '^-[]/'                ), '\\^\\-[\\]\\/'
   return done?()
 
 
