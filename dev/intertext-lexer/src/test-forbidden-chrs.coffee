@@ -40,26 +40,60 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@add_forbidden_chrs = ( T, done ) ->
+@add_reserved_chrs = ( T, done ) ->
   # T?.halt_on_error()
-  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex()
+  { Interlex, } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
-  do =>
+  add_lexemes   = ( lexer ) ->
     mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'star1',            pattern: ( /(?<!\*)\*(?!\*)/u ), forbidden: '*' }
-    # lexer.new_pattern_
-    exclude = c.charSet.complement.bind c.charSet
-    # debug pattern = c.charSet.union ( exclude '*' ), ( exclude 'x' )
-    forbidden = /[*x#]/
-    catchall = c.suffix '*', exclude forbidden
-    debug { forbidden, catchall, }
-    for probe in [ 'helo', 'helo*x', '*x', ]
-      debug GUY.trm.reverse GUY.trm.steel probe
-      help probe.match catchall
-      warn probe.match forbidden
+    lexer.add_lexeme { mode, tid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+    lexer.add_lexeme { mode, tid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
+    lexer.add_lexeme { mode, tid: 'heading',          pattern: ( /^(?<hashes>#+)\s+/u ), reserved: '#', }
+    lexer.add_lexeme { mode, tid: 'word',             pattern: ( /\p{Letter}+/u ), }
+    lexer.add_lexeme { mode, tid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
+    lexer.add_lexeme { mode, tid: 'number',           pattern: ( /\p{Number}+/u ), }
+    lexer.add_lexeme { mode, tid: 'ws',               pattern: ( /\s+/u ), }
+    lexer.add_catchall_lexeme { mode, }
+    lexer.add_reserved_lexeme { mode, }
+    return null
   #.........................................................................................................
-
+  await do =>
+    probes_and_matchers = [
+      [ 'helo', "word:'helo'", null ]
+      [ 'helo*x', "word:'helo'$reserved:'*'word:'x'", null ]
+      [ '*x', "$reserved:'*'word:'x'", null ]
+      [ '## question #1 and a hash: #', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:':'ws:' '$reserved:'#'", null ]
+      [ '## question #1 and a hash: \\#', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:':'ws:' 'escchr:'\\\\#'", null ]
+      [ ':.;*#', "$catchall:':'$catchall:'.'$catchall:';'$reserved:'*'$reserved:'#'", null ]
+      ]
+    for [ probe, matcher, error, ] in probes_and_matchers
+      await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+        lexer = new Interlex { catchall_concat: false, reserved_concat: false, }
+        add_lexemes lexer
+        # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
+        result      = lexer.run probe
+        # H.tabulate ( rpr probe ), result
+        result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join ''
+        resolve result_rpr
+  #.........................................................................................................
+  await do =>
+    probes_and_matchers = [
+      [ 'helo', "word:'helo'", null ]
+      [ 'helo*x', "word:'helo'$reserved:'*'word:'x'", null ]
+      [ '*x', "$reserved:'*'word:'x'", null ]
+      [ '## question #1 and a hash: #', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:': '$reserved:'#'", null ]
+      [ '## question #1 and a hash: \\#', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'$catchall:': 'escchr:'\\\\#'", null ]
+      [ ':.;*#', "$catchall:':.;'$reserved:'*#'", null ]
+      ]
+    for [ probe, matcher, error, ] in probes_and_matchers
+      await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+        lexer = new Interlex { catchall_concat: true, reserved_concat: true, }
+        add_lexemes lexer
+        # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
+        result      = lexer.run probe
+        # H.tabulate ( rpr probe ), result
+        result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join ''
+        resolve result_rpr
   #.........................................................................................................
   done?()
   return null
@@ -67,5 +101,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 
 ############################################################################################################
 if require.main is module then do =>
-  @add_forbidden_chrs()
+  # @add_reserved_chrs()
+  test @add_reserved_chrs
   # test @

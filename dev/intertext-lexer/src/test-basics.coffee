@@ -668,6 +668,49 @@ $parse_md_stars = ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@match_end_of_line = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  lexer = new Interlex()
+  #.........................................................................................................
+  do =>
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, tid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, tid: 'word',     pattern: ( /\S+/u ), }
+  #.........................................................................................................
+  probe = """
+    A line by line
+    lexing
+    probe\x20\x20\x20
+    """
+  matcher = [
+    "[plain:word,(0:1),='A']"
+    "[plain:ws,(1:2),=' ']"
+    "[plain:word,(2:6),='line']"
+    "[plain:ws,(6:7),=' ']"
+    "[plain:word,(7:9),='by']"
+    "[plain:ws,(9:10),=' ']"
+    "[plain:word,(10:14),='line']"
+    "[plain:eol,(14:14),='']"
+    "[plain:word,(0:6),='lexing']"
+    "[plain:eol,(6:6),='']"
+    "[plain:word,(0:5),='probe']"
+    "[plain:eol,(5:5),='']" ]
+  #.........................................................................................................
+  result      = []
+  result_rpr  = []
+  for line from GUY.str.walk_lines probe
+    for token from lexer.walk line
+      result.push token
+      result_rpr.push lexer.rpr_token token
+  #.........................................................................................................
+  T?.eq result_rpr, matcher
+  H.tabulate ( rpr probe ), result
+  done?()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -679,7 +722,10 @@ if require.main is module then do =>
   # test @using_lexer_without_lexemes
   # test @lex_tags
   # test @lex_tags_with_rpr
-  @parse_line_by_line()
+  # @parse_line_by_line()
+  # test @parse_line_by_line
+  # @match_end_of_line()
+  test @match_end_of_line
   # test @parse_line_by_line
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
