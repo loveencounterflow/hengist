@@ -447,28 +447,11 @@ $parse_md_stars = ->
     p.push $parse_md_stars()
     return p
   #.........................................................................................................
-  ### TAINT use upcoming implementation in `guy` ###
-  walk_lines = ( text, cfg ) ->
-    validate.text text
-    template      = { keep_newlines: true, }
-    cfg           = { template..., cfg..., }
-    pattern       = /.*?(\n|$)/suy
-    last_position = text.length - 1
-    loop
-      break if pattern.lastIndex > last_position
-      break unless ( match = text.match pattern )? ### internal error ###
-      Y = match[ 0 ]
-      Y = Y[ ... Y.length - 1 ] unless cfg.keep_newlines
-      yield Y
-    R = walk_lines()
-    R.reset = -> pattern.lastIndex = 0
-    return R
-  #.........................................................................................................
   md_lexer  = new_toy_md_lexer 'md'
   parser    = new_toy_parser md_lexer
   #.........................................................................................................
   result    = []
-  for line from walk_lines probe
+  for line from GUY.str.walk_lines probe
     parser.send line
     for d from parser.walk()
       result.push d
