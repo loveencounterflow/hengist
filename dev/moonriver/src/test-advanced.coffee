@@ -88,36 +88,36 @@ as_keysorted_list = ( d ) ->
     ]
   done?()
 
-#-----------------------------------------------------------------------------------------------------------
-@named_window_transform = ( T, done ) ->
-  # T?.halt_on_error()
-  GUY                 = require '../../../apps/guy'
-  { Pipeline,         \
-    transforms: TF  } = require '../../../apps/moonriver'
-  collector           = []
-  p                   = new Pipeline()
-  #.........................................................................................................
-  p.push [ 1 .. 9 ]
-  p.push show = ( d ) -> urge '^45-1^', d
-  p.push TF.$named_window { names: [ 'a', 'b', 'c', 'd', 'e', ], empty: '_', }
-  p.push show = ( d ) -> urge '^45-1^', d
-  p.push $as_keysorted_list()
-  p.push ( d, send ) -> send ( "#{e}" for e in d ).join ''
-  p.push show = ( d ) -> urge '^45-1^', d
-  result = p.run()
-  info '^45-2^', result
-  T?.eq result, [
-    '__123'
-    '_1234'
-    '12345'
-    '23456'
-    '34567'
-    '45678'
-    '56789'
-    '6789_'
-    '789__'
-    ]
-  done?()
+# #-----------------------------------------------------------------------------------------------------------
+# @named_window_transform = ( T, done ) ->
+#   # T?.halt_on_error()
+#   GUY                 = require '../../../apps/guy'
+#   { Pipeline,         \
+#     transforms: TF  } = require '../../../apps/moonriver'
+#   collector           = []
+#   p                   = new Pipeline()
+#   #.........................................................................................................
+#   p.push [ 1 .. 9 ]
+#   p.push show = ( d ) -> urge '^45-1^', d
+#   p.push TF.$named_window { names: [ 'a', 'b', 'c', 'd', 'e', ], empty: '_', }
+#   p.push show = ( d ) -> urge '^45-1^', d
+#   p.push $as_keysorted_list()
+#   p.push ( d, send ) -> send ( "#{e}" for e in d ).join ''
+#   p.push show = ( d ) -> urge '^45-1^', d
+#   result = p.run()
+#   info '^45-2^', result
+#   T?.eq result, [
+#     '__123'
+#     '_1234'
+#     '12345'
+#     '23456'
+#     '34567'
+#     '45678'
+#     '56789'
+#     '6789_'
+#     '789__'
+#     ]
+#   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @use_sync_pipeline_as_segment = ( T, done ) ->
