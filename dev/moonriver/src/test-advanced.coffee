@@ -65,13 +65,13 @@ as_keysorted_list = ( d ) ->
   # T?.halt_on_error()
   { Pipeline,         \
     transforms: TF  } = require '../../../apps/moonriver'
-  { $window         } = require '../../../apps/moonriver/lib/transforms'
   collector           = []
   p                   = new Pipeline()
   #.........................................................................................................
   p.push [ 1 .. 9 ]
   p.push TF.$window { min: -2, max: +2, empty: '_', }
-  p.push $as_keysorted_list()
+  # p.push show = ( d ) -> info '^45-1^', d
+  # p.push ( d, send ) -> d.join ''
   p.push ( d, send ) -> send ( "#{e}" for e in d ).join ''
   p.push show = ( d ) -> urge '^45-1^', d
   result = p.run()
@@ -351,6 +351,7 @@ as_keysorted_list = ( d ) ->
 ############################################################################################################
 if require.main is module then await do =>
   # @window_transform()
+  test @window_transform
   # test @window_transform
   # @use_pipeline_as_segment_preview()
   # @named_window_transform()
@@ -367,7 +368,7 @@ if require.main is module then await do =>
   # await @async_protocol_3()
   # test @modifiers_preserved_for_pipeline_segments
   # test @segment_pipelines_can_be_nested
-  test @
+  # test @
 
 
 
