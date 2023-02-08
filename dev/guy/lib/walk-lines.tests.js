@@ -320,33 +320,434 @@
     return null;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @GUY_fs_walk_lines_with_custom_newline = ( T, done ) ->
-  //   GUY     = require H.guy_path
-  //   GUY.temp.with_file ({ path, }) ->
-  //     FS.writeFileSync path, "foo𠀀𠀐bar𠀀𠀐baz𠀀𠀐"
-  //     #.......................................................................................................
-  //     # for chunk_size in [ 1 .. 5 ] by +1
-  //     for chunk_size in [ 1 .. 1 ] by +1
-  //       result  = []
-  //       lnr     = 0
-  //       for line from GUY.fs.walk_lines path, { chunk_size, newline: '𠀀𠀐', }
-  //         lnr++
-  //         debug '^4323^', "##{lnr}:#{line}"
-  //         result.push "##{lnr}:#{line}"
-  //       T?.eq result, [ '#1:foo', '#2:bar', '#3:baz', '#4:', ]
-  //   #.........................................................................................................
-  //   done?()
-  //   return null
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_str_walk_lines_with_positions = function(T, done) {
+    var GUY, cfg, d, i, len, line, matcher, matcher_2, path, probe, probes_and_matchers, ref, ref1, result, result_2, text;
+    GUY = require(H.guy_path);
+    probes_and_matchers = [
+      [
+        ['../../../assets/a-few-words.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: "Ångström's",
+            nl: '\n'
+          },
+          {
+            idx: 11,
+            lnr: 2,
+            line: 'éclair',
+            nl: '\n'
+          },
+          {
+            idx: 18,
+            lnr: 3,
+            line: "éclair's",
+            nl: '\n'
+          },
+          {
+            idx: 27,
+            lnr: 4,
+            line: 'éclairs',
+            nl: '\n'
+          },
+          {
+            idx: 35,
+            lnr: 5,
+            line: 'éclat',
+            nl: '\n'
+          },
+          {
+            idx: 41,
+            lnr: 6,
+            line: "éclat's",
+            nl: '\n'
+          },
+          {
+            idx: 49,
+            lnr: 7,
+            line: 'élan',
+            nl: '\n'
+          },
+          {
+            idx: 54,
+            lnr: 8,
+            line: "élan's",
+            nl: '\n'
+          },
+          {
+            idx: 61,
+            lnr: 9,
+            line: 'émigré',
+            nl: '\n'
+          },
+          {
+            idx: 68,
+            lnr: 10,
+            line: "émigré's",
+            nl: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/empty-file.txt',
+        null],
+        [
+          {
+            idx: -1,
+            lnr: 1,
+            text: '',
+            nl: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-single-nl.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: '',
+            nl: '\n'
+          },
+          {
+            idx: 2,
+            lnr: 2,
+            text: '',
+            nl: '\n'
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-3-lines-no-eofnl.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: '1',
+            nl: '\n'
+          },
+          {
+            idx: 2,
+            lnr: 2,
+            line: '2',
+            nl: '\n'
+          },
+          {
+            idx: 4,
+            lnr: 3,
+            line: '3',
+            nl: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-3-lines-with-eofnl.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: '1',
+            nl: '\n'
+          },
+          {
+            idx: 2,
+            lnr: 2,
+            line: '2',
+            nl: '\n'
+          },
+          {
+            idx: 4,
+            lnr: 3,
+            line: '3',
+            nl: '\n'
+          },
+          {
+            idx: 7,
+            lnr: 4,
+            text: '',
+            nl: '\n'
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/windows-crlf.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: 'this',
+            nl: '\r\n'
+          },
+          {
+            idx: 6,
+            lnr: 2,
+            line: 'file',
+            nl: '\r\n'
+          },
+          {
+            idx: 12,
+            lnr: 3,
+            line: 'written',
+            nl: '\r\n'
+          },
+          {
+            idx: 21,
+            lnr: 4,
+            line: 'on',
+            nl: '\r\n'
+          },
+          {
+            idx: 25,
+            lnr: 5,
+            line: 'MS Notepad',
+            nl: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/mixed-usage.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: 'all',
+            nl: '\r'
+          },
+          {
+            idx: 4,
+            lnr: 2,
+            line: '𠀀bases',
+            nl: '\r'
+          },
+          {
+            idx: 12,
+            lnr: 3,
+            line: '',
+            nl: '\r'
+          },
+          {
+            idx: 13,
+            lnr: 4,
+            line: 'are belong',
+            nl: '\r\n'
+          },
+          {
+            idx: 25,
+            lnr: 5,
+            line: '𠀀to us',
+            nl: '\n'
+          },
+          {
+            idx: 34,
+            lnr: 6,
+            text: '',
+            nl: '\n'
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/all-empty-mixed.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: '',
+            nl: '\r'
+          },
+          {
+            idx: 1,
+            lnr: 2,
+            line: '',
+            nl: '\r\n'
+          },
+          {
+            idx: 3,
+            lnr: 3,
+            line: '',
+            nl: '\r\n'
+          },
+          {
+            idx: 5,
+            lnr: 4,
+            line: '',
+            nl: '\n'
+          },
+          {
+            idx: 6,
+            lnr: 5,
+            line: '',
+            nl: '\n'
+          },
+          {
+            idx: 8,
+            lnr: 6,
+            text: '',
+            nl: '\n'
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/lines-with-trailing-spcs.txt',
+        null],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: 'line',
+            nl: '\n'
+          },
+          {
+            idx: 8,
+            lnr: 2,
+            line: 'with',
+            nl: '\n'
+          },
+          {
+            idx: 16,
+            lnr: 3,
+            line: 'trailing',
+            nl: '\n'
+          },
+          {
+            idx: 27,
+            lnr: 4,
+            line: 'whitespace',
+            nl: ''
+          }
+        ]
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: true
+          }
+        ],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: 'line',
+            nl: '\n'
+          },
+          {
+            idx: 8,
+            lnr: 2,
+            line: 'with',
+            nl: '\n'
+          },
+          {
+            idx: 16,
+            lnr: 3,
+            line: 'trailing',
+            nl: '\n'
+          },
+          {
+            idx: 27,
+            lnr: 4,
+            line: 'whitespace',
+            nl: ''
+          }
+        ]
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: false
+          }
+        ],
+        [
+          {
+            idx: 0,
+            lnr: 1,
+            line: 'line   ',
+            nl: '\n'
+          },
+          {
+            idx: 8,
+            lnr: 2,
+            line: 'with   ',
+            nl: '\n'
+          },
+          {
+            idx: 16,
+            lnr: 3,
+            line: 'trailing\t\t',
+            nl: '\n'
+          },
+          {
+            idx: 27,
+            lnr: 4,
+            line: 'whitespace　 ',
+            nl: ''
+          }
+        ]
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher] = probes_and_matchers[i];
+      result = [];
+      result_2 = [];
+      [path, cfg] = probe;
+      path = PATH.resolve(PATH.join(__dirname, path));
+      // help '^23-1^', path
+      text = FS.readFileSync(path, {
+        encoding: 'utf-8'
+      });
+      matcher_2 = text.split(/\r\n|\r|\n/u);
+      if ((ref = cfg != null ? cfg.trim : void 0) != null ? ref : true) {
+        matcher_2 = (function() {
+          var j, len1, results;
+          results = [];
+          for (j = 0, len1 = matcher_2.length; j < len1; j++) {
+            line = matcher_2[j];
+            results.push(line.trimEnd());
+          }
+          return results;
+        })();
+      }
+      ref1 = GUY.str.walk_lines_with_positions(text, cfg);
+      for (d of ref1) {
+        if (line !== '') {
+          if (T != null) {
+            T.eq((Array.from(text.slice(d.idx, +(d.idx + 2) + 1 || 9e9)))[0], (Array.from(d.line))[0]);
+          }
+        }
+        result.push(d);
+      }
+      echo([probe, result]);
+      // help '^35-2^', matcher
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
 
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // @GUY_str_walk_lines_with_positions()
+      return test(this.GUY_str_walk_lines_with_positions);
     })();
   }
 
-  // test @GUY_fs_walk_lines
+  // test @
+// test @GUY_fs_walk_lines
 
 }).call(this);
 

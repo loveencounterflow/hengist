@@ -123,21 +123,30 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.parse_headers = async function(T, done) {
+  this.parse_headings = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    probes_and_matchers = [["# H1", "<h1>H1</h1>"]];
+    // [ "# H1", "<h1>H1\n", ]
+    // [ "\n# H1", "\n<h1>H1\n", ]
+    // [ "## Section", "<h2>Section\n", ]
+    // [ "not a\n# heading", 'not a\n# heading\n', ]
+    // [ 'x', 'x\n', null ]
+    // [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
+    probes_and_matchers = [["paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n']];
 //.........................................................................................................
+// [ '', '', ]
+// [ "\n", 'not a\nheading\n', ]
+// [ "\n\nnot a\nheading", 'not a\nheading\n', ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var d, line, p, ref1, result, result_rpr;
           p = new Hypedown_parser();
-          p.send(XXX_new_token('^æ19^', {
-            start: 0,
-            stop: probe.length
-          }, 'plain', 'p', null, probe));
+          ref1 = GUY.str.walk_lines(probe);
+          for (line of ref1) {
+            p.send(line);
+          }
           result = p.run();
           result_rpr = ((function() {
             var j, len1, results;
@@ -151,7 +160,7 @@
             return results;
           })()).join('');
           // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, result); // unless result_rpr is matcher
           return resolve(result_rpr);
         });
       });
@@ -165,7 +174,7 @@
       // test @
       // test @parse_codespans_and_single_star
       // test @parse_md_stars_markup
-      return test(this.parse_headers);
+      return test(this.parse_headings);
     })();
   }
 

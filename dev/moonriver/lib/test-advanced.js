@@ -113,13 +113,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.window_transform = function(T, done) {
-    var $window, Pipeline, TF, collector, p, result, show;
+    var Pipeline, TF, collector, p, result, show;
     ({
       // T?.halt_on_error()
       Pipeline,
       transforms: TF
     } = require('../../../apps/moonriver'));
-    ({$window} = require('../../../apps/moonriver/lib/transforms'));
     collector = [];
     p = new Pipeline();
     //.........................................................................................................
@@ -129,7 +128,8 @@
       max: +2,
       empty: '_'
     }));
-    p.push($as_keysorted_list());
+    // p.push show = ( d ) -> info '^45-1^', d
+    // p.push ( d, send ) -> d.join ''
     p.push(function(d, send) {
       var e;
       return send(((function() {
@@ -152,52 +152,36 @@
     return typeof done === "function" ? done() : void 0;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.named_window_transform = function(T, done) {
-    var Pipeline, TF, collector, p, result, show;
-    // T?.halt_on_error()
-    GUY = require('../../../apps/guy');
-    ({
-      Pipeline,
-      transforms: TF
-    } = require('../../../apps/moonriver'));
-    collector = [];
-    p = new Pipeline();
-    //.........................................................................................................
-    p.push([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    p.push(show = function(d) {
-      return urge('^45-1^', d);
-    });
-    p.push(TF.$named_window({
-      names: ['a', 'b', 'c', 'd', 'e'],
-      empty: '_'
-    }));
-    p.push(show = function(d) {
-      return urge('^45-1^', d);
-    });
-    p.push($as_keysorted_list());
-    p.push(function(d, send) {
-      var e;
-      return send(((function() {
-        var i, len, results;
-        results = [];
-        for (i = 0, len = d.length; i < len; i++) {
-          e = d[i];
-          results.push(`${e}`);
-        }
-        return results;
-      })()).join(''));
-    });
-    p.push(show = function(d) {
-      return urge('^45-1^', d);
-    });
-    result = p.run();
-    info('^45-2^', result);
-    if (T != null) {
-      T.eq(result, ['__123', '_1234', '12345', '23456', '34567', '45678', '56789', '6789_', '789__']);
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @named_window_transform = ( T, done ) ->
+  //   # T?.halt_on_error()
+  //   GUY                 = require '../../../apps/guy'
+  //   { Pipeline,         \
+  //     transforms: TF  } = require '../../../apps/moonriver'
+  //   collector           = []
+  //   p                   = new Pipeline()
+  //   #.........................................................................................................
+  //   p.push [ 1 .. 9 ]
+  //   p.push show = ( d ) -> urge '^45-1^', d
+  //   p.push TF.$named_window { names: [ 'a', 'b', 'c', 'd', 'e', ], empty: '_', }
+  //   p.push show = ( d ) -> urge '^45-1^', d
+  //   p.push $as_keysorted_list()
+  //   p.push ( d, send ) -> send ( "#{e}" for e in d ).join ''
+  //   p.push show = ( d ) -> urge '^45-1^', d
+  //   result = p.run()
+  //   info '^45-2^', result
+  //   T?.eq result, [
+  //     '__123'
+  //     '_1234'
+  //     '12345'
+  //     '23456'
+  //     '34567'
+  //     '45678'
+  //     '56789'
+  //     '6789_'
+  //     '789__'
+  //     ]
+  //   done?()
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_sync_pipeline_as_segment = function(T, done) {
@@ -564,25 +548,27 @@
   if (require.main === module) {
     await (() => {
       // @window_transform()
-      // test @window_transform
-      // @use_pipeline_as_segment_preview()
-      // @named_window_transform()
-      // test @named_window_transform
-      // @use_sync_pipeline_as_segment()
-      // @transform_window_cfg_type()
-      // test @transform_window_cfg_type
-      // @use_async_pipeline_as_segment()
-      // test @use_async_pipeline_as_segment
-      // @segment_pipelines_can_be_nested()
-      // @protocol_1()
-      // @protocol_2()
-      // @protocol_3()
-      // await @async_protocol_3()
-      // test @modifiers_preserved_for_pipeline_segments
-      // test @segment_pipelines_can_be_nested
-      return test(this);
+      return test(this.window_transform);
     })();
   }
+
+  // test @window_transform
+// @use_pipeline_as_segment_preview()
+// @named_window_transform()
+// test @named_window_transform
+// @use_sync_pipeline_as_segment()
+// @transform_window_cfg_type()
+// test @transform_window_cfg_type
+// @use_async_pipeline_as_segment()
+// test @use_async_pipeline_as_segment
+// @segment_pipelines_can_be_nested()
+// @protocol_1()
+// @protocol_2()
+// @protocol_3()
+// await @async_protocol_3()
+// test @modifiers_preserved_for_pipeline_segments
+// test @segment_pipelines_can_be_nested
+// test @
 
 }).call(this);
 
