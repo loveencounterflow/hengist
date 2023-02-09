@@ -204,8 +204,6 @@ types                     = new ( require 'intertype' ).Intertype
     [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ [ 'all', buffer_0d ], [ '𠀀bases', buffer_0d ], [ '', buffer_0d ], [ 'are belong', buffer_0d ], [ '', buffer_0a ], [ '𠀀to us', buffer_0a ] ] ]
     [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ [ '', buffer_0d ], [ '', buffer_0d ], [ '', buffer_0a ], [ '', buffer_0d ], [ '', buffer_0a ], [ '', buffer_0a ], [ '', buffer_0a ] ] ]
     [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ [ 'line   ', buffer_0a ], [ 'with   ', buffer_0a ], [ 'trailing\t\t', buffer_0a ], [ 'whitespace　 ', null ] ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ [ 'line   ', buffer_0a ], [ 'with   ', buffer_0a ], [ 'trailing\t\t', buffer_0a ], [ 'whitespace　 ', null ] ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ [ 'line   ', buffer_0a ], [ 'with   ', buffer_0a ], [ 'trailing\t\t', buffer_0a ], [ 'whitespace　 ', null ] ] ]
     [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ [ 'line1', buffer_0d ], [ 'line2', buffer_0d ], [ 'line3', buffer_0d ] ] ]
     [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ [ 'line1', buffer_0d ], [ '', buffer_0a ], [ 'line2', buffer_0d ], [ '', buffer_0a ], [ 'line3', buffer_0d ], [ '', buffer_0a ] ] ]
     ]
@@ -213,8 +211,7 @@ types                     = new ( require 'intertype' ).Intertype
   for [ probe, matcher, ] in probes_and_matchers
     do =>
       result    = []
-      [ path
-        cfg ]   = probe
+      [ path ]  = probe
       path      = PATH.resolve PATH.join __dirname, path
       buffer    = FS.readFileSync path
       first_idx = 0
