@@ -190,7 +190,7 @@ types                     = new ( require 'intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@GUY_str_walk_lines__walk_advancements = ( T, done ) ->
+@GUY_fs__walk_lines__walk_advancements = ( T, done ) ->
   GUY     = require H.guy_path
   probes_and_matchers = [
     [ [ '../../../assets/a-few-words.txt', null ], "Ångström's\néclair\néclair's\néclairs\néclat\néclat's\nélan\nélan's\némigré\némigré's", null ]
@@ -331,4 +331,4 @@ if require.main is module then do =>
   # @GUY_fs_walk_buffers()
   # test @GUY_fs_walk_buffers
   # test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
-  test @GUY_str_walk_lines__walk_advancements
+  test @GUY_fs__walk_lines__walk_advancements
