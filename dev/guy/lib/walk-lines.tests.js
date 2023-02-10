@@ -804,12 +804,57 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.GUY_fs__walk_lines_get_next_line_part = function(T, done) {
-    var GUY, buffer_0a, buffer_0d, i, len, matcher, probe, probes_and_matchers;
+  this.GUY_str_walk_lines__walk_advancements = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
     GUY = require(H.guy_path);
-    buffer_0a = Buffer.from([0x0a]);
-    buffer_0d = Buffer.from([0x0d]);
-    probes_and_matchers = [[['../../../assets/a-few-words.txt', null], [["Ångström's", buffer_0a], ['éclair', buffer_0a], ["éclair's", buffer_0a], ['éclairs', buffer_0a], ['éclat', buffer_0a], ["éclat's", buffer_0a], ['élan', buffer_0a], ["élan's", buffer_0a], ['émigré', buffer_0a], ["émigré's", null]]], [['../../../assets/datamill/empty-file.txt', null], []], [['../../../assets/datamill/file-with-single-nl.txt', null], [['', buffer_0a]]], [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null], [['1', buffer_0a], ['2', buffer_0a], ['3', null]]], [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null], [['1', buffer_0a], ['2', buffer_0a], ['3', buffer_0a]]], [['../../../assets/datamill/windows-crlf.txt', null], [['this', buffer_0d], ['', buffer_0a], ['file', buffer_0d], ['', buffer_0a], ['written', buffer_0d], ['', buffer_0a], ['on', buffer_0d], ['', buffer_0a], ['MS Notepad', null]]], [['../../../assets/datamill/mixed-usage.txt', null], [['all', buffer_0d], ['𠀀bases', buffer_0d], ['', buffer_0d], ['are belong', buffer_0d], ['', buffer_0a], ['𠀀to us', buffer_0a]]], [['../../../assets/datamill/all-empty-mixed.txt', null], [['', buffer_0d], ['', buffer_0d], ['', buffer_0a], ['', buffer_0d], ['', buffer_0a], ['', buffer_0a], ['', buffer_0a]]], [['../../../assets/datamill/lines-with-trailing-spcs.txt', null], [['line   ', buffer_0a], ['with   ', buffer_0a], ['trailing\t\t', buffer_0a], ['whitespace　 ', null]]], [['../../../assets/datamill/lines-with-lf.txt', null], [['line1', buffer_0d], ['line2', buffer_0d], ['line3', buffer_0d]]], [['../../../assets/datamill/lines-with-crlf.txt', null], [['line1', buffer_0d], ['', buffer_0a], ['line2', buffer_0d], ['', buffer_0a], ['line3', buffer_0d], ['', buffer_0a]]]];
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', null], "Ångström's\néclair\néclair's\néclairs\néclat\néclat's\nélan\nélan's\némigré\némigré's", null], [['../../../assets/datamill/empty-file.txt', null], '', null], [['../../../assets/datamill/file-with-single-nl.txt', null], '\n', null], [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null], '1\n2\n3', null], [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null], '1\n2\n3\n', null], [['../../../assets/datamill/windows-crlf.txt', null], 'this\r\nfile\r\nwritten\r\non\r\nMS Notepad', null], [['../../../assets/datamill/mixed-usage.txt', null], 'all\r𠀀bases\r\rare belong\r\n𠀀to us\n', null], [['../../../assets/datamill/all-empty-mixed.txt', null], '\r\r\n\r\n\n\n', null], [['../../../assets/datamill/lines-with-trailing-spcs.txt', null], 'line   \nwith   \ntrailing\t\t\nwhitespace　 ', null], [['../../../assets/datamill/lines-with-lf.txt', null], 'line1\rline2\rline3\r', null], [['../../../assets/datamill/lines-with-crlf.txt', null], 'line1\r\nline2\r\nline3\r\n', null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var buffer, chunk_size, eol, j, material, path, ref, ref1, result, x;
+          for (chunk_size = j = 1; j <= 200; chunk_size = j += +10) {
+            result = [];
+            [path] = probe;
+            path = PATH.resolve(PATH.join(__dirname, path));
+            ref = GUY.fs.walk_buffers(path, {chunk_size});
+            for (buffer of ref) {
+              ref1 = GUY.fs._walk_lines__walk_advancements(buffer);
+              for (x of ref1) {
+                ({material, eol} = x);
+                // info { material, eol, }
+                result.push(material);
+                result.push(eol);
+              }
+            }
+            result = Buffer.concat(result);
+            if (T != null) {
+              T.eq(result.length, (FS.statSync(path)).size);
+            }
+          }
+          if (T != null) {
+            T.eq(Buffer.compare(Buffer.concat([...(GUY.fs.walk_buffers(path))]), FS.readFileSync(path)), 0);
+          }
+          result = result.toString();
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs__walk_lines__advance = function(T, done) {
+    var C_cr_buffer, C_empty_buffer, C_lf_buffer, GUY, i, len, matcher, probe, probes_and_matchers;
+    GUY = require(H.guy_path);
+    C_empty_buffer = Buffer.from([]);
+    C_cr_buffer = Buffer.from([0x0d]);
+    C_lf_buffer = Buffer.from([0x0a]);
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', null], [["Ångström's", C_lf_buffer], ['éclair', C_lf_buffer], ["éclair's", C_lf_buffer], ['éclairs', C_lf_buffer], ['éclat', C_lf_buffer], ["éclat's", C_lf_buffer], ['élan', C_lf_buffer], ["élan's", C_lf_buffer], ['émigré', C_lf_buffer], ["émigré's", C_empty_buffer]]], [['../../../assets/datamill/empty-file.txt', null], []], [['../../../assets/datamill/file-with-single-nl.txt', null], [['', C_lf_buffer]]], [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null], [['1', C_lf_buffer], ['2', C_lf_buffer], ['3', C_empty_buffer]]], [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null], [['1', C_lf_buffer], ['2', C_lf_buffer], ['3', C_lf_buffer]]], [['../../../assets/datamill/windows-crlf.txt', null], [['this', C_cr_buffer], ['', C_lf_buffer], ['file', C_cr_buffer], ['', C_lf_buffer], ['written', C_cr_buffer], ['', C_lf_buffer], ['on', C_cr_buffer], ['', C_lf_buffer], ['MS Notepad', C_empty_buffer]]], [['../../../assets/datamill/mixed-usage.txt', null], [['all', C_cr_buffer], ['𠀀bases', C_cr_buffer], ['', C_cr_buffer], ['are belong', C_cr_buffer], ['', C_lf_buffer], ['𠀀to us', C_lf_buffer]]], [['../../../assets/datamill/all-empty-mixed.txt', null], [['', C_cr_buffer], ['', C_cr_buffer], ['', C_lf_buffer], ['', C_cr_buffer], ['', C_lf_buffer], ['', C_lf_buffer], ['', C_lf_buffer]]], [['../../../assets/datamill/lines-with-trailing-spcs.txt', null], [['line   ', C_lf_buffer], ['with   ', C_lf_buffer], ['trailing\t\t', C_lf_buffer], ['whitespace　 ', C_empty_buffer]]], [['../../../assets/datamill/lines-with-lf.txt', null], [['line1', C_cr_buffer], ['line2', C_cr_buffer], ['line3', C_cr_buffer]]], [['../../../assets/datamill/lines-with-crlf.txt', null], [['line1', C_cr_buffer], ['', C_lf_buffer], ['line2', C_cr_buffer], ['', C_lf_buffer], ['line3', C_cr_buffer], ['', C_lf_buffer]]]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher] = probes_and_matchers[i];
@@ -825,13 +870,89 @@
           if (first_idx > last_idx) {
             break;
           }
-          d = GUY.fs._walk_lines_get_next_line_part(buffer, first_idx);
+          d = GUY.fs._walk_lines__advance(buffer, first_idx);
           result.push([d.material.toString(), d.eol]);
           first_idx = d.next_idx;
         }
         echo([probe, result]);
         return T != null ? T.eq(result, matcher) : void 0;
       })();
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs_walk_buffers = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    GUY = require(H.guy_path);
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', null], "Ångström's\néclair\néclair's\néclairs\néclat\néclat's\nélan\nélan's\némigré\némigré's", null], [['../../../assets/datamill/empty-file.txt', null], '', null], [['../../../assets/datamill/file-with-single-nl.txt', null], '\n', null], [['../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null], '1\n2\n3', null], [['../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null], '1\n2\n3\n', null], [['../../../assets/datamill/windows-crlf.txt', null], 'this\r\nfile\r\nwritten\r\non\r\nMS Notepad', null], [['../../../assets/datamill/mixed-usage.txt', null], 'all\r𠀀bases\r\rare belong\r\n𠀀to us\n', null], [['../../../assets/datamill/all-empty-mixed.txt', null], '\r\r\n\r\n\n\n', null], [['../../../assets/datamill/lines-with-trailing-spcs.txt', null], 'line   \nwith   \ntrailing\t\t\nwhitespace　 ', null], [['../../../assets/datamill/lines-with-lf.txt', null], 'line1\rline2\rline3\r', null], [['../../../assets/datamill/lines-with-crlf.txt', null], 'line1\r\nline2\r\nline3\r\n', null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var buffer, chunk_size, j, path, ref, result;
+          for (chunk_size = j = 1; j <= 200; chunk_size = j += +10) {
+            result = [];
+            [path] = probe;
+            path = PATH.resolve(PATH.join(__dirname, path));
+            ref = GUY.fs.walk_buffers(path, {chunk_size});
+            for (buffer of ref) {
+              if (T != null) {
+                T.eq(type_of(buffer), 'buffer');
+              }
+              if (T != null) {
+                T.ok(buffer.length <= chunk_size);
+              }
+              result.push(buffer);
+            }
+            result = Buffer.concat(result);
+            if (T != null) {
+              T.eq(result.length, (FS.statSync(path)).size);
+            }
+            result = result.toString();
+          }
+          if (T != null) {
+            T.eq(Buffer.compare(Buffer.concat([...(GUY.fs.walk_buffers(path))]), FS.readFileSync(path)), 0);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1 = function(T, done) {
+    var GUY, chunk_size, exhaust, i, len, path, ref;
+    GUY = require(H.guy_path);
+    path = PATH.resolve(PATH.join(__dirname, '../../../assets/a-few-words.txt'));
+    exhaust = function(g) {
+      var _;
+      for (_ of g) {
+        _;
+      }
+      return null;
+    };
+    ref = [-10000, -1, 0];
+    for (i = 0, len = ref.length; i < len; i++) {
+      chunk_size = ref[i];
+      if (T != null) {
+        T.throws(/not a valid .*chunk_size/, function() {
+          return exhaust(GUY.fs.walk_buffers(path, {chunk_size}));
+        });
+      }
+      if (T != null) {
+        T.throws(/not a valid .*chunk_size/, function() {
+          return exhaust(GUY.fs.walk_lines(path, {chunk_size}));
+        });
+      }
     }
     if (typeof done === "function") {
       done();
@@ -850,8 +971,12 @@
       // test @GUY_fs_walk_lines
       // @GUY_str_walk_lines()
       // test @GUY_str_walk_lines
-      // @GUY_fs__walk_lines_get_next_line_part()
-      return test(this.GUY_fs__walk_lines_get_next_line_part);
+      // @GUY_fs__walk_lines__advance()
+      // test @GUY_fs__walk_lines__advance
+      // @GUY_fs_walk_buffers()
+      // test @GUY_fs_walk_buffers
+      // test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
+      return test(this.GUY_str_walk_lines__walk_advancements);
     })();
   }
 
