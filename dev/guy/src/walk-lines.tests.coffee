@@ -83,55 +83,17 @@ types                     = new ( require 'intertype' ).Intertype
   GUY     = require H.guy_path
   probes_and_matchers = [
     [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
-    # [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
-    # [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
     ]
-  #-----------------------------------------------------------------------------------------------------------
-  GUY.fs._walk_lines_with_positions = ( path, cfg ) ->
-    chunk_size  = cfg?.chunk_size ? 200
-    trim        = cfg?.trim ? true
-    C_cr                      = @_C_cr            # 0x0d
-    C_lf                      = @_C_lf            # 0x0a
-    C_empty_string            = @_C_empty_string  # ''
-    C_empty_buffer            = @_C_empty_buffer  # Buffer.from C_empty_string
-    C_cr_buffer               = @_C_cr_buffer     # Buffer.from [ C_cr, ]
-    C_lf_buffer               = @_C_lf_buffer     # Buffer.from [ C_lf, ]
-    #.........................................................................................................
-    line_cache  = []
-    eol_cache   = []
-    lnr         = 0
-    #.........................................................................................................
-    flush = ( material = null, eol = null ) ->
-      line              = Buffer.concat if material? then [ line_cache...,  material, ] else line_cache
-      eol               = Buffer.concat if eol?      then [ eol_cache...,   eol,      ] else eol_cache
-      line_cache.length = 0
-      eol_cache.length  = 0
-      lnr++
-      yield { lnr, line, eol, }
-    #.........................................................................................................
-    for buffer from @walk_buffers path, { chunk_size, }
-      urge '^43-1^', buffer
-      for { material, eol, } from @_walk_lines__walk_advancements buffer
-        urge '^43-1^', material, eol
-        # info { material, eol, }
-        if eol is C_lf_buffer
-          yield from flush material, eol
-        else
-          line_cache.push material  if material.length  > 0
-          eol_cache.push eol        if eol.length       > 0
-    #.........................................................................................................
-    yield from flush()
-    return null
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
     result    = []
@@ -139,12 +101,12 @@ types                     = new ( require 'intertype' ).Intertype
       cfg ]   = probe
     path      = PATH.resolve PATH.join __dirname, path
     text      = FS.readFileSync path, { encoding: 'utf-8', }
-    for d from GUY.fs._walk_lines_with_positions path, cfg
+    for d from GUY.fs._walk_lines_with_positions path
       T?.eq ( type_of d.line  ), 'buffer'
       T?.eq ( type_of d.eol   ), 'buffer'
       d.line  = d.line.toString()
       d.eol   = d.eol.toString()
-      info '^43-1^', d
+      # info '^43-1^', d
       result.push d
     T?.eq result, matcher
   #.........................................................................................................
@@ -368,3 +330,8 @@ if require.main is module then do =>
   # test @GUY_fs_walk_buffers
   # test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
   # test @GUY_fs__walk_lines__walk_advancements
+
+
+
+  ### test that no method leaks C_empty_buffer, C_cr_buffer, C_lf_buffer ###
+
