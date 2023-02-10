@@ -190,22 +190,60 @@ types                     = new ( require 'intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@GUY_fs__walk_lines_get_next_line_part = ( T, done ) ->
-  GUY       = require H.guy_path
-  buffer_0a = Buffer.from [ 0x0a ]
-  buffer_0d = Buffer.from [ 0x0d ]
+@GUY_str_walk_lines__walk_advancements = ( T, done ) ->
+  GUY     = require H.guy_path
   probes_and_matchers = [
-    [ [ '../../../assets/a-few-words.txt', null ], [ [ "Ångström's", buffer_0a ], [ 'éclair', buffer_0a ], [ "éclair's", buffer_0a ], [ 'éclairs', buffer_0a ], [ 'éclat', buffer_0a ], [ "éclat's", buffer_0a ], [ 'élan', buffer_0a ], [ "élan's", buffer_0a ], [ 'émigré', buffer_0a ], [ "émigré's", null ] ] ]
+    [ [ '../../../assets/a-few-words.txt', null ], "Ångström's\néclair\néclair's\néclairs\néclat\néclat's\nélan\nélan's\némigré\némigré's", null ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], '', null ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], '\n', null ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], '1\n2\n3', null ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], '1\n2\n3\n', null ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], 'this\r\nfile\r\nwritten\r\non\r\nMS Notepad', null ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], 'all\r𠀀bases\r\rare belong\r\n𠀀to us\n', null ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], '\r\r\n\r\n\n\n', null ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], 'line   \nwith   \ntrailing\t\t\nwhitespace　 ', null ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], 'line1\rline2\rline3\r', null ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], 'line1\r\nline2\r\nline3\r\n', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      for chunk_size in [ 1 .. 200 ] by +10
+        result    = []
+        [ path ]  = probe
+        path      = PATH.resolve PATH.join __dirname, path
+        for buffer from GUY.fs.walk_buffers path, { chunk_size, }
+          for { material, eol, } from GUY.fs._walk_lines__walk_advancements buffer
+            # info { material, eol, }
+            result.push material
+            result.push eol
+        result = Buffer.concat result
+        T?.eq result.length, ( FS.statSync path ).size
+      T?.eq ( Buffer.compare ( Buffer.concat [ ( GUY.fs.walk_buffers path )..., ] ), ( FS.readFileSync path ) ), 0
+      result = result.toString()
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs__walk_lines__advance = ( T, done ) ->
+  GUY                 = require H.guy_path
+  C_empty_buffer      = Buffer.from []
+  C_cr_buffer         = Buffer.from [ 0x0d ]
+  C_lf_buffer         = Buffer.from [ 0x0a ]
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', null ], [ [ "Ångström's", C_lf_buffer ], [ 'éclair', C_lf_buffer ], [ "éclair's", C_lf_buffer ], [ 'éclairs', C_lf_buffer ], [ 'éclat', C_lf_buffer ], [ "éclat's", C_lf_buffer ], [ 'élan', C_lf_buffer ], [ "élan's", C_lf_buffer ], [ 'émigré', C_lf_buffer ], [ "émigré's", C_empty_buffer ] ] ]
     [ [ '../../../assets/datamill/empty-file.txt', null ], [] ]
-    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ [ '', buffer_0a ] ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ [ '1', buffer_0a ], [ '2', buffer_0a ], [ '3', null ] ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ [ '1', buffer_0a ], [ '2', buffer_0a ], [ '3', buffer_0a ] ] ]
-    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ [ 'this', buffer_0d ], [ '', buffer_0a ], [ 'file', buffer_0d ], [ '', buffer_0a ], [ 'written', buffer_0d ], [ '', buffer_0a ], [ 'on', buffer_0d ], [ '', buffer_0a ], [ 'MS Notepad', null ] ] ]
-    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ [ 'all', buffer_0d ], [ '𠀀bases', buffer_0d ], [ '', buffer_0d ], [ 'are belong', buffer_0d ], [ '', buffer_0a ], [ '𠀀to us', buffer_0a ] ] ]
-    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ [ '', buffer_0d ], [ '', buffer_0d ], [ '', buffer_0a ], [ '', buffer_0d ], [ '', buffer_0a ], [ '', buffer_0a ], [ '', buffer_0a ] ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ [ 'line   ', buffer_0a ], [ 'with   ', buffer_0a ], [ 'trailing\t\t', buffer_0a ], [ 'whitespace　 ', null ] ] ]
-    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ [ 'line1', buffer_0d ], [ 'line2', buffer_0d ], [ 'line3', buffer_0d ] ] ]
-    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ [ 'line1', buffer_0d ], [ '', buffer_0a ], [ 'line2', buffer_0d ], [ '', buffer_0a ], [ 'line3', buffer_0d ], [ '', buffer_0a ] ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ [ '', C_lf_buffer ] ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ [ '1', C_lf_buffer ], [ '2', C_lf_buffer ], [ '3', C_empty_buffer ] ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ [ '1', C_lf_buffer ], [ '2', C_lf_buffer ], [ '3', C_lf_buffer ] ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ [ 'this', C_cr_buffer ], [ '', C_lf_buffer ], [ 'file', C_cr_buffer ], [ '', C_lf_buffer ], [ 'written', C_cr_buffer ], [ '', C_lf_buffer ], [ 'on', C_cr_buffer ], [ '', C_lf_buffer ], [ 'MS Notepad', C_empty_buffer ] ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ [ 'all', C_cr_buffer ], [ '𠀀bases', C_cr_buffer ], [ '', C_cr_buffer ], [ 'are belong', C_cr_buffer ], [ '', C_lf_buffer ], [ '𠀀to us', C_lf_buffer ] ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ [ '', C_cr_buffer ], [ '', C_cr_buffer ], [ '', C_lf_buffer ], [ '', C_cr_buffer ], [ '', C_lf_buffer ], [ '', C_lf_buffer ], [ '', C_lf_buffer ] ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ [ 'line   ', C_lf_buffer ], [ 'with   ', C_lf_buffer ], [ 'trailing\t\t', C_lf_buffer ], [ 'whitespace　 ', C_empty_buffer ] ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ [ 'line1', C_cr_buffer ], [ 'line2', C_cr_buffer ], [ 'line3', C_cr_buffer ] ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ [ 'line1', C_cr_buffer ], [ '', C_lf_buffer ], [ 'line2', C_cr_buffer ], [ '', C_lf_buffer ], [ 'line3', C_cr_buffer ], [ '', C_lf_buffer ] ] ]
     ]
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
@@ -218,11 +256,59 @@ types                     = new ( require 'intertype' ).Intertype
       last_idx  = buffer.length - 1
       loop
         break if first_idx > last_idx
-        d = GUY.fs._walk_lines_get_next_line_part buffer, first_idx
+        d = GUY.fs._walk_lines__advance buffer, first_idx
         result.push [ d.material.toString(), d.eol, ]
         first_idx = d.next_idx
       echo [ probe, result, ]
       T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_buffers = ( T, done ) ->
+  GUY                 = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', null ], "Ångström's\néclair\néclair's\néclairs\néclat\néclat's\nélan\nélan's\némigré\némigré's", null ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], '', null ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], '\n', null ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], '1\n2\n3', null ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], '1\n2\n3\n', null ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], 'this\r\nfile\r\nwritten\r\non\r\nMS Notepad', null ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], 'all\r𠀀bases\r\rare belong\r\n𠀀to us\n', null ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], '\r\r\n\r\n\n\n', null ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], 'line   \nwith   \ntrailing\t\t\nwhitespace　 ', null ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], 'line1\rline2\rline3\r', null ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], 'line1\r\nline2\r\nline3\r\n', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      for chunk_size in [ 1 .. 200 ] by +10
+        result    = []
+        [ path ]  = probe
+        path      = PATH.resolve PATH.join __dirname, path
+        for buffer from GUY.fs.walk_buffers path, { chunk_size, }
+          T?.eq ( type_of buffer ), 'buffer'
+          T?.ok buffer.length <= chunk_size
+          result.push buffer
+        result = Buffer.concat result
+        T?.eq result.length, ( FS.statSync path ).size
+        result = result.toString()
+      T?.eq ( Buffer.compare ( Buffer.concat [ ( GUY.fs.walk_buffers path )..., ] ), ( FS.readFileSync path ) ), 0
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1 = ( T, done ) ->
+  GUY                 = require H.guy_path
+  path                = PATH.resolve PATH.join __dirname, '../../../assets/a-few-words.txt'
+  exhaust             = ( g ) -> _ for _ from g; return null
+  for chunk_size in [ -10000, -1, 0, ]
+    T?.throws /not a valid .*chunk_size/, -> exhaust GUY.fs.walk_buffers  path, { chunk_size, }
+    T?.throws /not a valid .*chunk_size/, -> exhaust GUY.fs.walk_lines    path, { chunk_size, }
   #.........................................................................................................
   done?()
   return null
@@ -240,6 +326,9 @@ if require.main is module then do =>
   # test @GUY_fs_walk_lines
   # @GUY_str_walk_lines()
   # test @GUY_str_walk_lines
-  # @GUY_fs__walk_lines_get_next_line_part()
-  test @GUY_fs__walk_lines_get_next_line_part
-
+  # @GUY_fs__walk_lines__advance()
+  # test @GUY_fs__walk_lines__advance
+  # @GUY_fs_walk_buffers()
+  # test @GUY_fs_walk_buffers
+  # test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
+  test @GUY_str_walk_lines__walk_advancements
