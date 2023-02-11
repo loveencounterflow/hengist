@@ -31,88 +31,8 @@ types                     = new ( require 'intertype' ).Intertype
   validate_list_of
   equals }                = types.export()
 
-
 #===========================================================================================================
-# TESTS
-#-----------------------------------------------------------------------------------------------------------
-@GUY_fs_walk_lines = ( T, done ) ->
-  GUY     = require H.guy_path
-  probes_and_matchers = [
-    [ [ '../../../assets/a-few-words.txt',                           null,              ], [ "1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's", ], ]
-    [ [ '../../../assets/datamill/empty-file.txt',                   null,              ], [ '1:',                                                                                                                           ], ]
-    [ [ '../../../assets/datamill/file-with-single-nl.txt',          null,              ], [ '1:', '2:',                                                                                                                     ], ]
-    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',   null,              ], [ '1:1', '2:2', '3:3',                                                                                                            ], ]
-    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null,              ], [ '1:1', '2:2', '3:3', '4:',                                                                                                      ], ]
-    [ [ '../../../assets/datamill/windows-crlf.txt',                 null,              ], [ '1:this', '2:file', '3:written', '4:on', '5:MS Notepad'                                                                         ], ]
-    [ [ '../../../assets/datamill/mixed-usage.txt',                  null,              ], [ '1:all', '2:𠀀bases', '3:', '4:are belong', '5:𠀀to us', '6:' ], ]
-    [ [ '../../../assets/datamill/all-empty-mixed.txt',              null,              ], [ '1:', '2:', '3:', '4:', '5:', '6:', ], ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     null,              ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: true, },   ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: false, },  ], [ '1:line   ', '2:with   ', '3:trailing\t\t', '4:whitespace\u3000 ', ], ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, ] in probes_and_matchers
-    for chunk_size in [ 1 .. 200 ] by +10
-    # for chunk_size in [ 200 ]
-      result    = []
-      result_2  = []
-      # whisper '^45-1^', '----------------------------------'
-      [ path
-        cfg ]   = probe
-      path      = PATH.resolve PATH.join __dirname, path
-      text      = FS.readFileSync path, { encoding: 'utf-8', }
-      matcher_2 = text.split /\r\n|\r|\n/u
-      matcher_2 = ( line.trimEnd() for line in matcher_2 ) if ( cfg?.trim ? true )
-      lnr       = 0
-      for line from GUY.fs.walk_lines path, { chunk_size, cfg..., }
-        lnr++
-        result.push "#{lnr}:#{line}"
-        result_2.push line
-      # urge '^35-1^', result
-      # help '^35-2^', matcher
-      T?.eq result, matcher
-      T?.eq result_2, matcher_2
-  #.........................................................................................................
-  # debug '^45-1^', '\r\r\n\r\n\n\n'.split /\r\n|\r|\n/
-  done?()
-  return null
-
-
-#-----------------------------------------------------------------------------------------------------------
-@GUY_fs__walk_lines_with_positions = ( T, done ) ->
-  GUY     = require H.guy_path
-  probes_and_matchers = [
-    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
-    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
-    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, ] in probes_and_matchers
-    result    = []
-    [ path
-      cfg ]   = probe
-    path      = PATH.resolve PATH.join __dirname, path
-    text      = FS.readFileSync path, { encoding: 'utf-8', }
-    for d from GUY.fs._walk_lines_with_positions path
-      T?.eq ( type_of d.line  ), 'buffer'
-      T?.eq ( type_of d.eol   ), 'buffer'
-      d.line  = d.line.toString()
-      d.eol   = d.eol.toString()
-      # info '^43-1^', d
-      result.push d
-    T?.eq result, matcher
-  #.........................................................................................................
-  done?()
-  return null
-
+# TESTS FOR STR
 #-----------------------------------------------------------------------------------------------------------
 @GUY_str_walk_lines = ( T, done ) ->
   GUY     = require H.guy_path
@@ -159,19 +79,19 @@ types                     = new ( require 'intertype' ).Intertype
 @GUY_str_walk_lines_with_positions = ( T, done ) ->
   GUY     = require H.guy_path
   probes_and_matchers = [
-    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", nl: '\n' }, { lnr: 2, line: 'éclair', nl: '\n' }, { lnr: 3, line: "éclair's", nl: '\n' }, { lnr: 4, line: 'éclairs', nl: '\n' }, { lnr: 5, line: 'éclat', nl: '\n' }, { lnr: 6, line: "éclat's", nl: '\n' }, { lnr: 7, line: 'élan', nl: '\n' }, { lnr: 8, line: "élan's", nl: '\n' }, { lnr: 9, line: 'émigré', nl: '\n' }, { lnr: 10, line: "émigré's", nl: '' } ] ]
-    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', nl: '\n' }, { lnr: 2, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', nl: '\n' }, { lnr: 2, line: '2', nl: '\n' }, { lnr: 3, line: '3', nl: '' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', nl: '\n' }, { lnr: 2, line: '2', nl: '\n' }, { lnr: 3, line: '3', nl: '\n' }, { lnr: 4, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', nl: '\r\n' }, { lnr: 2, line: 'file', nl: '\r\n' }, { lnr: 3, line: 'written', nl: '\r\n' }, { lnr: 4, line: 'on', nl: '\r\n' }, { lnr: 5, line: 'MS Notepad', nl: '' } ] ]
-    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', nl: '\r' }, { lnr: 2, line: '𠀀bases', nl: '\r' }, { lnr: 3, line: '', nl: '\r' }, { lnr: 4, line: 'are belong', nl: '\r\n' }, { lnr: 5, line: '𠀀to us', nl: '\n' }, { lnr: 6, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', nl: '\r' }, { lnr: 2, line: '', nl: '\r\n' }, { lnr: 3, line: '', nl: '\r\n' }, { lnr: 4, line: '', nl: '\n' }, { lnr: 5, line: '', nl: '\n' }, { lnr: 6, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line', nl: '\n' }, { lnr: 2, line: 'with', nl: '\n' }, { lnr: 3, line: 'trailing', nl: '\n' }, { lnr: 4, line: 'whitespace', nl: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line', nl: '\n' }, { lnr: 2, line: 'with', nl: '\n' }, { lnr: 3, line: 'trailing', nl: '\n' }, { lnr: 4, line: 'whitespace', nl: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', nl: '\n' }, { lnr: 2, line: 'with   ', nl: '\n' }, { lnr: 3, line: 'trailing\t\t', nl: '\n' }, { lnr: 4, line: 'whitespace　 ', nl: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', nl: '\r' }, { lnr: 2, line: 'line2', nl: '\r' }, { lnr: 3, line: 'line3', nl: '\r' }, { lnr: 4, line: '', nl: '' } ] ]
-    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', nl: '\r\n' }, { lnr: 2, line: 'line2', nl: '\r\n' }, { lnr: 3, line: 'line3', nl: '\r\n' }, { lnr: 4, line: '', nl: '' } ] ]
+    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
     ]
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
@@ -183,6 +103,161 @@ types                     = new ( require 'intertype' ).Intertype
     for d from GUY.str.walk_lines_with_positions text, cfg
       result.push d
     T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+
+#===========================================================================================================
+# TESTS FOR FS
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_lines = ( T, done ) ->
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt',                           null,              ], [ "1:Ångström's", "2:éclair", "3:éclair's", "4:éclairs", "5:éclat", "6:éclat's", "7:élan", "8:élan's", "9:émigré", "10:émigré's", ], ]
+    [ [ '../../../assets/datamill/empty-file.txt',                   null,              ], [ '1:',                                                                                                                           ], ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt',          null,              ], [ '1:', '2:',                                                                                                                     ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt',   null,              ], [ '1:1', '2:2', '3:3',                                                                                                            ], ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null,              ], [ '1:1', '2:2', '3:3', '4:',                                                                                                      ], ]
+    [ [ '../../../assets/datamill/windows-crlf.txt',                 null,              ], [ '1:this', '2:file', '3:written', '4:on', '5:MS Notepad'                                                                         ], ]
+    [ [ '../../../assets/datamill/mixed-usage.txt',                  null,              ], [ '1:all', '2:𠀀bases', '3:', '4:are belong', '5:𠀀to us', '6:' ], ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt',              null,              ], [ '1:', '2:', '3:', '4:', '5:', '6:', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     null,              ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: true, },   ], [ '1:line', '2:with', '3:trailing', '4:whitespace', ], ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt',     { trim: false, },  ], [ '1:line   ', '2:with   ', '3:trailing\t\t', '4:whitespace\u3000 ', ], ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    for chunk_size in [ 1 .. 200 ] by +10
+    # for chunk_size in [ 200 ]
+      result    = []
+      result_2  = []
+      # whisper '^45-1^', '----------------------------------'
+      [ path
+        cfg ]   = probe
+      path      = PATH.resolve PATH.join __dirname, path
+      text      = FS.readFileSync path, { encoding: 'utf-8', }
+      matcher_2 = text.split /\r\n|\r|\n/u
+      matcher_2 = ( line.trimEnd() for line in matcher_2 ) if ( cfg?.trim ? true )
+      lnr       = 0
+      for line from GUY.fs.walk_lines path, { chunk_size, cfg..., }
+        lnr++
+        result.push "#{lnr}:#{line}"
+        result_2.push line
+      # urge '^35-1^', result
+      # help '^35-2^', matcher
+      T?.eq result, matcher
+      T?.eq result_2, matcher_2
+  #.........................................................................................................
+  # debug '^45-1^', '\r\r\n\r\n\n\n'.split /\r\n|\r|\n/
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_lines_with_positions = ( T, done ) ->
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    result    = []
+    [ path
+      cfg ]   = probe
+    path      = PATH.resolve PATH.join __dirname, path
+    # text      = FS.readFileSync path, { encoding: 'utf-8', }
+    for d from GUY.fs.walk_lines_with_positions path, cfg
+      # d.line  = d.line.toString()
+      # d.eol   = d.eol.toString()
+      result.push d
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_lines_with_positions_no_encoding = ( T, done ) ->
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    result    = []
+    [ path
+      cfg ]   = probe
+    path      = PATH.resolve PATH.join __dirname, path
+    for d from GUY.fs.walk_lines_with_positions path, { cfg..., encoding: null, }
+      T?.ok d.eol isnt GUY.fs._C_cr_buffer
+      T?.ok d.eol isnt GUY.fs._C_lf_buffer
+      d.line  = d.line.toString()
+      d.eol   = d.eol.toString()
+      result.push d
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_fs__walk_lines_with_positions = ( T, done ) ->
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', null ], [ { lnr: 1, line: "Ångström's", eol: '\n' }, { lnr: 2, line: 'éclair', eol: '\n' }, { lnr: 3, line: "éclair's", eol: '\n' }, { lnr: 4, line: 'éclairs', eol: '\n' }, { lnr: 5, line: 'éclat', eol: '\n' }, { lnr: 6, line: "éclat's", eol: '\n' }, { lnr: 7, line: 'élan', eol: '\n' }, { lnr: 8, line: "élan's", eol: '\n' }, { lnr: 9, line: 'émigré', eol: '\n' }, { lnr: 10, line: "émigré's", eol: '' } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    # echo '^2343^', GUY.trm.steel probe[ 0 ]
+    # echo '^12-2^', GUY.trm.gold matcher
+    for chunk_size in [ 1 .. 200 ]
+      result    = []
+      [ path
+        cfg ]   = probe
+      path      = PATH.resolve PATH.join __dirname, path
+      text      = FS.readFileSync path, { encoding: 'utf-8', }
+      for d from GUY.fs._walk_lines_with_positions path, chunk_size
+        T?.eq ( type_of d.line  ), 'buffer'
+        T?.eq ( type_of d.eol   ), 'buffer'
+        d.line  = d.line.toString()
+        d.eol   = d.eol.toString()
+        # info '^43-1^', d
+        result.push d
+      # echo '^12-1^', result, chunk_size
+      T?.eq result, matcher
+    # echo '^12-2^', GUY.trm.gold matcher
   #.........................................................................................................
   done?()
   return null
@@ -317,10 +392,13 @@ types                     = new ( require 'intertype' ).Intertype
 ############################################################################################################
 if require.main is module then do =>
   # @GUY_fs__walk_lines_with_positions()
-  test @GUY_fs__walk_lines_with_positions
+  # test @GUY_fs__walk_lines_with_positions
+  # test @GUY_fs__walk_lines__walk_advancements
   # @GUY_str_walk_lines_with_positions()
   # test @GUY_str_walk_lines_with_positions
-  # test @
+  # test @GUY_fs_walk_lines_with_positions
+  # test @GUY_fs_walk_lines_with_positions_no_encoding
+  test @
   # test @GUY_fs_walk_lines
   # @GUY_str_walk_lines()
   # test @GUY_str_walk_lines
@@ -329,9 +407,7 @@ if require.main is module then do =>
   # @GUY_fs_walk_buffers()
   # test @GUY_fs_walk_buffers
   # test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
-  # test @GUY_fs__walk_lines__walk_advancements
 
 
 
-  ### test that no method leaks C_empty_buffer, C_cr_buffer, C_lf_buffer ###
 
