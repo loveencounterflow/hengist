@@ -108,7 +108,7 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@parse_headers = ( T, done ) ->
+@parse_headings = ( T, done ) ->
   { XXX_new_token
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
@@ -134,5 +134,5 @@ if require.main is module then do =>
   # test @
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup
-  test @parse_headers
+  test @parse_headings
 
