@@ -262,23 +262,25 @@ $parse_md_stars = ->
 @lex_tags = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { end_token: true, }
   #.........................................................................................................
-  do =>
-    ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
-    mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
-    lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
-    lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
-    lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
-    # lexer.add_lexeme mode, 'other',        /./u
-  #.........................................................................................................
-  do =>
-    mode    = 'tag'
-    lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
-    lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
-    lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
-    lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+  new_lexer = ->
+    lexer = new Interlex { end_token: true, }
+    do =>
+      ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
+      mode    = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
+      lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
+      lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+      lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+      # lexer.add_lexeme mode, 'other',        /./u
+    #.........................................................................................................
+    do =>
+      mode    = 'tag'
+      lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
+      lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
+      lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
+      lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+    return lexer
   #.........................................................................................................
   probes_and_matchers = [
     [ 'helo <bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 5, stop: 6, x: { lslash: null }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 6, stop: 10, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 10, stop: 11, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 11, stop: 12, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 12, stop: 17, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 17, stop: 18, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 18, stop: 20, x: { lslash: '/' }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 20, stop: 24, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 24, stop: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 25, stop: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' } ], null ]
@@ -297,7 +299,8 @@ $parse_md_stars = ->
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      result = lexer.run probe
+      lexer   = new_lexer()
+      result  = lexer.run probe
       for token in result
         T?.eq probe[ token.start ... token.stop ], token.value
       H.tabulate ( rpr probe ), result
@@ -310,23 +313,25 @@ $parse_md_stars = ->
 @lex_tags_with_rpr = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { end_token: true, }
-  #.........................................................................................................
-  do =>
-    ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
-    mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
-    lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
-    lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
-    lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
-    # lexer.add_lexeme mode, 'other',        /./u
-  #.........................................................................................................
-  do =>
-    mode    = 'tag'
-    lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
-    lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
-    lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
-    lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+  new_lexer = ->
+    lexer = new Interlex { end_token: true, }
+    #.........................................................................................................
+    do =>
+      ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
+      mode    = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr',           pattern: ( /\\(?<chr>.)/u                             ), }
+      lexer.add_lexeme { mode, tid: 'text',             pattern: ( c.suffix '+', c.charSet.complement /[<`\\?]/u  ), }
+      lexer.add_lexeme { mode, tid: 'tag', jump: 'tag', pattern: ( /<(?<lslash>\/?)/u                         ), }
+      lexer.add_lexeme { mode, tid: 'E_backticks',      pattern: ( /`+/                                       ), }
+      # lexer.add_lexeme mode, 'other',        /./u
+    #.........................................................................................................
+    do =>
+      mode    = 'tag'
+      lexer.add_lexeme { mode, tid: 'escchr',         pattern: ( /\\(?<chr>.)/u                           ), }
+      lexer.add_lexeme { mode, tid: 'end', jump: '^', pattern: ( />/u                                     ), }
+      lexer.add_lexeme { mode, tid: 'text',           pattern: ( c.suffix '+', c.charSet.complement /[>\\]/u  ), }
+      lexer.add_lexeme { mode, tid: 'other',          pattern: ( /./u                                     ), }
+    return lexer
   #.........................................................................................................
   probes_and_matchers = [
     [ 'helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end>plain,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end>plain,(24:25),='>'][plain:$eof,(25:25),='']", null ]
@@ -345,6 +350,7 @@ $parse_md_stars = ->
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer = new_lexer()
       resolve ( lexer.rpr_token token for token from lexer.walk probe ).join ''
   #.........................................................................................................
   done?()
@@ -634,10 +640,10 @@ $parse_md_stars = ->
           send d
       return null
   #.........................................................................................................
-  md_lexer  = new_toy_md_lexer 'md'
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      md_lexer  = new_toy_md_lexer 'md'
       #.....................................................................................................
       p = new Pipeline()
       p.push ( d, send ) ->
@@ -760,7 +766,8 @@ $parse_md_stars = ->
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  test @parse_string_literals
   # @using_strings_for_patterns()
   # test @using_strings_for_patterns
   # @cannot_return_from_initial_mode()
