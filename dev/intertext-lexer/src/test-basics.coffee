@@ -409,6 +409,50 @@ $parse_md_stars = ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@parse_string_literals = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ->
+    lexer   = new Interlex { linewise: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, }
+      lexer.add_lexeme { mode, tid: 'dq1',    jump: 'dq1',          pattern: /(?<!")"(?!")/u, }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, }
+      lexer.add_lexeme { mode, tid: 'other',  jump: null,           pattern: /[^"]+/u, }
+    #.........................................................................................................
+    do =>
+      mode = 'dq1'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, }
+      lexer.add_lexeme { mode, tid: 'text',   jump: null,           pattern: /[^"]+/u, }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, }
+      lexer.add_lexeme { mode, tid: 'dq1',    jump: '^',            pattern: /"/u, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:other', value: 'helo' }, { mk: 'plain:nl', value: '' } ], null ]
+    [ 'helo "world"', [ { mk: 'plain:other', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'world' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:nl', value: '' } ], null ]
+    [ 'helo "everyone\nout there"!', [ { mk: 'plain:other', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'everyone' }, { mk: 'dq1:nl', value: '' }, { mk: 'dq1:text', value: 'out there' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:other', value: '!' }, { mk: 'plain:nl', value: '' } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new_lexer()
+      result      = []
+      for token from lexer.walk probe
+        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
+      #.....................................................................................................
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @parse_line_by_line = ( T, done ) ->
   { Pipeline,         \
     $,
