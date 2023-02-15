@@ -508,6 +508,7 @@
             start: 0,
             stop: 5,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -521,6 +522,7 @@
             x: {
               lslash: null
             },
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -532,6 +534,7 @@
             start: 6,
             stop: 10,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -543,6 +546,7 @@
             start: 10,
             stop: 11,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -554,6 +558,7 @@
             start: 11,
             stop: 12,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -565,6 +570,7 @@
             start: 12,
             stop: 17,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -576,6 +582,7 @@
             start: 17,
             stop: 18,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -589,6 +596,7 @@
             x: {
               lslash: '/'
             },
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -600,6 +608,7 @@
             start: 20,
             stop: 24,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -611,6 +620,7 @@
             start: 24,
             stop: 25,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -622,6 +632,7 @@
             start: 25,
             stop: 25,
             x: null,
+            source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           }
         ],
@@ -641,6 +652,7 @@
             x: {
               lslash: null
             },
+            source: '<x v=\\> z=42>',
             '$key': '^plain'
           },
           {
@@ -652,6 +664,7 @@
             start: 1,
             stop: 5,
             x: null,
+            source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
           {
@@ -665,6 +678,7 @@
             x: {
               chr: '>'
             },
+            source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
           {
@@ -676,6 +690,7 @@
             start: 7,
             stop: 12,
             x: null,
+            source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
           {
@@ -687,6 +702,7 @@
             start: 12,
             stop: 13,
             x: null,
+            source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
           {
@@ -698,6 +714,7 @@
             start: 13,
             stop: 13,
             x: null,
+            source: '<x v=\\> z=42>',
             '$key': '^plain'
           }
         ],
@@ -717,6 +734,7 @@
             x: {
               lslash: null
             },
+            source: '<x v=\\> z=42\\>',
             '$key': '^plain'
           },
           {
@@ -728,6 +746,7 @@
             start: 1,
             stop: 5,
             x: null,
+            source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
           {
@@ -741,6 +760,7 @@
             x: {
               chr: '>'
             },
+            source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
           {
@@ -752,6 +772,7 @@
             start: 7,
             stop: 12,
             x: null,
+            source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
           {
@@ -765,6 +786,7 @@
             x: {
               chr: '>'
             },
+            source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
           {
@@ -776,6 +798,7 @@
             start: 14,
             stop: 14,
             x: null,
+            source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           }
         ],
@@ -793,6 +816,7 @@
             start: 0,
             stop: 2,
             x: null,
+            source: 'a <b',
             '$key': '^plain'
           },
           {
@@ -806,6 +830,7 @@
             x: {
               lslash: null
             },
+            source: 'a <b',
             '$key': '^plain'
           },
           {
@@ -817,6 +842,7 @@
             start: 3,
             stop: 4,
             x: null,
+            source: 'a <b',
             '$key': '^tag'
           },
           {
@@ -828,6 +854,7 @@
             start: 4,
             stop: 4,
             x: null,
+            source: 'a <b',
             '$key': '^tag'
           }
         ],
@@ -845,6 +872,7 @@
             start: 0,
             stop: 4,
             x: null,
+            source: 'what? error?',
             '$key': '^plain'
           },
           {
@@ -858,6 +886,7 @@
             x: {
               code: 'nomatch'
             },
+            source: 'what? error?',
             '$key': '^plain'
           }
         ],
@@ -875,6 +904,7 @@
             start: 0,
             stop: 2,
             x: null,
+            source: 'd <',
             '$key': '^plain'
           },
           {
@@ -888,6 +918,7 @@
             x: {
               lslash: null
             },
+            source: 'd <',
             '$key': '^plain'
           },
           {
@@ -899,6 +930,7 @@
             start: 3,
             stop: 3,
             x: null,
+            source: 'd <',
             '$key': '^tag'
           }
         ],
@@ -918,6 +950,7 @@
             x: {
               lslash: null
             },
+            source: '<c',
             '$key': '^plain'
           },
           {
@@ -929,6 +962,7 @@
             start: 1,
             stop: 2,
             x: null,
+            source: '<c',
             '$key': '^tag'
           },
           {
@@ -940,6 +974,7 @@
             start: 2,
             stop: 2,
             x: null,
+            source: '<c',
             '$key': '^tag'
           }
         ],
@@ -959,6 +994,7 @@
             x: {
               lslash: null
             },
+            source: '<',
             '$key': '^plain'
           },
           {
@@ -970,6 +1006,7 @@
             start: 1,
             stop: 1,
             x: null,
+            source: '<',
             '$key': '^tag'
           }
         ],
@@ -987,6 +1024,7 @@
             start: 0,
             stop: 0,
             x: null,
+            source: '',
             '$key': '^plain'
           }
         ],
@@ -1004,6 +1042,7 @@
             start: 0,
             stop: 5,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1017,6 +1056,7 @@
             x: {
               chr: '<'
             },
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1028,6 +1068,7 @@
             start: 7,
             stop: 12,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1039,6 +1080,7 @@
             start: 12,
             stop: 13,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1050,6 +1092,7 @@
             start: 13,
             stop: 18,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1061,6 +1104,7 @@
             start: 18,
             stop: 19,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1074,6 +1118,7 @@
             x: {
               lslash: '/'
             },
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
           {
@@ -1085,6 +1130,7 @@
             start: 21,
             stop: 25,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -1096,6 +1142,7 @@
             start: 25,
             stop: 26,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
           },
           {
@@ -1107,6 +1154,7 @@
             start: 26,
             stop: 26,
             x: null,
+            source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           }
         ],
@@ -1126,6 +1174,7 @@
             x: {
               lslash: null
             },
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1137,6 +1186,7 @@
             start: 1,
             stop: 2,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1148,6 +1198,7 @@
             start: 2,
             stop: 3,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1159,6 +1210,7 @@
             start: 3,
             stop: 8,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1172,6 +1224,7 @@
             x: {
               chr: '<'
             },
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1183,6 +1236,7 @@
             start: 10,
             stop: 15,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1194,6 +1248,7 @@
             start: 15,
             stop: 16,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1205,6 +1260,7 @@
             start: 16,
             stop: 21,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1216,6 +1272,7 @@
             start: 21,
             stop: 22,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1229,6 +1286,7 @@
             x: {
               lslash: '/'
             },
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1240,6 +1298,7 @@
             start: 24,
             stop: 28,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1251,6 +1310,7 @@
             start: 28,
             stop: 29,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1264,6 +1324,7 @@
             x: {
               lslash: '/'
             },
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
           {
@@ -1275,6 +1336,7 @@
             start: 31,
             stop: 32,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1286,6 +1348,7 @@
             start: 32,
             stop: 33,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
           {
@@ -1297,6 +1360,7 @@
             start: 33,
             stop: 33,
             x: null,
+            source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           }
         ],
@@ -1316,6 +1380,7 @@
             x: {
               lslash: null
             },
+            source: '<i><b></b></i>',
             '$key': '^plain'
           },
           {
@@ -1327,6 +1392,7 @@
             start: 1,
             stop: 2,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1338,6 +1404,7 @@
             start: 2,
             stop: 3,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1351,6 +1418,7 @@
             x: {
               lslash: null
             },
+            source: '<i><b></b></i>',
             '$key': '^plain'
           },
           {
@@ -1362,6 +1430,7 @@
             start: 4,
             stop: 5,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1373,6 +1442,7 @@
             start: 5,
             stop: 6,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1386,6 +1456,7 @@
             x: {
               lslash: '/'
             },
+            source: '<i><b></b></i>',
             '$key': '^plain'
           },
           {
@@ -1397,6 +1468,7 @@
             start: 8,
             stop: 9,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1408,6 +1480,7 @@
             start: 9,
             stop: 10,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1421,6 +1494,7 @@
             x: {
               lslash: '/'
             },
+            source: '<i><b></b></i>',
             '$key': '^plain'
           },
           {
@@ -1432,6 +1506,7 @@
             start: 12,
             stop: 13,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1443,6 +1518,7 @@
             start: 13,
             stop: 14,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^tag'
           },
           {
@@ -1454,6 +1530,7 @@
             start: 14,
             stop: 14,
             x: null,
+            source: '<i><b></b></i>',
             '$key': '^plain'
           }
         ],
@@ -1465,9 +1542,15 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var result;
+          var j, len1, result, token;
           result = lexer.run(probe);
-          // H.tabulate ( rpr probe ), result
+          for (j = 0, len1 = result.length; j < len1; j++) {
+            token = result[j];
+            if (T != null) {
+              T.eq(probe.slice(token.start, token.stop), token.value);
+            }
+          }
+          H.tabulate(rpr(probe), result);
           return resolve(result);
         });
       });
@@ -2224,22 +2307,22 @@ probe\x20\x20\x20`;
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @using_strings_for_patterns()
-      // test @using_strings_for_patterns
-      // @cannot_return_from_initial_mode()
-      // test @cannot_return_from_initial_mode
-      // test @using_lexer_without_lexemes
-      // test @lex_tags
-      // test @lex_tags_with_rpr
-      // @parse_line_by_line()
-      // test @parse_line_by_line
-      // @match_end_of_line()
-      return test(this.match_end_of_line);
+      return test(this);
     })();
   }
 
-  // test @parse_line_by_line
+  // @using_strings_for_patterns()
+// test @using_strings_for_patterns
+// @cannot_return_from_initial_mode()
+// test @cannot_return_from_initial_mode
+// test @using_lexer_without_lexemes
+// test @lex_tags
+// test @lex_tags_with_rpr
+// @parse_line_by_line()
+// test @parse_line_by_line
+// @match_end_of_line()
+// test @match_end_of_line
+// test @parse_line_by_line
 // @parse_md_stars_markup()
 // test @parse_md_stars_markup
 // test @parse_nested_codespan

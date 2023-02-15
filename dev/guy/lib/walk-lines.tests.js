@@ -724,7 +724,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.GUY_fs_walk_lines_with_positions = function(T, done) {
-    var GUY, cfg, chunk_size, d, i, j, len, len1, matcher, path, probe, probes_and_matchers, ref, ref1, result;
+    var GUY, cfg, chunk_size, d, i, j, len, len1, matcher, path, probe, probes_and_matchers, ref, ref1, result, text_bfr;
     GUY = require(H.guy_path);
     probes_and_matchers = [
       [
@@ -782,21 +782,324 @@
             eol: ''
           }
         ]
+      ],
+      [
+        ['../../../assets/datamill/empty-file.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-single-nl.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: '',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-3-lines-no-eofnl.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: '1',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: '2',
+            eol: '\n'
+          },
+          {
+            lnr: 3,
+            line: '3',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/file-with-3-lines-with-eofnl.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: '1',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: '2',
+            eol: '\n'
+          },
+          {
+            lnr: 3,
+            line: '3',
+            eol: '\n'
+          },
+          {
+            lnr: 4,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/windows-crlf.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: 'this',
+            eol: '\r\n'
+          },
+          {
+            lnr: 2,
+            line: 'file',
+            eol: '\r\n'
+          },
+          {
+            lnr: 3,
+            line: 'written',
+            eol: '\r\n'
+          },
+          {
+            lnr: 4,
+            line: 'on',
+            eol: '\r\n'
+          },
+          {
+            lnr: 5,
+            line: 'MS Notepad',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/mixed-usage.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: 'all',
+            eol: '\r'
+          },
+          {
+            lnr: 2,
+            line: '𠀀bases',
+            eol: '\r'
+          },
+          {
+            lnr: 3,
+            line: '',
+            eol: '\r'
+          },
+          {
+            lnr: 4,
+            line: 'are belong',
+            eol: '\r\n'
+          },
+          {
+            lnr: 5,
+            line: '𠀀to us',
+            eol: '\n'
+          },
+          {
+            lnr: 6,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/all-empty-mixed.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: '',
+            eol: '\r'
+          },
+          {
+            lnr: 2,
+            line: '',
+            eol: '\r\n'
+          },
+          {
+            lnr: 3,
+            line: '',
+            eol: '\r\n'
+          },
+          {
+            lnr: 4,
+            line: '',
+            eol: '\n'
+          },
+          {
+            lnr: 5,
+            line: '',
+            eol: '\n'
+          },
+          {
+            lnr: 6,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/lines-with-trailing-spcs.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: 'line',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: 'with',
+            eol: '\n'
+          },
+          {
+            lnr: 3,
+            line: 'trailing',
+            eol: '\n'
+          },
+          {
+            lnr: 4,
+            line: 'whitespace',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: true
+          }
+        ],
+        [
+          {
+            lnr: 1,
+            line: 'line',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: 'with',
+            eol: '\n'
+          },
+          {
+            lnr: 3,
+            line: 'trailing',
+            eol: '\n'
+          },
+          {
+            lnr: 4,
+            line: 'whitespace',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        [
+          '../../../assets/datamill/lines-with-trailing-spcs.txt',
+          {
+            trim: false
+          }
+        ],
+        [
+          {
+            lnr: 1,
+            line: 'line   ',
+            eol: '\n'
+          },
+          {
+            lnr: 2,
+            line: 'with   ',
+            eol: '\n'
+          },
+          {
+            lnr: 3,
+            line: 'trailing\t\t',
+            eol: '\n'
+          },
+          {
+            lnr: 4,
+            line: 'whitespace　 ',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/lines-with-lf.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: 'line1',
+            eol: '\r'
+          },
+          {
+            lnr: 2,
+            line: 'line2',
+            eol: '\r'
+          },
+          {
+            lnr: 3,
+            line: 'line3',
+            eol: '\r'
+          },
+          {
+            lnr: 4,
+            line: '',
+            eol: ''
+          }
+        ]
+      ],
+      [
+        ['../../../assets/datamill/lines-with-crlf.txt',
+        null],
+        [
+          {
+            lnr: 1,
+            line: 'line1',
+            eol: '\r\n'
+          },
+          {
+            lnr: 2,
+            line: 'line2',
+            eol: '\r\n'
+          },
+          {
+            lnr: 3,
+            line: 'line3',
+            eol: '\r\n'
+          },
+          {
+            lnr: 4,
+            line: '',
+            eol: ''
+          }
+        ]
       ]
     ];
 //.........................................................................................................
-// [ [ '../../../assets/datamill/empty-file.txt', null ], [ { lnr: 1, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { lnr: 1, line: '', eol: '\n' }, { lnr: 2, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '' } ] ]
-// [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { lnr: 1, line: '1', eol: '\n' }, { lnr: 2, line: '2', eol: '\n' }, { lnr: 3, line: '3', eol: '\n' }, { lnr: 4, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { lnr: 1, line: 'this', eol: '\r\n' }, { lnr: 2, line: 'file', eol: '\r\n' }, { lnr: 3, line: 'written', eol: '\r\n' }, { lnr: 4, line: 'on', eol: '\r\n' }, { lnr: 5, line: 'MS Notepad', eol: '' } ] ]
-// [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { lnr: 1, line: 'all', eol: '\r' }, { lnr: 2, line: '𠀀bases', eol: '\r' }, { lnr: 3, line: '', eol: '\r' }, { lnr: 4, line: 'are belong', eol: '\r\n' }, { lnr: 5, line: '𠀀to us', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { lnr: 1, line: '', eol: '\r' }, { lnr: 2, line: '', eol: '\r\n' }, { lnr: 3, line: '', eol: '\r\n' }, { lnr: 4, line: '', eol: '\n' }, { lnr: 5, line: '', eol: '\n' }, { lnr: 6, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
-// [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { lnr: 1, line: 'line', eol: '\n' }, { lnr: 2, line: 'with', eol: '\n' }, { lnr: 3, line: 'trailing', eol: '\n' }, { lnr: 4, line: 'whitespace', eol: '' } ] ]
-// [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { lnr: 1, line: 'line   ', eol: '\n' }, { lnr: 2, line: 'with   ', eol: '\n' }, { lnr: 3, line: 'trailing\t\t', eol: '\n' }, { lnr: 4, line: 'whitespace　 ', eol: '' } ] ]
-// [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r' }, { lnr: 2, line: 'line2', eol: '\r' }, { lnr: 3, line: 'line3', eol: '\r' }, { lnr: 4, line: '', eol: '' } ] ]
-// [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { lnr: 1, line: 'line1', eol: '\r\n' }, { lnr: 2, line: 'line2', eol: '\r\n' }, { lnr: 3, line: 'line3', eol: '\r\n' }, { lnr: 4, line: '', eol: '' } ] ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher] = probes_and_matchers[i];
       ref = [20];
@@ -805,11 +1108,16 @@
         result = [];
         [path, cfg] = probe;
         path = PATH.resolve(PATH.join(__dirname, path));
+        text_bfr = FS.readFileSync(path, {
+          encoding: null
+        });
         ref1 = GUY.fs.walk_lines_with_positions(path, {...cfg, chunk_size});
-        // text      = FS.readFileSync path, { encoding: 'utf-8', }
         for (d of ref1) {
-          // d.line  = d.line.toString()
-          // d.eol   = d.eol.toString()
+          // { byte_idx } = d
+          // delete d.byte_idx
+          // debug '^23-2^', rpr ( text_bfr.subarray byte_idx, byte_idx + 10 ).toString()
+          d.line = d.line.toString();
+          d.eol = d.eol.toString();
           result.push(d);
         }
         if (T != null) {
@@ -1807,18 +2115,19 @@
       // test @GUY_str_walk_lines_with_positions
       // test @GUY_fs_walk_lines_with_positions
       // test @GUY_fs_walk_lines_with_positions_no_encoding
-      // test @
-      // test @GUY_fs_walk_lines
-      // @GUY_str_walk_lines()
-      // test @GUY_str_walk_lines
-      // @GUY_fs__walk_lines__advance()
-      // test @GUY_fs__walk_lines__advance
-      // @GUY_fs_walk_buffers()
-      // test @GUY_fs_walk_buffers
-      // test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
-      return test(this.GUY_fs_walk_buffers_with_positions);
+      return test(this);
     })();
   }
+
+  // test @GUY_fs_walk_lines
+// @GUY_str_walk_lines()
+// test @GUY_str_walk_lines
+// @GUY_fs__walk_lines__advance()
+// test @GUY_fs__walk_lines__advance
+// @GUY_fs_walk_buffers()
+// test @GUY_fs_walk_buffers
+// test @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1
+// test @GUY_fs_walk_buffers_with_positions
 
 }).call(this);
 
