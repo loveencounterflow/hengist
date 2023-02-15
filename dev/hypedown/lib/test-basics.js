@@ -141,10 +141,12 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, line, p, ref1, result, result_rpr;
+          var d, eol, line, lnr, p, ref1, result, result_rpr, y;
           p = new Hypedown_parser();
-          ref1 = GUY.str.walk_lines(probe);
-          for (line of ref1) {
+          ref1 = GUY.str.walk_lines_with_positions(probe);
+          for (y of ref1) {
+            ({lnr, line, eol} = y);
+            debug('^');
             p.send(line);
           }
           result = p.run();

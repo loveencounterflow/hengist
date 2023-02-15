@@ -433,67 +433,72 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.lex_tags = async function(T, done) {
-    var Interlex, c, error, i, len, lexer, matcher, probe, probes_and_matchers;
+    var Interlex, c, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
     ({
       // T?.halt_on_error()
       Interlex,
       compose: c
     } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex({
-      end_token: true
-    });
-    (() => {      //.........................................................................................................
-      /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
-      var mode;
-      mode = 'plain';
-      lexer.add_lexeme({
-        mode,
-        tid: 'escchr',
-        pattern: /\\(?<chr>.)/u
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer;
+      lexer = new Interlex({
+        end_token: true
       });
-      lexer.add_lexeme({
-        mode,
-        tid: 'text',
-        pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'tag',
-        jump: 'tag',
-        pattern: /<(?<lslash>\/?)/u
-      });
-      return lexer.add_lexeme({
-        mode,
-        tid: 'E_backticks',
-        pattern: /`+/
-      });
-    })();
-    (() => {      // lexer.add_lexeme mode, 'other',        /./u
-      //.........................................................................................................
-      var mode;
-      mode = 'tag';
-      lexer.add_lexeme({
-        mode,
-        tid: 'escchr',
-        pattern: /\\(?<chr>.)/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'end',
-        jump: '^',
-        pattern: />/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'text',
-        pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
-      });
-      return lexer.add_lexeme({
-        mode,
-        tid: 'other',
-        pattern: /./u
-      });
-    })();
+      (() => {
+        /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'tag',
+          jump: 'tag',
+          pattern: /<(?<lslash>\/?)/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'E_backticks',
+          pattern: /`+/
+        });
+      })();
+      (() => {        // lexer.add_lexeme mode, 'other',        /./u
+        //.........................................................................................................
+        var mode;
+        mode = 'tag';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'end',
+          jump: '^',
+          pattern: />/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'other',
+          pattern: /./u
+        });
+      })();
+      return lexer;
+    };
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -1542,7 +1547,8 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var j, len1, result, token;
+          var j, len1, lexer, result, token;
+          lexer = new_lexer();
           result = lexer.run(probe);
           for (j = 0, len1 = result.length; j < len1; j++) {
             token = result[j];
@@ -1563,67 +1569,71 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.lex_tags_with_rpr = async function(T, done) {
-    var Interlex, c, error, i, len, lexer, matcher, probe, probes_and_matchers;
+    var Interlex, c, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
     ({
       // T?.halt_on_error()
       Interlex,
       compose: c
     } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex({
-      end_token: true
-    });
-    (() => {      //.........................................................................................................
-      /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
-      var mode;
-      mode = 'plain';
-      lexer.add_lexeme({
-        mode,
-        tid: 'escchr',
-        pattern: /\\(?<chr>.)/u
+    new_lexer = function() {
+      var lexer;
+      lexer = new Interlex({
+        end_token: true
       });
-      lexer.add_lexeme({
-        mode,
-        tid: 'text',
-        pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'tag',
-        jump: 'tag',
-        pattern: /<(?<lslash>\/?)/u
-      });
-      return lexer.add_lexeme({
-        mode,
-        tid: 'E_backticks',
-        pattern: /`+/
-      });
-    })();
-    (() => {      // lexer.add_lexeme mode, 'other',        /./u
-      //.........................................................................................................
-      var mode;
-      mode = 'tag';
-      lexer.add_lexeme({
-        mode,
-        tid: 'escchr',
-        pattern: /\\(?<chr>.)/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'end',
-        jump: '^',
-        pattern: />/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'text',
-        pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
-      });
-      return lexer.add_lexeme({
-        mode,
-        tid: 'other',
-        pattern: /./u
-      });
-    })();
+      (() => {        //.........................................................................................................
+        /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'tag',
+          jump: 'tag',
+          pattern: /<(?<lslash>\/?)/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'E_backticks',
+          pattern: /`+/
+        });
+      })();
+      (() => {        // lexer.add_lexeme mode, 'other',        /./u
+        //.........................................................................................................
+        var mode;
+        mode = 'tag';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'end',
+          jump: '^',
+          pattern: />/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'other',
+          pattern: /./u
+        });
+      })();
+      return lexer;
+    };
     //.........................................................................................................
     probes_and_matchers = [['helo <bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:tag>tag,(5:6),='<',lslash:null][tag:text,(6:10),='bold'][tag:end>plain,(10:11),='>'][plain:E_backticks,(11:12),='`'][plain:text,(12:17),='world'][plain:E_backticks,(17:18),='`'][plain:tag>tag,(18:20),='</',lslash:'/'][tag:text,(20:24),='bold'][tag:end>plain,(24:25),='>'][plain:$eof,(25:25),='']", null], ['<x v=\\> z=42>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:end>plain,(12:13),='>'][plain:$eof,(13:13),='']", null], ['<x v=\\> z=42\\>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:5),='x v='][tag:escchr,(5:7),='\\\\>',chr:'>'][tag:text,(7:12),=' z=42'][tag:escchr,(12:14),='\\\\>',chr:'>'][tag:$eof,(14:14),='']", null], ['a <b', "[plain:text,(0:2),='a '][plain:tag>tag,(2:3),='<',lslash:null][tag:text,(3:4),='b'][tag:$eof,(4:4),='']", null], ['what? error?', "[plain:text,(0:4),='what'][plain:$error,(4:4),='',code:'nomatch']", null], ['d <', "[plain:text,(0:2),='d '][plain:tag>tag,(2:3),='<',lslash:null][tag:$eof,(3:3),='']", null], ['<c', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='c'][tag:$eof,(2:2),='']", null], ['<', "[plain:tag>tag,(0:1),='<',lslash:null][tag:$eof,(1:1),='']", null], ['', "[plain:$eof,(0:0),='']", null], ['helo \\<bold>`world`</bold>', "[plain:text,(0:5),='helo '][plain:escchr,(5:7),='\\\\<',chr:'<'][plain:text,(7:12),='bold>'][plain:E_backticks,(12:13),='`'][plain:text,(13:18),='world'][plain:E_backticks,(18:19),='`'][plain:tag>tag,(19:21),='</',lslash:'/'][tag:text,(21:25),='bold'][tag:end>plain,(25:26),='>'][plain:$eof,(26:26),='']", null], ['<b>helo \\<bold>`world`</bold></b>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='b'][tag:end>plain,(2:3),='>'][plain:text,(3:8),='helo '][plain:escchr,(8:10),='\\\\<',chr:'<'][plain:text,(10:15),='bold>'][plain:E_backticks,(15:16),='`'][plain:text,(16:21),='world'][plain:E_backticks,(21:22),='`'][plain:tag>tag,(22:24),='</',lslash:'/'][tag:text,(24:28),='bold'][tag:end>plain,(28:29),='>'][plain:tag>tag,(29:31),='</',lslash:'/'][tag:text,(31:32),='b'][tag:end>plain,(32:33),='>'][plain:$eof,(33:33),='']", null], ['<i><b></b></i>', "[plain:tag>tag,(0:1),='<',lslash:null][tag:text,(1:2),='i'][tag:end>plain,(2:3),='>'][plain:tag>tag,(3:4),='<',lslash:null][tag:text,(4:5),='b'][tag:end>plain,(5:6),='>'][plain:tag>tag,(6:8),='</',lslash:'/'][tag:text,(8:9),='b'][tag:end>plain,(9:10),='>'][plain:tag>tag,(10:12),='</',lslash:'/'][tag:text,(12:13),='i'][tag:end>plain,(13:14),='>'][plain:$eof,(14:14),='']", null]];
 //.........................................................................................................
@@ -1631,7 +1641,8 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var token;
+          var lexer, token;
+          lexer = new_lexer();
           return resolve(((function() {
             var ref1, results;
             ref1 = lexer.walk(probe);
@@ -1741,6 +1752,191 @@
           H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
           //.....................................................................................................
           return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_string_literals = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer;
+      lexer = new Interlex({
+        linewise: true
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: 'dq1',
+          pattern: /(?<!")"(?!")/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'other',
+          jump: null,
+          pattern: /[^"]+/u
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'dq1';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          jump: null,
+          pattern: /[^"]+/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: '^',
+          pattern: /"/u
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'helo',
+        [
+          {
+            mk: 'plain:other',
+            value: 'helo'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ],
+      [
+        'helo "world"',
+        [
+          {
+            mk: 'plain:other',
+            value: 'helo '
+          },
+          {
+            mk: 'plain:dq1',
+            value: '"'
+          },
+          {
+            mk: 'dq1:text',
+            value: 'world'
+          },
+          {
+            mk: 'dq1:dq1',
+            value: '"'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ],
+      [
+        'helo "everyone\nout there"!',
+        [
+          {
+            mk: 'plain:other',
+            value: 'helo '
+          },
+          {
+            mk: 'plain:dq1',
+            value: '"'
+          },
+          {
+            mk: 'dq1:text',
+            value: 'everyone'
+          },
+          {
+            mk: 'dq1:nl',
+            value: ''
+          },
+          {
+            mk: 'dq1:text',
+            value: 'out there'
+          },
+          {
+            mk: 'dq1:dq1',
+            value: '"'
+          },
+          {
+            mk: 'plain:other',
+            value: '!'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, ref1, result, result_rpr, token;
+          lexer = new_lexer();
+          result = [];
+          ref1 = lexer.walk(probe);
+          for (token of ref1) {
+            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+          }
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, result); // unless result_rpr is matcher
+          //.....................................................................................................
+          return resolve(result);
         });
       });
     }
@@ -1985,7 +2181,7 @@ the
 
   //-----------------------------------------------------------------------------------------------------------
   this.markup_with_variable_length = async function(T, done) {
-    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_toy_md_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -2077,14 +2273,14 @@ the
         return null;
       };
     };
-    //.........................................................................................................
-    md_lexer = new_toy_md_lexer('md');
+//.........................................................................................................
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var d, md_lexer, p, result, result_rpr;
+          md_lexer = new_toy_md_lexer('md');
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
@@ -2307,7 +2503,8 @@ probe\x20\x20\x20`;
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this.parse_string_literals);
     })();
   }
 

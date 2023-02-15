@@ -160,11 +160,107 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.catchall_and_reserved_with_custom_names = async function(T, done) {
+    var Interlex, add_lexemes;
+    // T?.halt_on_error()
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    add_lexemes = function(lexer) {
+      var mode;
+      mode = 'plain';
+      lexer.add_lexeme({
+        mode,
+        tid: 'escchr',
+        pattern: /\\(?<chr>.)/u,
+        reserved: '\\'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'star2',
+        pattern: /(?<!\*)\*\*(?!\*)/u,
+        reserved: '*'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'heading',
+        pattern: /^(?<hashes>#+)\s+/u,
+        reserved: '#'
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'word',
+        pattern: /\p{Letter}+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'number_symbol',
+        pattern: /#(?=\p{Number})/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'number',
+        pattern: /\p{Number}+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'ws',
+        pattern: /\s+/u
+      });
+      lexer.add_catchall_lexeme({
+        mode,
+        tid: 'other'
+      });
+      lexer.add_reserved_lexeme({
+        mode,
+        tid: 'forbidden'
+      });
+      return null;
+    };
+    await (async() => {      //.........................................................................................................
+      var error, i, len, matcher, probe, probes_and_matchers, results;
+      probes_and_matchers = [['helo', "word:'helo'", null], ['helo*x', "word:'helo'forbidden:'*'word:'x'", null], ['*x', "forbidden:'*'word:'x'", null], ['## question #1 and a hash: #', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'other:': 'forbidden:'#'", null], ['## question #1 and a hash: \\#', "heading:'## 'word:'question'ws:' 'number_symbol:'#'number:'1'ws:' 'word:'and'ws:' 'word:'a'ws:' 'word:'hash'other:': 'escchr:'\\\\#'", null], [':.;*#', "other:':.;'forbidden:'*#'", null]];
+      results = [];
+      for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+        [probe, matcher, error] = probes_and_matchers[i];
+        results.push((await T.perform(probe, matcher, error, function() {
+          return new Promise(function(resolve, reject) {
+            var lexer, result, result_rpr, t;
+            lexer = new Interlex({
+              catchall_concat: true,
+              reserved_concat: true
+            });
+            add_lexemes(lexer);
+            // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
+            result = lexer.run(probe);
+            H.tabulate(rpr(probe), result);
+            result_rpr = ((function() {
+              var j, len1, results1;
+              results1 = [];
+              for (j = 0, len1 = result.length; j < len1; j++) {
+                t = result[j];
+                results1.push(`${t.tid}:${rpr(t.value)}`);
+              }
+              return results1;
+            })()).join('');
+            return resolve(result_rpr);
+          });
+        })));
+      }
+      return results;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @add_reserved_chrs()
-      return test(this.add_reserved_chrs);
+      // test @add_reserved_chrs
+      return test(this.catchall_and_reserved_with_custom_names);
     })();
   }
 
