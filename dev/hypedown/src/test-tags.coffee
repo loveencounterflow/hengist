@@ -37,25 +37,33 @@ new_tag_lexer = ->
   { Interlex } = require '../../../apps/intertext-lexer'
   lexer = new Interlex { linewise: true, catchall_concat: true, reserved_concat: true, }
   # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+  #.......................................................................................................
   new_escchr_descriptor = ( mode ) ->
     create = ( token ) ->
       token.x = { chr: '\n', } unless ( token.x?.chr )?
       return token
     return { mode, tid: 'escchr', pattern: /\\(?<chr>.|$)/u, reserved: '\\', create, }
   #.......................................................................................................
+  new_nl_descriptor = ( mode ) ->
+    ### TAINT consider to force value by setting it in descriptor (needs interlex update) ###
+    create = ( token ) ->
+      token.value = '\n'
+      return token
+    return { mode, tid: 'nl', pattern: /$/u, create, }
+  #.......................................................................................................
   do =>
     mode = 'plain'
-    lexer.add_lexeme new_escchr_descriptor mode
+    lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme { mode,  tid: 'ltbang',    jump: 'comment',  pattern: ( /<!--/u ), reserved: '<', }
     lexer.add_lexeme { mode,  tid: 'lt',        jump: 'tag',      pattern: ( /</u ), reserved: '<', }
-    lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+    lexer.add_lexeme new_nl_descriptor      mode
     lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: ( /\s+/u ), }
     lexer.add_catchall_lexeme { mode, tid: 'other', }
     lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
   #.......................................................................................................
   do =>
     mode = 'tag'
-    lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+    lexer.add_lexeme new_nl_descriptor      mode
     # lexer.add_lexeme { mode,  tid: 'tagtext',   jump: null,       pattern: ( /[^\/>]+/u ), }
     lexer.add_lexeme { mode,  tid: 'dq',        jump: 'tag:dq',   pattern: ( /"/u ),    reserved: '"' }
     lexer.add_lexeme { mode,  tid: 'sq',        jump: 'tag:sq',   pattern: ( /'/u ),    reserved: "'" }
@@ -69,20 +77,20 @@ new_tag_lexer = ->
   do =>
     mode = 'tag:dq'
     lexer.add_lexeme new_escchr_descriptor mode
-    lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+    lexer.add_lexeme new_nl_descriptor      mode
     lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern: ( /"/u ),    reserved: '"' }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
   #.......................................................................................................
   do =>
     mode = 'tag:sq'
     lexer.add_lexeme new_escchr_descriptor mode
-    lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+    lexer.add_lexeme new_nl_descriptor      mode
     lexer.add_lexeme { mode,  tid: 'sq',        jump: '^',        pattern: ( /'/u ),    reserved: "'" }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
   #.......................................................................................................
   do =>
     mode = 'comment'
-    lexer.add_lexeme { mode, tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+    lexer.add_lexeme new_nl_descriptor      mode
     lexer.add_lexeme new_escchr_descriptor mode
     lexer.add_lexeme { mode, tid: 'eoc',       jump: '^',        pattern:  /-->/u, reserved: '--',    }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
@@ -101,20 +109,57 @@ new_parser = ( lexer ) ->
       send token for token from parser.lexer.walk line
       return null
   #.........................................................................................................
-  $collect_tag  = ( htmlish_parser ) ->
+  $_hd_token_from_paragate_token = ->
+    return _hd_token_from_paragate_token = ( d, send ) ->
+      return send d unless d.$key in [ '<tag', ]
+      first = d.$collector.at  0
+      last  = d.$collector.at -1
+      delete d.$collector; H.tabulate "htmlish", [ d, ]
+      e     =
+        mode:   'tag'
+        tid:    d.type
+        mk:     "tag:#{d.type}"
+        jump:   null
+        value:  d.$source
+        ### TAINT must give first_lnr, last_lnr ###
+        lnr:    first.lnr
+        start:  first.start
+        stop:   last.stop
+        x:
+          atrs:   d.atrs
+          id:     d.id
+        source: null
+        $key:   '^tag'
+      send e
+    return null
+  #.........................................................................................................
+  $parse_htmlish_tag  = ( htmlish_parser ) ->
     collector   = []
     within_tag  = false
     sp          = new Pipeline()
     sp.push transforms.$window { min: 0, max: +1, empty: null, }
-    sp.push collect_tag = ( [ d, nxt, ], send ) ->
+    sp.push parse_htmlish_tag = ( [ d, nxt, ], send ) ->
       #.....................................................................................................
       if within_tag
         collector.push d
-        unless nxt?.mk.startsWith 'tag:'
+        # debug '^parse_htmlish_tag@1^', d
+        if d.jump is 'plain' ### TAINT magic number ###
           within_tag  = false
-          source      = ( e.value for e from collector ).join ''
-          debug '^78^', rpr source, GUY.lft.thaw _HTMLISH.parse source
-          send e for e in GUY.lft.thaw _HTMLISH.parse source
+          $source     = ( e.value for e from collector ).join ''
+          $collector  = [ collector..., ]
+          send stamp collector.shift() while collector.length > 0
+          htmlish     = _HTMLISH.parse $source
+          # H.tabulate '^78^', htmlish
+          # debug '^78^', rpr $source
+          # info '^78^', x for x in htmlish
+          unless htmlish.length is 1
+            ### TAINT use API to create token ###
+            # throw new Error "^34345^ expected single token, got #{rpr htmlish}"
+            return send { mode: 'tag', tid: '$error', }
+          [ htmlish ]         = GUY.lft.thaw htmlish
+          htmlish.$collector  = $collector
+          htmlish.$source     = $source
+          send htmlish
         return null
       #.....................................................................................................
       else
@@ -123,13 +168,14 @@ new_parser = ( lexer ) ->
         collector.push d
       #.....................................................................................................
       return null
+    sp.push $_hd_token_from_paragate_token()
     return sp
   #.........................................................................................................
   p             = new Pipeline()
   p.lexer       = lexer
   p.push $tokenize p
-  p.push $collect_tag()
-  p.push show = ( d ) -> urge '^parser@1^', d
+  p.push $parse_htmlish_tag()
+  # p.push show = ( d ) -> urge '^parser@1^', d
   debug '^43^', p
   return p
 
@@ -174,6 +220,7 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   probes_and_matchers = [
     [ 'abc<div#c1 foo=bar/xyz/', null, null ]
+    [ 'abc<div#c1\nfoo=bar/xyz/', null, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
