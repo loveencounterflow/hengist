@@ -212,11 +212,12 @@
 
   //-----------------------------------------------------------------------------------------------------------
   new_parser = function(lexer) {
-    var $_hd_token_from_paragate_token, $parse_htmlish_tag, $tokenize, Pipeline, _HTMLISH, p, transforms;
+    var $_hd_token_from_paragate_token, $parse_htmlish_tag, $tokenize, Pipeline, _HTMLISH, htmlish_sym, p, transforms;
     ({Pipeline, transforms} = require('../../../apps/moonriver'));
     _HTMLISH = (require('paragate/lib/htmlish.grammar')).new_grammar({
       bare: true
     });
+    htmlish_sym = Symbol('htmlish');
     //.........................................................................................................
     $tokenize = function(parser) {
       var tokenize;
@@ -234,8 +235,8 @@
     $_hd_token_from_paragate_token = function() {
       var _hd_token_from_paragate_token;
       return _hd_token_from_paragate_token = function(d, send) {
-        var e, first, last, ref;
-        if ((ref = d.$key) !== '<tag') {
+        var e, first, last;
+        if (d[htmlish_sym] == null) {
           return send(d);
         }
         first = d.$collector.at(0);
@@ -264,7 +265,7 @@
       return null;
     };
     //.........................................................................................................
-    $parse_htmlish_tag = function(htmlish_parser) {
+    $parse_htmlish_tag = function() {
       var collector, parse_htmlish_tag, sp, within_tag;
       collector = [];
       within_tag = false;
@@ -275,7 +276,7 @@
         empty: null
       }));
       sp.push(parse_htmlish_tag = function([d, nxt], send) {
-        var $collector, $source, e, htmlish;
+        var $collector, $source, e, htmlish, i, len, x;
         //.....................................................................................................
         if (within_tag) {
           collector.push(d);
@@ -295,9 +296,12 @@
               send(stamp(collector.shift()));
             }
             htmlish = _HTMLISH.parse($source);
-            // H.tabulate '^78^', htmlish
-            // debug '^78^', rpr $source
-            // info '^78^', x for x in htmlish
+            for (i = 0, len = htmlish.length; i < len; i++) {
+              x = htmlish[i];
+              // H.tabulate '^78^', htmlish
+              // debug '^78^', rpr $source
+              info('^78^', x);
+            }
             if (htmlish.length !== 1) {
               /* TAINT use API to create token */
               // throw new Error "^34345^ expected single token, got #{rpr htmlish}"
@@ -307,6 +311,7 @@
               });
             }
             [htmlish] = GUY.lft.thaw(htmlish);
+            htmlish[htmlish_sym] = true;
             htmlish.$collector = $collector;
             htmlish.$source = $source;
             send(htmlish);
@@ -1023,7 +1028,7 @@
   this.tags_2 = async function(T, done) {
     var error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
-    probes_and_matchers = [['abc<div#c1 foo=bar/xyz/', null, null], ['abc<div#c1\nfoo=bar/xyz/', null, null]];
+    probes_and_matchers = [['abc<div#c1 foo=bar/xyz/', null, null], ['abc<div#c1\nfoo=bar/xyz/', null, null], ['abc<div#c1 foo=bar>xyz/', null, null], ['abc<div#c1\nfoo=bar>xyz/', null, null], ['abc<div#c1 foo=bar/>xyz/', null, null], ['abc<div#c1\nfoo=bar/>xyz/', null, null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
