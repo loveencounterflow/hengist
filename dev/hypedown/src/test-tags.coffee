@@ -102,6 +102,7 @@ new_parser = ( lexer ) ->
   { Pipeline
     transforms  } = require '../../../apps/moonriver'
   _HTMLISH        = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
+  htmlish_sym     = Symbol 'htmlish'
   #.........................................................................................................
   $tokenize     = ( parser ) ->
     return tokenize = ( line, send ) ->
@@ -111,7 +112,7 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   $_hd_token_from_paragate_token = ->
     return _hd_token_from_paragate_token = ( d, send ) ->
-      return send d unless d.$key in [ '<tag', ]
+      return send d unless d[htmlish_sym]?
       first = d.$collector.at  0
       last  = d.$collector.at -1
       delete d.$collector; H.tabulate "htmlish", [ d, ]
@@ -133,7 +134,7 @@ new_parser = ( lexer ) ->
       send e
     return null
   #.........................................................................................................
-  $parse_htmlish_tag  = ( htmlish_parser ) ->
+  $parse_htmlish_tag  = ->
     collector   = []
     within_tag  = false
     sp          = new Pipeline()
@@ -151,14 +152,15 @@ new_parser = ( lexer ) ->
           htmlish     = _HTMLISH.parse $source
           # H.tabulate '^78^', htmlish
           # debug '^78^', rpr $source
-          # info '^78^', x for x in htmlish
+          info '^78^', x for x in htmlish
           unless htmlish.length is 1
             ### TAINT use API to create token ###
             # throw new Error "^34345^ expected single token, got #{rpr htmlish}"
             return send { mode: 'tag', tid: '$error', }
-          [ htmlish ]         = GUY.lft.thaw htmlish
-          htmlish.$collector  = $collector
-          htmlish.$source     = $source
+          [ htmlish ]           = GUY.lft.thaw htmlish
+          htmlish[htmlish_sym]  = true
+          htmlish.$collector    = $collector
+          htmlish.$source       = $source
           send htmlish
         return null
       #.....................................................................................................
@@ -221,6 +223,10 @@ new_parser = ( lexer ) ->
   probes_and_matchers = [
     [ 'abc<div#c1 foo=bar/xyz/', null, null ]
     [ 'abc<div#c1\nfoo=bar/xyz/', null, null ]
+    [ 'abc<div#c1 foo=bar>xyz/', null, null ]
+    [ 'abc<div#c1\nfoo=bar>xyz/', null, null ]
+    [ 'abc<div#c1 foo=bar/>xyz/', null, null ]
+    [ 'abc<div#c1\nfoo=bar/>xyz/', null, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
