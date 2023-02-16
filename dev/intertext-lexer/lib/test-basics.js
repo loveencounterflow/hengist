@@ -2500,11 +2500,275 @@ probe\x20\x20\x20`;
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_create_for_custom_behavior = async function(T, done) {
+    var Interlex, create_call_count, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    create_call_count = 0;
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer, new_escchr_descriptor;
+      lexer = new Interlex({
+        linewise: true,
+        catchall_concat: true,
+        reserved_concat: true
+      });
+      //.......................................................................................................
+      new_escchr_descriptor = function(mode) {
+        var create;
+        create = function(token) {
+          var ref1;
+          create_call_count++;
+          if (((ref1 = token.x) != null ? ref1.chr : void 0) == null) {
+            token.x = {
+              chr: '\n'
+            };
+          }
+          return token;
+        };
+        return {
+          mode,
+          tid: 'escchr',
+          pattern: /\\(?<chr>.|$)/u,
+          reserved: '\\',
+          create
+        };
+      };
+      (() => {        //.......................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme(new_escchr_descriptor(mode));
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'ws',
+          jump: null,
+          pattern: /\s+/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'word',
+          jump: null,
+          pattern: /\S+/u
+        });
+        lexer.add_catchall_lexeme({
+          mode,
+          tid: 'other'
+        });
+        return lexer.add_reserved_lexeme({
+          mode,
+          tid: 'forbidden'
+        });
+      })();
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'foo <!-- comment --> bar',
+        [
+          {
+            mk: 'plain:word',
+            value: 'foo'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '<!--'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: 'comment'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '-->'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: 'bar'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ],
+      [
+        'foo <!-- \\comment \n --> bar',
+        [
+          {
+            mk: 'plain:word',
+            value: 'foo'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '<!--'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:escchr',
+            value: '\\c',
+            x: {
+              chr: 'c'
+            }
+          },
+          {
+            mk: 'plain:word',
+            value: 'omment'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '-->'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: 'bar'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ],
+      [
+        'foo <!-- comment \\\n --> bar',
+        [
+          {
+            mk: 'plain:word',
+            value: 'foo'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '<!--'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: 'comment'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:escchr',
+            value: '\\',
+            x: {
+              chr: '\n'
+            }
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: '-->'
+          },
+          {
+            mk: 'plain:ws',
+            value: ' '
+          },
+          {
+            mk: 'plain:word',
+            value: 'bar'
+          },
+          {
+            mk: 'plain:nl',
+            value: ''
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, ref1, result, token;
+          lexer = new_lexer();
+          if (T != null) {
+            T.eq(type_of(lexer.registry.plain.lexemes.escchr.create), 'function');
+          }
+          result = [];
+          ref1 = lexer.walk(probe);
+          for (token of ref1) {
+            d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'x'));
+            // debug '^432^', d if d.mk.endsWith ':escchr'
+            result.push(d);
+          }
+          // H.tabulate ( rpr probe ), result
+          return resolve(result);
+        });
+      });
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(create_call_count, 2);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      return test(this.parse_string_literals);
+      // test @parse_string_literals
+      return test(this.use_create_for_custom_behavior);
     })();
   }
 
