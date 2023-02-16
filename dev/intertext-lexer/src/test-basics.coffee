@@ -764,10 +764,58 @@ $parse_md_stars = ->
   return null
 
 
+#-----------------------------------------------------------------------------------------------------------
+@use_create_for_custom_behavior = ( T, done ) ->
+  { Interlex } = require '../../../apps/intertext-lexer'
+  create_call_count = 0
+  #.........................................................................................................
+  new_lexer = ->
+    lexer = new Interlex { linewise: true, catchall_concat: true, reserved_concat: true, }
+    #.......................................................................................................
+    new_escchr_descriptor = ( mode ) ->
+      create = ( token ) ->
+        create_call_count++
+        token.x = { chr: '\n', } unless ( token.x?.chr )?
+        return token
+      return { mode, tid: 'escchr', pattern: /\\(?<chr>.|$)/u, reserved: '\\', create, }
+    #.......................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme new_escchr_descriptor mode
+      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
+      lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: ( /\s+/u ), }
+      lexer.add_lexeme { mode,  tid: 'word',      jump: null,       pattern: ( /\S+/u ), }
+      lexer.add_catchall_lexeme { mode, tid: 'other', }
+      lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'foo <!-- comment --> bar', [ { mk: 'plain:word', value: 'foo' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '<!--' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: 'comment' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '-->' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: 'bar' }, { mk: 'plain:nl', value: '' } ], null ]
+    [ 'foo <!-- \\comment \n --> bar', [ { mk: 'plain:word', value: 'foo' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '<!--' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:escchr', value: '\\c', x: { chr: 'c' } }, { mk: 'plain:word', value: 'omment' }, { mk: 'plain:nl', value: '' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '-->' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: 'bar' }, { mk: 'plain:nl', value: '' } ], null ]
+    [ 'foo <!-- comment \\\n --> bar', [ { mk: 'plain:word', value: 'foo' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '<!--' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: 'comment' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:escchr', value: '\\', x: { chr: '\n' } }, { mk: 'plain:nl', value: '' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: '-->' }, { mk: 'plain:ws', value: ' ' }, { mk: 'plain:word', value: 'bar' }, { mk: 'plain:nl', value: '' } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer   = new_lexer()
+      T?.eq ( type_of lexer.registry.plain.lexemes.escchr.create ), 'function'
+      result  = []
+      for token from lexer.walk probe
+        d = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
+        # debug '^432^', d if d.mk.endsWith ':escchr'
+        result.push d
+      # H.tabulate ( rpr probe ), result
+      resolve result
+  #.........................................................................................................
+  T?.eq create_call_count, 2
+  done?()
+
+
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @parse_string_literals
+  # test @parse_string_literals
+  test @use_create_for_custom_behavior
   # @using_strings_for_patterns()
   # test @using_strings_for_patterns
   # @cannot_return_from_initial_mode()
