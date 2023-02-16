@@ -25,7 +25,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   new_tag_lexer = function() {
-    var Interlex, lexer, new_escchr_descriptor;
+    var Interlex, lexer, new_escchr_descriptor, new_nl_descriptor;
     ({Interlex} = require('../../../apps/intertext-lexer'));
     lexer = new Interlex({
       linewise: true,
@@ -33,6 +33,7 @@
       reserved_concat: true
     });
     // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+    //.......................................................................................................
     new_escchr_descriptor = function(mode) {
       var create;
       create = function(token) {
@@ -49,6 +50,21 @@
         tid: 'escchr',
         pattern: /\\(?<chr>.|$)/u,
         reserved: '\\',
+        create
+      };
+    };
+    //.......................................................................................................
+    new_nl_descriptor = function(mode) {
+      /* TAINT consider to force value by setting it in descriptor (needs interlex update) */
+      var create;
+      create = function(token) {
+        token.value = '\n';
+        return token;
+      };
+      return {
+        mode,
+        tid: 'nl',
+        pattern: /$/u,
         create
       };
     };
@@ -70,12 +86,7 @@
         pattern: /</u,
         reserved: '<'
       });
-      lexer.add_lexeme({
-        mode,
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
+      lexer.add_lexeme(new_nl_descriptor(mode));
       lexer.add_lexeme({
         mode,
         tid: 'ws',
@@ -94,12 +105,7 @@
     (() => {      //.......................................................................................................
       var mode;
       mode = 'tag';
-      lexer.add_lexeme({
-        mode,
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
+      lexer.add_lexeme(new_nl_descriptor(mode));
       // lexer.add_lexeme { mode,  tid: 'tagtext',   jump: null,       pattern: ( /[^\/>]+/u ), }
       lexer.add_lexeme({
         mode,
@@ -150,12 +156,7 @@
       var mode;
       mode = 'tag:dq';
       lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
+      lexer.add_lexeme(new_nl_descriptor(mode));
       lexer.add_lexeme({
         mode,
         tid: 'dq',
@@ -172,12 +173,7 @@
       var mode;
       mode = 'tag:sq';
       lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
+      lexer.add_lexeme(new_nl_descriptor(mode));
       lexer.add_lexeme({
         mode,
         tid: 'sq',
@@ -193,12 +189,7 @@
     (() => {      //.......................................................................................................
       var mode;
       mode = 'comment';
-      lexer.add_lexeme({
-        mode,
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
+      lexer.add_lexeme(new_nl_descriptor(mode));
       lexer.add_lexeme(new_escchr_descriptor(mode));
       lexer.add_lexeme({
         mode,
@@ -221,7 +212,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   new_parser = function(lexer) {
-    var $collect_tag, $tokenize, Pipeline, _HTMLISH, p, show, transforms;
+    var $_hd_token_from_paragate_token, $parse_htmlish_tag, $tokenize, Pipeline, _HTMLISH, p, transforms;
     ({Pipeline, transforms} = require('../../../apps/moonriver'));
     _HTMLISH = (require('paragate/lib/htmlish.grammar')).new_grammar({
       bare: true
@@ -240,8 +231,41 @@
       };
     };
     //.........................................................................................................
-    $collect_tag = function(htmlish_parser) {
-      var collect_tag, collector, sp, within_tag;
+    $_hd_token_from_paragate_token = function() {
+      var _hd_token_from_paragate_token;
+      return _hd_token_from_paragate_token = function(d, send) {
+        var e, first, last, ref;
+        if ((ref = d.$key) !== '<tag') {
+          return send(d);
+        }
+        first = d.$collector.at(0);
+        last = d.$collector.at(-1);
+        delete d.$collector;
+        H.tabulate("htmlish", [d]);
+        e = {
+          mode: 'tag',
+          tid: d.type,
+          mk: `tag:${d.type}`,
+          jump: null,
+          value: d.$source,
+          /* TAINT must give first_lnr, last_lnr */
+          lnr: first.lnr,
+          start: first.start,
+          stop: last.stop,
+          x: {
+            atrs: d.atrs,
+            id: d.id
+          },
+          source: null,
+          $key: '^tag'
+        };
+        return send(e);
+      };
+      return null;
+    };
+    //.........................................................................................................
+    $parse_htmlish_tag = function(htmlish_parser) {
+      var collector, parse_htmlish_tag, sp, within_tag;
       collector = [];
       within_tag = false;
       sp = new Pipeline();
@@ -250,14 +274,15 @@
         max: +1,
         empty: null
       }));
-      sp.push(collect_tag = function([d, nxt], send) {
-        var e, i, len, ref, source;
+      sp.push(parse_htmlish_tag = function([d, nxt], send) {
+        var $collector, $source, e, htmlish;
         //.....................................................................................................
         if (within_tag) {
           collector.push(d);
-          if (!(nxt != null ? nxt.mk.startsWith('tag:') : void 0)) {
+          // debug '^parse_htmlish_tag@1^', d
+          if (d.jump === 'plain'/* TAINT magic number */) {
             within_tag = false;
-            source = ((function() {
+            $source = ((function() {
               var results;
               results = [];
               for (e of collector) {
@@ -265,12 +290,26 @@
               }
               return results;
             })()).join('');
-            debug('^78^', rpr(source, GUY.lft.thaw(_HTMLISH.parse(source))));
-            ref = GUY.lft.thaw(_HTMLISH.parse(source));
-            for (i = 0, len = ref.length; i < len; i++) {
-              e = ref[i];
-              send(e);
+            $collector = [...collector];
+            while (collector.length > 0) {
+              send(stamp(collector.shift()));
             }
+            htmlish = _HTMLISH.parse($source);
+            // H.tabulate '^78^', htmlish
+            // debug '^78^', rpr $source
+            // info '^78^', x for x in htmlish
+            if (htmlish.length !== 1) {
+              /* TAINT use API to create token */
+              // throw new Error "^34345^ expected single token, got #{rpr htmlish}"
+              return send({
+                mode: 'tag',
+                tid: '$error'
+              });
+            }
+            [htmlish] = GUY.lft.thaw(htmlish);
+            htmlish.$collector = $collector;
+            htmlish.$source = $source;
+            send(htmlish);
           }
           return null;
         } else {
@@ -284,16 +323,15 @@
         //.....................................................................................................
         return null;
       });
+      sp.push($_hd_token_from_paragate_token());
       return sp;
     };
     //.........................................................................................................
     p = new Pipeline();
     p.lexer = lexer;
     p.push($tokenize(p));
-    p.push($collect_tag());
-    p.push(show = function(d) {
-      return urge('^parser@1^', d);
-    });
+    p.push($parse_htmlish_tag());
+    // p.push show = ( d ) -> urge '^parser@1^', d
     debug('^43^', p);
     return p;
   };
@@ -985,7 +1023,7 @@
   this.tags_2 = async function(T, done) {
     var error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
-    probes_and_matchers = [['abc<div#c1 foo=bar/xyz/', null, null]];
+    probes_and_matchers = [['abc<div#c1 foo=bar/xyz/', null, null], ['abc<div#c1\nfoo=bar/xyz/', null, null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
