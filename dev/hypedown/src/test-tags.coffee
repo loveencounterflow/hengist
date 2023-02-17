@@ -117,6 +117,23 @@ new_parser = ( lexer ) ->
       first = d.$collector.at  0
       last  = d.$collector.at -1
       # delete d.$collector; H.tabulate "htmlish", [ d, ]
+      #.....................................................................................................
+      #
+      # * otag      opening tag, `<a>`
+      # * ctag      closing tag, `</a>` or `</>`
+      #
+      # * ntag      opening tag of `<i/italic/`
+      # * nctag     closing slash of `<i/italic/`
+      #
+      # * stag      self-closing tag, `<br/>`
+      #
+      tag_types =
+        otag:       { open: true,  close: false, }
+        ctag:       { open: false, close: true,  }
+        ntag:       { open: true,  close: false, }
+        nctag:      { open: false, close: true,  }
+        stag:       { open: true,  close: true,  }
+      #.....................................................................................................
       e     =
         mode:   'tag'
         tid:    d.type
@@ -198,6 +215,9 @@ new_parser = ( lexer ) ->
     [ "abc<div#c1 foo='bar>xyz'/", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:sq', value: "'" }, { mk: 'tag:sq:text', value: 'bar>xyz' }, { mk: 'tag:sq:sq', value: "'" }, { mk: 'tag:slash', value: '/' }, { mk: 'plain:nl', value: '\n' } ], null ]
     [ "abc<div#c1 foo='bar/>xyz'/", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:sq', value: "'" }, { mk: 'tag:sq:text', value: 'bar/>xyz' }, { mk: 'tag:sq:sq', value: "'" }, { mk: 'tag:slash', value: '/' }, { mk: 'plain:nl', value: '\n' } ], null ]
     [ "abc<div#c1 foo='bar/xyz'/", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:sq', value: "'" }, { mk: 'tag:sq:text', value: 'bar/xyz' }, { mk: 'tag:sq:sq', value: "'" }, { mk: 'tag:slash', value: '/' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ "abc<div#c1 foo='bar/xyz'/>", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:sq', value: "'" }, { mk: 'tag:sq:text', value: 'bar/xyz' }, { mk: 'tag:sq:sq', value: "'" }, { mk: 'tag:slashgt', value: '/>' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'abc<i/>xyz/>', [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'i' }, { mk: 'tag:slashgt', value: '/>' }, { mk: 'plain:other', value: 'xyz' }, { mk: 'plain:slash', value: '/' }, { mk: 'plain:other', value: '>' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'abc<i/xyz/>', [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'i' }, { mk: 'tag:slash', value: '/' }, { mk: 'plain:other', value: 'xyz' }, { mk: 'plain:slash', value: '/' }, { mk: 'plain:other', value: '>' }, { mk: 'plain:nl', value: '\n' } ], null ]
     [ """abc<div#c1 foo="bar>xyz'/""", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:dq', value: '"' }, { mk: 'tag:dq:text', value: "bar>xyz'/" }, { mk: 'tag:dq:nl', value: '\n' } ], null ]
     [ """abc<div#c1 foo="bar/>xyz'/""", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:dq', value: '"' }, { mk: 'tag:dq:text', value: "bar/>xyz'/" }, { mk: 'tag:dq:nl', value: '\n' } ], null ]
     [ """abc<div#c1 foo="bar/xyz'/""", [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:dq', value: '"' }, { mk: 'tag:dq:text', value: "bar/xyz'/" }, { mk: 'tag:dq:nl', value: '\n' } ], null ]
@@ -248,13 +268,40 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@htmlish_tag_types = ( T, done ) ->
+  _HTMLISH        = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '<a>', [ "otag'<a>'" ], null ]
+    [ '<a b=c>', [ "otag'<a b=c>'" ], null ]
+    [ '<a b=c/>', [ "stag'<a b=c/>'" ], null ]
+    [ '<a b=c/', [ "ntag'<a b=c/'" ], null ]
+    [ '</a>', [ "ctag'</a>'" ], null ]
+    [ '<br>', [ "otag'<br>'" ], null ]
+    [ '<br/>', [ "stag'<br/>'" ], null ]
+    [ '<i/italic/', [ "ntag'<i/'", "undefined'italic'", "nctag'/'" ], null ]
+    [ '<i>italic</>', [ "otag'<i>'", "undefined'italic'", "ctag'</>'", "undefined'>'" ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result      = _HTMLISH.parse probe
+      result_rpr  = ( "#{token.type}#{rpr token.text}" for token in result )
+      # H.tabulate ( rpr probe ), result
+      resolve result_rpr
+      # resolve undefined
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  test @tags_1
+  # test @tags_2
+  # test @htmlish_tag_types
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup
-  # test @tags_1
-  # test @tags_2
 
