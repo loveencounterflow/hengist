@@ -763,6 +763,59 @@ $parse_md_stars = ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@cannot_redeclare_lexeme = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  lexer = new Interlex()
+  T?.throws /lexeme plain:eol already exists/, =>
+  # do =>
+    mode    = 'plain'
+    lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@allow_value_and_empty_value = ( T, done ) ->
+  # T?.halt_on_error()
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  mode = 'plain'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ { mode, tid: 'eol',             empty_value: '\n',  pattern: /$/u, }, '', ], [ { mk: 'plain:eol', value: '\n' } ], null, ]
+    [ [ { mode, tid: 'eol',                                 pattern: /$/u, }, '', ], [ { mk: 'plain:eol', value: '' } ], null, ]
+    [ [ { mode, tid: 'eol', value: '\n',                    pattern: /$/u, }, '', ], [ { mk: 'plain:eol', value: '\n' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u',                     pattern: 'x', }, 'x', ], [ { mk: 'plain:x',   value: 'u' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u',                     pattern: /x/u, }, 'x', ], [ { mk: 'plain:x',   value: 'u' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u', empty_value: '!!!', pattern: /x|/u, }, '', ], [ { mk: 'plain:x',   value: '!!!' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u', empty_value: '!!!', pattern: /x/u, }, 'x', ], [ { mk: 'plain:x',   value: 'u' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u',                     pattern: /x|/u, }, 'x', ], [ { mk: 'plain:x',   value: 'u' }, { mk: 'plain:x',   value: 'u' } ], null, ]
+    [ [ { mode, tid: 'x',   value: 'u', empty_value: '!!!', pattern: /x|/u, }, 'x', ], [ { mk: 'plain:x',   value: 'u' }, { mk: 'plain:x',   value: '!!!' } ], null, ]
+    [ [ { mode, tid: 'x',   value: ( -> 'u' ), empty_value: ( -> '!!!' ), pattern: /x|/u, }, 'x', ], [ { mk: 'plain:x',   value: 'u' }, { mk: 'plain:x',   value: '!!!' } ], null, ]
+    ]
+  #.........................................................................................................
+  new_lexer = ->
+    lexer = new Interlex()
+    mode    = 'plain'
+    return lexer
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      [ lexeme
+        source  ] = probe
+      lexer       = new_lexer()
+      lexer.add_lexeme lexeme
+      result      = lexer.run source
+      # H.tabulate ( rpr probe ), result
+      result      = ( ( GUY.props.pick_with_fallback token, null, 'mk', 'value' ) for token in result )
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
 
 #-----------------------------------------------------------------------------------------------------------
 @use_create_for_custom_behavior = ( T, done ) ->
@@ -815,7 +868,9 @@ $parse_md_stars = ->
 if require.main is module then do =>
   # test @
   # test @parse_string_literals
-  test @use_create_for_custom_behavior
+  # test @use_create_for_custom_behavior
+  # test @cannot_redeclare_lexeme
+  test @allow_value_and_empty_value
   # @using_strings_for_patterns()
   # test @using_strings_for_patterns
   # @cannot_return_from_initial_mode()
