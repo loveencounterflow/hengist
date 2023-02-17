@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, H, PATH, alert, debug, demo, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, walk_lines, warn, whisper;
+  var GUY, H, PATH, alert, debug, demo, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -56,37 +56,6 @@
       H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
     }
     return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  /* TAINT use upcoming implementation in `guy` */
-  walk_lines = function*(text, cfg) {
-    var R, Y/* internal error */, last_position, match, pattern, template;
-    validate.text(text);
-    template = {
-      keep_newlines: true
-    };
-    cfg = {...template, ...cfg};
-    pattern = /.*?(\n|$)/suy;
-    last_position = text.length - 1;
-    while (true) {
-      if (pattern.lastIndex > last_position) {
-        break;
-      }
-      if ((match = text.match(pattern)) == null) {
-        break;
-      }
-      Y = match[0];
-      if (!cfg.keep_newlines) {
-        Y = Y.slice(0, Y.length - 1);
-      }
-      yield Y;
-    }
-    R = walk_lines();
-    R.reset = function() {
-      return pattern.lastIndex = 0;
-    };
-    return R;
   };
 
   //###########################################################################################################
