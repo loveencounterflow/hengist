@@ -33,7 +33,7 @@
       reserved_concat: true
     });
     // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-    //.......................................................................................................
+    //.........................................................................................................
     new_escchr_descriptor = function(mode) {
       var create;
       create = function(token) {
@@ -53,7 +53,7 @@
         create
       };
     };
-    //.......................................................................................................
+    //.........................................................................................................
     new_nl_descriptor = function(mode) {
       /* TAINT consider to force value by setting it in descriptor (needs interlex update) */
       var create;
@@ -68,7 +68,7 @@
         create
       };
     };
-    (() => {      //.......................................................................................................
+    (() => {      //.........................................................................................................
       var mode;
       mode = 'plain';
       lexer.add_lexeme(new_escchr_descriptor(mode));
@@ -77,14 +77,14 @@
         mode,
         tid: 'ltbang',
         jump: 'comment',
-        pattern: /<!--/u,
+        pattern: '<!--',
         reserved: '<'
       });
       lexer.add_lexeme({
         mode,
         tid: 'lt',
         jump: 'tag',
-        pattern: /</u,
+        pattern: '<',
         reserved: '<'
       });
       lexer.add_lexeme({
@@ -102,7 +102,7 @@
         tid: 'forbidden'
       });
     })();
-    (() => {      //.......................................................................................................
+    (() => {      //.........................................................................................................
       var mode;
       mode = 'tag';
       lexer.add_lexeme(new_escchr_descriptor(mode));
@@ -112,35 +112,35 @@
         mode,
         tid: 'dq',
         jump: 'tag:dq',
-        pattern: /"/u,
+        pattern: '"',
         reserved: '"'
       });
       lexer.add_lexeme({
         mode,
         tid: 'sq',
         jump: 'tag:sq',
-        pattern: /'/u,
+        pattern: "'",
         reserved: "'"
       });
       lexer.add_lexeme({
         mode,
         tid: 'slashgt',
         jump: '^',
-        pattern: /\/>/u,
+        pattern: '/>',
         reserved: ['>', '/']
       });
       lexer.add_lexeme({
         mode,
         tid: 'slash',
         jump: '^',
-        pattern: /\//u,
+        pattern: '/',
         reserved: '/'
       });
       lexer.add_lexeme({
         mode,
         tid: 'gt',
         jump: '^',
-        pattern: />/u,
+        pattern: '>',
         reserved: '>'
       });
       lexer.add_catchall_lexeme({
@@ -152,7 +152,7 @@
         tid: 'forbidden'
       });
     })();
-    (() => {      //.......................................................................................................
+    (() => {      //.........................................................................................................
       var mode;
       mode = 'tag:dq';
       lexer.add_lexeme(new_escchr_descriptor(mode));
@@ -161,7 +161,7 @@
         mode,
         tid: 'dq',
         jump: '^',
-        pattern: /"/u,
+        pattern: '"',
         reserved: '"'
       });
       return lexer.add_catchall_lexeme({
@@ -169,7 +169,7 @@
         tid: 'text'
       });
     })();
-    (() => {      //.......................................................................................................
+    (() => {      //.........................................................................................................
       var mode;
       mode = 'tag:sq';
       lexer.add_lexeme(new_escchr_descriptor(mode));
@@ -178,7 +178,7 @@
         mode,
         tid: 'sq',
         jump: '^',
-        pattern: /'/u,
+        pattern: "'",
         reserved: "'"
       });
       return lexer.add_catchall_lexeme({
@@ -186,7 +186,7 @@
         tid: 'text'
       });
     })();
-    (() => {      //.......................................................................................................
+    (() => {      //.........................................................................................................
       var mode;
       mode = 'comment';
       lexer.add_lexeme(new_escchr_descriptor(mode));
@@ -195,7 +195,7 @@
         mode,
         tid: 'eoc',
         jump: '^',
-        pattern: /-->/u,
+        pattern: '-->',
         reserved: '--'
       });
       lexer.add_catchall_lexeme({
