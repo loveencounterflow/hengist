@@ -242,13 +242,46 @@
     $_hd_token_from_paragate_token = function() {
       var _hd_token_from_paragate_token;
       return _hd_token_from_paragate_token = function(d, send) {
-        var e, first, last;
+        var e, first, last, tag_types;
         if (d[htmlish_sym] == null) {
           return send(d);
         }
         first = d.$collector.at(0);
         last = d.$collector.at(-1);
         // delete d.$collector; H.tabulate "htmlish", [ d, ]
+        //.....................................................................................................
+
+        // * otag      opening tag, `<a>`
+        // * ctag      closing tag, `</a>` or `</>`
+
+        // * ntag      opening tag of `<i/italic/`
+        // * nctag     closing slash of `<i/italic/`
+
+        // * stag      self-closing tag, `<br/>`
+
+        tag_types = {
+          otag: {
+            open: true,
+            close: false
+          },
+          ctag: {
+            open: false,
+            close: true
+          },
+          ntag: {
+            open: true,
+            close: false
+          },
+          nctag: {
+            open: false,
+            close: true
+          },
+          stag: {
+            open: true,
+            close: true
+          }
+        };
+        //.....................................................................................................
         e = {
           mode: 'tag',
           tid: d.type,
@@ -797,6 +830,120 @@
         null
       ],
       [
+        "abc<div#c1 foo='bar/xyz'/>",
+        [
+          {
+            mk: 'plain:other',
+            value: 'abc'
+          },
+          {
+            mk: 'plain:lt',
+            value: '<'
+          },
+          {
+            mk: 'tag:text',
+            value: 'div#c1 foo='
+          },
+          {
+            mk: 'tag:sq',
+            value: "'"
+          },
+          {
+            mk: 'tag:sq:text',
+            value: 'bar/xyz'
+          },
+          {
+            mk: 'tag:sq:sq',
+            value: "'"
+          },
+          {
+            mk: 'tag:slashgt',
+            value: '/>'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        'abc<i/>xyz/>',
+        [
+          {
+            mk: 'plain:other',
+            value: 'abc'
+          },
+          {
+            mk: 'plain:lt',
+            value: '<'
+          },
+          {
+            mk: 'tag:text',
+            value: 'i'
+          },
+          {
+            mk: 'tag:slashgt',
+            value: '/>'
+          },
+          {
+            mk: 'plain:other',
+            value: 'xyz'
+          },
+          {
+            mk: 'plain:slash',
+            value: '/'
+          },
+          {
+            mk: 'plain:other',
+            value: '>'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        'abc<i/xyz/>',
+        [
+          {
+            mk: 'plain:other',
+            value: 'abc'
+          },
+          {
+            mk: 'plain:lt',
+            value: '<'
+          },
+          {
+            mk: 'tag:text',
+            value: 'i'
+          },
+          {
+            mk: 'tag:slash',
+            value: '/'
+          },
+          {
+            mk: 'plain:other',
+            value: 'xyz'
+          },
+          {
+            mk: 'plain:slash',
+            value: '/'
+          },
+          {
+            mk: 'plain:other',
+            value: '>'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
         `abc<div#c1 foo="bar>xyz'/`,
         [
           {
@@ -1064,17 +1211,50 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.htmlish_tag_types = async function(T, done) {
+    var _HTMLISH, error, i, len, matcher, probe, probes_and_matchers;
+    _HTMLISH = (require('paragate/lib/htmlish.grammar')).new_grammar({
+      bare: true
+    });
+    //.........................................................................................................
+    probes_and_matchers = [['<a>', ["otag'<a>'"], null], ['<a b=c>', ["otag'<a b=c>'"], null], ['<a b=c/>', ["stag'<a b=c/>'"], null], ['<a b=c/', ["ntag'<a b=c/'"], null], ['</a>', ["ctag'</a>'"], null], ['<br>', ["otag'<br>'"], null], ['<br/>', ["stag'<br/>'"], null], ['<i/italic/', ["ntag'<i/'", "undefined'italic'", "nctag'/'"], null], ['<i>italic</>', ["otag'<i>'", "undefined'italic'", "ctag'</>'", "undefined'>'"], null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result, result_rpr, token;
+          result = _HTMLISH.parse(probe);
+          result_rpr = (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              token = result[j];
+              results.push(`${token.type}${rpr(token.text)}`);
+            }
+            return results;
+          })();
+          // H.tabulate ( rpr probe ), result
+          return resolve(result_rpr);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this.tags_1);
     })();
   }
 
-  // test @parse_codespans_and_single_star
+  // test @tags_2
+// test @htmlish_tag_types
+// test @parse_codespans_and_single_star
 // test @parse_md_stars_markup
-// test @tags_1
-// test @tags_2
 
 }).call(this);
 
