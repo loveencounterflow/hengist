@@ -32,83 +32,6 @@ H                         = require '../../../lib/helpers'
   lets
   stamp     }             = DATOM
 
-#-----------------------------------------------------------------------------------------------------------
-new_tag_lexer = ->
-  { Interlex } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { linewise: true, catchall_concat: true, reserved_concat: true, }
-  # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-  #.........................................................................................................
-  new_escchr_descriptor = ( mode ) ->
-    create = ( token ) ->
-      token.x = { chr: '\n', } unless ( token.x?.chr )?
-      return token
-    return { mode, tid: 'escchr', pattern: /\\(?<chr>.|$)/u, reserved: '\\', create, }
-  #.........................................................................................................
-  new_nl_descriptor = ( mode ) ->
-    ### TAINT consider to force value by setting it in descriptor (needs interlex update) ###
-    create = ( token ) ->
-      token.value = '\n'
-      return token
-    return { mode, tid: 'nl', pattern: /$/u, create, }
-  #.........................................................................................................
-  do =>
-    mode = 'plain'
-    lexer.add_lexeme new_escchr_descriptor  mode
-    lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'amp',       jump: 'xncr',     pattern: /&(?=[^\s\\]+;)/, reserved: '&', } # only match if ahead of (no ws, no bslash) + semicolon
-    lexer.add_lexeme { mode,  tid: 'slash',     jump: null,       pattern: '/',     reserved: '/', }
-    lexer.add_lexeme { mode,  tid: 'ltbang',    jump: 'comment',  pattern: '<!--',  reserved: '<', }
-    lexer.add_lexeme { mode,  tid: 'lt',        jump: 'tag',      pattern: '<',     reserved: '<', }
-    lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: /\s+/u, }
-    lexer.add_catchall_lexeme { mode, tid: 'other', }
-    lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
-  #.........................................................................................................
-  do =>
-    mode = 'xncr'
-    # lexer.add_lexeme new_escchr_descriptor  mode
-    # lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'csg',       jump: null,     pattern: /(?<=&)[^\s;#\\]+(?=#)/u, } # character set sigil (non-standard)
-    lexer.add_lexeme { mode,  tid: 'name',      jump: null,     pattern: /(?<=&)[^\s;#\\]+(?=;)/u, } # name of named entity
-    lexer.add_lexeme { mode,  tid: 'dec',       jump: null,     pattern: /#(?<nr>[0-9]+)(?=;)/u, }
-    lexer.add_lexeme { mode,  tid: 'hex',       jump: null,     pattern: /#(?:x|X)(?<nr>[0-9a-fA-F]+)(?=;)/u, }
-    lexer.add_lexeme { mode,  tid: 'sc',        jump: '^',      pattern: /;/u, }
-    lexer.add_lexeme { mode,  tid: '$error',    jump: '^',      pattern: /.|$/u, }
-  #.........................................................................................................
-  do =>
-    mode = 'tag'
-    lexer.add_lexeme new_escchr_descriptor  mode
-    lexer.add_lexeme new_nl_descriptor      mode
-    # lexer.add_lexeme { mode,  tid: 'tagtext',   jump: null,       pattern: ( /[^\/>]+/u ), }
-    lexer.add_lexeme { mode,  tid: 'dq',        jump: 'tag:dq',   pattern: '"',       reserved: '"' }
-    lexer.add_lexeme { mode,  tid: 'sq',        jump: 'tag:sq',   pattern: "'",       reserved: "'" }
-    lexer.add_lexeme { mode,  tid: 'slashgt',   jump: '^',        pattern: '/>',      reserved: [ '>', '/', ] }
-    lexer.add_lexeme { mode,  tid: 'slash',     jump: '^',        pattern: '/',       reserved: '/', }
-    lexer.add_lexeme { mode,  tid: 'gt',        jump: '^',        pattern: '>',       reserved: '>', }
-    lexer.add_catchall_lexeme { mode, tid: 'text', }
-    lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
-  #.........................................................................................................
-  do =>
-    mode = 'tag:dq'
-    lexer.add_lexeme new_escchr_descriptor  mode
-    lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern: '"',       reserved: '"', }
-    lexer.add_catchall_lexeme { mode, tid: 'text', }
-  #.........................................................................................................
-  do =>
-    mode = 'tag:sq'
-    lexer.add_lexeme new_escchr_descriptor  mode
-    lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'sq',        jump: '^',        pattern: "'",       reserved: "'", }
-    lexer.add_catchall_lexeme { mode, tid: 'text', }
-  #.........................................................................................................
-  do =>
-    mode = 'comment'
-    lexer.add_lexeme new_escchr_descriptor  mode
-    lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode, tid: 'eoc',       jump: '^',         pattern:  '-->',    reserved: '--',  }
-    lexer.add_catchall_lexeme { mode, tid: 'text', }
-    lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
-  return lexer
 
 #-----------------------------------------------------------------------------------------------------------
 new_parser = ( lexer ) ->
@@ -238,9 +161,11 @@ new_parser = ( lexer ) ->
     [ 'abc<div#c1 foo="bar/xyz\\"/', [ { mk: 'plain:other', value: 'abc' }, { mk: 'plain:lt', value: '<' }, { mk: 'tag:text', value: 'div#c1 foo=' }, { mk: 'tag:dq', value: '"' }, { mk: 'tag:dq:text', value: 'bar/xyz' }, { mk: 'tag:dq:escchr', value: '\\"', x: { chr: '"' } }, { mk: 'tag:dq:text', value: '/' }, { mk: 'tag:dq:nl', value: '\n' } ], null ]
     ]
   #.........................................................................................................
+  { Hypedown_lexer } = require '../../../apps/hypedown'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer   = new_tag_lexer()
+      # lexer   = new_tag_lexer()
+      lexer   = new Hypedown_lexer()
       result  = []
       for token from lexer.walk probe
         d = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
@@ -371,8 +296,8 @@ new_parser = ( lexer ) ->
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
-  # test @tags_1
+  # test @
+  test @tags_1
   # test @tags_2
   # @_tags_2_for_profiling()
   # test @htmlish_tag_types
