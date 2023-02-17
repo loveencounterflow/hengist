@@ -280,6 +280,36 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   done?()
 
+# #-----------------------------------------------------------------------------------------------------------
+# @_tags_2_for_profiling = ( T, done ) ->
+#   #.........................................................................................................
+#   probes_and_matchers = [
+#     [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+#     ]
+#   #.........................................................................................................
+#   for [ probe, matcher, error, ] in probes_and_matchers
+#     lexer       = new_tag_lexer()
+#     parser      = new_parser lexer
+#     for _ in [ 1 .. 100 ]
+#     # for _ in [ 1 ]
+#       result      = []
+#       result_rpr  = []
+#       for line from GUY.str.walk_lines probe
+#         parser.send line
+#         for token from parser.walk()
+#           # token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
+#           result.push token
+#           result_rpr.push "#{token.mk}#{rpr token.value}"
+#       urge '^34-1^', Date.now(), result_rpr
+#       # H.tabulate ( rpr probe ), result
+#   #.........................................................................................................
+#   done?()
+
 #-----------------------------------------------------------------------------------------------------------
 @htmlish_tag_types = ( T, done ) ->
   _HTMLISH        = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
@@ -321,7 +351,7 @@ new_parser = ( lexer ) ->
     [ '&#123;', "plain:amp'&',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
     [ '&#x123;', "plain:amp'&',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null ]
     [ '&jzr#123;', "plain:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&jzr#x123;', "plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null ]
+    [ 'some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',plain:lt'<',tag:text'b',tag:slash'/',plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:slash'/',plain:ws' ',plain:other'text',plain:nl'\\n'", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -330,7 +360,7 @@ new_parser = ( lexer ) ->
       result      = []
       for token from lexer.walk probe
         result.push token
-      # H.tabulate ( rpr probe ), result
+      H.tabulate ( rpr probe ), result
       result_rpr = ( "#{token.mk}#{rpr token.value}" for token in result ).join ','
       # info '^94-1^', result_rpr
       resolve result_rpr
@@ -341,11 +371,12 @@ new_parser = ( lexer ) ->
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @tags_1
   # test @tags_2
+  # @_tags_2_for_profiling()
   # test @htmlish_tag_types
-  test @xncrs
+  # test @xncrs
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup
 
