@@ -60,24 +60,6 @@ demo = ->
     H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-### TAINT use upcoming implementation in `guy` ###
-walk_lines = ( text, cfg ) ->
-  validate.text text
-  template      = { keep_newlines: true, }
-  cfg           = { template..., cfg..., }
-  pattern       = /.*?(\n|$)/suy
-  last_position = text.length - 1
-  loop
-    break if pattern.lastIndex > last_position
-    break unless ( match = text.match pattern )? ### internal error ###
-    Y = match[ 0 ]
-    Y = Y[ ... Y.length - 1 ] unless cfg.keep_newlines
-    yield Y
-  R = walk_lines()
-  R.reset = -> pattern.lastIndex = 0
-  return R
-
 
 ############################################################################################################
 if require.main is module then do =>
