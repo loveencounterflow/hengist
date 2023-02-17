@@ -37,62 +37,62 @@ new_tag_lexer = ->
   { Interlex } = require '../../../apps/intertext-lexer'
   lexer = new Interlex { linewise: true, catchall_concat: true, reserved_concat: true, }
   # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-  #.......................................................................................................
+  #.........................................................................................................
   new_escchr_descriptor = ( mode ) ->
     create = ( token ) ->
       token.x = { chr: '\n', } unless ( token.x?.chr )?
       return token
     return { mode, tid: 'escchr', pattern: /\\(?<chr>.|$)/u, reserved: '\\', create, }
-  #.......................................................................................................
+  #.........................................................................................................
   new_nl_descriptor = ( mode ) ->
     ### TAINT consider to force value by setting it in descriptor (needs interlex update) ###
     create = ( token ) ->
       token.value = '\n'
       return token
     return { mode, tid: 'nl', pattern: /$/u, create, }
-  #.......................................................................................................
+  #.........................................................................................................
   do =>
     mode = 'plain'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'ltbang',    jump: 'comment',  pattern: ( /<!--/u ), reserved: '<', }
-    lexer.add_lexeme { mode,  tid: 'lt',        jump: 'tag',      pattern: ( /</u ), reserved: '<', }
-    lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode,  tid: 'ltbang',    jump: 'comment',  pattern: '<!--',  reserved: '<', }
+    lexer.add_lexeme { mode,  tid: 'lt',        jump: 'tag',      pattern: '<',     reserved: '<', }
+    lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: /\s+/u, }
     lexer.add_catchall_lexeme { mode, tid: 'other', }
     lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
-  #.......................................................................................................
+  #.........................................................................................................
   do =>
     mode = 'tag'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
     # lexer.add_lexeme { mode,  tid: 'tagtext',   jump: null,       pattern: ( /[^\/>]+/u ), }
-    lexer.add_lexeme { mode,  tid: 'dq',        jump: 'tag:dq',   pattern: ( /"/u ),    reserved: '"' }
-    lexer.add_lexeme { mode,  tid: 'sq',        jump: 'tag:sq',   pattern: ( /'/u ),    reserved: "'" }
-    lexer.add_lexeme { mode,  tid: 'slashgt',   jump: '^',        pattern: ( /\/>/u ),  reserved: [ '>', '/', ] }
-    lexer.add_lexeme { mode,  tid: 'slash',     jump: '^',        pattern: ( /\//u ),   reserved: '/', }
-    lexer.add_lexeme { mode,  tid: 'gt',        jump: '^',        pattern: ( />/u ),    reserved: '>', }
+    lexer.add_lexeme { mode,  tid: 'dq',        jump: 'tag:dq',   pattern: '"',       reserved: '"' }
+    lexer.add_lexeme { mode,  tid: 'sq',        jump: 'tag:sq',   pattern: "'",       reserved: "'" }
+    lexer.add_lexeme { mode,  tid: 'slashgt',   jump: '^',        pattern: '/>',      reserved: [ '>', '/', ] }
+    lexer.add_lexeme { mode,  tid: 'slash',     jump: '^',        pattern: '/',       reserved: '/', }
+    lexer.add_lexeme { mode,  tid: 'gt',        jump: '^',        pattern: '>',       reserved: '>', }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
     lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
-  #.......................................................................................................
+  #.........................................................................................................
   do =>
     mode = 'tag:dq'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern: ( /"/u ),    reserved: '"' }
+    lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern: '"',       reserved: '"', }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
-  #.......................................................................................................
+  #.........................................................................................................
   do =>
     mode = 'tag:sq'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode,  tid: 'sq',        jump: '^',        pattern: ( /'/u ),    reserved: "'" }
+    lexer.add_lexeme { mode,  tid: 'sq',        jump: '^',        pattern: "'",       reserved: "'", }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
-  #.......................................................................................................
+  #.........................................................................................................
   do =>
     mode = 'comment'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
-    lexer.add_lexeme { mode, tid: 'eoc',       jump: '^',        pattern:  /-->/u, reserved: '--',    }
+    lexer.add_lexeme { mode, tid: 'eoc',       jump: '^',         pattern:  '-->',    reserved: '--',  }
     lexer.add_catchall_lexeme { mode, tid: 'text', }
     lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
   return lexer
