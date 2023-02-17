@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, new_parser, new_tag_lexer, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, new_parser, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -22,249 +22,6 @@
   ({DATOM} = require('../../../apps/datom'));
 
   ({new_datom, lets, stamp} = DATOM);
-
-  //-----------------------------------------------------------------------------------------------------------
-  new_tag_lexer = function() {
-    var Interlex, lexer, new_escchr_descriptor, new_nl_descriptor;
-    ({Interlex} = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex({
-      linewise: true,
-      catchall_concat: true,
-      reserved_concat: true
-    });
-    // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-    //.........................................................................................................
-    new_escchr_descriptor = function(mode) {
-      var create;
-      create = function(token) {
-        var ref;
-        if (((ref = token.x) != null ? ref.chr : void 0) == null) {
-          token.x = {
-            chr: '\n'
-          };
-        }
-        return token;
-      };
-      return {
-        mode,
-        tid: 'escchr',
-        pattern: /\\(?<chr>.|$)/u,
-        reserved: '\\',
-        create
-      };
-    };
-    //.........................................................................................................
-    new_nl_descriptor = function(mode) {
-      /* TAINT consider to force value by setting it in descriptor (needs interlex update) */
-      var create;
-      create = function(token) {
-        token.value = '\n';
-        return token;
-      };
-      return {
-        mode,
-        tid: 'nl',
-        pattern: /$/u,
-        create
-      };
-    };
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'plain';
-      lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme(new_nl_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'amp',
-        jump: 'xncr',
-        pattern: /&(?=[^\s\\]+;)/,
-        reserved: '&' // only match if ahead of (no ws, no bslash) + semicolon
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'slash',
-        jump: null,
-        pattern: '/',
-        reserved: '/'
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'ltbang',
-        jump: 'comment',
-        pattern: '<!--',
-        reserved: '<'
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'lt',
-        jump: 'tag',
-        pattern: '<',
-        reserved: '<'
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'ws',
-        jump: null,
-        pattern: /\s+/u
-      });
-      lexer.add_catchall_lexeme({
-        mode,
-        tid: 'other'
-      });
-      return lexer.add_reserved_lexeme({
-        mode,
-        tid: 'forbidden'
-      });
-    })();
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'xncr';
-      // lexer.add_lexeme new_escchr_descriptor  mode
-      // lexer.add_lexeme new_nl_descriptor      mode
-      lexer.add_lexeme({
-        mode,
-        tid: 'csg',
-        jump: null,
-        pattern: /(?<=&)[^\s;#\\]+(?=#)/u // character set sigil (non-standard)
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'name',
-        jump: null,
-        pattern: /(?<=&)[^\s;#\\]+(?=;)/u // name of named entity
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'dec',
-        jump: null,
-        pattern: /#(?<nr>[0-9]+)(?=;)/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'hex',
-        jump: null,
-        pattern: /#(?:x|X)(?<nr>[0-9a-fA-F]+)(?=;)/u
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'sc',
-        jump: '^',
-        pattern: /;/u
-      });
-      return lexer.add_lexeme({
-        mode,
-        tid: '$error',
-        jump: '^',
-        pattern: /.|$/u
-      });
-    })();
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'tag';
-      lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme(new_nl_descriptor(mode));
-      // lexer.add_lexeme { mode,  tid: 'tagtext',   jump: null,       pattern: ( /[^\/>]+/u ), }
-      lexer.add_lexeme({
-        mode,
-        tid: 'dq',
-        jump: 'tag:dq',
-        pattern: '"',
-        reserved: '"'
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'sq',
-        jump: 'tag:sq',
-        pattern: "'",
-        reserved: "'"
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'slashgt',
-        jump: '^',
-        pattern: '/>',
-        reserved: ['>', '/']
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'slash',
-        jump: '^',
-        pattern: '/',
-        reserved: '/'
-      });
-      lexer.add_lexeme({
-        mode,
-        tid: 'gt',
-        jump: '^',
-        pattern: '>',
-        reserved: '>'
-      });
-      lexer.add_catchall_lexeme({
-        mode,
-        tid: 'text'
-      });
-      return lexer.add_reserved_lexeme({
-        mode,
-        tid: 'forbidden'
-      });
-    })();
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'tag:dq';
-      lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme(new_nl_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'dq',
-        jump: '^',
-        pattern: '"',
-        reserved: '"'
-      });
-      return lexer.add_catchall_lexeme({
-        mode,
-        tid: 'text'
-      });
-    })();
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'tag:sq';
-      lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme(new_nl_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'sq',
-        jump: '^',
-        pattern: "'",
-        reserved: "'"
-      });
-      return lexer.add_catchall_lexeme({
-        mode,
-        tid: 'text'
-      });
-    })();
-    (() => {      //.........................................................................................................
-      var mode;
-      mode = 'comment';
-      lexer.add_lexeme(new_escchr_descriptor(mode));
-      lexer.add_lexeme(new_nl_descriptor(mode));
-      lexer.add_lexeme({
-        mode,
-        tid: 'eoc',
-        jump: '^',
-        pattern: '-->',
-        reserved: '--'
-      });
-      lexer.add_catchall_lexeme({
-        mode,
-        tid: 'text'
-      });
-      return lexer.add_reserved_lexeme({
-        mode,
-        tid: 'forbidden'
-      });
-    })();
-    return lexer;
-  };
 
   //-----------------------------------------------------------------------------------------------------------
   new_parser = function(lexer) {
@@ -428,7 +185,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.tags_1 = async function(T, done) {
-    var error, i, len, matcher, probe, probes_and_matchers;
+    var Hypedown_lexer, error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
     probes_and_matchers = [
       [
@@ -1206,13 +963,15 @@
         null
       ]
     ];
-//.........................................................................................................
+    //.........................................................................................................
+    ({Hypedown_lexer} = require('../../../apps/hypedown'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var d, lexer, ref, result, token;
-          lexer = new_tag_lexer();
+          // lexer   = new_tag_lexer()
+          lexer = new Hypedown_lexer();
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
@@ -1359,12 +1118,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this.tags_1);
     })();
   }
 
-  // test @tags_1
-// test @tags_2
+  // test @tags_2
 // @_tags_2_for_profiling()
 // test @htmlish_tag_types
 // test @xncrs

@@ -2501,6 +2501,287 @@ probe\x20\x20\x20`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.cannot_redeclare_lexeme = function(T, done) {
+    var Interlex, c, lexer;
+    ({
+      // T?.halt_on_error()
+      Interlex,
+      compose: c
+    } = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    lexer = new Interlex();
+    if (T != null) {
+      T.throws(/lexeme plain:eol already exists/, () => {
+        var mode;
+        // do =>
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'eol',
+          pattern: /$/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'eol',
+          pattern: /$/u
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.allow_value_and_empty_value = async function(T, done) {
+    var Interlex, c, error, i, len, matcher, mode, new_lexer, probe, probes_and_matchers;
+    ({
+      // T?.halt_on_error()
+      Interlex,
+      compose: c
+    } = require('../../../apps/intertext-lexer'));
+    mode = 'plain';
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          {
+            mode,
+            tid: 'eol',
+            empty_value: '\n',
+            pattern: /$/u
+          },
+          ''
+        ],
+        [
+          {
+            mk: 'plain:eol',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'eol',
+            pattern: /$/u
+          },
+          ''
+        ],
+        [
+          {
+            mk: 'plain:eol',
+            value: ''
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'eol',
+            value: '\n',
+            pattern: /$/u
+          },
+          ''
+        ],
+        [
+          {
+            mk: 'plain:eol',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            pattern: 'x'
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            pattern: /x/u
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            empty_value: '!!!',
+            pattern: /x|/u
+          },
+          ''
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: '!!!'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            empty_value: '!!!',
+            pattern: /x/u
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            pattern: /x|/u
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          },
+          {
+            mk: 'plain:x',
+            value: 'u'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: 'u',
+            empty_value: '!!!',
+            pattern: /x|/u
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          },
+          {
+            mk: 'plain:x',
+            value: '!!!'
+          }
+        ],
+        null
+      ],
+      [
+        [
+          {
+            mode,
+            tid: 'x',
+            value: (function() {
+              return 'u';
+            }),
+            empty_value: (function() {
+              return '!!!';
+            }),
+            pattern: /x|/u
+          },
+          'x'
+        ],
+        [
+          {
+            mk: 'plain:x',
+            value: 'u'
+          },
+          {
+            mk: 'plain:x',
+            value: '!!!'
+          }
+        ],
+        null
+      ]
+    ];
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer;
+      lexer = new Interlex();
+      mode = 'plain';
+      return lexer;
+    };
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var lexeme, lexer, result, source, token;
+          [lexeme, source] = probe;
+          lexer = new_lexer();
+          lexer.add_lexeme(lexeme);
+          result = lexer.run(source);
+          // H.tabulate ( rpr probe ), result
+          result = (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              token = result[j];
+              results.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            }
+            return results;
+          })();
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.use_create_for_custom_behavior = async function(T, done) {
     var Interlex, create_call_count, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
     ({Interlex} = require('../../../apps/intertext-lexer'));
@@ -2768,7 +3049,9 @@ probe\x20\x20\x20`;
     (() => {
       // test @
       // test @parse_string_literals
-      return test(this.use_create_for_custom_behavior);
+      // test @use_create_for_custom_behavior
+      // test @cannot_redeclare_lexeme
+      return test(this.allow_value_and_empty_value);
     })();
   }
 
