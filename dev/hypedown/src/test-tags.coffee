@@ -55,12 +55,24 @@ new_tag_lexer = ->
     mode = 'plain'
     lexer.add_lexeme new_escchr_descriptor  mode
     lexer.add_lexeme new_nl_descriptor      mode
+    lexer.add_lexeme { mode,  tid: 'amp',       jump: 'xncr',     pattern: /&(?=[^\s\\]+;)/, reserved: '&', } # only match if ahead of (no ws, no bslash) + semicolon
     lexer.add_lexeme { mode,  tid: 'slash',     jump: null,       pattern: '/',     reserved: '/', }
     lexer.add_lexeme { mode,  tid: 'ltbang',    jump: 'comment',  pattern: '<!--',  reserved: '<', }
     lexer.add_lexeme { mode,  tid: 'lt',        jump: 'tag',      pattern: '<',     reserved: '<', }
     lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: /\s+/u, }
     lexer.add_catchall_lexeme { mode, tid: 'other', }
     lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
+  #.........................................................................................................
+  do =>
+    mode = 'xncr'
+    # lexer.add_lexeme new_escchr_descriptor  mode
+    # lexer.add_lexeme new_nl_descriptor      mode
+    lexer.add_lexeme { mode,  tid: 'csg',       jump: null,     pattern: /(?<=&)[^\s;#\\]+(?=#)/u, } # character set sigil (non-standard)
+    lexer.add_lexeme { mode,  tid: 'name',      jump: null,     pattern: /(?<=&)[^\s;#\\]+(?=;)/u, } # name of named entity
+    lexer.add_lexeme { mode,  tid: 'dec',       jump: null,     pattern: /#(?<nr>[0-9]+)(?=;)/u, }
+    lexer.add_lexeme { mode,  tid: 'hex',       jump: null,     pattern: /#(?:x|X)(?<nr>[0-9a-fA-F]+)(?=;)/u, }
+    lexer.add_lexeme { mode,  tid: 'sc',        jump: '^',      pattern: /;/u, }
+    lexer.add_lexeme { mode,  tid: '$error',    jump: '^',      pattern: /.|$/u, }
   #.........................................................................................................
   do =>
     mode = 'tag'
@@ -294,14 +306,46 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@xncrs = ( T, done ) ->
+  probes_and_matchers = [
+    [ '&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null ]
+    [ '&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null ]
+    [ '&amp\n', "plain:forbidden'&',plain:other'amp',plain:nl'\\n',plain:nl'\\n'", null ]
+    [ '&amp;', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&amp\\;', "plain:forbidden'&',plain:other'amp',plain:escchr'\\\\;',plain:nl'\\n'", null ]
+    [ '&amp;\n', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n',plain:nl'\\n'", null ]
+    [ '&xamp;', "plain:amp'&',xncr:name'xamp',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&123;', "plain:amp'&',xncr:name'123',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&x123;', "plain:amp'&',xncr:name'x123',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&#123;', "plain:amp'&',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&#x123;', "plain:amp'&',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&jzr#123;', "plain:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&jzr#x123;', "plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new_tag_lexer()
+      result      = []
+      for token from lexer.walk probe
+        result.push token
+      # H.tabulate ( rpr probe ), result
+      result_rpr = ( "#{token.mk}#{rpr token.value}" for token in result ).join ','
+      # info '^94-1^', result_rpr
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @tags_1
+  # test @tags_1
   # test @tags_2
   # test @htmlish_tag_types
+  test @xncrs
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup
 
