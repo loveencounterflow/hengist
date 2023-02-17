@@ -242,12 +242,12 @@ new_parser = ( lexer ) ->
 @tags_2 = ( T, done ) ->
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'abc<div#c1 foo=bar/xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1 foo=bar'", "tag:slash'/'", "tag:ntag'<div#c1 foo=bar/'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
-    [ 'abc<div#c1\nfoo=bar/xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1'", "tag:nl'\\n'", "tag:text'foo=bar'", "tag:slash'/'", "tag:ntag'<div#c1\\nfoo=bar/'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
-    [ 'abc<div#c1 foo=bar>xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1 foo=bar'", "tag:gt'>'", "tag:otag'<div#c1 foo=bar>'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
-    [ 'abc<div#c1\nfoo=bar>xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1'", "tag:nl'\\n'", "tag:text'foo=bar'", "tag:gt'>'", "tag:otag'<div#c1\\nfoo=bar>'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
-    [ 'abc<div#c1 foo=bar/>xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1 foo=bar'", "tag:slashgt'/>'", "tag:stag'<div#c1 foo=bar/>'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
-    [ 'abc<div#c1\nfoo=bar/>xyz/', [ "plain:other'abc'", "plain:lt'<'", "tag:text'div#c1'", "tag:nl'\\n'", "tag:text'foo=bar'", "tag:slashgt'/>'", "tag:stag'<div#c1\\nfoo=bar/>'", "plain:other'xyz'", "plain:slash'/'", "plain:nl'\\n'" ], null ]
+    [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -263,7 +263,7 @@ new_parser = ( lexer ) ->
           result.push token
           result_rpr.push "#{token.mk}#{rpr token.value}"
       # H.tabulate ( rpr probe ), result
-      resolve result_rpr
+      resolve result_rpr.join ','
       # resolve null
   #.........................................................................................................
   done?()
