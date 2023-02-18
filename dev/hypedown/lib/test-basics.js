@@ -89,18 +89,38 @@
   this.parse_codespans_and_single_star = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    probes_and_matchers = [["`abc`", "<code>abc</code>"], ["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null], ['*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null]];
+    probes_and_matchers = [["`abc`", "<code>abc</code>\n"], ["*abc*", "<i>abc</i>\n"]];
 //.........................................................................................................
+// [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
+// [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+// [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+// [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+// [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz\n', null ]
+// [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz\n', null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var d, entry, lexeme, line, mode, p, ref1, ref2, ref3, result, result_rpr, tid;
           p = new Hypedown_parser();
-          p.send(XXX_new_token('^æ19^', {
-            start: 0,
-            stop: probe.length
-          }, 'plain', 'p', null, probe));
+          H.tabulate(rpr('helo'), p.lexer.run('helo'));
+          H.tabulate(rpr('`helo`'), p.lexer.run('`helo`'));
+          H.tabulate(rpr('*helo*'), p.lexer.run('*helo*'));
+          ref1 = p.lexer.registry;
+          for (mode in ref1) {
+            entry = ref1[mode];
+            ref2 = entry.lexemes;
+            // debug '^2325687^', entry
+            for (tid in ref2) {
+              lexeme = ref2[tid];
+              urge('^2325687^', `${lexeme.mode}:${lexeme.tid}`);
+            }
+          }
+          process.exit(111);
+          ref3 = GUY.str.walk_lines(probe);
+          for (line of ref3) {
+            p.send(line);
+          }
           result = p.run();
           result_rpr = ((function() {
             var j, len1, results;
@@ -174,11 +194,12 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @parse_codespans_and_single_star
-      // test @parse_md_stars_markup
-      return test(this.parse_headings);
+      return test(this.parse_codespans_and_single_star);
     })();
   }
+
+  // test @parse_md_stars_markup
+// test @parse_headings
 
 }).call(this);
 

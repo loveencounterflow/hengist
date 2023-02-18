@@ -988,16 +988,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.tags_2 = async function(T, done) {
-    var error, i, len, matcher, probe, probes_and_matchers;
+    var Hypedown_lexer, error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
     probes_and_matchers = [['abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null], ['abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null], ['abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null], ['abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null], ['abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null], ['abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null]];
-//.........................................................................................................
+    //.........................................................................................................
+    ({Hypedown_lexer} = require('../../../apps/hypedown'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var lexer, line, parser, ref, ref1, result, result_rpr, token;
-          lexer = new_tag_lexer();
+          lexer = new Hypedown_lexer();
           parser = new_parser(lexer);
           result = [];
           result_rpr = [];
@@ -1083,7 +1084,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.xncrs = async function(T, done) {
-    var error, i, len, matcher, probe, probes_and_matchers;
+    var Hypedown_lexer, error, i, len, matcher, probe, probes_and_matchers;
+    ({Hypedown_lexer} = require('../../../apps/hypedown'));
     probes_and_matchers = [['&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null], ['&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null], ['&amp\n', "plain:forbidden'&',plain:other'amp',plain:nl'\\n',plain:nl'\\n'", null], ['&amp;', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n'", null], ['&amp\\;', "plain:forbidden'&',plain:other'amp',plain:escchr'\\\\;',plain:nl'\\n'", null], ['&amp;\n', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n',plain:nl'\\n'", null], ['&xamp;', "plain:amp'&',xncr:name'xamp',xncr:sc';',plain:nl'\\n'", null], ['&123;', "plain:amp'&',xncr:name'123',xncr:sc';',plain:nl'\\n'", null], ['&x123;', "plain:amp'&',xncr:name'x123',xncr:sc';',plain:nl'\\n'", null], ['&#123;', "plain:amp'&',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null], ['&#x123;', "plain:amp'&',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null], ['&jzr#123;', "plain:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null], ['some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',plain:lt'<',tag:text'b',tag:slash'/',plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:slash'/',plain:ws' ',plain:other'text',plain:nl'\\n'", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -1091,7 +1093,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var lexer, ref, result, result_rpr, token;
-          lexer = new_tag_lexer();
+          lexer = new Hypedown_lexer();
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
@@ -1119,12 +1121,12 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this.tags_1);
+      // test @tags_1
+      return test(this.tags_2);
     })();
   }
 
-  // test @tags_2
-// @_tags_2_for_profiling()
+  // @_tags_2_for_profiling()
 // test @htmlish_tag_types
 // test @xncrs
 // test @parse_codespans_and_single_star
