@@ -187,9 +187,10 @@ new_parser = ( lexer ) ->
     [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     ]
   #.........................................................................................................
+  { Hypedown_lexer } = require '../../../apps/hypedown'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new_tag_lexer()
+      lexer       = new Hypedown_lexer()
       parser      = new_parser lexer
       result      = []
       result_rpr  = []
@@ -263,6 +264,7 @@ new_parser = ( lexer ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @xncrs = ( T, done ) ->
+  { Hypedown_lexer } = require '../../../apps/hypedown'
   probes_and_matchers = [
     [ '&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null ]
     [ '&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null ]
@@ -281,7 +283,7 @@ new_parser = ( lexer ) ->
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new_tag_lexer()
+      lexer       = new Hypedown_lexer()
       result      = []
       for token from lexer.walk probe
         result.push token
@@ -297,8 +299,8 @@ new_parser = ( lexer ) ->
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @tags_1
-  # test @tags_2
+  # test @tags_1
+  test @tags_2
   # @_tags_2_for_profiling()
   # test @htmlish_tag_types
   # test @xncrs
