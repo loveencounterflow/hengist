@@ -37,35 +37,35 @@ H                         = require './helpers'
 #
 #-----------------------------------------------------------------------------------------------------------
 @parse_md_stars_markup = ( T, done ) ->
-  { XXX_new_token
-    Hypedown_lexer
+  { Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
+  { XXX_new_token }   = require '../../../apps/hypedown/lib/helpers'
   probes_and_matchers = [
-    [ "*abc*", "<i>abc</i>", ]
-    [ "**def**", "<b>def</b>", ]
-    [ "***def***", "<b><i>def</i></b>", ]
-    [ "**x*def*x**", "<b>x<i>def</i>x</b>", ]
-    [ "*x**def**x*", "<i>x<b>def</b>x</i>", ]
-    [ "***abc*def**", "<b><i>abc</i>def</b>", ]
-    [ "***abc**def*", "<b><i>abc</i></b><i>def</i>", ]
-    [ "*x***def**", "<i>x</i><b>def</b>", ]
-    [ "**x***def*", "<b>x</b><i>def</i>", ]
-    [ "*", "<i>", ]
-    [ "**", "<b>", ]
-    [ "***", "<b><i>", ]
+    [ '*abc*', '<p><i>abc</i>\n', null ]
+    [ '*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null ]
+    [ '*abc*\n\n*abc*', '<p><i>abc</i>\n\n<p><i>abc</i>\n', null ]
+    [ '**def**', '<p><b>def</b>\n', null ]
+    [ '***def***', '<p><b><i>def</i></b>\n', null ]
+    [ '**x*def*x**', '<p><b>x<i>def</i>x</b>\n', null ]
+    [ '*x**def**x*', '<p><i>x<b>def</b>x</i>\n', null ]
+    [ '***abc*def**', '<p><b><i>abc</i>def</b>\n', null ]
+    [ '***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null ]
+    [ '*x***def**', '<p><i>x</i><b>def</b>\n', null ]
+    [ '**x***def*', '<p><b>x</b><i>def</i>\n', null ]
+    [ '*', '<p><i>\n', null ]
+    [ '**', '<p><b>\n', null ]
+    [ '***', '<p><b><i>\n', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       p           = new Hypedown_parser()
-      p.send XXX_new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+      p.send probe
       result      = p.run()
-      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
-      # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      H.tabulate "#{rpr probe} -> #{result_rpr} (#{rpr matcher})", result # unless result_rpr is matcher
-      H.tabulate "#{rpr probe} -> #{result_rpr} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      result_html = ( d.value for d in result when not d.$stamped ).join ''
+      # H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in result when not t.$stamped )
       #.....................................................................................................
-      resolve result_rpr
+      resolve result_html
   #.........................................................................................................
   done?()
 
@@ -144,7 +144,7 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @parse_codespans_and_single_star
-  # test @parse_md_stars_markup
+  # test @parse_codespans_and_single_star
+  test @parse_md_stars_markup
   # test @parse_headings
 
