@@ -25,7 +25,7 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-H                         = require '../../../lib/helpers'
+H                         = require './helpers'
 # after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 { DATOM }                 = require '../../../apps/datom'
 { new_datom
