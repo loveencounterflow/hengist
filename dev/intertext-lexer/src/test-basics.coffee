@@ -30,6 +30,7 @@ types                     = new ( require 'intertype' ).Intertype
 SQL                       = String.raw
 guy                       = require '../../../apps/guy'
 H                         = require '../../../lib/helpers'
+H2                        = require './helpers'
 after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 { DATOM }                 = require '../../../apps/datom'
 { new_datom
@@ -37,116 +38,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   stamp     }             = DATOM
 
 
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
-new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null ) ->
-  ### TAINT recreation of `Interlex::new_token()` ###
-  jump      = lexeme?.jump ? null
-  { start
-    stop  } = token
-  return new_datom "^#{mode}", { mode, tid, mk: "#{mode}:#{tid}", jump, name, value, start, stop, x, $: ref, }
-
-#-----------------------------------------------------------------------------------------------------------
-$parse_md_star = ->
-  #.........................................................................................................
-  within =
-    one:    false
-  start_of =
-    one:    null
-  #.........................................................................................................
-  enter = ( mode, start ) ->
-    within[   mode ] = true
-    start_of[ mode ] = start
-    return null
-  enter.one = ( start ) -> enter 'one', start
-  #.........................................................................................................
-  exit = ( mode ) ->
-    within[   mode ] = false
-    start_of[ mode ] = null
-    return null
-  exit.one = -> exit 'one'
-  #.........................................................................................................
-  return ( d, send ) ->
-    switch d.tid
-      #.....................................................................................................
-      when 'star1'
-        send stamp d
-        if within.one then  exit.one();         send new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
-        else                enter.one d.start;  send new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
-      #.....................................................................................................
-      else send d
-    return null
-
-#-----------------------------------------------------------------------------------------------------------
-$parse_md_stars = ->
-  within =
-    one:    false
-    two:    false
-  start_of =
-    one:    null
-    two:    null
-  #.........................................................................................................
-  enter = ( mode, start ) ->
-    within[   mode ] = true
-    start_of[ mode ] = start
-    return null
-  enter.one = ( start ) -> enter 'one', start
-  enter.two = ( start ) -> enter 'two', start
-  #.........................................................................................................
-  exit = ( mode ) ->
-    within[   mode ] = false
-    start_of[ mode ] = null
-    return null
-  exit.one = -> exit 'one'
-  exit.two = -> exit 'two'
-  #.........................................................................................................
-  return parse_md_stars = ( d, send ) ->
-    switch d.tid
-      #.....................................................................................................
-      when 'star1'
-        send stamp d
-        if within.one then  exit.one();         send new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
-        else                enter.one d.start;  send new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
-      #.....................................................................................................
-      when 'star2'
-        send stamp d
-        if within.two
-          if within.one
-            if start_of.one > start_of.two
-              exit.one();         send new_token '^æ3^', d, 'html', 'tag', 'i', '</i>'
-              exit.two();         send new_token '^æ4^', d, 'html', 'tag', 'b', '</b>'
-              enter.one d.start;  send new_token '^æ5^', d, 'html', 'tag', 'i', '<i>'
-            else
-              exit.two();         send new_token '^æ6^', d, 'html', 'tag', 'b', '</b>'
-          else
-            exit.two();         send new_token '^æ7^', d, 'html', 'tag', 'b', '</b>'
-        else
-          enter.two d.start;  send new_token '^æ8^', d, 'html', 'tag', 'b', '<b>'
-      #.....................................................................................................
-      when 'star3'
-        send stamp d
-        if within.one
-          if within.two
-            if start_of.one > start_of.two
-              exit.one();       send new_token '^æ9^', d, 'html', 'tag', 'i', '</i>'
-              exit.two();       send new_token '^æ10^', d, 'html', 'tag', 'b', '</b>'
-            else
-              exit.two();       send new_token '^æ11^', d, 'html', 'tag', 'b', '</b>'
-              exit.one();       send new_token '^æ12^', d, 'html', 'tag', 'i', '</i>'
-          else
-            exit.one();         send new_token '^æ13^', d, 'html', 'tag', 'i', '</i>'
-            enter.two d.start;  send new_token '^æ14^', d, 'html', 'tag', 'b', '<b>'
-        else
-          if within.two
-            exit.two();         send new_token '^æ15^', d, 'html', 'tag', 'b', '</b>'
-            enter.one d.start;  send new_token '^æ16^', d, 'html', 'tag', 'i', '<i>'
-          else
-            enter.two d.start;  send new_token '^æ17^', d, 'html', 'tag', 'b', '<b>'
-            enter.one d.start + 2;  send new_token '^æ18^', { start: d.start + 2, stop: d.stop, }, 'html', 'tag', 'i', '<i>'
-      #.....................................................................................................
-      else send d
-    return null
 
 
 #===========================================================================================================
@@ -283,18 +174,18 @@ $parse_md_stars = ->
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo <bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 5, stop: 6, x: { lslash: null }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 6, stop: 10, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 10, stop: 11, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 11, stop: 12, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 12, stop: 17, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 17, stop: 18, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 18, stop: 20, x: { lslash: '/' }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 20, stop: 24, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 24, stop: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 25, stop: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' } ], null ]
-    [ '<x v=\\> z=42>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<x v=\\> z=42>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', start: 1, stop: 5, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 5, stop: 7, x: { chr: '>' }, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', start: 7, stop: 12, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 12, stop: 13, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 13, stop: 13, x: null, source: '<x v=\\> z=42>', '$key': '^plain' } ], null ]
-    [ '<x v=\\> z=42\\>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<x v=\\> z=42\\>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', start: 1, stop: 5, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 5, stop: 7, x: { chr: '>' }, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', start: 7, stop: 12, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', start: 12, stop: 14, x: { chr: '>' }, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 14, stop: 14, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' } ], null ]
-    [ 'a <b', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'a ', start: 0, stop: 2, x: null, source: 'a <b', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 2, stop: 3, x: { lslash: null }, source: 'a <b', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 3, stop: 4, x: null, source: 'a <b', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 4, stop: 4, x: null, source: 'a <b', '$key': '^tag' } ], null ]
-    [ 'what? error?', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'what', start: 0, stop: 4, x: null, source: 'what? error?', '$key': '^plain' }, { mode: 'plain', tid: '$error', mk: 'plain:$error', jump: null, value: '', start: 4, stop: 4, x: { code: 'nomatch' }, source: 'what? error?', '$key': '^plain' } ], null ]
-    [ 'd <', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'd ', start: 0, stop: 2, x: null, source: 'd <', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 2, stop: 3, x: { lslash: null }, source: 'd <', '$key': '^plain' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 3, stop: 3, x: null, source: 'd <', '$key': '^tag' } ], null ]
-    [ '<c', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<c', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'c', start: 1, stop: 2, x: null, source: '<c', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 2, stop: 2, x: null, source: '<c', '$key': '^tag' } ], null ]
-    [ '<', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<', '$key': '^plain' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', start: 1, stop: 1, x: null, source: '<', '$key': '^tag' } ], null ]
-    [ '', [ { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 0, stop: 0, x: null, source: '', '$key': '^plain' } ], null ]
-    [ 'helo \\<bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 0, stop: 5, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', start: 5, stop: 7, x: { chr: '<' }, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', start: 7, stop: 12, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 12, stop: 13, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 13, stop: 18, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 18, stop: 19, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 19, stop: 21, x: { lslash: '/' }, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 21, stop: 25, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 25, stop: 26, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 26, stop: 26, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' } ], null ]
-    [ '<b>helo \\<bold>`world`</bold></b>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 1, stop: 2, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 2, stop: 3, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', start: 3, stop: 8, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', start: 8, stop: 10, x: { chr: '<' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', start: 10, stop: 15, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 15, stop: 16, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', start: 16, stop: 21, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', start: 21, stop: 22, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 22, stop: 24, x: { lslash: '/' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', start: 24, stop: 28, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 28, stop: 29, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 29, stop: 31, x: { lslash: '/' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 31, stop: 32, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 32, stop: 33, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 33, stop: 33, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' } ], null ]
-    [ '<i><b></b></i>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 0, stop: 1, x: { lslash: null }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', start: 1, stop: 2, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 2, stop: 3, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', start: 3, stop: 4, x: { lslash: null }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 4, stop: 5, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 5, stop: 6, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 6, stop: 8, x: { lslash: '/' }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', start: 8, stop: 9, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 9, stop: 10, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', start: 10, stop: 12, x: { lslash: '/' }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', start: 12, stop: 13, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', start: 13, stop: 14, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', start: 14, stop: 14, x: null, source: '<i><b></b></i>', '$key': '^plain' } ], null ]
+    [ 'helo <bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', x1: 0, x2: 5, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 5, x2: 6, x: { lslash: null }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', x1: 6, x2: 10, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 10, x2: 11, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 11, x2: 12, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', x1: 12, x2: 17, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 17, x2: 18, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 18, x2: 20, x: { lslash: '/' }, source: 'helo <bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', x1: 20, x2: 24, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 24, x2: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 25, x2: 25, x: null, source: 'helo <bold>`world`</bold>', '$key': '^plain' } ], null ]
+    [ '<x v=\\> z=42>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<x v=\\> z=42>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', x1: 1, x2: 5, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', x1: 5, x2: 7, x: { chr: '>' }, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', x1: 7, x2: 12, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 12, x2: 13, x: null, source: '<x v=\\> z=42>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 13, x2: 13, x: null, source: '<x v=\\> z=42>', '$key': '^plain' } ], null ]
+    [ '<x v=\\> z=42\\>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<x v=\\> z=42\\>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'x v=', x1: 1, x2: 5, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', x1: 5, x2: 7, x: { chr: '>' }, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: ' z=42', x1: 7, x2: 12, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: 'escchr', mk: 'tag:escchr', jump: null, value: '\\>', x1: 12, x2: 14, x: { chr: '>' }, source: '<x v=\\> z=42\\>', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', x1: 14, x2: 14, x: null, source: '<x v=\\> z=42\\>', '$key': '^tag' } ], null ]
+    [ 'a <b', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'a ', x1: 0, x2: 2, x: null, source: 'a <b', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 2, x2: 3, x: { lslash: null }, source: 'a <b', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', x1: 3, x2: 4, x: null, source: 'a <b', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', x1: 4, x2: 4, x: null, source: 'a <b', '$key': '^tag' } ], null ]
+    [ 'what? error?', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'what', x1: 0, x2: 4, x: null, source: 'what? error?', '$key': '^plain' }, { mode: 'plain', tid: '$error', mk: 'plain:$error', jump: null, value: '', x1: 4, x2: 4, x: { code: 'nomatch' }, source: 'what? error?', '$key': '^plain' } ], null ]
+    [ 'd <', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'd ', x1: 0, x2: 2, x: null, source: 'd <', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 2, x2: 3, x: { lslash: null }, source: 'd <', '$key': '^plain' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', x1: 3, x2: 3, x: null, source: 'd <', '$key': '^tag' } ], null ]
+    [ '<c', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<c', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'c', x1: 1, x2: 2, x: null, source: '<c', '$key': '^tag' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', x1: 2, x2: 2, x: null, source: '<c', '$key': '^tag' } ], null ]
+    [ '<', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<', '$key': '^plain' }, { mode: 'tag', tid: '$eof', mk: 'tag:$eof', jump: null, value: '', x1: 1, x2: 1, x: null, source: '<', '$key': '^tag' } ], null ]
+    [ '', [ { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 0, x2: 0, x: null, source: '', '$key': '^plain' } ], null ]
+    [ 'helo \\<bold>`world`</bold>', [ { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', x1: 0, x2: 5, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', x1: 5, x2: 7, x: { chr: '<' }, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', x1: 7, x2: 12, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 12, x2: 13, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', x1: 13, x2: 18, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 18, x2: 19, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 19, x2: 21, x: { lslash: '/' }, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', x1: 21, x2: 25, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 25, x2: 26, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 26, x2: 26, x: null, source: 'helo \\<bold>`world`</bold>', '$key': '^plain' } ], null ]
+    [ '<b>helo \\<bold>`world`</bold></b>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', x1: 1, x2: 2, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 2, x2: 3, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'helo ', x1: 3, x2: 8, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'escchr', mk: 'plain:escchr', jump: null, value: '\\<', x1: 8, x2: 10, x: { chr: '<' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'bold>', x1: 10, x2: 15, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 15, x2: 16, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'text', mk: 'plain:text', jump: null, value: 'world', x1: 16, x2: 21, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'E_backticks', mk: 'plain:E_backticks', jump: null, value: '`', x1: 21, x2: 22, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 22, x2: 24, x: { lslash: '/' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'bold', x1: 24, x2: 28, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 28, x2: 29, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 29, x2: 31, x: { lslash: '/' }, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', x1: 31, x2: 32, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 32, x2: 33, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 33, x2: 33, x: null, source: '<b>helo \\<bold>`world`</bold></b>', '$key': '^plain' } ], null ]
+    [ '<i><b></b></i>', [ { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 0, x2: 1, x: { lslash: null }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', x1: 1, x2: 2, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 2, x2: 3, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '<', x1: 3, x2: 4, x: { lslash: null }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', x1: 4, x2: 5, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 5, x2: 6, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 6, x2: 8, x: { lslash: '/' }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'b', x1: 8, x2: 9, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 9, x2: 10, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: 'tag', mk: 'plain:tag', jump: 'tag', value: '</', x1: 10, x2: 12, x: { lslash: '/' }, source: '<i><b></b></i>', '$key': '^plain' }, { mode: 'tag', tid: 'text', mk: 'tag:text', jump: null, value: 'i', x1: 12, x2: 13, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'tag', tid: 'end', mk: 'tag:end', jump: 'plain', value: '>', x1: 13, x2: 14, x: null, source: '<i><b></b></i>', '$key': '^tag' }, { mode: 'plain', tid: '$eof', mk: 'plain:$eof', jump: null, value: '', x1: 14, x2: 14, x: null, source: '<i><b></b></i>', '$key': '^plain' } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -302,7 +193,7 @@ $parse_md_stars = ->
       lexer   = new_lexer()
       result  = lexer.run probe
       for token in result
-        T?.eq probe[ token.start ... token.stop ], token.value
+        T?.eq probe[ token.x1 ... token.x2 ], token.value
       H.tabulate ( rpr probe ), result
       resolve result
   #.........................................................................................................
@@ -401,9 +292,9 @@ $parse_md_stars = ->
       p.push ( d, send ) ->
         return send d unless d.tid is 'p'
         send e for e from md_lexer.walk d.value
-      p.push $parse_md_stars()
+      p.push H2.$parse_md_stars()
       #.....................................................................................................
-      p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+      p.send H2.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       urge '^08-1^', ( Object.keys d ).sort() for d in result
@@ -493,10 +384,10 @@ $parse_md_stars = ->
     p.push ( d ) -> urge '^79-1^', rpr d
     p.push ( d, send ) ->
       return send d unless isa.text d
-      # send new_token = ref: 'x1', token, mode, tid, name, value, start, stop
+      # send H2.new_token = ref: 'x1', token, mode, tid, name, value, x1, x2
       # send new_datom { }
       send e for e from lexer.walk d
-    p.push $parse_md_stars()
+    p.push H2.$parse_md_stars()
     return p
   #.........................................................................................................
   md_lexer  = new_toy_md_lexer 'md'
@@ -549,10 +440,10 @@ $parse_md_stars = ->
     return ( d, send ) ->
       if d.mk is 'plain:codespan'
         send stamp d
-        return send new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
+        return send H2.new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
       if d.mk is 'literal:codespan'
         send stamp d
-        return send new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
+        return send H2.new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
       send d
       return null
   #.........................................................................................................
@@ -565,10 +456,10 @@ $parse_md_stars = ->
       p.push ( d, send ) ->
         return send d unless d.tid is 'p'
         send e for e from md_lexer.walk d.value
-      p.push $parse_md_star()
+      p.push H2.$parse_md_star()
       p.push $parse_md_codespan()
       #.....................................................................................................
-      p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+      p.send H2.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
@@ -632,10 +523,10 @@ $parse_md_stars = ->
       switch d.mk
         when  'plain:codespan'
           send stamp d
-          send new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
+          send H2.new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
         when 'literal:codespan'
           send stamp d
-          send new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
+          send H2.new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
         else
           send d
       return null
@@ -649,10 +540,10 @@ $parse_md_stars = ->
       p.push ( d, send ) ->
         return send d unless d.tid is 'p'
         send e for e from md_lexer.walk d.value
-      p.push $parse_md_star()
+      p.push H2.$parse_md_star()
       p.push $parse_md_codespan()
       #.....................................................................................................
-      p.send new_token '^æ19^', { start: 0, stop: probe.length, }, 'plain', 'p', null, probe
+      p.send H2.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result

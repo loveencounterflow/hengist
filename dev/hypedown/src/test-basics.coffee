@@ -36,17 +36,6 @@ H                         = require '../../../lib/helpers'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null ) ->
-  ### TAINT recreation of `Interlex::new_token()` ###
-  jump      = lexeme?.jump ? null
-  { start
-    stop  } = token
-  return new_datom "^#{mode}", { mode, tid, mk: "#{mode}:#{tid}", jump, name, value, start, stop, x, $: ref, }
-
-
-#===========================================================================================================
-#
-#-----------------------------------------------------------------------------------------------------------
 @parse_md_stars_markup = ( T, done ) ->
   { XXX_new_token
     Hypedown_lexer
@@ -73,7 +62,8 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
+      H.tabulate "#{rpr probe} -> #{result_rpr} (#{rpr matcher})", result # unless result_rpr is matcher
+      H.tabulate "#{rpr probe} -> #{result_rpr} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       #.....................................................................................................
       resolve result_rpr
   #.........................................................................................................
@@ -85,12 +75,13 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
-    [ "`abc`", "<code>abc</code>\n", ]
-    [ "*abc*", "<i>abc</i>\n", ]
-    # [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
+    # [ "`abc`", "<code>abc</code>\n", ]
+    # [ "*abc*", "<i>abc</i>\n", ]
     # [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
     # [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
     # [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
+    [ 'foo\n\nbar\n\nbaz', '<i>foo</i> <code>*bar*``` baz\n', null ]
     # [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz\n', null ]
     # [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz\n', null ]
     ]
@@ -98,20 +89,21 @@ new_token = ( ref, token, mode, tid, name, value, start, stop, x = null, lexeme 
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       p           = new Hypedown_parser()
-      H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
-      H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
-      H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
-      for mode, entry of p.lexer.registry
-        # debug '^2325687^', entry
-        for tid, lexeme of entry.lexemes
-          urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
-      process.exit 111
+      # H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
+      # H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
+      # H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
+      # for mode, entry of p.lexer.registry
+      #   # debug '^2325687^', entry
+      #   for tid, lexeme of entry.lexemes
+      #     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
+      # process.exit 111
       for line from GUY.str.walk_lines probe
         p.send line
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr} (#{rpr matcher})", result # unless result_rpr is matcher
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_rpr
   #.........................................................................................................
   done?()
