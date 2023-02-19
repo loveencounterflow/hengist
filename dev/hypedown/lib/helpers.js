@@ -21,7 +21,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   show_lexer_as_table = function(title, lexer) {
-    var entry, lexeme, lexemes, mode, ref, ref1, tid;
+    var create, empty_value, entry, jump, lexeme, lexemes, mode, pattern, ref, ref1, reserved, tid, value;
     lexemes = [];
     ref = lexer.registry;
     for (mode in ref) {
@@ -29,7 +29,8 @@
       ref1 = entry.lexemes;
       for (tid in ref1) {
         lexeme = ref1[tid];
-        lexemes.push(lexeme);
+        ({mode, tid, pattern, jump, reserved, create, value, empty_value} = lexeme);
+        lexemes.push({mode, tid, pattern, jump, reserved, create, value, empty_value});
       }
     }
     H.tabulate(title, lexemes);
