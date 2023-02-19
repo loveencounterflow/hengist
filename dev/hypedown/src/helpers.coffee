@@ -32,7 +32,8 @@ show_lexer_as_table = ( title, lexer ) ->
   lexemes = []
   for mode, entry of lexer.registry
     for tid, lexeme of entry.lexemes
-      lexemes.push lexeme
+      { mode, tid, pattern, jump, reserved, create, value, empty_value, } = lexeme
+      lexemes.push { mode, tid, pattern, jump, reserved, create, value, empty_value, }
   H.tabulate title, lexemes
   return null
 
