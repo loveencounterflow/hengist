@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var $parse_md_star, $parse_md_stars, DATOM, GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, new_token, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, H2, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -25,6 +25,8 @@
 
   H = require('../../../lib/helpers');
 
+  H2 = require('./helpers');
+
   after = (dts, f) => {
     return new Promise(function(resolve) {
       return setTimeout((function() {
@@ -36,199 +38,6 @@
   ({DATOM} = require('../../../apps/datom'));
 
   ({new_datom, lets, stamp} = DATOM);
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
-  new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
-    /* TAINT recreation of `Interlex::new_token()` */
-    var jump, ref1;
-    jump = (ref1 = lexeme != null ? lexeme.jump : void 0) != null ? ref1 : null;
-    ({start, stop} = token);
-    return new_datom(`^${mode}`, {
-      mode,
-      tid,
-      mk: `${mode}:${tid}`,
-      jump,
-      name,
-      value,
-      start,
-      stop,
-      x,
-      $: ref
-    });
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  $parse_md_star = function() {
-    var enter, exit, start_of, within;
-    //.........................................................................................................
-    within = {
-      one: false
-    };
-    start_of = {
-      one: null
-    };
-    //.........................................................................................................
-    enter = function(mode, start) {
-      within[mode] = true;
-      start_of[mode] = start;
-      return null;
-    };
-    enter.one = function(start) {
-      return enter('one', start);
-    };
-    //.........................................................................................................
-    exit = function(mode) {
-      within[mode] = false;
-      start_of[mode] = null;
-      return null;
-    };
-    exit.one = function() {
-      return exit('one');
-    };
-    //.........................................................................................................
-    return function(d, send) {
-      switch (d.tid) {
-        //.....................................................................................................
-        case 'star1':
-          send(stamp(d));
-          if (within.one) {
-            exit.one();
-            send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
-          } else {
-            enter.one(d.start);
-            send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
-          }
-          break;
-        default:
-          //.....................................................................................................
-          send(d);
-      }
-      return null;
-    };
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  $parse_md_stars = function() {
-    var enter, exit, parse_md_stars, start_of, within;
-    within = {
-      one: false,
-      two: false
-    };
-    start_of = {
-      one: null,
-      two: null
-    };
-    //.........................................................................................................
-    enter = function(mode, start) {
-      within[mode] = true;
-      start_of[mode] = start;
-      return null;
-    };
-    enter.one = function(start) {
-      return enter('one', start);
-    };
-    enter.two = function(start) {
-      return enter('two', start);
-    };
-    //.........................................................................................................
-    exit = function(mode) {
-      within[mode] = false;
-      start_of[mode] = null;
-      return null;
-    };
-    exit.one = function() {
-      return exit('one');
-    };
-    exit.two = function() {
-      return exit('two');
-    };
-    //.........................................................................................................
-    return parse_md_stars = function(d, send) {
-      switch (d.tid) {
-        //.....................................................................................................
-        case 'star1':
-          send(stamp(d));
-          if (within.one) {
-            exit.one();
-            send(new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
-          } else {
-            enter.one(d.start);
-            send(new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
-          }
-          break;
-        //.....................................................................................................
-        case 'star2':
-          send(stamp(d));
-          if (within.two) {
-            if (within.one) {
-              if (start_of.one > start_of.two) {
-                exit.one();
-                send(new_token('^æ3^', d, 'html', 'tag', 'i', '</i>'));
-                exit.two();
-                send(new_token('^æ4^', d, 'html', 'tag', 'b', '</b>'));
-                enter.one(d.start);
-                send(new_token('^æ5^', d, 'html', 'tag', 'i', '<i>'));
-              } else {
-                exit.two();
-                send(new_token('^æ6^', d, 'html', 'tag', 'b', '</b>'));
-              }
-            } else {
-              exit.two();
-              send(new_token('^æ7^', d, 'html', 'tag', 'b', '</b>'));
-            }
-          } else {
-            enter.two(d.start);
-            send(new_token('^æ8^', d, 'html', 'tag', 'b', '<b>'));
-          }
-          break;
-        //.....................................................................................................
-        case 'star3':
-          send(stamp(d));
-          if (within.one) {
-            if (within.two) {
-              if (start_of.one > start_of.two) {
-                exit.one();
-                send(new_token('^æ9^', d, 'html', 'tag', 'i', '</i>'));
-                exit.two();
-                send(new_token('^æ10^', d, 'html', 'tag', 'b', '</b>'));
-              } else {
-                exit.two();
-                send(new_token('^æ11^', d, 'html', 'tag', 'b', '</b>'));
-                exit.one();
-                send(new_token('^æ12^', d, 'html', 'tag', 'i', '</i>'));
-              }
-            } else {
-              exit.one();
-              send(new_token('^æ13^', d, 'html', 'tag', 'i', '</i>'));
-              enter.two(d.start);
-              send(new_token('^æ14^', d, 'html', 'tag', 'b', '<b>'));
-            }
-          } else {
-            if (within.two) {
-              exit.two();
-              send(new_token('^æ15^', d, 'html', 'tag', 'b', '</b>'));
-              enter.one(d.start);
-              send(new_token('^æ16^', d, 'html', 'tag', 'i', '<i>'));
-            } else {
-              enter.two(d.start);
-              send(new_token('^æ17^', d, 'html', 'tag', 'b', '<b>'));
-              enter.one(d.start + 2);
-              send(new_token('^æ18^', {
-                start: d.start + 2,
-                stop: d.stop
-              }, 'html', 'tag', 'i', '<i>'));
-            }
-          }
-          break;
-        default:
-          //.....................................................................................................
-          send(d);
-      }
-      return null;
-    };
-  };
 
   //===========================================================================================================
   // TESTS
@@ -510,8 +319,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'helo ',
-            start: 0,
-            stop: 5,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
@@ -522,8 +331,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 5,
-            stop: 6,
+            x1: 5,
+            x2: 6,
             x: {
               lslash: null
             },
@@ -536,8 +345,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'bold',
-            start: 6,
-            stop: 10,
+            x1: 6,
+            x2: 10,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
@@ -548,8 +357,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 10,
-            stop: 11,
+            x1: 10,
+            x2: 11,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
@@ -560,8 +369,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 11,
-            stop: 12,
+            x1: 11,
+            x2: 12,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
@@ -572,8 +381,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'world',
-            start: 12,
-            stop: 17,
+            x1: 12,
+            x2: 17,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
@@ -584,8 +393,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 17,
-            stop: 18,
+            x1: 17,
+            x2: 18,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
@@ -596,8 +405,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 18,
-            stop: 20,
+            x1: 18,
+            x2: 20,
             x: {
               lslash: '/'
             },
@@ -610,8 +419,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'bold',
-            start: 20,
-            stop: 24,
+            x1: 20,
+            x2: 24,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
@@ -622,8 +431,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 24,
-            stop: 25,
+            x1: 24,
+            x2: 25,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
@@ -634,8 +443,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 25,
-            stop: 25,
+            x1: 25,
+            x2: 25,
             x: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
@@ -652,8 +461,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -666,8 +475,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'x v=',
-            start: 1,
-            stop: 5,
+            x1: 1,
+            x2: 5,
             x: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
@@ -678,8 +487,8 @@
             mk: 'tag:escchr',
             jump: null,
             value: '\\>',
-            start: 5,
-            stop: 7,
+            x1: 5,
+            x2: 7,
             x: {
               chr: '>'
             },
@@ -692,8 +501,8 @@
             mk: 'tag:text',
             jump: null,
             value: ' z=42',
-            start: 7,
-            stop: 12,
+            x1: 7,
+            x2: 12,
             x: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
@@ -704,8 +513,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 12,
-            stop: 13,
+            x1: 12,
+            x2: 13,
             x: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
@@ -716,8 +525,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 13,
-            stop: 13,
+            x1: 13,
+            x2: 13,
             x: null,
             source: '<x v=\\> z=42>',
             '$key': '^plain'
@@ -734,8 +543,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -748,8 +557,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'x v=',
-            start: 1,
-            stop: 5,
+            x1: 1,
+            x2: 5,
             x: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
@@ -760,8 +569,8 @@
             mk: 'tag:escchr',
             jump: null,
             value: '\\>',
-            start: 5,
-            stop: 7,
+            x1: 5,
+            x2: 7,
             x: {
               chr: '>'
             },
@@ -774,8 +583,8 @@
             mk: 'tag:text',
             jump: null,
             value: ' z=42',
-            start: 7,
-            stop: 12,
+            x1: 7,
+            x2: 12,
             x: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
@@ -786,8 +595,8 @@
             mk: 'tag:escchr',
             jump: null,
             value: '\\>',
-            start: 12,
-            stop: 14,
+            x1: 12,
+            x2: 14,
             x: {
               chr: '>'
             },
@@ -800,8 +609,8 @@
             mk: 'tag:$eof',
             jump: null,
             value: '',
-            start: 14,
-            stop: 14,
+            x1: 14,
+            x2: 14,
             x: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
@@ -818,8 +627,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'a ',
-            start: 0,
-            stop: 2,
+            x1: 0,
+            x2: 2,
             x: null,
             source: 'a <b',
             '$key': '^plain'
@@ -830,8 +639,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 2,
-            stop: 3,
+            x1: 2,
+            x2: 3,
             x: {
               lslash: null
             },
@@ -844,8 +653,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'b',
-            start: 3,
-            stop: 4,
+            x1: 3,
+            x2: 4,
             x: null,
             source: 'a <b',
             '$key': '^tag'
@@ -856,8 +665,8 @@
             mk: 'tag:$eof',
             jump: null,
             value: '',
-            start: 4,
-            stop: 4,
+            x1: 4,
+            x2: 4,
             x: null,
             source: 'a <b',
             '$key': '^tag'
@@ -874,8 +683,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'what',
-            start: 0,
-            stop: 4,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'what? error?',
             '$key': '^plain'
@@ -886,8 +695,8 @@
             mk: 'plain:$error',
             jump: null,
             value: '',
-            start: 4,
-            stop: 4,
+            x1: 4,
+            x2: 4,
             x: {
               code: 'nomatch'
             },
@@ -906,8 +715,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'd ',
-            start: 0,
-            stop: 2,
+            x1: 0,
+            x2: 2,
             x: null,
             source: 'd <',
             '$key': '^plain'
@@ -918,8 +727,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 2,
-            stop: 3,
+            x1: 2,
+            x2: 3,
             x: {
               lslash: null
             },
@@ -932,8 +741,8 @@
             mk: 'tag:$eof',
             jump: null,
             value: '',
-            start: 3,
-            stop: 3,
+            x1: 3,
+            x2: 3,
             x: null,
             source: 'd <',
             '$key': '^tag'
@@ -950,8 +759,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -964,8 +773,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'c',
-            start: 1,
-            stop: 2,
+            x1: 1,
+            x2: 2,
             x: null,
             source: '<c',
             '$key': '^tag'
@@ -976,8 +785,8 @@
             mk: 'tag:$eof',
             jump: null,
             value: '',
-            start: 2,
-            stop: 2,
+            x1: 2,
+            x2: 2,
             x: null,
             source: '<c',
             '$key': '^tag'
@@ -994,8 +803,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -1008,8 +817,8 @@
             mk: 'tag:$eof',
             jump: null,
             value: '',
-            start: 1,
-            stop: 1,
+            x1: 1,
+            x2: 1,
             x: null,
             source: '<',
             '$key': '^tag'
@@ -1026,8 +835,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 0,
-            stop: 0,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -1044,8 +853,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'helo ',
-            start: 0,
-            stop: 5,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1056,8 +865,8 @@
             mk: 'plain:escchr',
             jump: null,
             value: '\\<',
-            start: 5,
-            stop: 7,
+            x1: 5,
+            x2: 7,
             x: {
               chr: '<'
             },
@@ -1070,8 +879,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'bold>',
-            start: 7,
-            stop: 12,
+            x1: 7,
+            x2: 12,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1082,8 +891,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 12,
-            stop: 13,
+            x1: 12,
+            x2: 13,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1094,8 +903,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'world',
-            start: 13,
-            stop: 18,
+            x1: 13,
+            x2: 18,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1106,8 +915,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 18,
-            stop: 19,
+            x1: 18,
+            x2: 19,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1118,8 +927,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 19,
-            stop: 21,
+            x1: 19,
+            x2: 21,
             x: {
               lslash: '/'
             },
@@ -1132,8 +941,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'bold',
-            start: 21,
-            stop: 25,
+            x1: 21,
+            x2: 25,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
@@ -1144,8 +953,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 25,
-            stop: 26,
+            x1: 25,
+            x2: 26,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
@@ -1156,8 +965,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 26,
-            stop: 26,
+            x1: 26,
+            x2: 26,
             x: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
@@ -1174,8 +983,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -1188,8 +997,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'b',
-            start: 1,
-            stop: 2,
+            x1: 1,
+            x2: 2,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1200,8 +1009,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 2,
-            stop: 3,
+            x1: 2,
+            x2: 3,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1212,8 +1021,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'helo ',
-            start: 3,
-            stop: 8,
+            x1: 3,
+            x2: 8,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1224,8 +1033,8 @@
             mk: 'plain:escchr',
             jump: null,
             value: '\\<',
-            start: 8,
-            stop: 10,
+            x1: 8,
+            x2: 10,
             x: {
               chr: '<'
             },
@@ -1238,8 +1047,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'bold>',
-            start: 10,
-            stop: 15,
+            x1: 10,
+            x2: 15,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1250,8 +1059,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 15,
-            stop: 16,
+            x1: 15,
+            x2: 16,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1262,8 +1071,8 @@
             mk: 'plain:text',
             jump: null,
             value: 'world',
-            start: 16,
-            stop: 21,
+            x1: 16,
+            x2: 21,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1274,8 +1083,8 @@
             mk: 'plain:E_backticks',
             jump: null,
             value: '`',
-            start: 21,
-            stop: 22,
+            x1: 21,
+            x2: 22,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1286,8 +1095,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 22,
-            stop: 24,
+            x1: 22,
+            x2: 24,
             x: {
               lslash: '/'
             },
@@ -1300,8 +1109,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'bold',
-            start: 24,
-            stop: 28,
+            x1: 24,
+            x2: 28,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1312,8 +1121,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 28,
-            stop: 29,
+            x1: 28,
+            x2: 29,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1324,8 +1133,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 29,
-            stop: 31,
+            x1: 29,
+            x2: 31,
             x: {
               lslash: '/'
             },
@@ -1338,8 +1147,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'b',
-            start: 31,
-            stop: 32,
+            x1: 31,
+            x2: 32,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1350,8 +1159,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 32,
-            stop: 33,
+            x1: 32,
+            x2: 33,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
@@ -1362,8 +1171,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 33,
-            stop: 33,
+            x1: 33,
+            x2: 33,
             x: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
@@ -1380,8 +1189,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 0,
-            stop: 1,
+            x1: 0,
+            x2: 1,
             x: {
               lslash: null
             },
@@ -1394,8 +1203,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'i',
-            start: 1,
-            stop: 2,
+            x1: 1,
+            x2: 2,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1406,8 +1215,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 2,
-            stop: 3,
+            x1: 2,
+            x2: 3,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1418,8 +1227,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '<',
-            start: 3,
-            stop: 4,
+            x1: 3,
+            x2: 4,
             x: {
               lslash: null
             },
@@ -1432,8 +1241,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'b',
-            start: 4,
-            stop: 5,
+            x1: 4,
+            x2: 5,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1444,8 +1253,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 5,
-            stop: 6,
+            x1: 5,
+            x2: 6,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1456,8 +1265,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 6,
-            stop: 8,
+            x1: 6,
+            x2: 8,
             x: {
               lslash: '/'
             },
@@ -1470,8 +1279,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'b',
-            start: 8,
-            stop: 9,
+            x1: 8,
+            x2: 9,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1482,8 +1291,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 9,
-            stop: 10,
+            x1: 9,
+            x2: 10,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1494,8 +1303,8 @@
             mk: 'plain:tag',
             jump: 'tag',
             value: '</',
-            start: 10,
-            stop: 12,
+            x1: 10,
+            x2: 12,
             x: {
               lslash: '/'
             },
@@ -1508,8 +1317,8 @@
             mk: 'tag:text',
             jump: null,
             value: 'i',
-            start: 12,
-            stop: 13,
+            x1: 12,
+            x2: 13,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1520,8 +1329,8 @@
             mk: 'tag:end',
             jump: 'plain',
             value: '>',
-            start: 13,
-            stop: 14,
+            x1: 13,
+            x2: 14,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
@@ -1532,8 +1341,8 @@
             mk: 'plain:$eof',
             jump: null,
             value: '',
-            start: 14,
-            stop: 14,
+            x1: 14,
+            x2: 14,
             x: null,
             source: '<i><b></b></i>',
             '$key': '^plain'
@@ -1553,7 +1362,7 @@
           for (j = 0, len1 = result.length; j < len1; j++) {
             token = result[j];
             if (T != null) {
-              T.eq(probe.slice(token.start, token.stop), token.value);
+              T.eq(probe.slice(token.x1, token.x2), token.value);
             }
           }
           H.tabulate(rpr(probe), result);
@@ -1644,10 +1453,10 @@
           var lexer, token;
           lexer = new_lexer();
           return resolve(((function() {
-            var ref1, results;
-            ref1 = lexer.walk(probe);
+            var ref, results;
+            ref = lexer.walk(probe);
             results = [];
-            for (token of ref1) {
+            for (token of ref) {
               results.push(lexer.rpr_token(token));
             }
             return results;
@@ -1716,22 +1525,22 @@
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
-            var e, ref1, results;
+            var e, ref, results;
             if (d.tid !== 'p') {
               return send(d);
             }
-            ref1 = md_lexer.walk(d.value);
+            ref = md_lexer.walk(d.value);
             results = [];
-            for (e of ref1) {
+            for (e of ref) {
               results.push(send(e));
             }
             return results;
           });
-          p.push($parse_md_stars());
+          p.push(H2.$parse_md_stars());
           //.....................................................................................................
-          p.send(new_token('^æ19^', {
-            start: 0,
-            stop: probe.length
+          p.send(H2.new_token('^æ19^', {
+            x1: 0,
+            x2: probe.length
           }, 'plain', 'p', null, probe));
           result = p.run();
           result_rpr = ((function() {
@@ -1916,11 +1725,11 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, lexer, ref1, result, result_rpr, token;
+          var d, lexer, ref, result, result_rpr, token;
           lexer = new_lexer();
           result = [];
-          ref1 = lexer.walk(probe);
-          for (token of ref1) {
+          ref = lexer.walk(probe);
+          for (token of ref) {
             result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
           }
           result_rpr = ((function() {
@@ -1948,7 +1757,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_line_by_line = function(T, done) {
-    var $, Interlex, Pipeline, compose, d, first, last, line, md_lexer, new_toy_md_lexer, new_toy_parser, parser, probe, ref1, ref2, result, result_rpr, token, transforms;
+    var $, Interlex, Pipeline, compose, d, first, last, line, md_lexer, new_toy_md_lexer, new_toy_parser, parser, probe, ref, ref1, result, result_rpr, token, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -2004,20 +1813,20 @@ the
         return urge('^79-1^', rpr(d));
       });
       p.push(function(d, send) {
-        var e, ref1, results;
+        var e, ref, results;
         if (!isa.text(d)) {
           return send(d);
         }
-        ref1 = lexer.walk(d);
+        ref = lexer.walk(d);
         results = [];
-        for (e of ref1) {
-          // send new_token = ref: 'x1', token, mode, tid, name, value, start, stop
+        for (e of ref) {
+          // send H2.new_token = ref: 'x1', token, mode, tid, name, value, x1, x2
           // send new_datom { }
           results.push(send(e));
         }
         return results;
       });
-      p.push($parse_md_stars());
+      p.push(H2.$parse_md_stars());
       return p;
     };
     //.........................................................................................................
@@ -2025,11 +1834,11 @@ the
     parser = new_toy_parser(md_lexer);
     //.........................................................................................................
     result = [];
-    ref1 = GUY.str.walk_lines(probe);
-    for (line of ref1) {
+    ref = GUY.str.walk_lines(probe);
+    for (line of ref) {
       parser.send(line);
-      ref2 = parser.walk();
-      for (d of ref2) {
+      ref1 = parser.walk();
+      for (d of ref1) {
         result.push(d);
         info('^79-10^', rpr(d));
       }
@@ -2038,11 +1847,11 @@ the
     H.tabulate("parse line by line", result);
     // debug '^79-11^', result_rpr = ( md_lexer.rpr_token token for token in result ).join ''
     result_rpr = ((function() {
-      var i, len, ref3, results;
+      var i, len, ref2, results;
       results = [];
       for (i = 0, len = result.length; i < len; i++) {
         token = result[i];
-        if ((ref3 = !token.$stamped) != null ? ref3 : false) {
+        if ((ref2 = !token.$stamped) != null ? ref2 : false) {
           results.push(token.value);
         }
       }
@@ -2115,11 +1924,11 @@ the
       return function(d, send) {
         if (d.mk === 'plain:codespan') {
           send(stamp(d));
-          return send(new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+          return send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
         }
         if (d.mk === 'literal:codespan') {
           send(stamp(d));
-          return send(new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+          return send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
         }
         send(d);
         return null;
@@ -2136,23 +1945,23 @@ the
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
-            var e, ref1, results;
+            var e, ref, results;
             if (d.tid !== 'p') {
               return send(d);
             }
-            ref1 = md_lexer.walk(d.value);
+            ref = md_lexer.walk(d.value);
             results = [];
-            for (e of ref1) {
+            for (e of ref) {
               results.push(send(e));
             }
             return results;
           });
-          p.push($parse_md_star());
+          p.push(H2.$parse_md_star());
           p.push($parse_md_codespan());
           //.....................................................................................................
-          p.send(new_token('^æ19^', {
-            start: 0,
-            stop: probe.length
+          p.send(H2.new_token('^æ19^', {
+            x1: 0,
+            x2: probe.length
           }, 'plain', 'p', null, probe));
           result = p.run();
           result_rpr = ((function() {
@@ -2261,11 +2070,11 @@ the
         switch (d.mk) {
           case 'plain:codespan':
             send(stamp(d));
-            send(new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+            send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
             break;
           case 'literal:codespan':
             send(stamp(d));
-            send(new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+            send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
             break;
           default:
             send(d);
@@ -2284,23 +2093,23 @@ the
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
-            var e, ref1, results;
+            var e, ref, results;
             if (d.tid !== 'p') {
               return send(d);
             }
-            ref1 = md_lexer.walk(d.value);
+            ref = md_lexer.walk(d.value);
             results = [];
-            for (e of ref1) {
+            for (e of ref) {
               results.push(send(e));
             }
             return results;
           });
-          p.push($parse_md_star());
+          p.push(H2.$parse_md_star());
           p.push($parse_md_codespan());
           //.....................................................................................................
-          p.send(new_token('^æ19^', {
-            start: 0,
-            stop: probe.length
+          p.send(H2.new_token('^æ19^', {
+            x1: 0,
+            x2: probe.length
           }, 'plain', 'p', null, probe));
           result = p.run();
           result_rpr = ((function() {
@@ -2447,7 +2256,7 @@ the
 
   //-----------------------------------------------------------------------------------------------------------
   this.match_end_of_line = function(T, done) {
-    var Interlex, c, lexer, line, matcher, probe, ref1, ref2, result, result_rpr, token;
+    var Interlex, c, lexer, line, matcher, probe, ref, ref1, result, result_rpr, token;
     ({
       // T?.halt_on_error()
       Interlex,
@@ -2481,10 +2290,10 @@ probe\x20\x20\x20`;
     //.........................................................................................................
     result = [];
     result_rpr = [];
-    ref1 = GUY.str.walk_lines(probe);
-    for (line of ref1) {
-      ref2 = lexer.walk(line);
-      for (token of ref2) {
+    ref = GUY.str.walk_lines(probe);
+    for (line of ref) {
+      ref1 = lexer.walk(line);
+      for (token of ref1) {
         result.push(token);
         result_rpr.push(lexer.rpr_token(token));
       }
@@ -2798,9 +2607,9 @@ probe\x20\x20\x20`;
       new_escchr_descriptor = function(mode) {
         var create;
         create = function(token) {
-          var ref1;
+          var ref;
           create_call_count++;
-          if (((ref1 = token.x) != null ? ref1.chr : void 0) == null) {
+          if (((ref = token.x) != null ? ref.chr : void 0) == null) {
             token.x = {
               chr: '\n'
             };
@@ -3020,14 +2829,14 @@ probe\x20\x20\x20`;
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, lexer, ref1, result, token;
+          var d, lexer, ref, result, token;
           lexer = new_lexer();
           if (T != null) {
             T.eq(type_of(lexer.registry.plain.lexemes.escchr.create), 'function');
           }
           result = [];
-          ref1 = lexer.walk(probe);
-          for (token of ref1) {
+          ref = lexer.walk(probe);
+          for (token of ref) {
             d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'x'));
             // debug '^432^', d if d.mk.endsWith ':escchr'
             result.push(d);

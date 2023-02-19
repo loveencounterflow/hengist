@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, new_token, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -26,28 +26,6 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  new_token = function(ref, token, mode, tid, name, value, start, stop, x = null, lexeme = null) {
-    /* TAINT recreation of `Interlex::new_token()` */
-    var jump, ref1;
-    jump = (ref1 = lexeme != null ? lexeme.jump : void 0) != null ? ref1 : null;
-    ({start, stop} = token);
-    return new_datom(`^${mode}`, {
-      mode,
-      tid,
-      mk: `${mode}:${tid}`,
-      jump,
-      name,
-      value,
-      start,
-      stop,
-      x,
-      $: ref
-    });
-  };
-
-  //===========================================================================================================
-
-  //-----------------------------------------------------------------------------------------------------------
   this.parse_md_stars_markup = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
@@ -57,7 +35,7 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var d, p, result, result_rpr, t;
           p = new Hypedown_parser();
           p.send(XXX_new_token('^æ19^', {
             start: 0,
@@ -76,7 +54,18 @@
             return results;
           })()).join('');
           // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          H.tabulate(`${rpr(probe)} -> ${result_rpr} (${rpr(matcher)})`, result); // unless result_rpr is matcher
+          H.tabulate(`${rpr(probe)} -> ${result_rpr} (${rpr(matcher)})`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
           //.....................................................................................................
           return resolve(result_rpr);
         });
@@ -89,36 +78,31 @@
   this.parse_codespans_and_single_star = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    probes_and_matchers = [["`abc`", "<code>abc</code>\n"], ["*abc*", "<i>abc</i>\n"]];
+    // [ "`abc`", "<code>abc</code>\n", ]
+    // [ "*abc*", "<i>abc</i>\n", ]
+    // [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    // [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    // [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    probes_and_matchers = [['helo `world`!', 'helo <code>world</code>!\n', null], ['foo\n\nbar\n\nbaz', '<i>foo</i> <code>*bar*``` baz\n', null]];
 //.........................................................................................................
-// [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
-// [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-// [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-// [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
 // [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz\n', null ]
 // [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz\n', null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, entry, lexeme, line, mode, p, ref1, ref2, ref3, result, result_rpr, tid;
+          var d, line, p, ref, result, result_rpr, t;
           p = new Hypedown_parser();
-          H.tabulate(rpr('helo'), p.lexer.run('helo'));
-          H.tabulate(rpr('`helo`'), p.lexer.run('`helo`'));
-          H.tabulate(rpr('*helo*'), p.lexer.run('*helo*'));
-          ref1 = p.lexer.registry;
-          for (mode in ref1) {
-            entry = ref1[mode];
-            ref2 = entry.lexemes;
-            // debug '^2325687^', entry
-            for (tid in ref2) {
-              lexeme = ref2[tid];
-              urge('^2325687^', `${lexeme.mode}:${lexeme.tid}`);
-            }
-          }
-          process.exit(111);
-          ref3 = GUY.str.walk_lines(probe);
-          for (line of ref3) {
+          ref = GUY.str.walk_lines(probe);
+          // H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
+          // H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
+          // H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
+          // for mode, entry of p.lexer.registry
+          //   # debug '^2325687^', entry
+          //   for tid, lexeme of entry.lexemes
+          //     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
+          // process.exit 111
+          for (line of ref) {
             p.send(line);
           }
           result = p.run();
@@ -134,7 +118,18 @@
             return results;
           })()).join('');
           // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, result); // unless result_rpr is matcher
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
           return resolve(result_rpr);
         });
       });
@@ -161,11 +156,11 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, eol, line, lnr, p, ref1, result, result_rpr, y;
+          var d, eol, line, lnr, p, ref, result, result_rpr, x;
           p = new Hypedown_parser();
-          ref1 = GUY.str.walk_lines_with_positions(probe);
-          for (y of ref1) {
-            ({lnr, line, eol} = y);
+          ref = GUY.str.walk_lines_with_positions(probe);
+          for (x of ref) {
+            ({lnr, line, eol} = x);
             debug('^');
             p.send(line);
           }

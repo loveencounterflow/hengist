@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, H2, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -25,6 +25,8 @@
 
   H = require('../../../lib/helpers');
 
+  H2 = require('./helpers');
+
   after = (dts, f) => {
     return new Promise(function(resolve) {
       return setTimeout((function() {
@@ -39,7 +41,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_linewise_lexing_with_external_iterator_no_linewise_cfg = function(T, done) {
-    var FS, Interlex, c, cfg, eol, i, len, lexer, line, lnr, matcher, new_lexer, path, probe, probes_and_matchers, ref, ref1, result, token, tokens, x;
+    var FS, Interlex, c, cfg, eol, i, len, lexer, line, lnr1, matcher, new_lexer, path, probe, probes_and_matchers, ref, ref1, result, token, tokens, x;
     FS = require('node:fs');
     GUY = require('../../../apps/guy');
     ({
@@ -57,9 +59,9 @@
             mk: 'plain:word',
             jump: null,
             value: "Ångström's",
-            lnr: 1,
-            start: 0,
-            stop: 10,
+            lnr1: 1,
+            x1: 0,
+            x2: 10,
             x: null,
             source: "Ångström's",
             '$key': '^plain'
@@ -70,9 +72,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'éclair',
-            lnr: 2,
-            start: 0,
-            stop: 6,
+            lnr1: 2,
+            x1: 0,
+            x2: 6,
             x: null,
             source: 'éclair',
             '$key': '^plain'
@@ -83,9 +85,9 @@
             mk: 'plain:word',
             jump: null,
             value: "éclair's",
-            lnr: 3,
-            start: 0,
-            stop: 8,
+            lnr1: 3,
+            x1: 0,
+            x2: 8,
             x: null,
             source: "éclair's",
             '$key': '^plain'
@@ -96,9 +98,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'éclairs',
-            lnr: 4,
-            start: 0,
-            stop: 7,
+            lnr1: 4,
+            x1: 0,
+            x2: 7,
             x: null,
             source: 'éclairs',
             '$key': '^plain'
@@ -109,9 +111,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'éclat',
-            lnr: 5,
-            start: 0,
-            stop: 5,
+            lnr1: 5,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'éclat',
             '$key': '^plain'
@@ -122,9 +124,9 @@
             mk: 'plain:word',
             jump: null,
             value: "éclat's",
-            lnr: 6,
-            start: 0,
-            stop: 7,
+            lnr1: 6,
+            x1: 0,
+            x2: 7,
             x: null,
             source: "éclat's",
             '$key': '^plain'
@@ -135,9 +137,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'élan',
-            lnr: 7,
-            start: 0,
-            stop: 4,
+            lnr1: 7,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'élan',
             '$key': '^plain'
@@ -148,9 +150,9 @@
             mk: 'plain:word',
             jump: null,
             value: "élan's",
-            lnr: 8,
-            start: 0,
-            stop: 6,
+            lnr1: 8,
+            x1: 0,
+            x2: 6,
             x: null,
             source: "élan's",
             '$key': '^plain'
@@ -161,9 +163,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'émigré',
-            lnr: 9,
-            start: 0,
-            stop: 6,
+            lnr1: 9,
+            x1: 0,
+            x2: 6,
             x: null,
             source: 'émigré',
             '$key': '^plain'
@@ -174,9 +176,9 @@
             mk: 'plain:word',
             jump: null,
             value: "émigré's",
-            lnr: 10,
-            start: 0,
-            stop: 8,
+            lnr1: 10,
+            x1: 0,
+            x2: 8,
             x: null,
             source: "émigré's",
             '$key': '^plain'
@@ -193,9 +195,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 1,
-            start: 0,
-            stop: 0,
+            lnr1: 1,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -212,9 +214,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 1,
-            start: 0,
-            stop: 0,
+            lnr1: 1,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -225,9 +227,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 2,
-            start: 0,
-            stop: 0,
+            lnr1: 2,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -244,9 +246,9 @@
             mk: 'plain:word',
             jump: null,
             value: '1',
-            lnr: 1,
-            start: 0,
-            stop: 1,
+            lnr1: 1,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '1',
             '$key': '^plain'
@@ -257,9 +259,9 @@
             mk: 'plain:word',
             jump: null,
             value: '2',
-            lnr: 2,
-            start: 0,
-            stop: 1,
+            lnr1: 2,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '2',
             '$key': '^plain'
@@ -270,9 +272,9 @@
             mk: 'plain:word',
             jump: null,
             value: '3',
-            lnr: 3,
-            start: 0,
-            stop: 1,
+            lnr1: 3,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '3',
             '$key': '^plain'
@@ -289,9 +291,9 @@
             mk: 'plain:word',
             jump: null,
             value: '1',
-            lnr: 1,
-            start: 0,
-            stop: 1,
+            lnr1: 1,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '1',
             '$key': '^plain'
@@ -302,9 +304,9 @@
             mk: 'plain:word',
             jump: null,
             value: '2',
-            lnr: 2,
-            start: 0,
-            stop: 1,
+            lnr1: 2,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '2',
             '$key': '^plain'
@@ -315,9 +317,9 @@
             mk: 'plain:word',
             jump: null,
             value: '3',
-            lnr: 3,
-            start: 0,
-            stop: 1,
+            lnr1: 3,
+            x1: 0,
+            x2: 1,
             x: null,
             source: '3',
             '$key': '^plain'
@@ -328,9 +330,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 4,
-            start: 0,
-            stop: 0,
+            lnr1: 4,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -347,9 +349,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'this',
-            lnr: 1,
-            start: 0,
-            stop: 4,
+            lnr1: 1,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'this',
             '$key': '^plain'
@@ -360,9 +362,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'file',
-            lnr: 2,
-            start: 0,
-            stop: 4,
+            lnr1: 2,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'file',
             '$key': '^plain'
@@ -373,9 +375,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'written',
-            lnr: 3,
-            start: 0,
-            stop: 7,
+            lnr1: 3,
+            x1: 0,
+            x2: 7,
             x: null,
             source: 'written',
             '$key': '^plain'
@@ -386,9 +388,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'on',
-            lnr: 4,
-            start: 0,
-            stop: 2,
+            lnr1: 4,
+            x1: 0,
+            x2: 2,
             x: null,
             source: 'on',
             '$key': '^plain'
@@ -399,9 +401,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'MS',
-            lnr: 5,
-            start: 0,
-            stop: 2,
+            lnr1: 5,
+            x1: 0,
+            x2: 2,
             x: null,
             source: 'MS Notepad',
             '$key': '^plain'
@@ -412,9 +414,9 @@
             mk: 'plain:ws',
             jump: null,
             value: ' ',
-            lnr: 5,
-            start: 2,
-            stop: 3,
+            lnr1: 5,
+            x1: 2,
+            x2: 3,
             x: null,
             source: 'MS Notepad',
             '$key': '^plain'
@@ -425,9 +427,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'Notepad',
-            lnr: 5,
-            start: 3,
-            stop: 10,
+            lnr1: 5,
+            x1: 3,
+            x2: 10,
             x: null,
             source: 'MS Notepad',
             '$key': '^plain'
@@ -444,9 +446,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'all',
-            lnr: 1,
-            start: 0,
-            stop: 3,
+            lnr1: 1,
+            x1: 0,
+            x2: 3,
             x: null,
             source: 'all',
             '$key': '^plain'
@@ -457,9 +459,9 @@
             mk: 'plain:word',
             jump: null,
             value: '𠀀bases',
-            lnr: 2,
-            start: 0,
-            stop: 7,
+            lnr1: 2,
+            x1: 0,
+            x2: 7,
             x: null,
             source: '𠀀bases',
             '$key': '^plain'
@@ -470,9 +472,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 3,
-            start: 0,
-            stop: 0,
+            lnr1: 3,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -483,9 +485,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'are',
-            lnr: 4,
-            start: 0,
-            stop: 3,
+            lnr1: 4,
+            x1: 0,
+            x2: 3,
             x: null,
             source: 'are belong',
             '$key': '^plain'
@@ -496,9 +498,9 @@
             mk: 'plain:ws',
             jump: null,
             value: ' ',
-            lnr: 4,
-            start: 3,
-            stop: 4,
+            lnr1: 4,
+            x1: 3,
+            x2: 4,
             x: null,
             source: 'are belong',
             '$key': '^plain'
@@ -509,9 +511,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'belong',
-            lnr: 4,
-            start: 4,
-            stop: 10,
+            lnr1: 4,
+            x1: 4,
+            x2: 10,
             x: null,
             source: 'are belong',
             '$key': '^plain'
@@ -522,9 +524,9 @@
             mk: 'plain:word',
             jump: null,
             value: '𠀀to',
-            lnr: 5,
-            start: 0,
-            stop: 4,
+            lnr1: 5,
+            x1: 0,
+            x2: 4,
             x: null,
             source: '𠀀to us',
             '$key': '^plain'
@@ -535,9 +537,9 @@
             mk: 'plain:ws',
             jump: null,
             value: ' ',
-            lnr: 5,
-            start: 4,
-            stop: 5,
+            lnr1: 5,
+            x1: 4,
+            x2: 5,
             x: null,
             source: '𠀀to us',
             '$key': '^plain'
@@ -548,9 +550,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'us',
-            lnr: 5,
-            start: 5,
-            stop: 7,
+            lnr1: 5,
+            x1: 5,
+            x2: 7,
             x: null,
             source: '𠀀to us',
             '$key': '^plain'
@@ -561,9 +563,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 6,
-            start: 0,
-            stop: 0,
+            lnr1: 6,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -580,9 +582,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 1,
-            start: 0,
-            stop: 0,
+            lnr1: 1,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -593,9 +595,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 2,
-            start: 0,
-            stop: 0,
+            lnr1: 2,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -606,9 +608,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 3,
-            start: 0,
-            stop: 0,
+            lnr1: 3,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -619,9 +621,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 4,
-            start: 0,
-            stop: 0,
+            lnr1: 4,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -632,9 +634,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 5,
-            start: 0,
-            stop: 0,
+            lnr1: 5,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -645,9 +647,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 6,
-            start: 0,
-            stop: 0,
+            lnr1: 6,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -664,9 +666,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line',
-            lnr: 1,
-            start: 0,
-            stop: 4,
+            lnr1: 1,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'line',
             '$key': '^plain'
@@ -677,9 +679,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'with',
-            lnr: 2,
-            start: 0,
-            stop: 4,
+            lnr1: 2,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'with',
             '$key': '^plain'
@@ -690,9 +692,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'trailing',
-            lnr: 3,
-            start: 0,
-            stop: 8,
+            lnr1: 3,
+            x1: 0,
+            x2: 8,
             x: null,
             source: 'trailing',
             '$key': '^plain'
@@ -703,9 +705,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'whitespace',
-            lnr: 4,
-            start: 0,
-            stop: 10,
+            lnr1: 4,
+            x1: 0,
+            x2: 10,
             x: null,
             source: 'whitespace',
             '$key': '^plain'
@@ -726,9 +728,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line',
-            lnr: 1,
-            start: 0,
-            stop: 4,
+            lnr1: 1,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'line',
             '$key': '^plain'
@@ -739,9 +741,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'with',
-            lnr: 2,
-            start: 0,
-            stop: 4,
+            lnr1: 2,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'with',
             '$key': '^plain'
@@ -752,9 +754,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'trailing',
-            lnr: 3,
-            start: 0,
-            stop: 8,
+            lnr1: 3,
+            x1: 0,
+            x2: 8,
             x: null,
             source: 'trailing',
             '$key': '^plain'
@@ -765,9 +767,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'whitespace',
-            lnr: 4,
-            start: 0,
-            stop: 10,
+            lnr1: 4,
+            x1: 0,
+            x2: 10,
             x: null,
             source: 'whitespace',
             '$key': '^plain'
@@ -788,9 +790,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line',
-            lnr: 1,
-            start: 0,
-            stop: 4,
+            lnr1: 1,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'line',
             '$key': '^plain'
@@ -801,9 +803,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'with',
-            lnr: 2,
-            start: 0,
-            stop: 4,
+            lnr1: 2,
+            x1: 0,
+            x2: 4,
             x: null,
             source: 'with',
             '$key': '^plain'
@@ -814,9 +816,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'trailing',
-            lnr: 3,
-            start: 0,
-            stop: 8,
+            lnr1: 3,
+            x1: 0,
+            x2: 8,
             x: null,
             source: 'trailing',
             '$key': '^plain'
@@ -827,9 +829,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'whitespace',
-            lnr: 4,
-            start: 0,
-            stop: 10,
+            lnr1: 4,
+            x1: 0,
+            x2: 10,
             x: null,
             source: 'whitespace',
             '$key': '^plain'
@@ -846,9 +848,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line1',
-            lnr: 1,
-            start: 0,
-            stop: 5,
+            lnr1: 1,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line1',
             '$key': '^plain'
@@ -859,9 +861,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line2',
-            lnr: 2,
-            start: 0,
-            stop: 5,
+            lnr1: 2,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line2',
             '$key': '^plain'
@@ -872,9 +874,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line3',
-            lnr: 3,
-            start: 0,
-            stop: 5,
+            lnr1: 3,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line3',
             '$key': '^plain'
@@ -885,9 +887,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 4,
-            start: 0,
-            stop: 0,
+            lnr1: 4,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -904,9 +906,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line1',
-            lnr: 1,
-            start: 0,
-            stop: 5,
+            lnr1: 1,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line1',
             '$key': '^plain'
@@ -917,9 +919,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line2',
-            lnr: 2,
-            start: 0,
-            stop: 5,
+            lnr1: 2,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line2',
             '$key': '^plain'
@@ -930,9 +932,9 @@
             mk: 'plain:word',
             jump: null,
             value: 'line3',
-            lnr: 3,
-            start: 0,
-            stop: 5,
+            lnr1: 3,
+            x1: 0,
+            x2: 5,
             x: null,
             source: 'line3',
             '$key': '^plain'
@@ -943,9 +945,9 @@
             mk: 'plain:empty',
             jump: null,
             value: '',
-            lnr: 4,
-            start: 0,
-            stop: 0,
+            lnr1: 4,
+            x1: 0,
+            x2: 0,
             x: null,
             source: '',
             '$key': '^plain'
@@ -960,7 +962,7 @@
         linewise: true
       });
       // T?.eq lexer.cfg.linewise, true
-      // T?.eq lexer.state.lnr, 0
+      // T?.eq lexer.state.lnr1, 0
       mode = 'plain';
       // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
       lexer.add_lexeme({
@@ -992,13 +994,13 @@
       // trimmed_source  = ( line + eol for { line, eol, } from GUY.fs.walk_lines_with_positions path, cfg ).join ''
       // debug '^23-4^', rpr trimmed_source
       for (x of ref) {
-        ({lnr, line, eol} = x);
+        ({lnr1, line, eol} = x);
         ref1 = lexer.walk(line);
         for (token of ref1) {
           tokens.push(token);
           result.push(token);
           if (T != null) {
-            T.eq(token.value, token.source.slice(token.start, token.stop));
+            T.eq(token.value, token.source.slice(token.x1, token.x2));
           }
         }
       }
@@ -1087,7 +1089,7 @@
         ...cfg
       });
       // T?.eq lexer.cfg.linewise, true
-      // T?.eq lexer.state.lnr, 0
+      // T?.eq lexer.state.lnr1, 0
       mode = 'plain';
       // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
       lexer.add_lexeme({
@@ -1123,7 +1125,7 @@
         // info '^23-4^', lexer.state
         info('^23-4^', token);
         tokens.push(token);
-        result.push(`${token.lnr}:${rpr(token.value)}`);
+        result.push(`${token.lnr1}:${rpr(token.value)}`);
       }
       //.........................................................................................................
       result = result.join(',');
@@ -1138,12 +1140,137 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_nested_codespan_across_lines = async function(T, done) {
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    first = Symbol('first');
+    last = Symbol('last');
+    //.........................................................................................................
+    new_toy_md_lexer = function(mode = 'plain') {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      //.........................................................................................................
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'escchr',
+        jump: null,
+        pattern: /\\(?<chr>.)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'star1',
+        jump: null,
+        pattern: /(?<!\*)\*(?!\*)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'codespan',
+        jump: 'literal',
+        pattern: /(?<!`)`(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'other',
+        jump: null,
+        pattern: /[^*`\\]+/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'codespan',
+        jump: '^',
+        pattern: /(?<!`)`(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'literal',
+        tid: 'text',
+        jump: null,
+        pattern: /(?:\\`|[^`])+/u
+      });
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* \\`*bar*\\` baz', '<i>foo</i> \\`<i>bar</i>\\` baz', null]];
+    //.........................................................................................................
+    $parse_md_codespan = function() {
+      return function(d, send) {
+        if (d.mk === 'plain:codespan') {
+          send(stamp(d));
+          return send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+        }
+        if (d.mk === 'literal:codespan') {
+          send(stamp(d));
+          return send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+        }
+        send(d);
+        return null;
+      };
+    };
+    //.........................................................................................................
+    md_lexer = new_toy_md_lexer('md');
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, p, result, result_rpr;
+          //.....................................................................................................
+          p = new Pipeline();
+          p.push(function(d, send) {
+            var e, ref, results;
+            if (d.tid !== 'p') {
+              return send(d);
+            }
+            ref = md_lexer.walk(d.value);
+            results = [];
+            for (e of ref) {
+              results.push(send(e));
+            }
+            return results;
+          });
+          p.push(H2.$parse_md_star());
+          p.push($parse_md_codespan());
+          //.....................................................................................................
+          p.send(H2.new_token('^æ19^', {
+            x1: 0,
+            x2: probe.length
+          }, 'plain', 'p', null, probe));
+          result = p.run();
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          //.....................................................................................................
+          return resolve(result_rpr);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
       // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
-      return test(this.use_linewise_with_single_text);
+      // test @use_linewise_with_single_text
+      return test(this.parse_nested_codespan_across_lines);
     })();
   }
 
