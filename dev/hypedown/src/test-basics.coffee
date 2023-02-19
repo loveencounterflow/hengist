@@ -75,15 +75,15 @@ H                         = require './helpers'
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
-    # [ "`abc`", "<code>abc</code>\n", ]
-    # [ "*abc*", "<i>abc</i>\n", ]
-    # [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    # [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    # [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
-    [ 'foo\n\nbar\n\nbaz', '<i>foo</i> <code>*bar*``` baz\n', null ]
-    # [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz\n', null ]
-    # [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz\n', null ]
+    # [ "`abc`", "<p><code>abc</code>\n", ]
+    # [ "*abc*", "<p><i>abc</i>\n", ]
+    # [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
+    # [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
+    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
+    # [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -100,11 +100,11 @@ H                         = require './helpers'
       for line from GUY.str.walk_lines probe
         p.send line
       result      = p.run()
-      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      H.tabulate "#{rpr probe} -> #{rpr result_rpr} (#{rpr matcher})", result # unless result_rpr is matcher
-      H.tabulate "#{rpr probe} -> #{rpr result_rpr} (#{rpr matcher})", ( t for t in result when not t.$stamped )
-      resolve result_rpr
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      resolve result_txt
   #.........................................................................................................
   done?()
 
@@ -144,7 +144,7 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @parse_codespans_and_single_star
-  test @parse_md_stars_markup
+  test @parse_codespans_and_single_star
+  # test @parse_md_stars_markup
   # test @parse_headings
 
