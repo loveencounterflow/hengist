@@ -61,6 +61,7 @@
             value: "Ångström's",
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 10,
             x: null,
             source: "Ångström's",
@@ -74,6 +75,7 @@
             value: 'éclair',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 6,
             x: null,
             source: 'éclair',
@@ -87,6 +89,7 @@
             value: "éclair's",
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 8,
             x: null,
             source: "éclair's",
@@ -100,6 +103,7 @@
             value: 'éclairs',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 7,
             x: null,
             source: 'éclairs',
@@ -113,6 +117,7 @@
             value: 'éclat',
             lnr1: 5,
             x1: 0,
+            lnr2: 5,
             x2: 5,
             x: null,
             source: 'éclat',
@@ -126,6 +131,7 @@
             value: "éclat's",
             lnr1: 6,
             x1: 0,
+            lnr2: 6,
             x2: 7,
             x: null,
             source: "éclat's",
@@ -139,6 +145,7 @@
             value: 'élan',
             lnr1: 7,
             x1: 0,
+            lnr2: 7,
             x2: 4,
             x: null,
             source: 'élan',
@@ -152,6 +159,7 @@
             value: "élan's",
             lnr1: 8,
             x1: 0,
+            lnr2: 8,
             x2: 6,
             x: null,
             source: "élan's",
@@ -165,6 +173,7 @@
             value: 'émigré',
             lnr1: 9,
             x1: 0,
+            lnr2: 9,
             x2: 6,
             x: null,
             source: 'émigré',
@@ -178,6 +187,7 @@
             value: "émigré's",
             lnr1: 10,
             x1: 0,
+            lnr2: 10,
             x2: 8,
             x: null,
             source: "émigré's",
@@ -197,6 +207,7 @@
             value: '',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 0,
             x: null,
             source: '',
@@ -216,6 +227,7 @@
             value: '',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 0,
             x: null,
             source: '',
@@ -229,6 +241,7 @@
             value: '',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 0,
             x: null,
             source: '',
@@ -248,6 +261,7 @@
             value: '1',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 1,
             x: null,
             source: '1',
@@ -261,6 +275,7 @@
             value: '2',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 1,
             x: null,
             source: '2',
@@ -274,6 +289,7 @@
             value: '3',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 1,
             x: null,
             source: '3',
@@ -293,6 +309,7 @@
             value: '1',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 1,
             x: null,
             source: '1',
@@ -306,6 +323,7 @@
             value: '2',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 1,
             x: null,
             source: '2',
@@ -319,6 +337,7 @@
             value: '3',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 1,
             x: null,
             source: '3',
@@ -332,6 +351,7 @@
             value: '',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 0,
             x: null,
             source: '',
@@ -351,6 +371,7 @@
             value: 'this',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 4,
             x: null,
             source: 'this',
@@ -364,6 +385,7 @@
             value: 'file',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 4,
             x: null,
             source: 'file',
@@ -377,6 +399,7 @@
             value: 'written',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 7,
             x: null,
             source: 'written',
@@ -390,6 +413,7 @@
             value: 'on',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 2,
             x: null,
             source: 'on',
@@ -403,6 +427,7 @@
             value: 'MS',
             lnr1: 5,
             x1: 0,
+            lnr2: 5,
             x2: 2,
             x: null,
             source: 'MS Notepad',
@@ -416,6 +441,7 @@
             value: ' ',
             lnr1: 5,
             x1: 2,
+            lnr2: 5,
             x2: 3,
             x: null,
             source: 'MS Notepad',
@@ -429,6 +455,7 @@
             value: 'Notepad',
             lnr1: 5,
             x1: 3,
+            lnr2: 5,
             x2: 10,
             x: null,
             source: 'MS Notepad',
@@ -448,6 +475,7 @@
             value: 'all',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 3,
             x: null,
             source: 'all',
@@ -461,6 +489,7 @@
             value: '𠀀bases',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 7,
             x: null,
             source: '𠀀bases',
@@ -474,6 +503,7 @@
             value: '',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 0,
             x: null,
             source: '',
@@ -487,6 +517,7 @@
             value: 'are',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 3,
             x: null,
             source: 'are belong',
@@ -500,6 +531,7 @@
             value: ' ',
             lnr1: 4,
             x1: 3,
+            lnr2: 4,
             x2: 4,
             x: null,
             source: 'are belong',
@@ -513,6 +545,7 @@
             value: 'belong',
             lnr1: 4,
             x1: 4,
+            lnr2: 4,
             x2: 10,
             x: null,
             source: 'are belong',
@@ -526,6 +559,7 @@
             value: '𠀀to',
             lnr1: 5,
             x1: 0,
+            lnr2: 5,
             x2: 4,
             x: null,
             source: '𠀀to us',
@@ -539,6 +573,7 @@
             value: ' ',
             lnr1: 5,
             x1: 4,
+            lnr2: 5,
             x2: 5,
             x: null,
             source: '𠀀to us',
@@ -552,6 +587,7 @@
             value: 'us',
             lnr1: 5,
             x1: 5,
+            lnr2: 5,
             x2: 7,
             x: null,
             source: '𠀀to us',
@@ -565,6 +601,7 @@
             value: '',
             lnr1: 6,
             x1: 0,
+            lnr2: 6,
             x2: 0,
             x: null,
             source: '',
@@ -584,6 +621,7 @@
             value: '',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 0,
             x: null,
             source: '',
@@ -597,6 +635,7 @@
             value: '',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 0,
             x: null,
             source: '',
@@ -610,6 +649,7 @@
             value: '',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 0,
             x: null,
             source: '',
@@ -623,6 +663,7 @@
             value: '',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 0,
             x: null,
             source: '',
@@ -636,6 +677,7 @@
             value: '',
             lnr1: 5,
             x1: 0,
+            lnr2: 5,
             x2: 0,
             x: null,
             source: '',
@@ -649,6 +691,7 @@
             value: '',
             lnr1: 6,
             x1: 0,
+            lnr2: 6,
             x2: 0,
             x: null,
             source: '',
@@ -668,6 +711,7 @@
             value: 'line',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 4,
             x: null,
             source: 'line',
@@ -681,6 +725,7 @@
             value: 'with',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 4,
             x: null,
             source: 'with',
@@ -694,6 +739,7 @@
             value: 'trailing',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 8,
             x: null,
             source: 'trailing',
@@ -707,6 +753,7 @@
             value: 'whitespace',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 10,
             x: null,
             source: 'whitespace',
@@ -730,6 +777,7 @@
             value: 'line',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 4,
             x: null,
             source: 'line',
@@ -743,6 +791,7 @@
             value: 'with',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 4,
             x: null,
             source: 'with',
@@ -756,6 +805,7 @@
             value: 'trailing',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 8,
             x: null,
             source: 'trailing',
@@ -769,6 +819,7 @@
             value: 'whitespace',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 10,
             x: null,
             source: 'whitespace',
@@ -792,6 +843,7 @@
             value: 'line',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 4,
             x: null,
             source: 'line',
@@ -805,6 +857,7 @@
             value: 'with',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 4,
             x: null,
             source: 'with',
@@ -818,6 +871,7 @@
             value: 'trailing',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 8,
             x: null,
             source: 'trailing',
@@ -831,6 +885,7 @@
             value: 'whitespace',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 10,
             x: null,
             source: 'whitespace',
@@ -850,6 +905,7 @@
             value: 'line1',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 5,
             x: null,
             source: 'line1',
@@ -863,6 +919,7 @@
             value: 'line2',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 5,
             x: null,
             source: 'line2',
@@ -876,6 +933,7 @@
             value: 'line3',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 5,
             x: null,
             source: 'line3',
@@ -889,6 +947,7 @@
             value: '',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 0,
             x: null,
             source: '',
@@ -908,6 +967,7 @@
             value: 'line1',
             lnr1: 1,
             x1: 0,
+            lnr2: 1,
             x2: 5,
             x: null,
             source: 'line1',
@@ -921,6 +981,7 @@
             value: 'line2',
             lnr1: 2,
             x1: 0,
+            lnr2: 2,
             x2: 5,
             x: null,
             source: 'line2',
@@ -934,6 +995,7 @@
             value: 'line3',
             lnr1: 3,
             x1: 0,
+            lnr2: 3,
             x2: 5,
             x: null,
             source: 'line3',
@@ -947,6 +1009,7 @@
             value: '',
             lnr1: 4,
             x1: 0,
+            lnr2: 4,
             x2: 0,
             x: null,
             source: '',
@@ -1142,7 +1205,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_nested_codespan_across_lines = async function(T, done) {
-    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, md_lexer, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_parser, new_toy_md_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
@@ -1151,7 +1214,7 @@
     new_toy_md_lexer = function(mode = 'plain') {
       var lexer;
       lexer = new Interlex({
-        dotall: false
+        linewise: true
       });
       //.........................................................................................................
       lexer.add_lexeme({
@@ -1168,9 +1231,15 @@
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'codespan',
+        tid: 'backtick',
         jump: 'literal',
         pattern: /(?<!`)`(?!`)/u
+      });
+      lexer.add_lexeme({
+        mode: 'plain',
+        tid: 'nl',
+        jump: null,
+        pattern: /$/u
       });
       lexer.add_lexeme({
         mode: 'plain',
@@ -1180,7 +1249,7 @@
       });
       lexer.add_lexeme({
         mode: 'literal',
-        tid: 'codespan',
+        tid: 'backtick',
         jump: '^',
         pattern: /(?<!`)`(?!`)/u
       });
@@ -1194,67 +1263,107 @@
       return lexer;
     };
     //.........................................................................................................
-    probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* \\`*bar*\\` baz', '<i>foo</i> \\`<i>bar</i>\\` baz', null]];
+    probes_and_matchers = [['abc `print "helo\nworld";` xyz', `[plain:other,(1:0)(1:4),='abc '][plain:codespan,(1:4)(2:8),='print "helo\\nworld";'][plain:other,(2:8)(2:12),=' xyz'][plain:nl,(2:12)(2:12),='']`, null]];
     //.........................................................................................................
     $parse_md_codespan = function() {
+      var collector, lnr1, mk, mode, tid, within_codespan, x1;
+      within_codespan = false;
+      collector = [];
+      mode = 'plain';
+      tid = 'codespan';
+      mk = 'plain:codespan';
+      lnr1 = null;
+      x1 = null;
       return function(d, send) {
-        if (d.mk === 'plain:codespan') {
-          send(stamp(d));
-          return send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+        var e, lnr2, value, x2;
+        switch (d.mk) {
+          case 'plain:backtick':
+            send(stamp(d));
+            within_codespan = true;
+            ({lnr1, x1} = d);
+            break;
+          case 'literal:text':
+            if (!within_codespan) {
+              return send(d);
+            }
+            send(stamp(d));
+            collector.push(d);
+            break;
+          case 'literal:backtick':
+            if (!within_codespan) {
+              return send(d);
+            }
+            send(stamp(d));
+            within_codespan = false;
+            value = ((function() {
+              var i, len, results;
+              results = [];
+              for (i = 0, len = collector.length; i < len; i++) {
+                e = collector[i];
+                results.push(e.value);
+              }
+              return results;
+            })()).join('\n');
+            ({lnr2, x2} = d);
+            send({mode, tid, mk, value, lnr1, x1, lnr2, x2});
+            break;
+          default:
+            send(d);
         }
-        if (d.mk === 'literal:codespan') {
-          send(stamp(d));
-          return send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
-        }
-        send(d);
         return null;
       };
     };
     //.........................................................................................................
-    md_lexer = new_toy_md_lexer('md');
+    new_parser = function(lexer) {
+      var p;
+      p = new Pipeline();
+      p.push(function(d, send) {
+        var e, ref, results;
+        if (d.tid !== 'p') {
+          return send(d);
+        }
+        ref = lexer.walk(d.value);
+        results = [];
+        for (e of ref) {
+          results.push(send(e));
+        }
+        return results;
+      });
+      p.push(H2.$parse_md_star());
+      p.push($parse_md_codespan());
+      return p;
+    };
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_rpr;
+          var lexer, p, ref, result, token;
           //.....................................................................................................
-          p = new Pipeline();
-          p.push(function(d, send) {
-            var e, ref, results;
-            if (d.tid !== 'p') {
-              return send(d);
-            }
-            ref = md_lexer.walk(d.value);
-            results = [];
-            for (e of ref) {
-              results.push(send(e));
-            }
-            return results;
-          });
-          p.push(H2.$parse_md_star());
-          p.push($parse_md_codespan());
+          lexer = new_toy_md_lexer('md');
+          p = new_parser(lexer);
           //.....................................................................................................
           p.send(H2.new_token('^æ19^', {
             x1: 0,
             x2: probe.length
           }, 'plain', 'p', null, probe));
-          result = p.run();
-          result_rpr = ((function() {
+          result = [];
+          ref = p.walk();
+          for (token of ref) {
+            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'));
+          }
+          H.tabulate(`${rpr(probe)}`, result); // unless result_rpr is matcher
+          return resolve(((function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
-              d = result[j];
-              if (!d.$stamped) {
-                results.push(d.value);
+              token = result[j];
+              if (!token.$stamped) {
+                results.push(lexer.rpr_token(token));
               }
             }
             return results;
-          })()).join('');
-          // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
-          //.....................................................................................................
-          return resolve(result_rpr);
+          })()).join(''));
         });
       });
     }
