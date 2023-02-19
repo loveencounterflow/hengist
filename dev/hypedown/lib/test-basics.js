@@ -64,20 +64,21 @@
   this.parse_codespans_and_single_star = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    // [ "`abc`", "<code>abc</code>\n", ]
-    // [ "*abc*", "<i>abc</i>\n", ]
-    // [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    // [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    // [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
-    probes_and_matchers = [['helo `world`!', 'helo <code>world</code>!\n', null], ['foo\n\nbar\n\nbaz', '<i>foo</i> <code>*bar*``` baz\n', null]];
+    // [ "`abc`", "<p><code>abc</code>\n", ]
+    // [ "*abc*", "<p><i>abc</i>\n", ]
+    // [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    // [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    // [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    // [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
+    // [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
+    probes_and_matchers = [['*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null]];
 //.........................................................................................................
-// [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz\n', null ]
-// [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz\n', null ]
+// [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, line, p, ref, result, result_rpr, t;
+          var d, line, p, ref, result, result_txt, t;
           p = new Hypedown_parser();
           ref = GUY.str.walk_lines(probe);
           // H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
@@ -92,7 +93,7 @@
             p.send(line);
           }
           result = p.run();
-          result_rpr = ((function() {
+          result_txt = ((function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
@@ -104,8 +105,8 @@
             return results;
           })()).join('');
           // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, result); // unless result_rpr is matcher
-          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, (function() {
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_txt)} (${rpr(matcher)})`, result);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_txt)} (${rpr(matcher)})`, (function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
@@ -116,7 +117,7 @@
             }
             return results;
           })());
-          return resolve(result_rpr);
+          return resolve(result_txt);
         });
       });
     }
@@ -175,12 +176,12 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @parse_codespans_and_single_star
-      return test(this.parse_md_stars_markup);
+      return test(this.parse_codespans_and_single_star);
     })();
   }
 
-  // test @parse_headings
+  // test @parse_md_stars_markup
+// test @parse_headings
 
 }).call(this);
 
