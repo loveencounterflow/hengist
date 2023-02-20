@@ -70,9 +70,9 @@
     // [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
     // [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
     // [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
-    // [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
-    probes_and_matchers = [['*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null]];
+    probes_and_matchers = [['foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null]];
 //.........................................................................................................
+// [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
 // [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -176,12 +176,12 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this.parse_codespans_and_single_star);
+      // test @parse_codespans_and_single_star
+      return test(this.parse_md_stars_markup);
     })();
   }
 
-  // test @parse_md_stars_markup
-// test @parse_headings
+  // test @parse_headings
 
 }).call(this);
 

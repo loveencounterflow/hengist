@@ -1319,10 +1319,8 @@
       p = new Pipeline();
       p.push(function(d, send) {
         var e, ref, results;
-        if (d.tid !== 'p') {
-          return send(d);
-        }
-        ref = lexer.walk(d.value);
+        validate.text(d);
+        ref = lexer.walk(d);
         results = [];
         for (e of ref) {
           results.push(send(e));
@@ -1343,10 +1341,7 @@
           lexer = new_toy_md_lexer('md');
           p = new_parser(lexer);
           //.....................................................................................................
-          p.send(H2.new_token('^æ19^', {
-            x1: 0,
-            x2: probe.length
-          }, 'plain', 'p', null, probe));
+          p.send(probe);
           result = [];
           ref = p.walk();
           for (token of ref) {
@@ -1379,11 +1374,11 @@
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
       // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
       // test @use_linewise_with_single_text
-      return test(this.parse_nested_codespan_across_lines);
+      // test @parse_nested_codespan_across_lines
+      // test @throws_error_on_linewise_with_nl_in_source
+      return test(this);
     })();
   }
-
-  // test @
 
 }).call(this);
 
