@@ -1374,11 +1374,12 @@
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
       // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
       // test @use_linewise_with_single_text
-      // test @parse_nested_codespan_across_lines
-      // test @throws_error_on_linewise_with_nl_in_source
-      return test(this);
+      return test(this.parse_nested_codespan_across_lines);
     })();
   }
+
+  // test @throws_error_on_linewise_with_nl_in_source
+// test @
 
 }).call(this);
 
