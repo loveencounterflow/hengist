@@ -198,8 +198,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
           return send d unless within_codespan
           send stamp d
           within_codespan = false
-          value         = ( e.value for e in collector ).join '\n'
-          { lnr2, x2, } = d
+          value           = ( e.value for e in collector ).join '\n'
+          { lnr2, x2, }   = d
           send { mode, tid, mk, value, lnr1, x1, lnr2, x2, }
         else
           send d
@@ -208,8 +208,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   new_parser = ( lexer ) ->
     p = new Pipeline()
     p.push ( d, send ) ->
-      return send d unless d.tid is 'p'
-      send e for e from lexer.walk d.value
+      validate.text d
+      send e for e from lexer.walk d
     p.push H2.$parse_md_star()
     p.push $parse_md_codespan()
     return p
@@ -220,7 +220,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       lexer   = new_toy_md_lexer 'md'
       p       = new_parser lexer
       #.....................................................................................................
-      p.send H2.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
+      p.send probe
       result = []
       for token from p.walk()
         result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
@@ -231,10 +231,12 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   return null
 
 
+
 ############################################################################################################
 if require.main is module then do =>
   # @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
   # test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
   # test @use_linewise_with_single_text
   test @parse_nested_codespan_across_lines
+  # test @throws_error_on_linewise_with_nl_in_source
   # test @
