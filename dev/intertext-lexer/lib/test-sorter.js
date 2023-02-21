@@ -42,7 +42,7 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
-  this.parse_md_stars_markup = async function(T, done) {
+  this.token_ordering = async function(T, done) {
     var $, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
