@@ -45,16 +45,16 @@ H                         = require './helpers'
     [ '*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null ]
     [ '*abc*\n\n*abc*', '<p><i>abc</i>\n\n<p><i>abc</i>\n', null ]
     [ '**def**', '<p><b>def</b>\n', null ]
-    [ '***def***', '<p><b><i>def</i></b>\n', null ]
     [ '**x*def*x**', '<p><b>x<i>def</i>x</b>\n', null ]
     [ '*x**def**x*', '<p><i>x<b>def</b>x</i>\n', null ]
     [ '***abc*def**', '<p><b><i>abc</i>def</b>\n', null ]
-    [ '***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null ]
     [ '*x***def**', '<p><i>x</i><b>def</b>\n', null ]
     [ '**x***def*', '<p><b>x</b><i>def</i>\n', null ]
     [ '*', '<p><i>\n', null ]
     [ '**', '<p><b>\n', null ]
     [ '***', '<p><b><i>\n', null ]
+    [ '***def***', '<p><b><i>def</i></b>\n', null ]
+    [ '***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -63,6 +63,7 @@ H                         = require './helpers'
       p.send probe
       result      = p.run()
       result_html = ( d.value for d in result when not d.$stamped ).join ''
+      # H.tabulate "#{rpr probe} -> #{rpr result_html}", result
       # H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in result when not t.$stamped )
       #.....................................................................................................
       resolve result_html
@@ -81,8 +82,8 @@ H                         = require './helpers'
     # [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
     # [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
     # [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
-    # [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
-    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
+    [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
+    # [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
     # [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     ]
   #.........................................................................................................
@@ -144,7 +145,7 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @parse_codespans_and_single_star
-  # test @parse_md_stars_markup
+  # test @parse_codespans_and_single_star
+  test @parse_md_stars_markup
   # test @parse_headings
 
