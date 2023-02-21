@@ -43,9 +43,9 @@
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
   this.token_ordering = async function(T, done) {
-    var $, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_lexer, probe, probes_and_matchers, transforms;
+    var $, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_lexer, probe, probes_and_matchers, sorter, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
-    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    ({Interlex, compose, sorter} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
@@ -89,27 +89,27 @@
             result.push(token);
             result_rpr.push(token.value);
           }
-          result_sorted = lexer.sorter.sort(result);
+          result_sorted = sorter.sort(result);
           if (T != null) {
             T.eq(result, result_sorted);
           }
           if (T != null) {
-            T.eq(lexer.sorter.ordering_is(result.at(0), result.at(-1)), true);
+            T.eq(sorter.ordering_is(result.at(0), result.at(-1)), true);
           }
           if (T != null) {
-            T.eq(lexer.sorter.ordering_is(result.at(-1), result.at(0)), false);
+            T.eq(sorter.ordering_is(result.at(-1), result.at(0)), false);
           }
           if (T != null) {
-            T.eq(lexer.sorter.cmp(result.at(0), result.at(-1)), -1);
+            T.eq(sorter.cmp(result.at(0), result.at(-1)), -1);
           }
           if (T != null) {
-            T.eq(lexer.sorter.cmp(result.at(-1), result.at(0)), +1);
+            T.eq(sorter.cmp(result.at(-1), result.at(0)), +1);
           }
           if (T != null) {
-            T.eq(lexer.sorter.cmp(result.at(-1), result.at(-1)), 0);
+            T.eq(sorter.cmp(result.at(-1), result.at(-1)), 0);
           }
           if (T != null) {
-            T.eq(lexer.sorter.cmp(result.at(0), result.at(0)), 0);
+            T.eq(sorter.cmp(result.at(0), result.at(0)), 0);
           }
           // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result_sorted
           // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher

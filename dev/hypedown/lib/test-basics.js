@@ -30,24 +30,13 @@
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
     ({XXX_new_token} = require('../../../apps/hypedown/lib/helpers'));
-    // [ '*abc*', '<p><i>abc</i>\n', null ]
-    // [ '*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null ]
-    // [ '*abc*\n\n*abc*', '<p><i>abc</i>\n\n<p><i>abc</i>\n', null ]
-    // [ '**def**', '<p><b>def</b>\n', null ]
-    // [ '**x*def*x**', '<p><b>x<i>def</i>x</b>\n', null ]
-    // [ '*x**def**x*', '<p><i>x<b>def</b>x</i>\n', null ]
-    // [ '***abc*def**', '<p><b><i>abc</i>def</b>\n', null ]
-    // [ '*x***def**', '<p><i>x</i><b>def</b>\n', null ]
-    // [ '**x***def*', '<p><b>x</b><i>def</i>\n', null ]
-    // [ '*', '<p><i>\n', null ]
-    // [ '**', '<p><b>\n', null ]
-    probes_and_matchers = [['***', '<p><b><i>\n', null], ['***def***', '<p><b><i>def</i></b>\n', null], ['***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null]];
+    probes_and_matchers = [['*abc*', '<p><i>abc</i>\n', null], ['*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null], ['*abc*\n\n*abc*', '<p><i>abc</i>\n\n<p><i>abc</i>\n', null], ['**def**', '<p><b>def</b>\n', null], ['**x*def*x**', '<p><b>x<i>def</i>x</b>\n', null], ['*x**def**x*', '<p><i>x<b>def</b>x</i>\n', null], ['***abc*def**', '<p><b><i>abc</i>def</b>\n', null], ['*x***def**', '<p><i>x</i><b>def</b>\n', null], ['**x***def*', '<p><b>x</b><i>def</i>\n', null], ['*', '<p><i>\n', null], ['**', '<p><b>\n', null], ['***', '<p><b><i>\n', null], ['***def***', '<p><b><i>def</i></b>\n', null], ['***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, p, result, result_html, t;
+          var d, p, result, result_html;
           p = new Hypedown_parser();
           p.send(probe);
           result = p.run();
@@ -62,18 +51,8 @@
             }
             return results;
           })()).join('');
-          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, result);
-          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, (function() {
-            var j, len1, results;
-            results = [];
-            for (j = 0, len1 = result.length; j < len1; j++) {
-              t = result[j];
-              if (!t.$stamped) {
-                results.push(t);
-              }
-            }
-            return results;
-          })());
+          // H.tabulate "#{rpr probe} -> #{rpr result_html}", result
+          // H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in result when not t.$stamped )
           //.....................................................................................................
           return resolve(result_html);
         });
