@@ -1022,7 +1022,7 @@
     new_lexer = function() {
       var lexer, mode;
       lexer = new Interlex({
-        linewise: true
+        split: 'lines'
       });
       // T?.eq lexer.cfg.linewise, true
       // T?.eq lexer.state.lnr1, 0
@@ -1148,7 +1148,7 @@
     new_lexer = function(cfg) {
       var lexer, mode;
       lexer = new Interlex({
-        linewise: true,
+        split: 'lines',
         ...cfg
       });
       // T?.eq lexer.cfg.linewise, true
@@ -1214,7 +1214,7 @@
     new_toy_md_lexer = function(mode = 'plain') {
       var lexer;
       lexer = new Interlex({
-        linewise: true
+        split: 'lines'
       });
       //.........................................................................................................
       lexer.add_lexeme({

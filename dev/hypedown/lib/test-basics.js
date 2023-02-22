@@ -65,16 +65,8 @@
   this.parse_codespans_and_single_star = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    // [ "`abc`", "<p><code>abc</code>\n", ]
-    // [ "*abc*", "<p><i>abc</i>\n", ]
-    // [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    // [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    // [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    // [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
-    probes_and_matchers = [['foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null]];
+    probes_and_matchers = [["`abc`", "<p><code>abc</code>\n"], ["*abc*", "<p><i>abc</i>\n"], ['*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null], ['*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null], ['*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null], ['helo `world`!', '<p>helo <code>world</code>!\n', null], ['foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null], ['*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null], ['*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null]];
 //.........................................................................................................
-// [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
-// [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -129,14 +121,14 @@
   this.parse_headings = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
     ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    // [ "# H1", "<h1>H1\n", ]
-    // [ "\n# H1", "\n<h1>H1\n", ]
-    // [ "## Section", "<h2>Section\n", ]
-    // [ "not a\n# heading", 'not a\n# heading\n', ]
-    // [ 'x', 'x\n', null ]
-    // [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
-    probes_and_matchers = [["paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n']];
+    probes_and_matchers = [["# H1", "<h1>H1\n"]];
 //.........................................................................................................
+// [ "\n# H1", "\n<h1>H1\n", ]
+// [ "## Section", "<h2>Section\n", ]
+// [ "not a\n# heading", 'not a\n# heading\n', ]
+// [ 'x', 'x\n', null ]
+// [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
+// [ "paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n', ]
 // [ '', '', ]
 // [ "\n", 'not a\nheading\n', ]
 // [ "\n\nnot a\nheading", 'not a\nheading\n', ]

@@ -252,6 +252,7 @@
     new_lexer = function() {
       var lexer;
       lexer = new Interlex({
+        split: false,
         end_token: true
       });
       (() => {
@@ -1541,6 +1542,7 @@
     new_lexer = function() {
       var lexer;
       lexer = new Interlex({
+        split: false,
         end_token: true
       });
       (() => {        //.........................................................................................................
@@ -1738,7 +1740,7 @@
     new_lexer = function() {
       var lexer;
       lexer = new Interlex({
-        linewise: true
+        split: 'lines'
       });
       (() => {        //.........................................................................................................
         var mode;
@@ -2305,6 +2307,7 @@ the
       compose: c
     } = require('../../../apps/intertext-lexer'));
     lexer = new Interlex({
+      split: false,
       dotall: true
     });
     (() => {      //.........................................................................................................
@@ -2361,6 +2364,7 @@ the
       compose: c
     } = require('../../../apps/intertext-lexer'));
     lexer = new Interlex({
+      split: false,
       dotall: true,
       end_token: true
     });
@@ -2420,7 +2424,9 @@ the
       Interlex,
       compose: c
     } = require('../../../apps/intertext-lexer'));
-    lexer = new Interlex();
+    lexer = new Interlex({
+      split: false
+    });
     (() => {      //.........................................................................................................
       var mode;
       mode = 'plain';
@@ -2757,7 +2763,7 @@ probe\x20\x20\x20`;
     new_lexer = function() {
       var lexer, new_escchr_descriptor;
       lexer = new Interlex({
-        linewise: true,
+        split: 'lines',
         catchall_concat: true,
         reserved_concat: true
       });

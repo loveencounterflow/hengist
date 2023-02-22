@@ -52,7 +52,7 @@
     new_lexer = function(mode = 'plain') {
       var lexer;
       lexer = new Interlex({
-        linewise: true
+        split: 'lines'
       });
       //.......................................................................................................
       lexer.add_lexeme({

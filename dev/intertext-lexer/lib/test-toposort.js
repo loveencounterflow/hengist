@@ -83,6 +83,7 @@
     new_toy_md_lexer = function(mode = 'plain') {
       var lexer;
       lexer = new Interlex({
+        split: false,
         dotall: false,
         end_token: true
       });
