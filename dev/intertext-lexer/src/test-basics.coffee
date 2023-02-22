@@ -155,7 +155,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
   new_lexer = ->
-    lexer = new Interlex { end_token: true, }
+    lexer = new Interlex { split: false, end_token: true, }
     do =>
       ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
       mode    = 'plain'
@@ -205,7 +205,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
   new_lexer = ->
-    lexer = new Interlex { end_token: true, }
+    lexer = new Interlex { split: false, end_token: true, }
     #.........................................................................................................
     do =>
       ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
@@ -315,7 +315,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     compose  }        = require '../../../apps/intertext-lexer'
   #.........................................................................................................
   new_lexer = ->
-    lexer   = new Interlex { linewise: true, }
+    lexer   = new Interlex { split: 'lines', }
     #.........................................................................................................
     do =>
       mode = 'plain'
@@ -562,7 +562,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 @match_with_lookbehind = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { dotall: true, }
+  lexer = new Interlex { split: false, dotall: true, }
   #.........................................................................................................
   do =>
     mode    = 'plain'
@@ -589,7 +589,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 @match_start_of_line = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { dotall: true, end_token: true, }
+  lexer = new Interlex { split: false, dotall: true, end_token: true, }
   #.........................................................................................................
   do =>
     mode    = 'plain'
@@ -617,7 +617,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 @match_end_of_line = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex()
+  lexer = new Interlex { split: false, }
   #.........................................................................................................
   do =>
     mode    = 'plain'
@@ -716,7 +716,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   create_call_count = 0
   #.........................................................................................................
   new_lexer = ->
-    lexer = new Interlex { linewise: true, catchall_concat: true, reserved_concat: true, }
+    lexer = new Interlex { split: 'lines', catchall_concat: true, reserved_concat: true, }
     #.......................................................................................................
     new_escchr_descriptor = ( mode ) ->
       create = ( token ) ->

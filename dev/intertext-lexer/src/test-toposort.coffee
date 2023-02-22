@@ -68,7 +68,7 @@ show = ( topograph ) ->
   last                = Symbol 'last'
   #.........................................................................................................
   new_toy_md_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { dotall: false, end_token: true, }
+    lexer   = new Interlex { split: false, dotall: false, end_token: true, }
     #.........................................................................................................
     lexer.add_lexeme { mode, tid: 'star1',  pattern: /\*{1}/u, needs: 'star2', }
     lexer.add_lexeme { mode, tid: 'star2',  pattern: /\*{2}/u, precedes: 'star1', needs: 'star3', }

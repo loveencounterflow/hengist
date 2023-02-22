@@ -54,7 +54,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   last                = Symbol 'last'
   #.........................................................................................................
   new_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { linewise: true, }
+    lexer   = new Interlex { split: 'lines', }
     #.......................................................................................................
     lexer.add_lexeme { mode, tid: 'star',   pattern: /[*]/u, }
     lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, }

@@ -60,7 +60,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     ]
   #.........................................................................................................
   new_lexer = ->
-    lexer   = new Interlex { linewise: true, }
+    lexer   = new Interlex { split: 'lines', }
     # T?.eq lexer.cfg.linewise, true
     # T?.eq lexer.state.lnr1, 0
     mode    = 'plain'
@@ -116,7 +116,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     ]
   #.........................................................................................................
   new_lexer = ( cfg ) ->
-    lexer   = new Interlex { linewise: true, cfg..., }
+    lexer   = new Interlex { split: 'lines', cfg..., }
     # T?.eq lexer.cfg.linewise, true
     # T?.eq lexer.state.lnr1, 0
     mode    = 'plain'
@@ -160,7 +160,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   last                = Symbol 'last'
   #.........................................................................................................
   new_toy_md_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { linewise: true, }
+    lexer   = new Interlex { split: 'lines', }
     #.........................................................................................................
     lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
     lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
