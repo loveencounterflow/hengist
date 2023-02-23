@@ -76,15 +76,15 @@ H                         = require './helpers'
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
-    # [ "`abc`", "<p><code>abc</code>\n", ]
-    # [ "*abc*", "<p><i>abc</i>\n", ]
-    # [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    # [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    # [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    # [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
+    [ "`abc`", "<p><code>abc</code>\n", ]
+    [ "*abc*", "<p><i>abc</i>\n", ]
+    [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
+    [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
     [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
-    # [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
-    # [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
+    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
+    [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -115,13 +115,13 @@ H                         = require './helpers'
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
-    # [ "# H1", "<h1>H1\n", ]
+    [ "# H1", "<h1>H1\n", ]
     # [ "\n# H1", "\n<h1>H1\n", ]
     # [ "## Section", "<h2>Section\n", ]
     # [ "not a\n# heading", 'not a\n# heading\n', ]
     # [ 'x', 'x\n', null ]
     # [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
-    [ "paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n', ]
+    # [ "paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n', ]
     # [ '', '', ]
     # [ "\n", 'not a\nheading\n', ]
     # [ "\n\nnot a\nheading", 'not a\nheading\n', ]
