@@ -45,7 +45,7 @@
     // T?.halt_on_error()
     ({Interlex} = require('../../../apps/intertext-lexer'));
     //.........................................................................................................
-    add_lexemes = function(lexer) {
+    add_lexemes = function(lexer, concat) {
       var mode;
       mode = 'plain';
       lexer.add_lexeme({
@@ -86,8 +86,8 @@
         tid: 'ws',
         pattern: /\s+/u
       });
-      lexer.add_catchall_lexeme({mode});
-      lexer.add_reserved_lexeme({mode});
+      lexer.add_catchall_lexeme({mode, concat});
+      lexer.add_reserved_lexeme({mode, concat});
       return null;
     };
     await (async() => {      //.........................................................................................................
@@ -99,11 +99,8 @@
         results.push((await T.perform(probe, matcher, error, function() {
           return new Promise(function(resolve, reject) {
             var lexer, result, result_rpr, t;
-            lexer = new Interlex({
-              catchall_concat: false,
-              reserved_concat: false
-            });
-            add_lexemes(lexer);
+            lexer = new Interlex();
+            add_lexemes(lexer, false);
             // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
             result = lexer.run(probe);
             // H.tabulate ( rpr probe ), result
@@ -131,11 +128,8 @@
         results.push((await T.perform(probe, matcher, error, function() {
           return new Promise(function(resolve, reject) {
             var lexer, result, result_rpr, t;
-            lexer = new Interlex({
-              catchall_concat: true,
-              reserved_concat: true
-            });
-            add_lexemes(lexer);
+            lexer = new Interlex();
+            add_lexemes(lexer, true);
             // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
             result = lexer.run(probe);
             // H.tabulate ( rpr probe ), result
@@ -166,7 +160,7 @@
     // T?.halt_on_error()
     ({Interlex} = require('../../../apps/intertext-lexer'));
     //.........................................................................................................
-    add_lexemes = function(lexer) {
+    add_lexemes = function(lexer, concat) {
       var mode;
       mode = 'plain';
       lexer.add_lexeme({
@@ -209,11 +203,13 @@
       });
       lexer.add_catchall_lexeme({
         mode,
-        tid: 'other'
+        tid: 'other',
+        concat
       });
       lexer.add_reserved_lexeme({
         mode,
-        tid: 'forbidden'
+        tid: 'forbidden',
+        concat
       });
       return null;
     };
@@ -226,11 +222,8 @@
         results.push((await T.perform(probe, matcher, error, function() {
           return new Promise(function(resolve, reject) {
             var lexer, result, result_rpr, t;
-            lexer = new Interlex({
-              catchall_concat: true,
-              reserved_concat: true
-            });
-            add_lexemes(lexer);
+            lexer = new Interlex();
+            add_lexemes(lexer, true);
             // H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
             result = lexer.run(probe);
             H.tabulate(rpr(probe), result);
@@ -260,11 +253,10 @@
     (() => {
       // @add_reserved_chrs()
       // test @add_reserved_chrs
-      return test(this.catchall_and_reserved_with_custom_names);
+      // test @catchall_and_reserved_with_custom_names
+      return test(this);
     })();
   }
-
-  // test @
 
 }).call(this);
 

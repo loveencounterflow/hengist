@@ -71,6 +71,52 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
+          var d, line, p, ref, result, result_txt;
+          p = new Hypedown_parser();
+          ref = GUY.str.walk_lines(probe);
+          // H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
+          // H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
+          // H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
+          // for mode, entry of p.lexer.registry
+          //   # debug '^2325687^', entry
+          //   for tid, lexeme of entry.lexemes
+          //     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
+          // process.exit 111
+          for (line of ref) {
+            p.send(line);
+          }
+          result = p.run();
+          result_txt = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          // H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+          // H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+          return resolve(result_txt);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_codespans_with_whitespace = async function(T, done) {
+    var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
+    ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
+    probes_and_matchers = [["`` `abc` ``", "<p><code>`abc`</code>\n"], ["`` `abc\\` ``", "<p><code>`abc`</code>\n"]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
           var d, line, p, ref, result, result_txt, t;
           p = new Hypedown_parser();
           ref = GUY.str.walk_lines(probe);
@@ -170,11 +216,12 @@
     (() => {
       // test @
       // test @parse_codespans_and_single_star
-      return test(this.parse_md_stars_markup);
+      return test(this.parse_codespans_with_whitespace);
     })();
   }
 
-  // test @parse_headings
+  // test @parse_md_stars_markup
+// test @parse_headings
 
 }).call(this);
 

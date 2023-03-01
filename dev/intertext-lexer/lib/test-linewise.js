@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, H2, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, H2, PATH, SQL, after, alert, debug, echo, equals, guy, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, tabulate_lexer, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -38,6 +38,23 @@
   ({DATOM} = require('../../../apps/datom'));
 
   ({new_datom, lets, stamp} = DATOM);
+
+  //-----------------------------------------------------------------------------------------------------------
+  tabulate_lexer = function(lexer) {
+    var _, entry, lexeme, lexemes, mode, ref, ref1;
+    lexemes = [];
+    ref = lexer.registry;
+    for (mode in ref) {
+      entry = ref[mode];
+      ref1 = entry.lexemes;
+      for (_ in ref1) {
+        lexeme = ref1[_];
+        lexemes.push(lexeme);
+      }
+    }
+    H.tabulate("lexer", lexemes);
+    return null;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_linewise_lexing_with_external_iterator_no_linewise_cfg = function(T, done) {
@@ -1205,65 +1222,115 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_nested_codespan_across_lines = async function(T, done) {
-    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_parser, new_toy_md_lexer, probe, probes_and_matchers, transforms;
+    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_lexer, new_parser, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
-    new_toy_md_lexer = function(mode = 'plain') {
+    new_lexer = function(cfg) {
       var lexer;
-      lexer = new Interlex({
-        split: 'lines'
-      });
-      //.........................................................................................................
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'escchr',
-        jump: null,
-        pattern: /\\(?<chr>.)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'star1',
-        jump: null,
-        pattern: /(?<!\*)\*(?!\*)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'backtick',
-        jump: 'literal',
-        pattern: /(?<!`)`(?!`)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'nl',
-        jump: null,
-        pattern: /$/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'other',
-        jump: null,
-        pattern: /[^*`\\]+/u
-      });
-      lexer.add_lexeme({
-        mode: 'literal',
-        tid: 'backtick',
-        jump: '^',
-        pattern: /(?<!`)`(?!`)/u
-      });
-      lexer.add_lexeme({
-        mode: 'literal',
-        tid: 'text',
-        jump: null,
-        pattern: /(?:\\`|[^`])+/u
-      });
+      lexer = new Interlex(cfg);
+      (function() {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'star1',
+          jump: null,
+          pattern: /(?<!\*)\*(?!\*)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'backtick',
+          jump: 'literal',
+          pattern: /(?<!`)`(?!`)/u
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /\n|$/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'other',
+          jump: null,
+          pattern: /[^*`\\]+/u
+        });
+      })();
+      (function() {
+        var mode;
+        mode = 'literal';
+        lexer.add_lexeme({
+          mode,
+          tid: 'backtick',
+          jump: '^',
+          pattern: /(?<!`)`(?!`)/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'text',
+          jump: null,
+          pattern: /(?:\\`|[^`])+/u
+        });
+      })();
       //.........................................................................................................
       return lexer;
     };
     //.........................................................................................................
-    probes_and_matchers = [['abc `print "helo\nworld";` xyz', `[plain:other,(1:0)(1:4),='abc '][plain:codespan,(1:4)(2:8),='print "helo\\nworld";'][plain:other,(2:8)(2:12),=' xyz'][plain:nl,(2:12)(2:12),='']`, null]];
+    probes_and_matchers = [
+      [
+        [
+          'abc `print "helo\nworld";` xyz',
+          {
+            split: 'lines',
+            state: 'keep'
+          }
+        ],
+        `[plain:other,(1:0)(1:4),='abc '][plain:codespan,(1:4)(2:8),='print "helo\\nworld";'][plain:other,(2:8)(2:12),=' xyz'][plain:nl,(2:12)(2:12),='']`,
+        null
+      ],
+      [
+        [
+          'abc `print "helo\nworld";` xyz',
+          {
+            split: 'lines',
+            state: 'reset'
+          }
+        ],
+        `[plain:other,(1:0)(1:4),='abc '][plain:other,(2:0)(2:7),='world";']`,
+        null
+      ],
+      [
+        [
+          'abc `print "helo\nworld";` xyz',
+          {
+            split: false,
+            state: 'keep'
+          }
+        ],
+        `[plain:other,(0:0)(0:4),='abc '][plain:codespan,(0:4)(0:25),='print "helo\\nworld";'][plain:other,(0:25)(0:29),=' xyz'][plain:nl,(0:29)(0:29),='']`,
+        null
+      ],
+      [
+        [
+          'abc `print "helo\nworld";` xyz',
+          {
+            split: false,
+            state: 'reset'
+          }
+        ],
+        `[plain:other,(0:0)(0:4),='abc '][plain:codespan,(0:4)(0:25),='print "helo\\nworld";'][plain:other,(0:25)(0:29),=' xyz'][plain:nl,(0:29)(0:29),='']`,
+        null
+      ]
+    ];
     //.........................................................................................................
     $parse_md_codespan = function() {
       var collector, lnr1, mk, mode, tid, within_codespan, x1;
@@ -1336,12 +1403,13 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var lexer, p, ref, result, token;
+          var cfg, lexer, p, ref, result, source, token;
           //.....................................................................................................
-          lexer = new_toy_md_lexer('md');
+          [source, cfg] = probe;
+          lexer = new_lexer(cfg);
           p = new_parser(lexer);
           //.....................................................................................................
-          p.send(probe);
+          p.send(source);
           result = [];
           ref = p.walk();
           for (token of ref) {
@@ -1368,13 +1436,177 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.read_csv = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(cfg) {
+      var lexer;
+      lexer = new Interlex(cfg);
+      (function() {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /\n|$/u,
+          reserved: '\n'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'sep',
+          jump: null,
+          pattern: /,/u,
+          reserved: ','
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq',
+          jump: 'dq',
+          pattern: /"/u,
+          reserved: '"'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'value',
+          concat: true
+        });
+      })();
+      (function() {
+        var mode;
+        mode = 'dq';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /\n|$/u,
+          reserved: '\n'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq',
+          jump: '^',
+          pattern: /"/u,
+          reserved: '"'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'string',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          '42,"helo"\n43,world',
+          {
+            split: 'lines',
+            state: 'keep'
+          }
+        ],
+        `plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:dq:'"',plain:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''`,
+        null
+      ],
+      [
+        [
+          '42,"helo\n43,world',
+          {
+            split: 'lines',
+            state: 'keep'
+          }
+        ],
+        `plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:nl:'',dq:string:'43,world',dq:nl:''`,
+        null
+      ],
+      [
+        [
+          '42,"helo"\n43,world',
+          {
+            split: 'lines',
+            state: 'reset'
+          }
+        ],
+        `plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:dq:'"',plain:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''`,
+        null
+      ],
+      [
+        [
+          '42,"helo\n43,world',
+          {
+            split: 'lines',
+            state: 'reset'
+          }
+        ],
+        `plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''`,
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var cfg, lexer, ref, result, source, t, token;
+          //.....................................................................................................
+          [source, cfg] = probe;
+          lexer = new_lexer(cfg);
+          //.....................................................................................................
+          result = [];
+          ref = lexer.walk(source);
+          for (token of ref) {
+            result.push(token); // GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
+          }
+          // H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
+          result = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              if (!token.$stamped) {
+                results.push(`${t.mk}:${rpr(t.value)}`);
+              }
+            }
+            return results;
+          })()).join(',');
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
       // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
       // test @use_linewise_with_single_text
-      return test(this.parse_nested_codespan_across_lines);
+      // test @parse_nested_codespan_across_lines
+      // @read_csv()
+      return test(this.read_csv);
     })();
   }
 

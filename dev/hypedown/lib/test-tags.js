@@ -1074,7 +1074,7 @@
             }
             return results;
           })();
-          // H.tabulate ( rpr probe ), result
+          H.tabulate(rpr(probe), result);
           return resolve(result_rpr);
         });
       });
@@ -1122,13 +1122,13 @@
     (() => {
       // test @
       // test @tags_1
-      return test(this.tags_2);
+      // test @tags_2
+      // @_tags_2_for_profiling()
+      return test(this.htmlish_tag_types);
     })();
   }
 
-  // @_tags_2_for_profiling()
-// test @htmlish_tag_types
-// test @xncrs
+  // test @xncrs
 // test @parse_codespans_and_single_star
 // test @parse_md_stars_markup
 

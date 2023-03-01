@@ -2755,6 +2755,196 @@ probe\x20\x20\x20`;
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.value_2 = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines'
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: 'dq1',
+          pattern: /(?<!")"(?!")/u,
+          reserved: '"'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u,
+          value: '\n'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'dq1';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: '^',
+          pattern: /"/u,
+          reserved: '"'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u,
+          value: '\n'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'helo',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        'helo "world"',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo '
+          },
+          {
+            mk: 'plain:dq1',
+            value: '"'
+          },
+          {
+            mk: 'dq1:text',
+            value: 'world'
+          },
+          {
+            mk: 'dq1:dq1',
+            value: '"'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ],
+      [
+        'helo "everyone\nout there"!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo '
+          },
+          {
+            mk: 'plain:dq1',
+            value: '"'
+          },
+          {
+            mk: 'dq1:text',
+            value: 'everyone'
+          },
+          {
+            mk: 'dq1:nl',
+            value: '\n'
+          },
+          {
+            mk: 'dq1:text',
+            value: 'out there'
+          },
+          {
+            mk: 'dq1:dq1',
+            value: '"'
+          },
+          {
+            mk: 'plain:text',
+            value: '!'
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n'
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, ref, result, result_rpr, token;
+          lexer = new_lexer();
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          result = [];
+          ref = lexer.walk(probe);
+          for (token of ref) {
+            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+          }
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
+          //.....................................................................................................
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.use_create_for_custom_behavior = async function(T, done) {
     var Interlex, create_call_count, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
     ({Interlex} = require('../../../apps/intertext-lexer'));
@@ -2763,9 +2953,7 @@ probe\x20\x20\x20`;
     new_lexer = function() {
       var lexer, new_escchr_descriptor;
       lexer = new Interlex({
-        split: 'lines',
-        catchall_concat: true,
-        reserved_concat: true
+        split: 'lines'
       });
       //.......................................................................................................
       new_escchr_descriptor = function(mode) {
@@ -2812,11 +3000,13 @@ probe\x20\x20\x20`;
         });
         lexer.add_catchall_lexeme({
           mode,
-          tid: 'other'
+          tid: 'other',
+          concat: true
         });
         return lexer.add_reserved_lexeme({
           mode,
-          tid: 'forbidden'
+          tid: 'forbidden',
+          concat: true
         });
       })();
       return lexer;
@@ -3024,29 +3214,11 @@ probe\x20\x20\x20`;
       // test @parse_string_literals
       // test @use_create_for_custom_behavior
       // test @cannot_redeclare_lexeme
-      // test @allow_value_and_empty_value
-      // @using_strings_for_patterns()
-      // test @using_strings_for_patterns
-      // @cannot_return_from_initial_mode()
-      // test @cannot_return_from_initial_mode
-      // test @using_lexer_without_lexemes
-      // test @lex_tags
-      // test @lex_tags_with_rpr
-      // @parse_line_by_line()
-      // test @parse_line_by_line
-      // @match_end_of_line()
-      // test @match_end_of_line
-      // test @parse_line_by_line
-      // @parse_md_stars_markup()
-      // test @parse_md_stars_markup
-      // test @parse_nested_codespan
-      // @markup_with_variable_length()
-      // test @markup_with_variable_length
-      // @_demo_markup_with_variable_length()
-      // test @match_start_of_line
-      return test(this.match_with_lookbehind);
+      return test(this.allow_value_and_empty_value);
     })();
   }
+
+  // test @value_2
 
 }).call(this);
 
