@@ -1249,7 +1249,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'backtick',
-          jump: 'literal',
+          jump: 'literal[',
           pattern: /(?<!`)`(?!`)/u
         });
         lexer.add_lexeme({
@@ -1271,7 +1271,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'backtick',
-          jump: '^',
+          jump: '.]',
           pattern: /(?<!`)`(?!`)/u
         });
         return lexer.add_lexeme({
@@ -1471,7 +1471,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'dq',
-          jump: 'dq',
+          jump: 'dq[',
           pattern: /"/u,
           reserved: '"'
         });
@@ -1501,7 +1501,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'dq',
-          jump: '^',
+          jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });

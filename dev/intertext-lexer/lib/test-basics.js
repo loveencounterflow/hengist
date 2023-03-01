@@ -186,7 +186,7 @@
       lexer.add_lexeme({
         mode: 'base',
         tid: 'b',
-        jump: 'up',
+        jump: 'up[',
         pattern: 'b'
       });
       lexer.add_lexeme({
@@ -197,13 +197,13 @@
       lexer.add_lexeme({
         mode: 'up',
         tid: 'd',
-        jump: '^',
+        jump: '.]',
         pattern: 'd'
       });
       lexer.add_lexeme({
         mode: 'base',
         tid: 'e',
-        jump: '^',
+        jump: '.]',
         pattern: 'e'
       });
       return lexer;
@@ -272,7 +272,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'tag',
-          jump: 'tag',
+          jump: 'tag[',
           pattern: /<(?<lslash>\/?)/u
         });
         return lexer.add_lexeme({
@@ -293,7 +293,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'end',
-          jump: '^',
+          jump: '.]',
           pattern: />/u
         });
         lexer.add_lexeme({
@@ -1562,7 +1562,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'tag',
-          jump: 'tag',
+          jump: 'tag[',
           pattern: /<(?<lslash>\/?)/u
         });
         return lexer.add_lexeme({
@@ -1583,7 +1583,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'end',
-          jump: '^',
+          jump: '.]',
           pattern: />/u
         });
         lexer.add_lexeme({
@@ -1600,7 +1600,7 @@
       return lexer;
     };
     //.........................................................................................................
-    probes_and_matchers = [['helo <bold>`world`</bold>', "[plain:text,(0:0)(0:5),='helo '][plain:tag>tag,(0:5)(0:6),='<',lslash:null][tag:text,(0:6)(0:10),='bold'][tag:end>plain,(0:10)(0:11),='>'][plain:E_backticks,(0:11)(0:12),='`'][plain:text,(0:12)(0:17),='world'][plain:E_backticks,(0:17)(0:18),='`'][plain:tag>tag,(0:18)(0:20),='</',lslash:'/'][tag:text,(0:20)(0:24),='bold'][tag:end>plain,(0:24)(0:25),='>'][plain:$eof,(0:25)(0:25),='']", null], ['<x v=\\> z=42>', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:5),='x v='][tag:escchr,(0:5)(0:7),='\\\\>',chr:'>'][tag:text,(0:7)(0:12),=' z=42'][tag:end>plain,(0:12)(0:13),='>'][plain:$eof,(0:13)(0:13),='']", null], ['<x v=\\> z=42\\>', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:5),='x v='][tag:escchr,(0:5)(0:7),='\\\\>',chr:'>'][tag:text,(0:7)(0:12),=' z=42'][tag:escchr,(0:12)(0:14),='\\\\>',chr:'>'][tag:$eof,(0:14)(0:14),='']", null], ['a <b', "[plain:text,(0:0)(0:2),='a '][plain:tag>tag,(0:2)(0:3),='<',lslash:null][tag:text,(0:3)(0:4),='b'][tag:$eof,(0:4)(0:4),='']", null], ['what? error?', "[plain:text,(0:0)(0:4),='what'][plain:$error,(0:4)(0:4),='',code:'nomatch']", null], ['d <', "[plain:text,(0:0)(0:2),='d '][plain:tag>tag,(0:2)(0:3),='<',lslash:null][tag:$eof,(0:3)(0:3),='']", null], ['<c', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='c'][tag:$eof,(0:2)(0:2),='']", null], ['<', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:$eof,(0:1)(0:1),='']", null], ['', "[plain:$eof,(0:0)(0:0),='']", null], ['helo \\<bold>`world`</bold>', "[plain:text,(0:0)(0:5),='helo '][plain:escchr,(0:5)(0:7),='\\\\<',chr:'<'][plain:text,(0:7)(0:12),='bold>'][plain:E_backticks,(0:12)(0:13),='`'][plain:text,(0:13)(0:18),='world'][plain:E_backticks,(0:18)(0:19),='`'][plain:tag>tag,(0:19)(0:21),='</',lslash:'/'][tag:text,(0:21)(0:25),='bold'][tag:end>plain,(0:25)(0:26),='>'][plain:$eof,(0:26)(0:26),='']", null], ['<b>helo \\<bold>`world`</bold></b>', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='b'][tag:end>plain,(0:2)(0:3),='>'][plain:text,(0:3)(0:8),='helo '][plain:escchr,(0:8)(0:10),='\\\\<',chr:'<'][plain:text,(0:10)(0:15),='bold>'][plain:E_backticks,(0:15)(0:16),='`'][plain:text,(0:16)(0:21),='world'][plain:E_backticks,(0:21)(0:22),='`'][plain:tag>tag,(0:22)(0:24),='</',lslash:'/'][tag:text,(0:24)(0:28),='bold'][tag:end>plain,(0:28)(0:29),='>'][plain:tag>tag,(0:29)(0:31),='</',lslash:'/'][tag:text,(0:31)(0:32),='b'][tag:end>plain,(0:32)(0:33),='>'][plain:$eof,(0:33)(0:33),='']", null], ['<i><b></b></i>', "[plain:tag>tag,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='i'][tag:end>plain,(0:2)(0:3),='>'][plain:tag>tag,(0:3)(0:4),='<',lslash:null][tag:text,(0:4)(0:5),='b'][tag:end>plain,(0:5)(0:6),='>'][plain:tag>tag,(0:6)(0:8),='</',lslash:'/'][tag:text,(0:8)(0:9),='b'][tag:end>plain,(0:9)(0:10),='>'][plain:tag>tag,(0:10)(0:12),='</',lslash:'/'][tag:text,(0:12)(0:13),='i'][tag:end>plain,(0:13)(0:14),='>'][plain:$eof,(0:14)(0:14),='']", null]];
+    probes_and_matchers = [['helo <bold>`world`</bold>', "[plain:text,(0:0)(0:5),='helo '][plain:tag<tag[>,(0:5)(0:6),='<',lslash:null][tag:text,(0:6)(0:10),='bold'][tag:end<.]>,(0:10)(0:11),='>'][plain:E_backticks,(0:11)(0:12),='`'][plain:text,(0:12)(0:17),='world'][plain:E_backticks,(0:17)(0:18),='`'][plain:tag<tag[>,(0:18)(0:20),='</',lslash:'/'][tag:text,(0:20)(0:24),='bold'][tag:end<.]>,(0:24)(0:25),='>'][plain:$eof,(0:25)(0:25),='']", null], ['<x v=\\> z=42>', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:5),='x v='][tag:escchr,(0:5)(0:7),='\\\\>',chr:'>'][tag:text,(0:7)(0:12),=' z=42'][tag:end<.]>,(0:12)(0:13),='>'][plain:$eof,(0:13)(0:13),='']", null], ['<x v=\\> z=42\\>', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:5),='x v='][tag:escchr,(0:5)(0:7),='\\\\>',chr:'>'][tag:text,(0:7)(0:12),=' z=42'][tag:escchr,(0:12)(0:14),='\\\\>',chr:'>'][tag:$eof,(0:14)(0:14),='']", null], ['a <b', "[plain:text,(0:0)(0:2),='a '][plain:tag<tag[>,(0:2)(0:3),='<',lslash:null][tag:text,(0:3)(0:4),='b'][tag:$eof,(0:4)(0:4),='']", null], ['what? error?', "[plain:text,(0:0)(0:4),='what'][plain:$error,(0:4)(0:4),='',code:'nomatch']", null], ['d <', "[plain:text,(0:0)(0:2),='d '][plain:tag<tag[>,(0:2)(0:3),='<',lslash:null][tag:$eof,(0:3)(0:3),='']", null], ['<c', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='c'][tag:$eof,(0:2)(0:2),='']", null], ['<', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:$eof,(0:1)(0:1),='']", null], ['', "[plain:$eof,(0:0)(0:0),='']", null], ['helo \\<bold>`world`</bold>', "[plain:text,(0:0)(0:5),='helo '][plain:escchr,(0:5)(0:7),='\\\\<',chr:'<'][plain:text,(0:7)(0:12),='bold>'][plain:E_backticks,(0:12)(0:13),='`'][plain:text,(0:13)(0:18),='world'][plain:E_backticks,(0:18)(0:19),='`'][plain:tag<tag[>,(0:19)(0:21),='</',lslash:'/'][tag:text,(0:21)(0:25),='bold'][tag:end<.]>,(0:25)(0:26),='>'][plain:$eof,(0:26)(0:26),='']", null], ['<b>helo \\<bold>`world`</bold></b>', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='b'][tag:end<.]>,(0:2)(0:3),='>'][plain:text,(0:3)(0:8),='helo '][plain:escchr,(0:8)(0:10),='\\\\<',chr:'<'][plain:text,(0:10)(0:15),='bold>'][plain:E_backticks,(0:15)(0:16),='`'][plain:text,(0:16)(0:21),='world'][plain:E_backticks,(0:21)(0:22),='`'][plain:tag<tag[>,(0:22)(0:24),='</',lslash:'/'][tag:text,(0:24)(0:28),='bold'][tag:end<.]>,(0:28)(0:29),='>'][plain:tag<tag[>,(0:29)(0:31),='</',lslash:'/'][tag:text,(0:31)(0:32),='b'][tag:end<.]>,(0:32)(0:33),='>'][plain:$eof,(0:33)(0:33),='']", null], ['<i><b></b></i>', "[plain:tag<tag[>,(0:0)(0:1),='<',lslash:null][tag:text,(0:1)(0:2),='i'][tag:end<.]>,(0:2)(0:3),='>'][plain:tag<tag[>,(0:3)(0:4),='<',lslash:null][tag:text,(0:4)(0:5),='b'][tag:end<.]>,(0:5)(0:6),='>'][plain:tag<tag[>,(0:6)(0:8),='</',lslash:'/'][tag:text,(0:8)(0:9),='b'][tag:end<.]>,(0:9)(0:10),='>'][plain:tag<tag[>,(0:10)(0:12),='</',lslash:'/'][tag:text,(0:12)(0:13),='i'][tag:end<.]>,(0:13)(0:14),='>'][plain:$eof,(0:14)(0:14),='']", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -1754,7 +1754,7 @@
         lexer.add_lexeme({
           mode,
           tid: 'dq1',
-          jump: 'dq1',
+          jump: 'dq1[',
           pattern: /(?<!")"(?!")/u
         });
         lexer.add_lexeme({
@@ -1794,7 +1794,7 @@
         return lexer.add_lexeme({
           mode,
           tid: 'dq1',
-          jump: '^',
+          jump: '.]',
           pattern: /"/u
         });
       })();
@@ -2055,7 +2055,7 @@ the
       lexer.add_lexeme({
         mode: 'plain',
         tid: 'codespan',
-        jump: 'literal',
+        jump: 'literal[',
         pattern: /(?<!`)`(?!`)/u
       });
       lexer.add_lexeme({
@@ -2067,7 +2067,7 @@ the
       lexer.add_lexeme({
         mode: 'literal',
         tid: 'codespan',
-        jump: '^',
+        jump: '.]',
         pattern: /(?<!`)`(?!`)/u
       });
       lexer.add_lexeme({
@@ -2777,7 +2777,7 @@ probe\x20\x20\x20`;
         lexer.add_lexeme({
           mode,
           tid: 'dq1',
-          jump: 'dq1',
+          jump: 'dq1[',
           pattern: /(?<!")"(?!")/u,
           reserved: '"'
         });
@@ -2807,7 +2807,7 @@ probe\x20\x20\x20`;
         lexer.add_lexeme({
           mode,
           tid: 'dq1',
-          jump: '^',
+          jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
@@ -3210,15 +3210,11 @@ probe\x20\x20\x20`;
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @parse_string_literals
-      // test @use_create_for_custom_behavior
-      // test @cannot_redeclare_lexeme
-      return test(this.allow_value_and_empty_value);
+      return test(this);
     })();
   }
 
-  // test @value_2
+  // test @lex_tags_with_rpr
 
 }).call(this);
 
