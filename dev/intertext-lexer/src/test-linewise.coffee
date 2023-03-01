@@ -173,12 +173,12 @@ tabulate_lexer = ( lexer ) ->
       mode = 'plain'
       lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
       lexer.add_lexeme { mode,  tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
-      lexer.add_lexeme { mode,  tid: 'backtick',  jump: 'literal',  pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  tid: 'backtick',  jump: 'literal[',  pattern:  /(?<!`)`(?!`)/u,    }
       lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        }
       lexer.add_lexeme { mode,  tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
     do ->
       mode = 'literal'
-      lexer.add_lexeme { mode,  tid: 'backtick',  jump: '^',        pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  tid: 'backtick',  jump: '.]',        pattern:  /(?<!`)`(?!`)/u,    }
       lexer.add_lexeme { mode,  tid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
     #.........................................................................................................
     return lexer
@@ -259,13 +259,13 @@ tabulate_lexer = ( lexer ) ->
       lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
       lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
       lexer.add_lexeme { mode,  tid: 'sep',       jump: null,       pattern:  /,/u,           reserved: ',',  }
-      lexer.add_lexeme { mode,  tid: 'dq',        jump: 'dq',       pattern:  /"/u,           reserved: '"',  }
+      lexer.add_lexeme { mode,  tid: 'dq',        jump: 'dq[',       pattern:  /"/u,           reserved: '"',  }
       lexer.add_catchall_lexeme { mode, tid: 'value', concat: true, }
     do ->
       mode = 'dq'
       lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
       lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
-      lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern:  /"/u,           reserved: '"',  }
+      lexer.add_lexeme { mode,  tid: 'dq',        jump: '.]',        pattern:  /"/u,           reserved: '"',  }
       lexer.add_catchall_lexeme { mode, tid: 'string', concat: true, }
     #.........................................................................................................
     return lexer
