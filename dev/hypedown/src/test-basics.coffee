@@ -103,6 +103,38 @@ H                         = require './helpers'
       result      = p.run()
       result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
+      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      resolve result_txt
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@parse_codespans_with_whitespace = ( T, done ) ->
+  { XXX_new_token
+    Hypedown_lexer
+    Hypedown_parser } = require '../../../apps/hypedown'
+  probes_and_matchers = [
+    [ "`` `abc` ``", "<p><code>`abc`</code>\n", ]
+    [ "`` `abc\\` ``", "<p><code>`abc`</code>\n", ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      p           = new Hypedown_parser()
+      # H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
+      # H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
+      # H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
+      # for mode, entry of p.lexer.registry
+      #   # debug '^2325687^', entry
+      #   for tid, lexeme of entry.lexemes
+      #     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
+      # process.exit 111
+      for line from GUY.str.walk_lines probe
+        p.send line
+      result      = p.run()
+      result_txt  = ( d.value for d in result when not d.$stamped ).join ''
+      # urge '^08-1^', ( Object.keys d ).sort() for d in result
       H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
       H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_txt
@@ -146,6 +178,7 @@ H                         = require './helpers'
 if require.main is module then do =>
   # test @
   # test @parse_codespans_and_single_star
-  test @parse_md_stars_markup
+  test @parse_codespans_with_whitespace
+  # test @parse_md_stars_markup
   # test @parse_headings
 

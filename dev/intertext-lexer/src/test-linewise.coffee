@@ -37,6 +37,13 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   lets
   stamp     }             = DATOM
 
+#-----------------------------------------------------------------------------------------------------------
+tabulate_lexer = ( lexer ) ->
+  lexemes = []
+  for mode, entry of lexer.registry
+    lexemes.push lexeme for _, lexeme of entry.lexemes
+  H.tabulate "lexer", lexemes
+  return null
 
 #-----------------------------------------------------------------------------------------------------------
 @use_linewise_lexing_with_external_iterator_no_linewise_cfg = ( T, done ) ->
@@ -159,21 +166,28 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   first               = Symbol 'first'
   last                = Symbol 'last'
   #.........................................................................................................
-  new_toy_md_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { split: 'lines', }
+  new_lexer = ( cfg ) ->
+    lexer   = new Interlex cfg
     #.........................................................................................................
-    lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
-    lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
-    lexer.add_lexeme { mode: 'plain',   tid: 'backtick',  jump: 'literal',  pattern:  /(?<!`)`(?!`)/u,    }
-    lexer.add_lexeme { mode: 'plain',   tid: 'nl',        jump: null,       pattern:  /$/u,        }
-    lexer.add_lexeme { mode: 'plain',   tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
-    lexer.add_lexeme { mode: 'literal', tid: 'backtick',  jump: '^',        pattern:  /(?<!`)`(?!`)/u,    }
-    lexer.add_lexeme { mode: 'literal', tid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
+    do ->
+      mode = 'plain'
+      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
+      lexer.add_lexeme { mode,  tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
+      lexer.add_lexeme { mode,  tid: 'backtick',  jump: 'literal',  pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        }
+      lexer.add_lexeme { mode,  tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
+    do ->
+      mode = 'literal'
+      lexer.add_lexeme { mode,  tid: 'backtick',  jump: '^',        pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  tid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'abc `print "helo\nworld";` xyz', """[plain:other,(1:0)(1:4),='abc '][plain:codespan,(1:4)(2:8),='print "helo\\nworld";'][plain:other,(2:8)(2:12),=' xyz'][plain:nl,(2:12)(2:12),='']""", null ]
+    [ [ 'abc `print "helo\nworld";` xyz', { split: 'lines', state: 'keep', }, ], """[plain:other,(1:0)(1:4),='abc '][plain:codespan,(1:4)(2:8),='print "helo\\nworld";'][plain:other,(2:8)(2:12),=' xyz'][plain:nl,(2:12)(2:12),='']""", null ]
+    [ [ 'abc `print "helo\nworld";` xyz', { split: 'lines', state: 'reset' } ], """[plain:other,(1:0)(1:4),='abc '][plain:other,(2:0)(2:7),='world";']""", null ]
+    [ [ 'abc `print "helo\nworld";` xyz', { split: false, state: 'keep' } ], """[plain:other,(0:0)(0:4),='abc '][plain:codespan,(0:4)(0:25),='print "helo\\nworld";'][plain:other,(0:25)(0:29),=' xyz'][plain:nl,(0:29)(0:29),='']""", null ]
+    [ [ 'abc `print "helo\nworld";` xyz', { split: false, state: 'reset' } ], """[plain:other,(0:0)(0:4),='abc '][plain:codespan,(0:4)(0:25),='print "helo\\nworld";'][plain:other,(0:25)(0:29),=' xyz'][plain:nl,(0:29)(0:29),='']""", null ]
     ]
   #.........................................................................................................
   $parse_md_codespan = ->
@@ -217,15 +231,65 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       #.....................................................................................................
-      lexer   = new_toy_md_lexer 'md'
+      [ source
+        cfg ] = probe
+      lexer   = new_lexer cfg
       p       = new_parser lexer
       #.....................................................................................................
-      p.send probe
+      p.send source
       result = []
       for token from p.walk()
         result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
       H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
       resolve ( lexer.rpr_token token for token in result when not token.$stamped ).join ''
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@read_csv = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( cfg ) ->
+    lexer   = new Interlex cfg
+    #.........................................................................................................
+    do ->
+      mode = 'plain'
+      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
+      lexer.add_lexeme { mode,  tid: 'sep',       jump: null,       pattern:  /,/u,           reserved: ',',  }
+      lexer.add_lexeme { mode,  tid: 'dq',        jump: 'dq',       pattern:  /"/u,           reserved: '"',  }
+      lexer.add_catchall_lexeme { mode, tid: 'value', concat: true, }
+    do ->
+      mode = 'dq'
+      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
+      lexer.add_lexeme { mode,  tid: 'dq',        jump: '^',        pattern:  /"/u,           reserved: '"',  }
+      lexer.add_catchall_lexeme { mode, tid: 'string', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ [ '42,"helo"\n43,world', { split: 'lines', state: 'keep' } ], """plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:dq:'"',plain:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''""", null ]
+    [ [ '42,"helo\n43,world', { split: 'lines', state: 'keep' } ], """plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:nl:'',dq:string:'43,world',dq:nl:''""", null ]
+    [ [ '42,"helo"\n43,world', { split: 'lines', state: 'reset' } ], """plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:dq:'"',plain:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''""", null ]
+    [ [ '42,"helo\n43,world', { split: 'lines', state: 'reset' } ], """plain:value:'42',plain:sep:',',plain:dq:'"',dq:string:'helo',dq:nl:'',plain:value:'43',plain:sep:',',plain:value:'world',plain:nl:''""", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      #.....................................................................................................
+      [ source
+        cfg ] = probe
+      lexer   = new_lexer cfg
+      #.....................................................................................................
+      result = []
+      for token from lexer.walk source
+        result.push token # GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
+      # H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
+      result  = ( "#{t.mk}:#{rpr t.value}" for t in result when not token.$stamped ).join ','
+      resolve result
   #.........................................................................................................
   done?()
   return null
@@ -237,6 +301,8 @@ if require.main is module then do =>
   # @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
   # test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
   # test @use_linewise_with_single_text
-  test @parse_nested_codespan_across_lines
+  # test @parse_nested_codespan_across_lines
+  # @read_csv()
+  test @read_csv
   # test @throws_error_on_linewise_with_nl_in_source
   # test @

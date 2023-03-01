@@ -256,7 +256,7 @@ new_parser = ( lexer ) ->
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       result      = _HTMLISH.parse probe
       result_rpr  = ( "#{token.type}#{rpr token.text}" for token in result )
-      # H.tabulate ( rpr probe ), result
+      H.tabulate ( rpr probe ), result
       resolve result_rpr
       # resolve undefined
   #.........................................................................................................
@@ -300,9 +300,9 @@ new_parser = ( lexer ) ->
 if require.main is module then do =>
   # test @
   # test @tags_1
-  test @tags_2
+  # test @tags_2
   # @_tags_2_for_profiling()
-  # test @htmlish_tag_types
+  test @htmlish_tag_types
   # test @xncrs
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup

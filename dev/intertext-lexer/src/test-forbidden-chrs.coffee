@@ -44,7 +44,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Interlex, } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
-  add_lexemes   = ( lexer ) ->
+  add_lexemes   = ( lexer, concat ) ->
     mode    = 'plain'
     lexer.add_lexeme { mode, tid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
     lexer.add_lexeme { mode, tid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
@@ -53,8 +53,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     lexer.add_lexeme { mode, tid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
     lexer.add_lexeme { mode, tid: 'number',           pattern: ( /\p{Number}+/u ), }
     lexer.add_lexeme { mode, tid: 'ws',               pattern: ( /\s+/u ), }
-    lexer.add_catchall_lexeme { mode, }
-    lexer.add_reserved_lexeme { mode, }
+    lexer.add_catchall_lexeme { mode, concat, }
+    lexer.add_reserved_lexeme { mode, concat, }
     return null
   #.........................................................................................................
   await do =>
@@ -68,8 +68,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       ]
     for [ probe, matcher, error, ] in probes_and_matchers
       await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-        lexer = new Interlex { catchall_concat: false, reserved_concat: false, }
-        add_lexemes lexer
+        lexer = new Interlex()
+        add_lexemes lexer, false
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         # H.tabulate ( rpr probe ), result
@@ -87,8 +87,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       ]
     for [ probe, matcher, error, ] in probes_and_matchers
       await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-        lexer = new Interlex { catchall_concat: true, reserved_concat: true, }
-        add_lexemes lexer
+        lexer = new Interlex()
+        add_lexemes lexer, true
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         # H.tabulate ( rpr probe ), result
@@ -103,7 +103,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Interlex, } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
-  add_lexemes   = ( lexer ) ->
+  add_lexemes   = ( lexer, concat ) ->
     mode    = 'plain'
     lexer.add_lexeme { mode, tid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
     lexer.add_lexeme { mode, tid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
@@ -112,8 +112,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     lexer.add_lexeme { mode, tid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
     lexer.add_lexeme { mode, tid: 'number',           pattern: ( /\p{Number}+/u ), }
     lexer.add_lexeme { mode, tid: 'ws',               pattern: ( /\s+/u ), }
-    lexer.add_catchall_lexeme { mode, tid: 'other', }
-    lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
+    lexer.add_catchall_lexeme { mode, tid: 'other',     concat, }
+    lexer.add_reserved_lexeme { mode, tid: 'forbidden', concat, }
     return null
   #.........................................................................................................
   await do =>
@@ -127,8 +127,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       ]
     for [ probe, matcher, error, ] in probes_and_matchers
       await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-        lexer = new Interlex { catchall_concat: true, reserved_concat: true, }
-        add_lexemes lexer
+        lexer = new Interlex()
+        add_lexemes lexer, true
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         H.tabulate ( rpr probe ), result
@@ -143,5 +143,5 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 if require.main is module then do =>
   # @add_reserved_chrs()
   # test @add_reserved_chrs
-  test @catchall_and_reserved_with_custom_names
-  # test @
+  # test @catchall_and_reserved_with_custom_names
+  test @

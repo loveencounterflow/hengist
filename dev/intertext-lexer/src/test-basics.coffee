@@ -709,6 +709,51 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@value_2 = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ->
+    lexer   = new Interlex { split: 'lines', }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'dq1',    jump: 'dq1',          pattern: /(?<!")"(?!")/u, reserved: '"', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'dq1'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'dq1',    jump: '^',            pattern: /"/u, reserved: '"', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:text', value: 'helo' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "world"', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'world' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "everyone\nout there"!', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'everyone' }, { mk: 'dq1:nl', value: '\n' }, { mk: 'dq1:text', value: 'out there' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:text', value: '!' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new_lexer()
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      result      = []
+      for token from lexer.walk probe
+        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
+      #.....................................................................................................
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
 
 #-----------------------------------------------------------------------------------------------------------
 @use_create_for_custom_behavior = ( T, done ) ->
@@ -716,7 +761,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   create_call_count = 0
   #.........................................................................................................
   new_lexer = ->
-    lexer = new Interlex { split: 'lines', catchall_concat: true, reserved_concat: true, }
+    lexer = new Interlex { split: 'lines', }
     #.......................................................................................................
     new_escchr_descriptor = ( mode ) ->
       create = ( token ) ->
@@ -731,8 +776,8 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
       lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern: ( /$/u ), }
       lexer.add_lexeme { mode,  tid: 'ws',        jump: null,       pattern: ( /\s+/u ), }
       lexer.add_lexeme { mode,  tid: 'word',      jump: null,       pattern: ( /\S+/u ), }
-      lexer.add_catchall_lexeme { mode, tid: 'other', }
-      lexer.add_reserved_lexeme { mode, tid: 'forbidden', }
+      lexer.add_catchall_lexeme { mode, tid: 'other',     concat: true, }
+      lexer.add_reserved_lexeme { mode, tid: 'forbidden', concat: true, }
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
@@ -763,24 +808,6 @@ if require.main is module then do =>
   # test @parse_string_literals
   # test @use_create_for_custom_behavior
   # test @cannot_redeclare_lexeme
-  # test @allow_value_and_empty_value
-  # @using_strings_for_patterns()
-  # test @using_strings_for_patterns
-  # @cannot_return_from_initial_mode()
-  # test @cannot_return_from_initial_mode
-  # test @using_lexer_without_lexemes
-  # test @lex_tags
-  # test @lex_tags_with_rpr
-  # @parse_line_by_line()
-  # test @parse_line_by_line
-  # @match_end_of_line()
-  # test @match_end_of_line
-  # test @parse_line_by_line
-  # @parse_md_stars_markup()
-  # test @parse_md_stars_markup
-  # test @parse_nested_codespan
-  # @markup_with_variable_length()
-  # test @markup_with_variable_length
-  # @_demo_markup_with_variable_length()
-  # test @match_start_of_line
-  test @match_with_lookbehind
+  test @allow_value_and_empty_value
+  # test @value_2
+
