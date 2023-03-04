@@ -27,6 +27,10 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
+{ DATOM }                 = require '../../../apps/datom'
+{ new_datom
+  lets
+  stamp     }             = DATOM
 H                         = require './helpers'
 
 
@@ -179,6 +183,147 @@ H                         = require './helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@cannot_use_undeclared_mode = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ->
+    lexer   = new Interlex { split: 'lines', }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'dq1'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', null, 'xxxx' ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    error = null
+    lexer       = new_lexer()
+    # debug '^w342^', lexer.start()
+    T?.throws /no such mode/, -> lexer.start()
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@auto_inserted_border_posts_inclusive = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( cfg ) ->
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'tag'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo<t1>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
+    [ 'helo<t1><t2>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:rpb', value: '>', x1: 11, x2: 12 }, { mk: 'plain:$border', value: '|', x1: 12, x2: 12 }, { mk: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
+    [ 'helo<t1><t2', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    lexer       = new_lexer { border_tokens: true, border_value: '|', }
+    T?.eq lexer.cfg.border_tokens, true
+    T?.eq lexer.cfg.border_value, '|'
+    # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+    result      = []
+    tokens      = []
+    for token from lexer.walk probe
+      tokens.push token
+      result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x1', 'x2'
+    result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+    echo [ probe, result, error, ]
+    # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+    #.....................................................................................................
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@auto_inserted_border_posts_exclusive = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( cfg ) ->
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'lpb',    jump: 'tag[',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'tag'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'rpb',    jump: '].',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo<t1>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
+    [ 'helo<t1><t2>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:$border', value: '|', x1: 9, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'plain:$border', value: '|', x1: 11, x2: 11 }, { mk: 'plain:rpb', value: '>', x1: 11, x2: 12 }, { mk: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
+    [ 'helo<t1><t2', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:$border', value: '|', x1: 9, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    lexer       = new_lexer { border_tokens: true, border_value: '|', }
+    T?.eq lexer.cfg.border_tokens, true
+    T?.eq lexer.cfg.border_value, '|'
+    # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+    result      = []
+    tokens      = []
+    for token from lexer.walk probe
+      tokens.push token
+      result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x1', 'x2'
+    result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+    echo [ probe, result, error, ]
+    # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+    #.....................................................................................................
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+
 #===========================================================================================================
 # JUMP FUNCTIONS
 #-----------------------------------------------------------------------------------------------------------
@@ -264,7 +409,13 @@ H                         = require './helpers'
   done?()
   return null
 
+
 ############################################################################################################
 if require.main is module then do =>
-  test @
-
+  # test @
+  # test @markup_with_variable_length
+  # test @cannot_use_undeclared_mode
+  # @auto_inserted_border_posts_inclusive()
+  # @auto_inserted_border_posts_exclusive()
+  # test @auto_inserted_border_posts_inclusive
+  test @auto_inserted_border_posts_exclusive
