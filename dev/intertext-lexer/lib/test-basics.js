@@ -324,7 +324,7 @@
             x1: 0,
             lnr2: 0,
             x2: 5,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -338,7 +338,7 @@
             x1: 5,
             lnr2: 0,
             x2: 6,
-            x: {
+            data: {
               lslash: null
             },
             source: 'helo <bold>`world`</bold>',
@@ -354,7 +354,7 @@
             x1: 6,
             lnr2: 0,
             x2: 10,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -368,7 +368,7 @@
             x1: 10,
             lnr2: 0,
             x2: 11,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -382,7 +382,7 @@
             x1: 11,
             lnr2: 0,
             x2: 12,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -396,7 +396,7 @@
             x1: 12,
             lnr2: 0,
             x2: 17,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -410,7 +410,7 @@
             x1: 17,
             lnr2: 0,
             x2: 18,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -424,7 +424,7 @@
             x1: 18,
             lnr2: 0,
             x2: 20,
-            x: {
+            data: {
               lslash: '/'
             },
             source: 'helo <bold>`world`</bold>',
@@ -440,7 +440,7 @@
             x1: 20,
             lnr2: 0,
             x2: 24,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -454,7 +454,7 @@
             x1: 24,
             lnr2: 0,
             x2: 25,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -468,7 +468,7 @@
             x1: 25,
             lnr2: 0,
             x2: 25,
-            x: null,
+            data: null,
             source: 'helo <bold>`world`</bold>',
             '$key': '^plain'
           }
@@ -488,7 +488,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<x v=\\> z=42>',
@@ -504,7 +504,7 @@
             x1: 1,
             lnr2: 0,
             x2: 5,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
@@ -518,7 +518,7 @@
             x1: 5,
             lnr2: 0,
             x2: 7,
-            x: {
+            data: {
               chr: '>'
             },
             source: '<x v=\\> z=42>',
@@ -534,7 +534,7 @@
             x1: 7,
             lnr2: 0,
             x2: 12,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
@@ -548,7 +548,7 @@
             x1: 12,
             lnr2: 0,
             x2: 13,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42>',
             '$key': '^tag'
           },
@@ -562,7 +562,7 @@
             x1: 13,
             lnr2: 0,
             x2: 13,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42>',
             '$key': '^plain'
           }
@@ -582,7 +582,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<x v=\\> z=42\\>',
@@ -598,7 +598,7 @@
             x1: 1,
             lnr2: 0,
             x2: 5,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
@@ -612,7 +612,7 @@
             x1: 5,
             lnr2: 0,
             x2: 7,
-            x: {
+            data: {
               chr: '>'
             },
             source: '<x v=\\> z=42\\>',
@@ -628,7 +628,7 @@
             x1: 7,
             lnr2: 0,
             x2: 12,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           },
@@ -642,7 +642,7 @@
             x1: 12,
             lnr2: 0,
             x2: 14,
-            x: {
+            data: {
               chr: '>'
             },
             source: '<x v=\\> z=42\\>',
@@ -658,7 +658,7 @@
             x1: 14,
             lnr2: 0,
             x2: 14,
-            x: null,
+            data: null,
             source: '<x v=\\> z=42\\>',
             '$key': '^tag'
           }
@@ -678,7 +678,7 @@
             x1: 0,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: 'a <b',
             '$key': '^plain'
           },
@@ -692,7 +692,7 @@
             x1: 2,
             lnr2: 0,
             x2: 3,
-            x: {
+            data: {
               lslash: null
             },
             source: 'a <b',
@@ -708,7 +708,7 @@
             x1: 3,
             lnr2: 0,
             x2: 4,
-            x: null,
+            data: null,
             source: 'a <b',
             '$key': '^tag'
           },
@@ -722,7 +722,7 @@
             x1: 4,
             lnr2: 0,
             x2: 4,
-            x: null,
+            data: null,
             source: 'a <b',
             '$key': '^tag'
           }
@@ -742,7 +742,7 @@
             x1: 0,
             lnr2: 0,
             x2: 4,
-            x: null,
+            data: null,
             source: 'what? error?',
             '$key': '^plain'
           },
@@ -756,7 +756,7 @@
             x1: 4,
             lnr2: 0,
             x2: 4,
-            x: {
+            data: {
               code: 'nomatch'
             },
             source: 'what? error?',
@@ -778,7 +778,7 @@
             x1: 0,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: 'd <',
             '$key': '^plain'
           },
@@ -792,7 +792,7 @@
             x1: 2,
             lnr2: 0,
             x2: 3,
-            x: {
+            data: {
               lslash: null
             },
             source: 'd <',
@@ -808,7 +808,7 @@
             x1: 3,
             lnr2: 0,
             x2: 3,
-            x: null,
+            data: null,
             source: 'd <',
             '$key': '^tag'
           }
@@ -828,7 +828,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<c',
@@ -844,7 +844,7 @@
             x1: 1,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: '<c',
             '$key': '^tag'
           },
@@ -858,7 +858,7 @@
             x1: 2,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: '<c',
             '$key': '^tag'
           }
@@ -878,7 +878,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<',
@@ -894,7 +894,7 @@
             x1: 1,
             lnr2: 0,
             x2: 1,
-            x: null,
+            data: null,
             source: '<',
             '$key': '^tag'
           }
@@ -914,7 +914,7 @@
             x1: 0,
             lnr2: 0,
             x2: 0,
-            x: null,
+            data: null,
             source: '',
             '$key': '^plain'
           }
@@ -934,7 +934,7 @@
             x1: 0,
             lnr2: 0,
             x2: 5,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -948,7 +948,7 @@
             x1: 5,
             lnr2: 0,
             x2: 7,
-            x: {
+            data: {
               chr: '<'
             },
             source: 'helo \\<bold>`world`</bold>',
@@ -964,7 +964,7 @@
             x1: 7,
             lnr2: 0,
             x2: 12,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -978,7 +978,7 @@
             x1: 12,
             lnr2: 0,
             x2: 13,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -992,7 +992,7 @@
             x1: 13,
             lnr2: 0,
             x2: 18,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -1006,7 +1006,7 @@
             x1: 18,
             lnr2: 0,
             x2: 19,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           },
@@ -1020,7 +1020,7 @@
             x1: 19,
             lnr2: 0,
             x2: 21,
-            x: {
+            data: {
               lslash: '/'
             },
             source: 'helo \\<bold>`world`</bold>',
@@ -1036,7 +1036,7 @@
             x1: 21,
             lnr2: 0,
             x2: 25,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -1050,7 +1050,7 @@
             x1: 25,
             lnr2: 0,
             x2: 26,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^tag'
           },
@@ -1064,7 +1064,7 @@
             x1: 26,
             lnr2: 0,
             x2: 26,
-            x: null,
+            data: null,
             source: 'helo \\<bold>`world`</bold>',
             '$key': '^plain'
           }
@@ -1084,7 +1084,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<b>helo \\<bold>`world`</bold></b>',
@@ -1100,7 +1100,7 @@
             x1: 1,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1114,7 +1114,7 @@
             x1: 2,
             lnr2: 0,
             x2: 3,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1128,7 +1128,7 @@
             x1: 3,
             lnr2: 0,
             x2: 8,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
@@ -1142,7 +1142,7 @@
             x1: 8,
             lnr2: 0,
             x2: 10,
-            x: {
+            data: {
               chr: '<'
             },
             source: '<b>helo \\<bold>`world`</bold></b>',
@@ -1158,7 +1158,7 @@
             x1: 10,
             lnr2: 0,
             x2: 15,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
@@ -1172,7 +1172,7 @@
             x1: 15,
             lnr2: 0,
             x2: 16,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
@@ -1186,7 +1186,7 @@
             x1: 16,
             lnr2: 0,
             x2: 21,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
@@ -1200,7 +1200,7 @@
             x1: 21,
             lnr2: 0,
             x2: 22,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           },
@@ -1214,7 +1214,7 @@
             x1: 22,
             lnr2: 0,
             x2: 24,
-            x: {
+            data: {
               lslash: '/'
             },
             source: '<b>helo \\<bold>`world`</bold></b>',
@@ -1230,7 +1230,7 @@
             x1: 24,
             lnr2: 0,
             x2: 28,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1244,7 +1244,7 @@
             x1: 28,
             lnr2: 0,
             x2: 29,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1258,7 +1258,7 @@
             x1: 29,
             lnr2: 0,
             x2: 31,
-            x: {
+            data: {
               lslash: '/'
             },
             source: '<b>helo \\<bold>`world`</bold></b>',
@@ -1274,7 +1274,7 @@
             x1: 31,
             lnr2: 0,
             x2: 32,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1288,7 +1288,7 @@
             x1: 32,
             lnr2: 0,
             x2: 33,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^tag'
           },
@@ -1302,7 +1302,7 @@
             x1: 33,
             lnr2: 0,
             x2: 33,
-            x: null,
+            data: null,
             source: '<b>helo \\<bold>`world`</bold></b>',
             '$key': '^plain'
           }
@@ -1322,7 +1322,7 @@
             x1: 0,
             lnr2: 0,
             x2: 1,
-            x: {
+            data: {
               lslash: null
             },
             source: '<i><b></b></i>',
@@ -1338,7 +1338,7 @@
             x1: 1,
             lnr2: 0,
             x2: 2,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1352,7 +1352,7 @@
             x1: 2,
             lnr2: 0,
             x2: 3,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1366,7 +1366,7 @@
             x1: 3,
             lnr2: 0,
             x2: 4,
-            x: {
+            data: {
               lslash: null
             },
             source: '<i><b></b></i>',
@@ -1382,7 +1382,7 @@
             x1: 4,
             lnr2: 0,
             x2: 5,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1396,7 +1396,7 @@
             x1: 5,
             lnr2: 0,
             x2: 6,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1410,7 +1410,7 @@
             x1: 6,
             lnr2: 0,
             x2: 8,
-            x: {
+            data: {
               lslash: '/'
             },
             source: '<i><b></b></i>',
@@ -1426,7 +1426,7 @@
             x1: 8,
             lnr2: 0,
             x2: 9,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1440,7 +1440,7 @@
             x1: 9,
             lnr2: 0,
             x2: 10,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1454,7 +1454,7 @@
             x1: 10,
             lnr2: 0,
             x2: 12,
-            x: {
+            data: {
               lslash: '/'
             },
             source: '<i><b></b></i>',
@@ -1470,7 +1470,7 @@
             x1: 12,
             lnr2: 0,
             x2: 13,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1484,7 +1484,7 @@
             x1: 13,
             lnr2: 0,
             x2: 14,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^tag'
           },
@@ -1498,7 +1498,7 @@
             x1: 14,
             lnr2: 0,
             x2: 14,
-            x: null,
+            data: null,
             source: '<i><b></b></i>',
             '$key': '^plain'
           }
@@ -2104,154 +2104,6 @@ the
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var d, p, result, result_rpr;
-          //.....................................................................................................
-          p = new Pipeline();
-          p.push(function(d, send) {
-            var e, ref, results;
-            if (d.tid !== 'p') {
-              return send(d);
-            }
-            ref = md_lexer.walk(d.value);
-            results = [];
-            for (e of ref) {
-              results.push(send(e));
-            }
-            return results;
-          });
-          p.push(H2.$parse_md_star());
-          p.push($parse_md_codespan());
-          //.....................................................................................................
-          p.send(H2.new_token('^æ19^', {
-            x1: 0,
-            x2: probe.length
-          }, 'plain', 'p', null, probe));
-          result = p.run();
-          result_rpr = ((function() {
-            var j, len1, results;
-            results = [];
-            for (j = 0, len1 = result.length; j < len1; j++) {
-              d = result[j];
-              if (!d.$stamped) {
-                results.push(d.value);
-              }
-            }
-            return results;
-          })()).join('');
-          // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
-          //.....................................................................................................
-          return resolve(result_rpr);
-        });
-      });
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.markup_with_variable_length = async function(T, done) {
-    var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_toy_md_lexer, probe, probes_and_matchers, transforms;
-    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
-    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
-    first = Symbol('first');
-    last = Symbol('last');
-    //.........................................................................................................
-    new_toy_md_lexer = function(mode = 'plain') {
-      var backtick_count, jlcs, jpcs, lexer;
-      lexer = new Interlex({
-        dotall: false
-      });
-      backtick_count = null;
-      //.......................................................................................................
-      jpcs = function({token, match, lexer}) {
-        // debug '^35-1^', match
-        backtick_count = token.value.length;
-        return 'literal';
-      };
-      //.......................................................................................................
-      jlcs = function({token, match, lexer}) {
-        // debug '^35-3^', match
-        if (token.value.length === backtick_count) {
-          backtick_count = null;
-          return '^';
-        }
-        token = lets(token, function(token) {
-          token.tid = 'text';
-          return token.mk = `${token.mode}:text`;
-        });
-        // debug '^345^', token
-        return {token};
-      };
-      //.......................................................................................................
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'escchr',
-        jump: null,
-        pattern: /\\(?<chr>.)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'star1',
-        jump: null,
-        pattern: /(?<!\*)\*(?!\*)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'codespan',
-        jump: jpcs,
-        pattern: /(?<!`)`+(?!`)/u
-      });
-      lexer.add_lexeme({
-        mode: 'plain',
-        tid: 'other',
-        jump: null,
-        pattern: /[^*`\\]+/u
-      });
-      lexer.add_lexeme({
-        mode: 'literal',
-        tid: 'codespan',
-        jump: jlcs,
-        pattern: /(?<!`)`+(?!`)/u
-      });
-      lexer.add_lexeme({
-        mode: 'literal',
-        tid: 'text',
-        jump: null,
-        pattern: /(?:\\`|[^`])+/u
-      });
-      //.......................................................................................................
-      return lexer;
-    };
-    //.........................................................................................................
-    probes_and_matchers = [["*abc*", "<i>abc</i>"], ['helo `world`!', 'helo <code>world</code>!', null], ['*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null], ['*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null], ['*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null]];
-    //.........................................................................................................
-    $parse_md_codespan = function() {
-      return function(d, send) {
-        switch (d.mk) {
-          case 'plain:codespan':
-            send(stamp(d));
-            send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
-            break;
-          case 'literal:codespan':
-            send(stamp(d));
-            send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
-            break;
-          default:
-            send(d);
-        }
-        return null;
-      };
-    };
-//.........................................................................................................
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var d, md_lexer, p, result, result_rpr;
-          md_lexer = new_toy_md_lexer('md');
           //.....................................................................................................
           p = new Pipeline();
           p.push(function(d, send) {
@@ -2961,8 +2813,8 @@ probe\x20\x20\x20`;
         create = function(token) {
           var ref;
           create_call_count++;
-          if (((ref = token.x) != null ? ref.chr : void 0) == null) {
-            token.x = {
+          if (((ref = token.data) != null ? ref.chr : void 0) == null) {
+            token.data = {
               chr: '\n'
             };
           }
@@ -3081,7 +2933,7 @@ probe\x20\x20\x20`;
           {
             mk: 'plain:escchr',
             value: '\\c',
-            x: {
+            data: {
               chr: 'c'
             }
           },
@@ -3146,7 +2998,7 @@ probe\x20\x20\x20`;
           {
             mk: 'plain:escchr',
             value: '\\',
-            x: {
+            data: {
               chr: '\n'
             }
           },
@@ -3191,7 +3043,7 @@ probe\x20\x20\x20`;
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
-            d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'x'));
+            d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
             // debug '^432^', d if d.mk.endsWith ':escchr'
             result.push(d);
           }

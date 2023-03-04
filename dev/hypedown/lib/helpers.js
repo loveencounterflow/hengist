@@ -1,6 +1,6 @@
 (function() {
   //###########################################################################################################
-  var GUY, H, alert, debug, echo, help, info, inspect, log, plain, praise, rpr, show_lexer_as_table, urge, warn, whisper;
+  var GUY, H, alert, debug, echo, excerpt_token, help, info, inspect, log, plain, praise, rpr, show_lexer_as_table, urge, warn, whisper;
 
   GUY = require('guy');
 
@@ -37,8 +37,13 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  excerpt_token = function(token) {
+    return GUY.props.pick_with_fallback(token, null, 'mode', 'tid', 'mk', 'jump', 'value', 'data', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped');
+  };
+
   //===========================================================================================================
-  module.exports = {...H, show_lexer_as_table};
+  module.exports = {...H, show_lexer_as_table, excerpt_token};
 
 }).call(this);
 
