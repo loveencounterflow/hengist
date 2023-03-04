@@ -179,6 +179,90 @@ H                         = require './helpers'
   done?()
   return null
 
+#===========================================================================================================
+# JUMP FUNCTIONS
+#-----------------------------------------------------------------------------------------------------------
+@markup_with_variable_length = ( T, done ) ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
+  #.........................................................................................................
+  new_toy_md_lexer = ( mode = 'plain' ) ->
+    lexer           = new Interlex { dotall: false, }
+    backtick_count  = null
+    #.......................................................................................................
+    enter_codespan = ({ token, match, lexer, }) ->
+      # debug '^35-1^', match
+      backtick_count = token.value.length
+      return { jump: 'literal[', }
+    #.......................................................................................................
+    exit_codespan = ({ token, match, lexer, }) ->
+      # debug '^35-3^', match
+      if token.value.length is backtick_count
+        backtick_count = null
+        return '.]'
+      ### TAINT setting `token.mk` should not have to be done manually ###
+      token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
+      # debug '^345^', token
+      return { token, }
+    #.......................................................................................................
+    lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,           pattern:  /\\(?<chr>.)/u,     }
+    lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,           pattern:  /(?<!\*)\*(?!\*)/u, }
+    lexer.add_lexeme { mode: 'plain',   tid: 'codespan',  jump: enter_codespan, pattern:  /(?<!`)`+(?!`)/u,   }
+    lexer.add_lexeme { mode: 'plain',   tid: 'other',     jump: null,           pattern:  /[^*`\\]+/u,        }
+    lexer.add_lexeme { mode: 'literal', tid: 'codespan',  jump: exit_codespan,  pattern:  /(?<!`)`+(?!`)/u,   }
+    lexer.add_lexeme { mode: 'literal', tid: 'text',      jump: null,           pattern:  /(?:\\`|[^`])+/u,   }
+    #.......................................................................................................
+    return lexer
+  #.........................................................................................................
+  $parse_md_codespan = ->
+    return ( d, send ) ->
+      switch d.mk
+        when  'plain:codespan'
+          send stamp d
+          send H.new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
+        when 'literal:codespan'
+          send stamp d
+          send H.new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
+        else
+          send d
+      return null
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ "*abc*", "<i>abc</i>", ]
+    [ 'helo `world`!', 'helo <code>world</code>!', null ]
+    [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz', null ]
+    [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*``` baz', null ]
+    [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      md_lexer  = new_toy_md_lexer 'md'
+      #.....................................................................................................
+      p = new Pipeline()
+      p.push ( d, send ) ->
+        return send d unless d.tid is 'p'
+        send e for e from md_lexer.walk d.value
+      p.push H.$parse_md_star()
+      p.push $parse_md_codespan()
+      #.....................................................................................................
+      p.send H.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
+      result      = p.run()
+      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      # urge '^08-1^', ( Object.keys d ).sort() for d in result
+      H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
+      #.....................................................................................................
+      resolve result_rpr
+  #.........................................................................................................
+  done?()
+  return null
 
 ############################################################################################################
 if require.main is module then do =>
