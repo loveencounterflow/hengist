@@ -25,114 +25,13 @@ types                     = new ( require 'intertype' ).Intertype
   type_of
   validate
   validate_list_of }      = types.export()
-H                         = require '../../../lib/helpers'
+H                         = require './helpers'
 # after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 { DATOM }                 = require '../../../apps/datom'
 { new_datom
   lets
   stamp     }             = DATOM
 
-
-#-----------------------------------------------------------------------------------------------------------
-new_parser = ( lexer ) ->
-  { Pipeline
-    transforms  } = require '../../../apps/moonriver'
-  _HTMLISH        = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
-  htmlish_sym     = Symbol 'htmlish'
-  #.........................................................................................................
-  $tokenize     = ( parser ) ->
-    return tokenize = ( line, send ) ->
-      @types.validate.text line
-      send token for token from parser.lexer.walk line
-      return null
-  #.........................................................................................................
-  $_hd_token_from_paragate_token = ->
-    return _hd_token_from_paragate_token = ( d, send ) ->
-      return send d unless d[htmlish_sym]?
-      first = d.$collector.at  0
-      last  = d.$collector.at -1
-      # delete d.$collector; H.tabulate "htmlish", [ d, ]
-      #.....................................................................................................
-      #
-      # * otag      opening tag, `<a>`
-      # * ctag      closing tag, `</a>` or `</>`
-      #
-      # * ntag      opening tag of `<i/italic/`
-      # * nctag     closing slash of `<i/italic/`
-      #
-      # * stag      self-closing tag, `<br/>`
-      #
-      tag_types =
-        otag:       { open: true,  close: false, }
-        ctag:       { open: false, close: true,  }
-        ntag:       { open: true,  close: false, }
-        nctag:      { open: false, close: true,  }
-        stag:       { open: true,  close: true,  }
-      #.....................................................................................................
-      e     =
-        mode:   'tag'
-        tid:    d.type
-        mk:     "tag:#{d.type}"
-        jump:   null
-        value:  d.$source
-        ### TAINT must give first_lnr, last_lnr ###
-        lnr:    first.lnr
-        start:  first.start
-        stop:   last.stop
-        x:
-          atrs:   d.atrs
-          id:     d.id
-        source: null
-        $key:   '^tag'
-      send e
-    return null
-  #.........................................................................................................
-  $parse_htmlish_tag  = ->
-    collector   = []
-    within_tag  = false
-    sp          = new Pipeline()
-    sp.push transforms.$window { min: 0, max: +1, empty: null, }
-    sp.push parse_htmlish_tag = ( [ d, nxt, ], send ) ->
-      #.....................................................................................................
-      if within_tag
-        collector.push d
-        # debug '^parse_htmlish_tag@1^', d
-        if d.jump is 'plain' ### TAINT magic number ###
-          within_tag  = false
-          $source     = ( e.value for e from collector ).join ''
-          $collector  = [ collector..., ]
-          send stamp collector.shift() while collector.length > 0
-          htmlish     = _HTMLISH.parse $source
-          # H.tabulate '^78^', htmlish
-          # debug '^78^', rpr $source
-          # info '^78^', x for x in htmlish
-          unless htmlish.length is 1
-            ### TAINT use API to create token ###
-            # throw new Error "^34345^ expected single token, got #{rpr htmlish}"
-            return send { mode: 'tag', tid: '$error', }
-          [ htmlish ]           = GUY.lft.thaw htmlish
-          htmlish[htmlish_sym]  = true
-          htmlish.$collector    = $collector
-          htmlish.$source       = $source
-          send htmlish
-        return null
-      #.....................................................................................................
-      else
-        return send d unless nxt?.mk.startsWith 'tag:'
-        within_tag = true
-        collector.push d
-      #.....................................................................................................
-      return null
-    sp.push $_hd_token_from_paragate_token()
-    return sp
-  #.........................................................................................................
-  p             = new Pipeline()
-  p.lexer       = lexer
-  p.push $tokenize p
-  p.push $parse_htmlish_tag()
-  # p.push show = ( d ) -> urge '^parser@1^', d
-  # debug '^43^', p
-  return p
 
 #-----------------------------------------------------------------------------------------------------------
 @tags_1 = ( T, done ) ->
@@ -179,28 +78,38 @@ new_parser = ( lexer ) ->
 @tags_2 = ( T, done ) ->
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
-    [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
-    [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
-    [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
-    [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
-    [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc', "plain:nl'',plain:nl'',html:parbreak'',html:text'<p>',plain:other'abc',html:text'abc',plain:nl'\\n',html:text'\\n'", null ]
+    [ 'abc<div>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ '1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    # [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    # [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     ]
   #.........................................................................................................
-  { Hypedown_lexer } = require '../../../apps/hypedown'
+  { Hypedown_parser } = require '../../../apps/hypedown'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new Hypedown_lexer()
-      parser      = new_parser lexer
+      parser      = new Hypedown_parser()
       result      = []
       result_rpr  = []
       for line from GUY.str.walk_lines probe
         parser.send line
         for token from parser.walk()
           # token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
-          result.push token
-          result_rpr.push "#{token.mk}#{rpr token.value}"
-      # H.tabulate ( rpr probe ), result
+          result.push H.excerpt_token token
+          result_rpr.push "#{token.mk}#{rpr token.value}" unless token.$stamped
+      text = ( t.value for t in result when not t.$stamped ).join '|'
+      debug '^3534^', rpr text
+      H.tabulate ( rpr probe ), result
+      H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
       resolve result_rpr.join ','
       # resolve null
   #.........................................................................................................
@@ -241,22 +150,22 @@ new_parser = ( lexer ) ->
   _HTMLISH        = ( require 'paragate/lib/htmlish.grammar' ).new_grammar { bare: true, }
   #.........................................................................................................
   probes_and_matchers = [
-    [ '<a>', [ "otag'<a>'" ], null ]
-    [ '<a b=c>', [ "otag'<a b=c>'" ], null ]
-    [ '<a b=c/>', [ "stag'<a b=c/>'" ], null ]
-    [ '<a b=c/', [ "ntag'<a b=c/'" ], null ]
-    [ '</a>', [ "ctag'</a>'" ], null ]
-    [ '<br>', [ "otag'<br>'" ], null ]
-    [ '<br/>', [ "stag'<br/>'" ], null ]
-    [ '<i/italic/', [ "ntag'<i/'", "undefined'italic'", "nctag'/'" ], null ]
-    [ '<i>italic</>', [ "otag'<i>'", "undefined'italic'", "ctag'</>'", "undefined'>'" ], null ]
+    [ '<a>', [ "otag'<a>'{}" ], null ]
+    [ '<a b=c>', [ "otag'<a b=c>'{ b: 'c' }" ], null ]
+    [ '<a b=c/>', [ "stag'<a b=c/>'{ b: 'c' }" ], null ]
+    [ '<a b=c/', [ "ntag'<a b=c/'{ b: 'c' }" ], null ]
+    [ '</a>', [ "ctag'</a>'{}" ], null ]
+    [ '<br>', [ "otag'<br>'{}" ], null ]
+    [ '<br/>', [ "stag'<br/>'{}" ], null ]
+    [ '<i/', [ "ntag'<i/'{}" ], null ]
+    [ '<i/>', [ "stag'<i/>'{}" ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       result      = _HTMLISH.parse probe
-      result_rpr  = ( "#{token.type}#{rpr token.text}" for token in result )
-      H.tabulate ( rpr probe ), result
+      result_rpr  = ( "#{t.type}#{rpr t.text}#{rpr t.atrs ? {}}" for t in result )
+      # H.tabulate ( rpr probe ), result
       resolve result_rpr
       # resolve undefined
   #.........................................................................................................
@@ -300,9 +209,10 @@ new_parser = ( lexer ) ->
 if require.main is module then do =>
   # test @
   # test @tags_1
-  # test @tags_2
+  # @tags_2()
+  test @tags_2
   # @_tags_2_for_profiling()
-  test @htmlish_tag_types
+  # test @htmlish_tag_types
   # test @xncrs
   # test @parse_codespans_and_single_star
   # test @parse_md_stars_markup

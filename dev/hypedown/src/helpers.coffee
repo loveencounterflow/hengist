@@ -37,8 +37,11 @@ show_lexer_as_table = ( title, lexer ) ->
   H.tabulate title, lexemes
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+excerpt_token = ( token ) -> GUY.props.pick_with_fallback token, null, \
+  'mode', 'tid', 'mk', 'jump', 'value', 'data', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
 
 #===========================================================================================================
-module.exports = { H..., show_lexer_as_table, }
+module.exports = { H..., show_lexer_as_table, excerpt_token, }
 
 
