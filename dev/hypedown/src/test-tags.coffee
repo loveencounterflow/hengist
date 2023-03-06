@@ -79,19 +79,48 @@ H                         = require './helpers'
   #.........................................................................................................
   probes_and_matchers = [
     # [ 'abc', "plain:nl'',plain:nl'',html:parbreak'',html:text'<p>',plain:other'abc',html:text'abc',plain:nl'\\n',html:text'\\n'", null ]
-    [ 'abc<div>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ 'abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ 'abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ 'abc<div/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ 'abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ 'abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    [ '1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:otag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc'", null ]
+    [ 'abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:stag'<div/>',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div/',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'xyz',html:text'\\n'", null ]
+    [ 'abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'def',html:text'xyz',html:text'\\n'", null ]
+    # [ '1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    # [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
     # [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     # [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     # [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     # [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     # [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     # [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    ]
+  #.........................................................................................................
+  { Hypedown_parser } = require '../../../apps/hypedown'
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      parser      = new Hypedown_parser()
+      result      = []
+      result_rpr  = []
+      for line from GUY.str.walk_lines probe
+        parser.send line
+        for token from parser.walk()
+          # token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
+          result.push H.excerpt_token token
+          result_rpr.push "#{token.mk}#{rpr token.value}" unless token.$stamped
+      text = ( t.value for t in result when not t.$stamped ).join '|'
+      # debug '^3534^', rpr text
+      # H.tabulate ( rpr probe ), result
+      # H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
+      resolve result_rpr.join ','
+      # resolve null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@parse_closing_tags = ( T, done ) ->
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
     ]
   #.........................................................................................................
   { Hypedown_parser } = require '../../../apps/hypedown'
@@ -211,6 +240,7 @@ if require.main is module then do =>
   # test @tags_1
   # @tags_2()
   test @tags_2
+  # test @parse_closing_tags
   # @_tags_2_for_profiling()
   # test @htmlish_tag_types
   # test @xncrs
