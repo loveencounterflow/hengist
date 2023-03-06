@@ -831,14 +831,64 @@
     var Hypedown_parser, error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
     // [ 'abc', "plain:nl'',plain:nl'',html:parbreak'',html:text'<p>',plain:other'abc',html:text'abc',plain:nl'\\n',html:text'\\n'", null ]
-    probes_and_matchers = [['abc<div>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null], ['1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null]];
+    probes_and_matchers = [['abc<div>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:otag'<div>',html:text'xyz',html:text'\\n'", null], ['abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc'", null], ['abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:stag'<div/>',html:text'xyz',html:text'\\n'", null], ['abc<div/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div/',html:text'xyz',html:text'\\n'", null], ['abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'xyz',html:text'\\n'", null], ['abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'def',html:text'xyz',html:text'\\n'", null]];
     //.........................................................................................................
+    // [ '1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    // [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
     // [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1 foo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slashgt'/>',tag:stag'<div#c1 foo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1\nfoo=bar/>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slashgt'/>',tag:stag'<div#c1\\nfoo=bar/>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+    ({Hypedown_parser} = require('../../../apps/hypedown'));
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var line, parser, ref, ref1, result, result_rpr, t, text, token;
+          parser = new Hypedown_parser();
+          result = [];
+          result_rpr = [];
+          ref = GUY.str.walk_lines(probe);
+          for (line of ref) {
+            parser.send(line);
+            ref1 = parser.walk();
+            for (token of ref1) {
+              // token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
+              result.push(H.excerpt_token(token));
+              if (!token.$stamped) {
+                result_rpr.push(`${token.mk}${rpr(token.value)}`);
+              }
+            }
+          }
+          text = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              if (!t.$stamped) {
+                results.push(t.value);
+              }
+            }
+            return results;
+          })()).join('|');
+          // debug '^3534^', rpr text
+          // H.tabulate ( rpr probe ), result
+          // H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
+          return resolve(result_rpr.join(','));
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.parse_closing_tags = async function(T, done) {
+    var Hypedown_parser, error, i, len, matcher, probe, probes_and_matchers;
+    //.........................................................................................................
+    probes_and_matchers = [['1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null]];
+    //.........................................................................................................
     ({Hypedown_parser} = require('../../../apps/hypedown'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -998,7 +1048,8 @@
     })();
   }
 
-  // @_tags_2_for_profiling()
+  // test @parse_closing_tags
+// @_tags_2_for_profiling()
 // test @htmlish_tag_types
 // test @xncrs
 // test @parse_codespans_and_single_star

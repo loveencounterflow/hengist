@@ -675,6 +675,238 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.in_and_exclusive_singular_jumps = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(cfg = null) {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq2',
+          jump: '[dqstr]',
+          pattern: /(?<!")""(?!")/u,
+          reserved: '"'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: '[dqstr',
+          pattern: /(?<!")"(?!")/u,
+          reserved: '"'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u,
+          value: '\n'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'dqstr';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'dq1',
+          jump: '.]',
+          pattern: /"/u,
+          reserved: '"'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u,
+          value: '\n'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'helo',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            data: null
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            data: null
+          }
+        ],
+        null
+      ],
+      [
+        'helo "world"',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo ',
+            data: null
+          },
+          {
+            mk: 'dqstr:$border',
+            value: '',
+            data: {
+              prv: 'plain',
+              nxt: 'dqstr'
+            }
+          },
+          {
+            mk: 'dqstr:dq1',
+            value: '"',
+            data: null
+          },
+          {
+            mk: 'dqstr:text',
+            value: 'world',
+            data: null
+          },
+          {
+            mk: 'dqstr:dq1',
+            value: '"',
+            data: null
+          },
+          {
+            mk: 'plain:$border',
+            value: '',
+            data: {
+              prv: 'dqstr',
+              nxt: 'plain'
+            }
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            data: null
+          }
+        ],
+        null
+      ],
+      [
+        'abc "" xyz',
+        [
+          {
+            mk: 'plain:text',
+            value: 'abc ',
+            data: null
+          },
+          {
+            mk: 'plain:$border',
+            value: '',
+            data: {
+              prv: 'plain',
+              nxt: 'dqstr'
+            }
+          },
+          {
+            mk: 'dqstr:dq2',
+            value: '""',
+            data: null
+          },
+          {
+            mk: 'plain:$border',
+            value: '',
+            data: {
+              prv: 'dqstr',
+              nxt: 'plain'
+            }
+          },
+          {
+            mk: 'plain:text',
+            value: ' xyz',
+            data: null
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            data: null
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, ref, result, result_rpr, token, tokens;
+          lexer = new_lexer({
+            border_tokens: true
+          });
+          if (T != null) {
+            T.eq(lexer.cfg.border_tokens, true);
+          }
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          result = [];
+          tokens = [];
+          ref = lexer.walk(probe);
+          for (token of ref) {
+            tokens.push(token);
+            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
+          }
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+          //.....................................................................................................
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.cannot_use_undeclared_mode = function(T, done) {
     var Interlex, compose, error, i, len, lexer, matcher, new_lexer, probe, probes_and_matchers;
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
@@ -1594,7 +1826,9 @@
       // @auto_inserted_border_posts_inclusive()
       // @auto_inserted_border_posts_exclusive()
       // test @auto_inserted_border_posts_inclusive
-      return test(this.auto_inserted_border_posts_exclusive);
+      // test @auto_inserted_border_posts_exclusive
+      // @in_and_exclusive_singular_jumps()
+      return test(this.in_and_exclusive_singular_jumps);
     })();
   }
 
