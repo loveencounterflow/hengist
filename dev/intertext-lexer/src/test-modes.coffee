@@ -225,7 +225,56 @@ H                         = require './helpers'
         tokens.push token
         result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'data'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
-      # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+      #.....................................................................................................
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@singular_jumps_move_forward_correctly = ( T, done ) ->
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( cfg = null ) ->
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    #.........................................................................................................
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,       pattern: /\\(?<chr>.)/u,    reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'c_lsr',  jump: '[tag]',    pattern: '</>',             reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',     pattern: '<',               reserved: '<', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_reserved_lexeme { mode, tid: '$forbidden', concat: true, }
+    #.........................................................................................................
+    do =>
+      mode = 'tag'
+      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, tid: 'lbp',    jump: null,           pattern: '<',            reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'rbp',    jump: null,           pattern: '>',            reserved: '>', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_reserved_lexeme { mode, tid: '$forbidden', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:text', value: 'helo', data: null } ], null ]
+    [ 'abc</>def<what>', [ { mk: 'plain:text', value: 'abc', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { mk: 'tag:c_lsr', value: '</>', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'tag', nxt: 'plain' } }, { mk: 'plain:text', value: 'def', data: null }, { mk: 'tag:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { mk: 'tag:lpb', value: '<', data: null }, { mk: 'tag:text', value: 'what', data: null }, { mk: 'tag:rbp', value: '>', data: null } ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      lexer       = new_lexer { border_tokens: true, }
+      T?.eq lexer.cfg.border_tokens, true
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      result      = []
+      tokens      = []
+      for token from lexer.walk probe
+        tokens.push token
+        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'data'
+      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
       #.....................................................................................................
       resolve result
   #.........................................................................................................
@@ -468,6 +517,6 @@ if require.main is module then do =>
   # @auto_inserted_border_posts_exclusive()
   # test @auto_inserted_border_posts_inclusive
   # test @auto_inserted_border_posts_exclusive
-  # @in_and_exclusive_singular_jumps()
-  test @in_and_exclusive_singular_jumps
+  # @singular_jumps()
+  test @singular_jumps_move_forward_correctly
 
