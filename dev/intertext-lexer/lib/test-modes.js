@@ -675,7 +675,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.in_and_exclusive_singular_jumps = async function(T, done) {
+  this.singular_jumps = async function(T, done) {
     var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
     //.........................................................................................................
@@ -894,7 +894,208 @@
             }
             return results;
           })()).join('');
-          // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, tokens);
+          //.....................................................................................................
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.singular_jumps_move_forward_correctly = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers;
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(cfg = null) {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'c_lsr',
+          jump: '[tag]',
+          pattern: '</>',
+          reserved: '<'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'lpb',
+          jump: '[tag',
+          pattern: '<',
+          reserved: '<'
+        });
+        lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+        return lexer.add_reserved_lexeme({
+          mode,
+          tid: '$forbidden',
+          concat: true
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'tag';
+        lexer.add_lexeme({
+          mode,
+          tid: 'escchr',
+          jump: null,
+          pattern: /\\(?<chr>.)/u,
+          reserved: '\\'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'lbp',
+          jump: null,
+          pattern: '<',
+          reserved: '<'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'rbp',
+          jump: null,
+          pattern: '>',
+          reserved: '>'
+        });
+        lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+        return lexer.add_reserved_lexeme({
+          mode,
+          tid: '$forbidden',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'helo',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            data: null
+          }
+        ],
+        null
+      ],
+      [
+        'abc</>def<what>',
+        [
+          {
+            mk: 'plain:text',
+            value: 'abc',
+            data: null
+          },
+          {
+            mk: 'plain:$border',
+            value: '',
+            data: {
+              prv: 'plain',
+              nxt: 'tag'
+            }
+          },
+          {
+            mk: 'tag:c_lsr',
+            value: '</>',
+            data: null
+          },
+          {
+            mk: 'plain:$border',
+            value: '',
+            data: {
+              prv: 'tag',
+              nxt: 'plain'
+            }
+          },
+          {
+            mk: 'plain:text',
+            value: 'def',
+            data: null
+          },
+          {
+            mk: 'tag:$border',
+            value: '',
+            data: {
+              prv: 'plain',
+              nxt: 'tag'
+            }
+          },
+          {
+            mk: 'tag:lpb',
+            value: '<',
+            data: null
+          },
+          {
+            mk: 'tag:text',
+            value: 'what',
+            data: null
+          },
+          {
+            mk: 'tag:rbp',
+            value: '>',
+            data: null
+          }
+        ],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, ref, result, result_rpr, token, tokens;
+          lexer = new_lexer({
+            border_tokens: true
+          });
+          if (T != null) {
+            T.eq(lexer.cfg.border_tokens, true);
+          }
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          result = [];
+          tokens = [];
+          ref = lexer.walk(probe);
+          for (token of ref) {
+            tokens.push(token);
+            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
+          }
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, tokens);
           //.....................................................................................................
           return resolve(result);
         });
@@ -1827,8 +2028,8 @@
       // @auto_inserted_border_posts_exclusive()
       // test @auto_inserted_border_posts_inclusive
       // test @auto_inserted_border_posts_exclusive
-      // @in_and_exclusive_singular_jumps()
-      return test(this.in_and_exclusive_singular_jumps);
+      // @singular_jumps()
+      return test(this.singular_jumps_move_forward_correctly);
     })();
   }
 
