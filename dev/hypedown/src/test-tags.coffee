@@ -112,7 +112,7 @@ H                         = require './helpers'
       text = ( t.value for t in result when not t.$stamped ).join '|'
       # debug '^3534^', rpr text
       H.tabulate ( rpr probe ), result
-      # H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
+      H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
       resolve result_rpr.join ','
       # resolve null
   #.........................................................................................................
