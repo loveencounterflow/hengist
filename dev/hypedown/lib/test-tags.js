@@ -36,7 +36,11 @@
             value: 'foo '
           },
           {
-            mk: 'plain:ltbang',
+            mk: 'comment:$border',
+            value: ''
+          },
+          {
+            mk: 'comment:ltbang',
             value: '<!--'
           },
           {
@@ -46,6 +50,10 @@
           {
             mk: 'comment:eoc',
             value: '-->'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:ws',
@@ -70,7 +78,11 @@
             value: 'foo '
           },
           {
-            mk: 'plain:ltbang',
+            mk: 'comment:$border',
+            value: ''
+          },
+          {
+            mk: 'comment:ltbang',
             value: '<!--'
           },
           {
@@ -88,6 +100,10 @@
           {
             mk: 'comment:eoc',
             value: '-->'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:ws',
@@ -112,7 +128,11 @@
             value: 'foo '
           },
           {
-            mk: 'plain:ltbang',
+            mk: 'comment:$border',
+            value: ''
+          },
+          {
+            mk: 'comment:ltbang',
             value: '<!--'
           },
           {
@@ -121,10 +141,7 @@
           },
           {
             mk: 'comment:escchr',
-            value: '\\',
-            x: {
-              chr: '\n'
-            }
+            value: '\\'
           },
           {
             mk: 'comment:nl',
@@ -137,6 +154,10 @@
           {
             mk: 'comment:eoc',
             value: '-->'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:ws',
@@ -161,7 +182,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -171,6 +196,10 @@
           {
             mk: 'tag:gt',
             value: '>'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:other',
@@ -191,7 +220,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -201,6 +234,10 @@
           {
             mk: 'tag:slashgt',
             value: '/>'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:other',
@@ -221,7 +258,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -233,12 +274,24 @@
             value: '/'
           },
           {
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
             mk: 'plain:other',
             value: 'xyz'
           },
           {
-            mk: 'plain:slash',
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:c_s',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -255,7 +308,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -267,16 +324,28 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar>xyz'
           },
           {
-            mk: 'tag:dq:dq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:dq',
             value: '"'
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -293,7 +362,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -305,16 +378,28 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar/>xyz'
           },
           {
-            mk: 'tag:dq:dq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:dq',
             value: '"'
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -331,7 +416,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -343,16 +432,28 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar/xyz'
           },
           {
-            mk: 'tag:dq:dq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:dq',
             value: '"'
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -369,7 +470,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -381,16 +486,28 @@
             value: "'"
           },
           {
+            mk: 'tag:sq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:sq:text',
             value: 'bar>xyz'
           },
           {
-            mk: 'tag:sq:sq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:sq',
             value: "'"
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -407,7 +524,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -419,16 +540,28 @@
             value: "'"
           },
           {
+            mk: 'tag:sq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:sq:text',
             value: 'bar/>xyz'
           },
           {
-            mk: 'tag:sq:sq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:sq',
             value: "'"
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -445,7 +578,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -457,16 +594,28 @@
             value: "'"
           },
           {
+            mk: 'tag:sq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:sq:text',
             value: 'bar/xyz'
           },
           {
-            mk: 'tag:sq:sq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:sq',
             value: "'"
           },
           {
             mk: 'tag:slash',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -483,7 +632,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -495,16 +648,28 @@
             value: "'"
           },
           {
+            mk: 'tag:sq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:sq:text',
             value: 'bar/xyz'
           },
           {
-            mk: 'tag:sq:sq',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:sq',
             value: "'"
           },
           {
             mk: 'tag:slashgt',
             value: '/>'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:nl',
@@ -521,7 +686,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -533,12 +702,24 @@
             value: '/>'
           },
           {
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
             mk: 'plain:other',
             value: 'xyz'
           },
           {
-            mk: 'plain:slash',
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:c_s',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:other',
@@ -559,7 +740,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -571,12 +756,24 @@
             value: '/'
           },
           {
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
             mk: 'plain:other',
             value: 'xyz'
           },
           {
-            mk: 'plain:slash',
+            mk: 'plain:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:c_s',
             value: '/'
+          },
+          {
+            mk: 'plain:$border',
+            value: ''
           },
           {
             mk: 'plain:other',
@@ -597,7 +794,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -607,6 +808,10 @@
           {
             mk: 'tag:dq',
             value: '"'
+          },
+          {
+            mk: 'tag:dq:$border',
+            value: ''
           },
           {
             mk: 'tag:dq:text',
@@ -627,7 +832,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -637,6 +846,10 @@
           {
             mk: 'tag:dq',
             value: '"'
+          },
+          {
+            mk: 'tag:dq:$border',
+            value: ''
           },
           {
             mk: 'tag:dq:text',
@@ -657,7 +870,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -667,6 +884,10 @@
           {
             mk: 'tag:dq',
             value: '"'
+          },
+          {
+            mk: 'tag:dq:$border',
+            value: ''
           },
           {
             mk: 'tag:dq:text',
@@ -687,7 +908,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -699,15 +924,16 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar>xyz'
           },
           {
             mk: 'tag:dq:escchr',
-            value: '\\"',
-            x: {
-              chr: '"'
-            }
+            value: '\\"'
           },
           {
             mk: 'tag:dq:text',
@@ -728,7 +954,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -740,15 +970,16 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar/>xyz'
           },
           {
             mk: 'tag:dq:escchr',
-            value: '\\"',
-            x: {
-              chr: '"'
-            }
+            value: '\\"'
           },
           {
             mk: 'tag:dq:text',
@@ -769,7 +1000,11 @@
             value: 'abc'
           },
           {
-            mk: 'plain:lt',
+            mk: 'tag:$border',
+            value: ''
+          },
+          {
+            mk: 'tag:lt',
             value: '<'
           },
           {
@@ -781,15 +1016,16 @@
             value: '"'
           },
           {
+            mk: 'tag:dq:$border',
+            value: ''
+          },
+          {
             mk: 'tag:dq:text',
             value: 'bar/xyz'
           },
           {
             mk: 'tag:dq:escchr',
-            value: '\\"',
-            x: {
-              chr: '"'
-            }
+            value: '\\"'
           },
           {
             mk: 'tag:dq:text',
@@ -831,7 +1067,7 @@
     var Hypedown_parser, error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
     // [ 'abc', "plain:nl'',plain:nl'',html:parbreak'',html:text'<p>',plain:other'abc',html:text'abc',plain:nl'\\n',html:text'\\n'", null ]
-    probes_and_matchers = [['abc<div>def</>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:o_ltr'<div>',html:text'def',tag:c_lsr'</>',html:text'xyz',html:text'\\n'", null]];
+    probes_and_matchers = [['abc<div>def</>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:o_ltr'<div>',html:text'def',tag:c_lsr'</>',html:text'xyz',html:text'\\n'", null], ['abc<div/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:o_lts'<div/',html:text'def',tag:c_s'/',html:text'xyz',html:text'\\n'", null], ['1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'1',tag:o_lts'<a/',html:text'2',tag:o_lts'<b/',html:text'3',tag:o_ltr'<i>',html:text'4',tag:c_lstr'</i>',html:text'5',tag:c_s'/',html:text'6',tag:c_s'/',html:text'7',html:text'\\n'", null], ['abc<div#c1 foo=bar/xyz/', "html:parbreak'',html:text'<p>',html:text'abc',tag:o_lts'<div#c1 foo=bar/',html:text'xyz',tag:c_s'/',html:text'\\n'", null]];
     //.........................................................................................................
     // [ 'abc<div\\>xyz', "html:parbreak'',html:text'<p>',html:text'abc'", null ]
     // [ 'abc<div/>xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:stag'<div/>',html:text'xyz',html:text'\\n'", null ]
@@ -839,9 +1075,7 @@
     // [ 'abc<div k=v/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'xyz',html:text'\\n'", null ]
     // [ 'abc<div k=v/def/xyz', "html:parbreak'',html:text'<p>',html:text'abc',tag:ntag'<div k=v/',html:text'def',html:text'xyz',html:text'\\n'", null ]
 
-      // [ '1<a/2<b/3<i>4</i>5/6/7', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    // [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
-    // [ 'abc<div#c1 foo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:slash'/',tag:ntag'<div#c1 foo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
+      // [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
     // [ 'abc<div#c1\nfoo=bar/xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:slash'/',tag:ntag'<div#c1\\nfoo=bar/',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1 foo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1 foo=bar',tag:gt'>',tag:otag'<div#c1 foo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
     // [ 'abc<div#c1\nfoo=bar>xyz/', "plain:other'abc',plain:lt'<',tag:text'div#c1',tag:nl'\\n',tag:text'foo=bar',tag:gt'>',tag:otag'<div#c1\\nfoo=bar>',plain:other'xyz',plain:slash'/',plain:nl'\\n'", null ]
@@ -881,7 +1115,17 @@
           })()).join('|');
           // debug '^3534^', rpr text
           H.tabulate(rpr(probe), result);
-          // H.tabulate ( rpr probe ), ( t for t in result when not t.$stamped )
+          H.tabulate(rpr(probe), (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              t = result[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
           return resolve(result_rpr.join(','));
         });
       });
@@ -893,7 +1137,7 @@
   this.parse_closing_tags = async function(T, done) {
     var Hypedown_parser, error, i, len, matcher, probe, probes_and_matchers;
     //.........................................................................................................
-    probes_and_matchers = [['1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null]];
+    probes_and_matchers = [['1</i>2', "html:parbreak'',html:text'<p>',html:text'1',tag:c_lstr'</i>',html:text'2',html:text'\\n'", null]];
     //.........................................................................................................
     ({Hypedown_parser} = require('../../../apps/hypedown'));
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -909,8 +1153,10 @@
             parser.send(line);
             ref1 = parser.walk();
             for (token of ref1) {
-              // token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
-              result.push(H.excerpt_token(token));
+              if (!token.$stamped) {
+                // token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
+                result.push(H.excerpt_token(token));
+              }
               if (!token.$stamped) {
                 result_rpr.push(`${token.mk}${rpr(token.value)}`);
               }
@@ -1013,29 +1259,30 @@
   this.xncrs = async function(T, done) {
     var Hypedown_lexer, error, i, len, matcher, probe, probes_and_matchers;
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
-    probes_and_matchers = [['&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null], ['&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null], ['&amp\n', "plain:forbidden'&',plain:other'amp',plain:nl'\\n',plain:nl'\\n'", null], ['&amp;', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n'", null], ['&amp\\;', "plain:forbidden'&',plain:other'amp',plain:escchr'\\\\;',plain:nl'\\n'", null], ['&amp;\n', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n',plain:nl'\\n'", null], ['&xamp;', "plain:amp'&',xncr:name'xamp',xncr:sc';',plain:nl'\\n'", null], ['&123;', "plain:amp'&',xncr:name'123',xncr:sc';',plain:nl'\\n'", null], ['&x123;', "plain:amp'&',xncr:name'x123',xncr:sc';',plain:nl'\\n'", null], ['&#123;', "plain:amp'&',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null], ['&#x123;', "plain:amp'&',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null], ['&jzr#123;', "plain:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null], ['some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',plain:lt'<',tag:text'b',tag:slash'/',plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:slash'/',plain:ws' ',plain:other'text',plain:nl'\\n'", null]];
+    probes_and_matchers = [['&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null], ['&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null], ['&amp\n', "plain:forbidden'&',plain:other'amp',plain:nl'\\n',plain:nl'\\n'", null], ['&amp;', "xncr:$border'',xncr:amp'&',xncr:name'amp',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&amp\\;', "plain:forbidden'&',plain:other'amp',plain:escchr'\\\\;',plain:nl'\\n'", null], ['&amp;\n', "xncr:$border'',xncr:amp'&',xncr:name'amp',xncr:sc';',plain:$border'',plain:nl'\\n',plain:nl'\\n'", null], ['&xamp;', "xncr:$border'',xncr:amp'&',xncr:name'xamp',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&123;', "xncr:$border'',xncr:amp'&',xncr:name'123',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&x123;', "xncr:$border'',xncr:amp'&',xncr:name'x123',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&#123;', "xncr:$border'',xncr:amp'&',xncr:dec'#123',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&#x123;', "xncr:$border'',xncr:amp'&',xncr:hex'#x123',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['&jzr#123;', "xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:$border'',plain:nl'\\n'", null], ['some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',tag:$border'',tag:lt'<',tag:text'b',tag:slash'/',plain:$border'',xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:$border'',xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:$border'',plain:$border'',tag:c_s'/',plain:$border'',plain:ws' ',plain:other'text',plain:nl'\\n'", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var lexer, ref, result, result_rpr, token;
+          var lexer, ref, result, result_rpr, t, token;
           lexer = new Hypedown_lexer();
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
             result.push(token);
           }
-          H.tabulate(rpr(probe), result);
+          // H.tabulate ( rpr probe ), result
           result_rpr = ((function() {
             var j, len1, results;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
-              token = result[j];
-              results.push(`${token.mk}${rpr(token.value)}`);
+              t = result[j];
+              results.push(`${t.mk}${rpr(t.value)}`);
             }
             return results;
           })()).join(',');
+          // result_rpr = ( "#{t.mk}#{rpr t.value}" for t in result when not t.$stamped ).join ','
           // info '^94-1^', result_rpr
           return resolve(result_rpr);
         });
@@ -1048,13 +1295,13 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @tags_1
-      // @tags_2()
-      return test(this.tags_2);
+      return test(this.tags_1);
     })();
   }
 
-  // test @parse_closing_tags
+  // @tags_2()
+// test @tags_2
+// test @parse_closing_tags
 // @_tags_2_for_profiling()
 // test @htmlish_tag_types
 // test @xncrs
