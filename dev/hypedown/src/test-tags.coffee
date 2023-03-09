@@ -122,7 +122,7 @@ H                         = require './helpers'
 @parse_closing_tags = ( T, done ) ->
   #.........................................................................................................
   probes_and_matchers = [
-    [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'abc',raw-html:tag'<div>',html:text'xyz',html:text'\\n'", null ]
+    [ '1</i>2', "html:parbreak'',html:text'<p>',html:text'1',tag:c_lstr'</i>',html:text'2',html:text'\\n'", null ]
     ]
   #.........................................................................................................
   { Hypedown_parser } = require '../../../apps/hypedown'
@@ -135,7 +135,7 @@ H                         = require './helpers'
         parser.send line
         for token from parser.walk()
           # token = GUY.props.omit_nullish GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x'
-          result.push H.excerpt_token token
+          result.push H.excerpt_token token if not token.$stamped
           result_rpr.push "#{token.mk}#{rpr token.value}" unless token.$stamped
       text = ( t.value for t in result when not t.$stamped ).join '|'
       debug '^3534^', rpr text
@@ -209,16 +209,16 @@ H                         = require './helpers'
     [ '&amp', "plain:forbidden'&',plain:other'amp',plain:nl'\\n'", null ]
     [ '&amp what', "plain:forbidden'&',plain:other'amp what',plain:nl'\\n'", null ]
     [ '&amp\n', "plain:forbidden'&',plain:other'amp',plain:nl'\\n',plain:nl'\\n'", null ]
-    [ '&amp;', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n'", null ]
+    [ '&amp;', "xncr:$border'',xncr:amp'&',xncr:name'amp',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
     [ '&amp\\;', "plain:forbidden'&',plain:other'amp',plain:escchr'\\\\;',plain:nl'\\n'", null ]
-    [ '&amp;\n', "plain:amp'&',xncr:name'amp',xncr:sc';',plain:nl'\\n',plain:nl'\\n'", null ]
-    [ '&xamp;', "plain:amp'&',xncr:name'xamp',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&123;', "plain:amp'&',xncr:name'123',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&x123;', "plain:amp'&',xncr:name'x123',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&#123;', "plain:amp'&',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&#x123;', "plain:amp'&',xncr:hex'#x123',xncr:sc';',plain:nl'\\n'", null ]
-    [ '&jzr#123;', "plain:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:nl'\\n'", null ]
-    [ 'some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',plain:lt'<',tag:text'b',tag:slash'/',plain:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:slash'/',plain:ws' ',plain:other'text',plain:nl'\\n'", null ]
+    [ '&amp;\n', "xncr:$border'',xncr:amp'&',xncr:name'amp',xncr:sc';',plain:$border'',plain:nl'\\n',plain:nl'\\n'", null ]
+    [ '&xamp;', "xncr:$border'',xncr:amp'&',xncr:name'xamp',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ '&123;', "xncr:$border'',xncr:amp'&',xncr:name'123',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ '&x123;', "xncr:$border'',xncr:amp'&',xncr:name'x123',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ '&#123;', "xncr:$border'',xncr:amp'&',xncr:dec'#123',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ '&#x123;', "xncr:$border'',xncr:amp'&',xncr:hex'#x123',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ '&jzr#123;', "xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:dec'#123',xncr:sc';',plain:$border'',plain:nl'\\n'", null ]
+    [ 'some <b/&jzr#x123;&jzr#x124;/ text', "plain:other'some ',tag:$border'',tag:lt'<',tag:text'b',tag:slash'/',plain:$border'',xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:hex'#x123',xncr:sc';',plain:$border'',xncr:$border'',xncr:amp'&',xncr:csg'jzr',xncr:hex'#x124',xncr:sc';',plain:$border'',plain:$border'',tag:c_s'/',plain:$border'',plain:ws' ',plain:other'text',plain:nl'\\n'", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -227,8 +227,9 @@ H                         = require './helpers'
       result      = []
       for token from lexer.walk probe
         result.push token
-      H.tabulate ( rpr probe ), result
-      result_rpr = ( "#{token.mk}#{rpr token.value}" for token in result ).join ','
+      # H.tabulate ( rpr probe ), result
+      result_rpr = ( "#{t.mk}#{rpr t.value}" for t in result ).join ','
+      # result_rpr = ( "#{t.mk}#{rpr t.value}" for t in result when not t.$stamped ).join ','
       # info '^94-1^', result_rpr
       resolve result_rpr
   #.........................................................................................................
@@ -239,9 +240,9 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @tags_1
+  test @tags_1
   # @tags_2()
-  test @tags_2
+  # test @tags_2
   # test @parse_closing_tags
   # @_tags_2_for_profiling()
   # test @htmlish_tag_types
