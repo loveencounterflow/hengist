@@ -158,7 +158,6 @@ H                         = require './helpers'
     # [ "\n", 'not a\nheading\n', ]
     # [ "\n\nnot a\nheading", 'not a\nheading\n', ]
     ]
-  #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       p           = new Hypedown_parser()
@@ -180,5 +179,6 @@ if require.main is module then do =>
   # test @parse_codespans_and_single_star
   test @parse_codespans_with_whitespace
   # test @parse_md_stars_markup
+  # @parse_headings()
   # test @parse_headings
 
