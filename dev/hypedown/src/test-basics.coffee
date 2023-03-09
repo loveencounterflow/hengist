@@ -104,7 +104,7 @@ H                         = require './helpers'
       result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
       # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
-      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_txt
   #.........................................................................................................
   done?()
@@ -135,8 +135,8 @@ H                         = require './helpers'
       result      = p.run()
       result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
-      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_txt
   #.........................................................................................................
   done?()
