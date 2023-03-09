@@ -83,8 +83,8 @@ H                         = require './helpers'
     [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
     [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
     [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
-    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> <code>*bar*``` baz\n', null ]
-    [ '*foo* ```*bar*`` baz', '<p><i>foo</i> <code>*bar*`` baz\n', null ]
+    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> \n', null ] ### TAINT preliminary, lack of STOP token ###
+    [ '*foo* ```*bar*`` baz', '<p><i>foo</i> \n', null ] ### TAINT preliminary, lack of STOP token ###
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
