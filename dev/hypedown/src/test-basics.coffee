@@ -147,7 +147,7 @@ H                         = require './helpers'
     Hypedown_lexer
     Hypedown_parser } = require '../../../apps/hypedown'
   probes_and_matchers = [
-    [ "# H1", "<h1>H1\n", ]
+    [ "# H1", "<h1>H1</h1>\n", ]
     # [ "\n# H1", "\n<h1>H1\n", ]
     # [ "## Section", "<h2>Section\n", ]
     # [ "not a\n# heading", 'not a\n# heading\n', ]
