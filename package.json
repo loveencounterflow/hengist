@@ -139,6 +139,7 @@
     "read-pkg-up": "^8.0.0",
     "readable-stream": "^3.6.0",
     "readlines-ng": "^0.2.1",
+    "reregexp": "^1.6.0",
     "rhombic": "^0.19.0",
     "rustybuzz-wasm": "4.6.0",
     "semver": "^7.3.5",
