@@ -2018,6 +2018,336 @@
     return null;
   };
 
+  //===========================================================================================================
+  // START AND STOP TOKENS
+  //-----------------------------------------------------------------------------------------------------------
+  this.meta_lexer_for_start_and_stop_tokens = function(T, done) {
+    var $, Interlex, Pipeline, active, compose, d, error, i, len, matcher, new_lexer, new_preparser, new_preprocessor, parser, probe, probes_and_matchers, ref, result, tokens, transforms;
+    ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_preprocessor = function(cfg) {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {        //.......................................................................................................
+        var create, mode;
+        mode = 'meta';
+        create = function(token) {
+          var base;
+          if (token.data == null) {
+            token.data = {};
+          }
+          if ((base = token.data).scope == null) {
+            base.scope = 'local';
+          }
+          return token;
+        };
+        lexer.add_lexeme({
+          mode,
+          tid: 'start',
+          pattern: /(?<!\\)<\?start\?>/,
+          reserved: '<'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'stop',
+          create,
+          pattern: /(?<!\\)<\?stop(?:[-_](?<scope>all))?\?>/,
+          reserved: '<'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          pattern: /$/u,
+          value: '\n'
+        });
+        lexer.add_lexeme({
+          mode,
+          tid: 'text_lt',
+          pattern: /<(?=\?)/
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      //.......................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    new_lexer = function(cfg) {
+      var lexer;
+      //.......................................................................................................
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          jump: null,
+          pattern: /$/u,
+          value: '\n'
+        });
+        return lexer.add_catchall_lexeme({
+          mode,
+          tid: 'text',
+          concat: true
+        });
+      })();
+      //.......................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        'helo',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ],
+      [
+        'helo <?start?>world<?stop?>!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ],
+      [
+        'helo <?start?>world<?stop_all?>!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ],
+      [
+        'helo <?start?>world<?stop-all?>!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ],
+      [
+        'helo <?start?>world<?stop-all\\?>!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ],
+      [
+        'helo <?start?>world\n<?stop_all?>!',
+        [
+          {
+            mk: 'plain:text',
+            value: 'helo',
+            x1: 0,
+            x2: 4
+          },
+          {
+            mk: 'plain:nl',
+            value: '\n',
+            x1: 4,
+            x2: 4
+          }
+        ],
+        null
+      ]
+    ];
+    //.........................................................................................................
+    new_preparser = function() {
+      var $collect_chunks, $mark_active, $parse, p, preprocessor;
+      preprocessor = new_preprocessor();
+      p = new Pipeline();
+      //.......................................................................................................
+      $parse = function() {
+        var parse;
+        return parse = function(source, send) {
+          var ref, results, token;
+          ref = preprocessor.walk(source);
+          results = [];
+          for (token of ref) {
+            results.push(send(token));
+          }
+          return results;
+        };
+      };
+      //.......................................................................................................
+      $mark_active = function() {
+        var active, mark_active, set_active;
+        active = false;
+        set_active = function(d, active) {
+          return GUY.lft.lets(d, function(d) {
+            if (d.data == null) {
+              d.data = {};
+            }
+            return d.data.active = active;
+          });
+        };
+        return mark_active = function(d, send) {
+          if (d.mk === 'meta:start') {
+            active = true;
+            return send(set_active(d, false));
+          }
+          if (d.mk === 'meta:stop') {
+            active = false;
+            return send(set_active(d, false));
+          }
+          return send(set_active(d, active));
+        };
+      };
+      //.......................................................................................................
+      $collect_chunks = function() {
+        var active, collect_chunks, collector, join;
+        collector = [];
+        active = null;
+        //.....................................................................................................
+        join = function() {
+          var first_t, last_t;
+          first_t = collector.at(0);
+          last_t = collector.at(-1);
+          return GUY.lft.lets(first_t, function(d) {
+            var t;
+            d.value = ((function() {
+              var i, len, results;
+              results = [];
+              for (i = 0, len = collector.length; i < len; i++) {
+                t = collector[i];
+                results.push(t.value);
+              }
+              return results;
+            })()).join('');
+            d.lnr1 = first_t.lnr1;
+            d.x1 = first_t.x1;
+            d.lnr2 = last_t.lnr2;
+            return d.x2 = last_t.x2;
+          });
+        };
+        //.....................................................................................................
+        return collect_chunks = function(d, send) {
+          // active ?= d.data.active
+          if (d.mk === 'meta:nl') {
+            collector.push(d);
+            send(join());
+            collector = [];
+          } else if (active !== d.data.active) {
+            if (collector.length > 0) {
+              send(join());
+            }
+            collector = [d];
+          } else {
+            collector.push(d);
+          }
+          return active = d.data.active;
+        };
+      };
+      //.......................................................................................................
+      p.push($parse());
+      p.push($mark_active());
+      // p.push ( d ) -> urge '^234^', ( if d.data.active then GUY.trm.green else GUY.trm.red ) ( rpr d.value )
+      p.push($collect_chunks());
+      return p;
+    };
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      result = [];
+      tokens = [];
+      parser = new_preparser();
+      active = false;
+      whisper('^234^', rpr(probe));
+      parser.send(probe);
+      ref = parser.walk();
+      for (d of ref) {
+        tokens.push(d);
+        result.push([d.value, d.data.active]);
+      }
+      debug('^4353^', ((function() {
+        var j, len1, results;
+        results = [];
+        for (j = 0, len1 = tokens.length; j < len1; j++) {
+          d = tokens[j];
+          results.push(GUY.trm.reverse((d.data.active ? GUY.trm.green : GUY.trm.red)(rpr(d.value))));
+        }
+        return results;
+      })()).join(''));
+      echo([probe, result, error]);
+      H.tabulate(`${rpr(probe)}`, tokens);
+      //.....................................................................................................
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -2029,9 +2359,13 @@
       // test @auto_inserted_border_posts_inclusive
       // test @auto_inserted_border_posts_exclusive
       // @singular_jumps()
-      return test(this.singular_jumps_move_forward_correctly);
+      // test @singular_jumps_move_forward_correctly
+      // @meta_lexer_for_start_and_stop_tokens()
+      return this.meta_lexer_for_start_and_stop_tokens();
     })();
   }
+
+  // test @meta_lexer_for_start_and_stop_tokens
 
 }).call(this);
 
