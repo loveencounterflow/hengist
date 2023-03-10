@@ -2021,7 +2021,7 @@
   //===========================================================================================================
   // START AND STOP TOKENS
   //-----------------------------------------------------------------------------------------------------------
-  this.meta_lexer_for_start_and_stop_tokens = function(T, done) {
+  this.meta_lexer_for_start_and_stop_tokens_1 = function(T, done) {
     var $, Interlex, Pipeline, active, compose, d, error, i, len, matcher, new_lexer, new_preparser, new_preprocessor, parser, probe, probes_and_matchers, ref, result, tokens, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
@@ -2106,116 +2106,7 @@
       return lexer;
     };
     //.........................................................................................................
-    probes_and_matchers = [
-      [
-        'helo',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo <?start?>world<?stop?>!',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo <?start?>world<?stop_all?>!',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo <?start?>world<?stop-all?>!',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo <?start?>world<?stop-all\\?>!',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo <?start?>world\n<?stop_all?>!',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 4,
-            x2: 4
-          }
-        ],
-        null
-      ]
-    ];
+    probes_and_matchers = [['helo', [['helo\n', false]], null], ['helo <?start?>world<?stop?>!', [['helo <?start?>', false], ['world', true], ['<?stop?>!\n', false]], null], ['helo <?start?>world<?stop_all?>!', [['helo <?start?>', false], ['world', true], ['<?stop_all?>!\n', false]], null], ['helo <?start?>world<?stop-all?>!', [['helo <?start?>', false], ['world', true], ['<?stop-all?>!\n', false]], null], ['helo <?start?>world<?stop-all\\?>!', [['helo <?start?>', false], ['world<?stop-all\\?>!\n', true]], null], ['helo <?start?>world\n<?stop_all?>!', [['helo <?start?>', false], ['world\n', true], ['<?stop_all?>!\n', false]], null]];
     //.........................................................................................................
     new_preparser = function() {
       var $collect_chunks, $mark_active, $parse, p, preprocessor;
@@ -2319,24 +2210,153 @@
       tokens = [];
       parser = new_preparser();
       active = false;
-      whisper('^234^', rpr(probe));
       parser.send(probe);
       ref = parser.walk();
       for (d of ref) {
         tokens.push(d);
         result.push([d.value, d.data.active]);
       }
-      debug('^4353^', ((function() {
-        var j, len1, results;
-        results = [];
-        for (j = 0, len1 = tokens.length; j < len1; j++) {
-          d = tokens[j];
-          results.push(GUY.trm.reverse((d.data.active ? GUY.trm.green : GUY.trm.red)(rpr(d.value))));
-        }
-        return results;
-      })()).join(''));
+      // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+      // H.tabulate "#{rpr probe}", tokens
       echo([probe, result, error]);
-      H.tabulate(`${rpr(probe)}`, tokens);
+      //.....................................................................................................
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.meta_lexer_for_start_and_stop_tokens_2 = function(T, done) {
+    var Interlex, cfg, compose, d, error, i, len, matcher, parser, probe, probes_and_matchers, ref, result, source, tokens, tools;
+    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    probes_and_matchers = [
+      [
+        [
+          'helo',
+          {
+            active: false
+          }
+        ],
+        [['helo\n',
+        false]],
+        null
+      ],
+      [
+        [
+          'helo <?start?>world<?stop?>!',
+          {
+            active: false
+          }
+        ],
+        [['helo <?start?>',
+        false],
+        ['world',
+        true],
+        ['<?stop?>!\n',
+        false]],
+        null
+      ],
+      [
+        [
+          'helo <?start?>world<?stop_all?>!',
+          {
+            active: false
+          }
+        ],
+        [['helo <?start?>',
+        false],
+        ['world',
+        true],
+        ['<?stop_all?>!\n',
+        false]],
+        null
+      ],
+      [
+        [
+          'helo <?start?>world<?stop-all?>!',
+          {
+            active: false
+          }
+        ],
+        [['helo <?start?>',
+        false],
+        ['world',
+        true],
+        ['<?stop-all?>!\n',
+        false]],
+        null
+      ],
+      [
+        [
+          'helo <?start?>world<?stop-all\\?>!',
+          {
+            active: false
+          }
+        ],
+        [['helo <?start?>',
+        false],
+        ['world<?stop-all\\?>!\n',
+        true]],
+        null
+      ],
+      [
+        [
+          'helo <?start?>world\n<?stop_all?>!',
+          {
+            active: false
+          }
+        ],
+        [['helo <?start?>',
+        false],
+        ['world\n',
+        true],
+        ['<?stop_all?>!\n',
+        false]],
+        null
+      ],
+      [
+        [
+          'helo <?stop?>comments\ngo\nhere\n',
+          {
+            active: true
+          }
+        ],
+        [['helo ',
+        true],
+        ['<?stop?>comments\n',
+        false],
+        ['go\n',
+        false],
+        ['here\n',
+        false],
+        ['\n',
+        false]],
+        null
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      // await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      [source, cfg] = probe;
+      result = [];
+      tokens = [];
+      parser = new tools.Start_stop_preprocessor(cfg);
+      ref = parser.walk(source);
+      for (d of ref) {
+        tokens.push(d);
+        result.push([d.value, d.data.active]);
+      }
+      // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+      // H.tabulate "#{rpr probe}", tokens
+      echo([probe, result, error]);
       //.....................................................................................................
       if (T != null) {
         T.eq(result, matcher);
@@ -2361,11 +2381,10 @@
       // @singular_jumps()
       // test @singular_jumps_move_forward_correctly
       // @meta_lexer_for_start_and_stop_tokens()
-      return this.meta_lexer_for_start_and_stop_tokens();
+      // @meta_lexer_for_start_and_stop_tokens_2()
+      return test(this.meta_lexer_for_start_and_stop_tokens_2);
     })();
   }
-
-  // test @meta_lexer_for_start_and_stop_tokens
 
 }).call(this);
 
