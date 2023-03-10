@@ -508,6 +508,130 @@ H                         = require './helpers'
   return null
 
 
+#===========================================================================================================
+# START AND STOP TOKENS
+#-----------------------------------------------------------------------------------------------------------
+@meta_lexer_for_start_and_stop_tokens = ( T, done ) ->
+  { Pipeline,         \
+    $,
+    transforms,     } = require '../../../apps/moonriver'
+  { Interlex
+    compose  }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_preprocessor = ( cfg ) ->
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    #.......................................................................................................
+    do =>
+      mode = 'meta'
+      create = ( token ) ->
+        token.data        ?= {}
+        token.data.scope  ?= 'local'
+        return token
+      lexer.add_lexeme { mode, tid: 'start',          pattern: /(?<!\\)<\?start\?>/,                      reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'stop',   create, pattern: /(?<!\\)<\?stop(?:[-_](?<scope>all))?\?>/, reserved: '<', }
+      lexer.add_lexeme { mode, tid: 'nl',             pattern: /$/u, value: '\n', }
+      lexer.add_lexeme { mode, tid: 'text_lt',        pattern: /<(?=\?)/, }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.......................................................................................................
+    return lexer
+  #.........................................................................................................
+  new_lexer = ( cfg ) ->
+    #.......................................................................................................
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    do =>
+      mode = 'plain'
+      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+    #.......................................................................................................
+    return lexer
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ 'helo', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo <?start?>world<?stop?>!', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo <?start?>world<?stop_all?>!', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo <?start?>world<?stop-all?>!', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo <?start?>world<?stop-all\\?>!', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo <?start?>world\n<?stop_all?>!', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    ]
+  #.........................................................................................................
+  new_preparser = ->
+    preprocessor  = new_preprocessor()
+    p             = new Pipeline()
+    #.......................................................................................................
+    $parse          = -> parse = ( source, send ) ->
+      send token for token from preprocessor.walk source
+    #.......................................................................................................
+    $mark_active    = ->
+      active = false
+      set_active = ( d, active ) -> GUY.lft.lets d, ( d ) ->
+        d.data         ?= {}
+        d.data.active   = active
+      return mark_active = ( d, send ) ->
+        if d.mk is 'meta:start'
+          active = true
+          return send set_active d, false
+        if d.mk is 'meta:stop'
+          active = false
+          return send set_active d, false
+        send set_active d, active
+    #.......................................................................................................
+    $collect_chunks  = ->
+      collector = []
+      active    = null
+      #.....................................................................................................
+      join      = ->
+        first_t = collector.at 0
+        last_t  = collector.at -1
+        return GUY.lft.lets first_t, ( d ) ->
+          d.value = ( t.value for t in collector ).join ''
+          d.lnr1  = first_t.lnr1
+          d.x1    = first_t.x1
+          d.lnr2  = last_t.lnr2
+          d.x2    = last_t.x2
+      #.....................................................................................................
+      return collect_chunks = ( d, send ) ->
+        # active ?= d.data.active
+        if d.mk is 'meta:nl'
+          collector.push d
+          send join()
+          collector = []
+        else if active isnt d.data.active
+          send join() if collector.length > 0
+          collector = [ d, ]
+        else
+          collector.push d
+        active = d.data.active
+    #.......................................................................................................
+    p.push $parse()
+    p.push $mark_active()
+    # p.push ( d ) -> urge '^234^', ( if d.data.active then GUY.trm.green else GUY.trm.red ) ( rpr d.value )
+    p.push $collect_chunks()
+    return p
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+    result      = []
+    tokens      = []
+    parser      = new_preparser()
+    active      = false
+    whisper '^234^', rpr probe
+    parser.send probe
+    for d from parser.walk()
+      tokens.push d
+      result.push [ d.value, d.data.active, ]
+    debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+    echo [ probe, result, error, ]
+    H.tabulate "#{rpr probe}", tokens
+    #.....................................................................................................
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
+  return null
+
+
+
+
 ############################################################################################################
 if require.main is module then do =>
   # test @
@@ -518,5 +642,9 @@ if require.main is module then do =>
   # test @auto_inserted_border_posts_inclusive
   # test @auto_inserted_border_posts_exclusive
   # @singular_jumps()
-  test @singular_jumps_move_forward_correctly
+  # test @singular_jumps_move_forward_correctly
+  # @meta_lexer_for_start_and_stop_tokens()
+  @meta_lexer_for_start_and_stop_tokens()
+  # test @meta_lexer_for_start_and_stop_tokens
+
 
