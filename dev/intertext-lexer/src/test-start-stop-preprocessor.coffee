@@ -128,22 +128,28 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr',   pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'number',   pattern: /[0-9]+/u,       reserved: [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ], }
-      lexer.add_lexeme { mode, tid: 'ws',       pattern: /\s+/u,          reserved: ' ', }
-      lexer.add_lexeme { mode, tid: 'nl',       pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, tid: 'any',    pattern: /.+/u, }
+      # lexer.add_lexeme { mode, tid: 'escchr',   pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      # lexer.add_lexeme { mode, tid: 'number',   pattern: /[0-9]+/u,       reserved: [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ], }
+      # lexer.add_lexeme { mode, tid: 'ws',       pattern: /\s+/u,          reserved: ' ', }
+      lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, value: '\n', }
+      # lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ [ 'helo', { active: false, }, ], [ [ 'helo\n', false ] ], null ]
-    [ [ 'helo <?start?>world<?stop?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop?>!\n', false ] ], null ]
-    [ [ 'helo <?start?>world<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop_all?>!\n', false ] ], null ]
-    [ [ 'helo <?start?>world<?stop-all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop-all?>!\n', false ] ], null ]
-    [ [ 'helo <?start?>world<?stop-all\\?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world<?stop-all\\?>!\n', true ] ], null ]
-    [ [ 'helo <?start?>world\n<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world\n', true ], [ '<?stop_all?>!\n', false ] ], null ]
-    [ [ 'helo <?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'helo ', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ], [ '\n', false ] ], null ]
+    # [ [ 'helo', { active: false, }, ], [ [ 'helo\n', false ] ], null ]
+    # [ [ 'helo <?start?>world<?stop?>!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ 'abc<?start?>def\nghi<?start?>uvw\nxyz', { active: false, join: ' ', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ 'abc<?stop?>def\nghi\n<?start?>uvw\nxyz', { active: true, join: ' ', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    # [ [ 'helo <?start?>\nworld<?stop?>\n<?start?>!!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    # [ [ 'helo <?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'helo ', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ], [ '\n', false ] ], null ]
+    # [ [ 'abc<?stop?><?start?>xyz', { active: true, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+
+    # [ [ 'helo <?start?>world<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop_all?>!\n', false ] ], null ]
+    # [ [ 'helo <?start?>world<?stop-all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop-all?>!\n', false ] ], null ]
+    # [ [ 'helo <?start?>world<?stop-all\\?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world<?stop-all\\?>!\n', true ] ], null ]
+    # [ [ 'helo <?start?>world\n<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world\n', true ], [ '<?stop_all?>!\n', false ] ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -154,20 +160,22 @@ H                         = require './helpers'
     result      = []
     tokens      = []
     parser      = new tools.Start_stop_preprocessor cfg
-    lexer       = new Interlex { split: 'lines', }
+    lexer       = new_lexer()
     for d from parser.walk source
-      whisper '^33-1^', rpr d.value
+      help '^33-1^', ( rpr d.value ), GUY.trm.truth d.data.active
+      tokens.push stamp d
       if d.data.active
+        lexer.XXX_set_position d # { lnr1, }
         for token from lexer.walk d.value
-          urge '^33-2^', rpr token.value
           tokens.push token
-      else
-        tokens.push d
-      # result.push [ d.value, d.data.active, ]
+          result.push "#{token.tid}#{rpr token.value}#{token.lnr1},#{token.x1},#{token.lnr2},#{token.x2}"
     # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-    H.tabulate "#{rpr probe}", tokens
-    # echo [ probe, result, error, ]
-    #.....................................................................................................
+    result_rpr = ( t.value for t in tokens when not t.$stamped ).join '|'
+    # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+    H.tabulate "#{rpr probe} -> #{rpr result_rpr}", ( t for t in tokens when     t.$stamped )
+    H.tabulate "#{rpr probe} -> #{rpr result_rpr}", ( t for t in tokens when not t.$stamped )
+    result = result.join '|'
+    echo [ probe, result, error, ]
     T?.eq result, matcher
   #.........................................................................................................
   done?()
@@ -180,6 +188,7 @@ H                         = require './helpers'
 if require.main is module then do =>
   # test @
   # @positioning_api()
-  test @positioning_api
-  # @start_stop_preprocessor_positioning()
+  # test @positioning_api
+  # test @start_stop_preprocessor_basic
+  @start_stop_preprocessor_positioning()
   # test @start_stop_preprocessor_positioning
