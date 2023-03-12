@@ -1221,6 +1221,74 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.use_linewise_with_prepend_and_append = function(T, done) {
+    var FS, Interlex, append, c, i, len, lexer, matcher, new_lexer, path, prepend, probe, probes_and_matchers, ref, result, source, token, tokens;
+    FS = require('node:fs');
+    GUY = require('../../../apps/guy');
+    ({
+      Interlex,
+      compose: c
+    } = require('../../../apps/intertext-lexer'));
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', '>', '\n'], `1:">Ångström's\\n",2:'>éclair\\n',3:">éclair's\\n",4:'>éclairs\\n',5:'>éclat\\n',6:">éclat's\\n",7:'>élan\\n',8:">élan's\\n",9:'>émigré\\n',10:">émigré's\\n\"`], [['../../../assets/datamill/lines-with-trailing-spcs.txt', '(', ')'], "1:'(line)',2:'(with)',3:'(trailing)',4:'(whitespace)'"]];
+    //.........................................................................................................
+    new_lexer = function(cfg) {
+      var lexer, mode;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      // T?.eq lexer.cfg.linewise, true
+      // T?.eq lexer.state.lnr1, 0
+      mode = 'plain';
+      // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+      lexer.add_lexeme({
+        mode,
+        tid: 'ws',
+        pattern: /\s+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'word',
+        pattern: /\S+\n?/u
+      });
+      lexer.add_lexeme({
+        mode,
+        tid: 'nl',
+        pattern: /\n/u
+      });
+      return lexer;
+    };
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher] = probes_and_matchers[i];
+      result = [];
+      tokens = [];
+      [path, prepend, append] = probe;
+      lexer = new_lexer({prepend, append});
+      path = PATH.resolve(PATH.join(__dirname, path));
+      source = FS.readFileSync(path, {
+        encoding: 'utf-8'
+      });
+      ref = lexer.walk({source});
+      for (token of ref) {
+        // info '^23-4^', lexer.state
+        tokens.push(token);
+        result.push(`${token.lnr1}:${rpr(token.value)}`);
+      }
+      //.........................................................................................................
+      result = result.join(',');
+      echo(rpr([probe, result]));
+      if (T != null) {
+        T.eq(result, matcher);
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.parse_nested_codespan_across_lines = async function(T, done) {
     var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_lexer, new_parser, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
@@ -1606,11 +1674,12 @@
       // test @use_linewise_with_single_text
       // test @parse_nested_codespan_across_lines
       // @read_csv()
-      return test(this.read_csv);
+      return test(this.use_linewise_with_prepend_and_append);
     })();
   }
 
-  // test @throws_error_on_linewise_with_nl_in_source
+  // test @read_csv
+// test @throws_error_on_linewise_with_nl_in_source
 // test @
 
 }).call(this);

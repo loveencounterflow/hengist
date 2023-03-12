@@ -2074,6 +2074,65 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs_walk_lines_prepend_append = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    GUY = require(H.guy_path);
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', '(', ')'], ["(Ångström's)", '(éclair)', "(éclair's)", '(éclairs)', '(éclat)', "(éclat's)", '(élan)', "(élan's)", '(émigré)', "(émigré's)"], null], [['../../../assets/datamill/lines-with-trailing-spcs.txt', '[', ']'], ['[line]', '[with]', '[trailing]', '[whitespace]'], null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var append, line, path, prepend, ref, result;
+          result = [];
+          [path, prepend, append] = probe;
+          path = PATH.resolve(PATH.join(__dirname, path));
+          ref = GUY.fs.walk_lines(path, {prepend, append});
+          for (line of ref) {
+            result.push(line);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_str_walk_lines_prepend_append = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    GUY = require(H.guy_path);
+    probes_and_matchers = [[['../../../assets/a-few-words.txt', '(', ')'], ["(Ångström's)", '(éclair)', "(éclair's)", '(éclairs)', '(éclat)', "(éclat's)", '(élan)', "(élan's)", '(émigré)', "(émigré's)"], null], [['../../../assets/datamill/lines-with-trailing-spcs.txt', '[', ']'], ['[line]', '[with]', '[trailing]', '[whitespace]'], null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var append, line, path, prepend, ref, result, text;
+          result = [];
+          [path, prepend, append] = probe;
+          path = PATH.resolve(PATH.join(__dirname, path));
+          text = FS.readFileSync(path, {
+            encoding: 'utf-8'
+          });
+          ref = GUY.str.walk_lines(text, {prepend, append});
+          for (line of ref) {
+            result.push(line);
+          }
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1 = function(T, done) {
     var GUY, chunk_size, exhaust, i, len, path, ref;
     GUY = require(H.guy_path);
@@ -2115,7 +2174,9 @@
       // test @GUY_str_walk_lines_with_positions
       // test @GUY_fs_walk_lines_with_positions
       // test @GUY_fs_walk_lines_with_positions_no_encoding
-      return test(this);
+      // test @
+      // test @GUY_fs_walk_lines_prepend_append
+      return test(this.GUY_str_walk_lines_prepend_append);
     })();
   }
 
