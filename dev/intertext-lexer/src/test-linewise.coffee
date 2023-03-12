@@ -155,6 +155,49 @@ tabulate_lexer = ( lexer ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@use_linewise_with_prepend_and_append = ( T, done ) ->
+  FS      = require 'node:fs'
+  GUY     = require '../../../apps/guy'
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', '>', '\n' ], """1:">Ångström's\\n",2:'>éclair\\n',3:">éclair's\\n",4:'>éclairs\\n',5:'>éclat\\n',6:">éclat's\\n",7:'>élan\\n',8:">élan's\\n",9:'>émigré\\n',10:">émigré's\\n\"""" ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', '(', ')' ], "1:'(line)',2:'(with)',3:'(trailing)',4:'(whitespace)'" ]
+    ]
+  #.........................................................................................................
+  new_lexer = ( cfg ) ->
+    lexer   = new Interlex { split: 'lines', cfg..., }
+    # T?.eq lexer.cfg.linewise, true
+    # T?.eq lexer.state.lnr1, 0
+    mode    = 'plain'
+    # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, tid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, tid: 'word',     pattern: ( /\S+\n?/u ), }
+    lexer.add_lexeme { mode, tid: 'nl',       pattern: ( /\n/u ), }
+    return lexer
+  #.........................................................................................................
+  for [ probe, matcher, ] in probes_and_matchers
+    result          = []
+    tokens          = []
+    [ path
+      prepend
+      append  ]     = probe
+    lexer           = new_lexer { prepend, append, }
+    path            = PATH.resolve PATH.join __dirname, path
+    source          = FS.readFileSync path, { encoding: 'utf-8', }
+    for token from lexer.walk { source, }
+      # info '^23-4^', lexer.state
+      tokens.push token
+      result.push "#{token.lnr1}:#{rpr token.value}"
+    #.........................................................................................................
+    result = result.join ','
+    echo rpr [ probe, result, ]
+    T?.eq result, matcher
+    # H.tabulate ( rpr probe ), tokens
+  #.........................................................................................................
+  done?()
+  return null
+
 
 #-----------------------------------------------------------------------------------------------------------
 @parse_nested_codespan_across_lines = ( T, done ) ->
@@ -303,6 +346,7 @@ if require.main is module then do =>
   # test @use_linewise_with_single_text
   # test @parse_nested_codespan_across_lines
   # @read_csv()
-  test @read_csv
+  test @use_linewise_with_prepend_and_append
+  # test @read_csv
   # test @throws_error_on_linewise_with_nl_in_source
   # test @
