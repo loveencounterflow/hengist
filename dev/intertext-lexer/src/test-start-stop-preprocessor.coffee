@@ -45,30 +45,30 @@ H                         = require './helpers'
   #.........................................................................................................
   probes_and_matchers = [
     [ [ 'helo', { active: false, }, ], [ [ 'helo\n', false ] ], null ]
+    [ [ 'helo', { active: true, }, ], [ [ 'helo\n', true ] ], null ]
     [ [ 'helo <?start?>world<?stop?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop?>!\n', false ] ], null ]
     [ [ 'helo <?start?>world<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop_all?>!\n', false ] ], null ]
     [ [ 'helo <?start?>world<?stop-all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop-all?>!\n', false ] ], null ]
     [ [ 'helo <?start?>world<?stop-all\\?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world<?stop-all\\?>!\n', true ] ], null ]
     [ [ 'helo <?start?>world\n<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world\n', true ], [ '<?stop_all?>!\n', false ] ], null ]
-    [ [ 'helo <?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'helo ', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ], [ '\n', false ] ], null ]
+    [ [ 'abc\ndef<?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'abc\n', true ], [ 'def', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ] ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
-    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-    # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
-    [ source
-      cfg     ] = probe
-    result      = []
-    tokens      = []
-    parser      = new tools.Start_stop_preprocessor cfg
-    for d from parser.walk source
-      tokens.push d
-      result.push [ d.value, d.data.active, ]
-    # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-    # H.tabulate "#{rpr probe}", tokens
-    echo [ probe, result, error, ]
-    #.....................................................................................................
-    T?.eq result, matcher
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      [ source
+        cfg     ] = probe
+      result      = []
+      tokens      = []
+      parser      = new tools.Start_stop_preprocessor cfg
+      for d from parser.walk source
+        tokens.push d
+        result.push [ d.value, d.data.active, ]
+      # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+      # H.tabulate "#{rpr probe}", tokens
+      # echo [ probe, result, error, ]
+      resolve result
   #.........................................................................................................
   done?()
   return null
