@@ -422,6 +422,51 @@ types                     = new ( require 'intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@GUY_fs_walk_lines_prepend_append = ( T, done ) ->
+  GUY                 = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', '(', ')' ], [ "(Ångström's)", '(éclair)', "(éclair's)", '(éclairs)', '(éclat)', "(éclat's)", '(élan)', "(élan's)", '(émigré)', "(émigré's)" ], null ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', '[', ']' ], [ '[line]', '[with]', '[trailing]', '[whitespace]' ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result      = []
+      [ path
+        prepend
+        append  ] = probe
+      path        = PATH.resolve PATH.join __dirname, path
+      for line from GUY.fs.walk_lines path, { prepend, append, }
+        result.push line
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@GUY_str_walk_lines_prepend_append = ( T, done ) ->
+  GUY                 = require H.guy_path
+  probes_and_matchers = [
+    [ [ '../../../assets/a-few-words.txt', '(', ')' ], [ "(Ångström's)", '(éclair)', "(éclair's)", '(éclairs)', '(éclat)', "(éclat's)", '(élan)', "(élan's)", '(émigré)', "(émigré's)" ], null ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', '[', ']' ], [ '[line]', '[with]', '[trailing]', '[whitespace]' ], null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result      = []
+      [ path
+        prepend
+        append  ] = probe
+      path        = PATH.resolve PATH.join __dirname, path
+      text        = FS.readFileSync path, { encoding: 'utf-8', }
+      for line from GUY.str.walk_lines text, { prepend, append, }
+        result.push line
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @GUY_fs_walk_buffers_walk_lines_reject_chunk_size_lt_1 = ( T, done ) ->
   GUY                 = require H.guy_path
   path                = PATH.resolve PATH.join __dirname, '../../../assets/a-few-words.txt'
@@ -445,7 +490,9 @@ if require.main is module then do =>
   # test @GUY_str_walk_lines_with_positions
   # test @GUY_fs_walk_lines_with_positions
   # test @GUY_fs_walk_lines_with_positions_no_encoding
-  test @
+  # test @
+  # test @GUY_fs_walk_lines_prepend_append
+  test @GUY_str_walk_lines_prepend_append
   # test @GUY_fs_walk_lines
   # @GUY_str_walk_lines()
   # test @GUY_str_walk_lines
