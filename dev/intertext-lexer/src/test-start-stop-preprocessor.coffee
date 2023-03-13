@@ -38,6 +38,36 @@ H                         = require './helpers'
 #===========================================================================================================
 # START AND STOP TOKENS
 #-----------------------------------------------------------------------------------------------------------
+@start_stop_preprocessor_instantiation = ( T, done ) ->
+  { Interlex
+    compose
+    tools   } = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ null, { active: true, joiner: null, eraser: ' ' }, ]
+    [ {}, { active: true, joiner: null, eraser: ' ' }, ]
+    [ { active: false, }, { active: false, joiner: null, eraser: ' ' }, ]
+    [ { active: true, }, { active: true, joiner: null, eraser: ' ' }, ]
+    [ { active: true, joiner: '', }, { active: true, joiner: '', eraser: null, }, ]
+    [ { active: true, joiner: 'x', }, { active: true, joiner: 'x', eraser: null, }, ]
+    [ { active: true, joiner: 'x', eraser: '', }, null, /cannot set both `joiner` and `eraser`/ ]
+    [ { active: true, eraser: '\x00', }, { active: true, joiner: null, eraser: '\x00' }, ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      parser  = new tools.Start_stop_preprocessor probe
+      result  = GUY.props.pick_with_fallback parser.cfg, null, 'active', 'joiner', 'eraser'
+      # debug '^24243^', probe, result
+      resolve result
+  #.........................................................................................................
+  # lexer = new Interlex()
+  # debug '^23423^', lexer.types.create.ilx_walk_source_or_cfg null
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @start_stop_preprocessor_basic = ( T, done ) ->
   { Interlex
     compose
@@ -140,8 +170,11 @@ H                         = require './helpers'
   probes_and_matchers = [
     # [ [ 'helo', { active: false, }, ], [ [ 'helo\n', false ] ], null ]
     # [ [ 'helo <?start?>world<?stop?>!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
-    [ [ 'abc<?start?>def\nghi<?start?>uvw\nxyz', { active: false, join: ' ', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
-    [ [ 'abc<?stop?>def\nghi\n<?start?>uvw\nxyz', { active: true, join: ' ', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ 'abc<?start?>def\nghi<?start?>uvw\nxyz', { active: false, joiner: '%', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ 'abc<?stop?>def\nghi\n<?start?>uvw\nxyz', { active: true, joiner: '%', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ 'abc<?stop?>whatever<?start?>xyz', { active: true, joiner: '%', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+    [ [ '<?stop?>whatever<?start?>xyz', { active: true, joiner: '%', }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
+       # abc                         xyz⏎
     # [ [ 'helo <?start?>\nworld<?stop?>\n<?start?>!!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
     # [ [ 'helo <?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'helo ', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ], [ '\n', false ] ], null ]
     # [ [ 'abc<?stop?><?start?>xyz', { active: true, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
@@ -190,5 +223,7 @@ if require.main is module then do =>
   # @positioning_api()
   # test @positioning_api
   # test @start_stop_preprocessor_basic
-  @start_stop_preprocessor_positioning()
+  # @start_stop_preprocessor_instantiation()
+  test @start_stop_preprocessor_instantiation
+  # @start_stop_preprocessor_positioning()
   # test @start_stop_preprocessor_positioning
