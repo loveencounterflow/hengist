@@ -144,7 +144,7 @@
             active: false
           }
         ],
-        [['helo\n',
+        [['helo',
         false]],
         null
       ],
@@ -155,7 +155,7 @@
             active: true
           }
         ],
-        [['helo\n',
+        [['helo',
         true]],
         null
       ],
@@ -168,10 +168,10 @@
         ],
         [['helo <?start?>',
         false],
+        ['<?stop?>!',
+        false],
         ['world',
-        true],
-        ['<?stop?>!\n',
-        false]],
+        true]],
         null
       ],
       [
@@ -183,10 +183,10 @@
         ],
         [['helo <?start?>',
         false],
+        ['<?stop_all?>!',
+        false],
         ['world',
-        true],
-        ['<?stop_all?>!\n',
-        false]],
+        true]],
         null
       ],
       [
@@ -198,10 +198,10 @@
         ],
         [['helo <?start?>',
         false],
+        ['<?stop-all?>!',
+        false],
         ['world',
-        true],
-        ['<?stop-all?>!\n',
-        false]],
+        true]],
         null
       ],
       [
@@ -213,7 +213,7 @@
         ],
         [['helo <?start?>',
         false],
-        ['world<?stop-all\\?>!\n',
+        ['world<?stop-all\\?>!',
         true]],
         null
       ],
@@ -226,10 +226,10 @@
         ],
         [['helo <?start?>',
         false],
-        ['world\n',
-        true],
-        ['<?stop_all?>!\n',
-        false]],
+        ['<?stop_all?>!',
+        false],
+        ['world',
+        true]],
         null
       ],
       [
@@ -239,16 +239,16 @@
             active: true
           }
         ],
-        [['abc\n',
+        [['abc',
         true],
+        ['<?stop?>comments',
+        false],
+        ['go',
+        false],
+        ['here',
+        false],
         ['def',
-        true],
-        ['<?stop?>comments\n',
-        false],
-        ['go\n',
-        false],
-        ['here\n',
-        false]],
+        true]],
         null
       ]
     ];
@@ -282,103 +282,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.positioning_api = async function(T, done) {
-    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers, tools;
-    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
-    //.........................................................................................................
-    new_lexer = function(cfg) {
-      var lexer;
-      lexer = new Interlex({
-        split: 'lines',
-        ...cfg
-      });
-      (() => {        //.........................................................................................................
-        var mode;
-        mode = 'plain';
-        lexer.add_lexeme({
-          mode,
-          tid: 'number',
-          pattern: /[0-9]+/u,
-          reserved: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        });
-        lexer.add_lexeme({
-          mode,
-          tid: 'ws',
-          pattern: /\s+/u,
-          reserved: ' '
-        });
-        lexer.add_lexeme({
-          mode,
-          tid: 'nl',
-          pattern: /$/u,
-          value: '\n'
-        });
-        return lexer.add_catchall_lexeme({
-          mode,
-          tid: 'text',
-          concat: true
-        });
-      })();
-      //.........................................................................................................
-      return lexer;
-    };
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        [
-          'helo',
-          {
-            lnr: 3,
-            x: 10
-          }
-        ],
-        "text'helo'3,10,3,14|nl'\\n'3,14,3,14",
-        null
-      ],
-      [
-        [
-          'helo',
-          {
-            lnr: 3,
-            x: -10
-          }
-        ],
-        null,
-        /not a valid ilx_set_offset_cfg/
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var d, lexer, offset, ref, result, source, tokens;
-          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
-          [source, offset] = probe;
-          result = [];
-          tokens = [];
-          lexer = new_lexer();
-          lexer.set_offset(offset);
-          ref = lexer.walk(source);
-          for (d of ref) {
-            urge('^33-2^', rpr(d.value));
-            tokens.push(d);
-            result.push(`${d.tid}${rpr(d.value)}${d.lnr1},${d.x1},${d.lnr2},${d.x2}`);
-          }
-          // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-          H.tabulate(`${rpr(probe)}`, tokens);
-          result = result.join('|');
-          return resolve(result);
-        });
-      });
-    }
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.start_stop_preprocessor_positioning = function(T, done) {
     var Interlex, cfg, compose, d, error, i, len, lexer, matcher, new_lexer, parser, probe, probes_and_matchers, ref, ref1, result, result_rpr, source, t, token, tokens, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
@@ -397,9 +300,6 @@
           tid: 'any',
           pattern: /.+/u
         });
-        // lexer.add_lexeme { mode, tid: 'escchr',   pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-        // lexer.add_lexeme { mode, tid: 'number',   pattern: /[0-9]+/u,       reserved: [ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ], }
-        // lexer.add_lexeme { mode, tid: 'ws',       pattern: /\s+/u,          reserved: ' ', }
         return lexer.add_lexeme({
           mode,
           tid: 'nl',
@@ -407,7 +307,6 @@
           value: '\n'
         });
       })();
-      // lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
       //.........................................................................................................
       return lexer;
     };
@@ -415,15 +314,13 @@
     probes_and_matchers = [
       [
         [
-          // [ [ 'helo', { active: false, }, ], [ [ 'helo\n', false ] ], null ]
-          // [ [ 'helo <?start?>world<?stop?>!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
           'abc<?start?>def\nghi<?start?>uvw\nxyz',
           {
             active: false,
             joiner: '%'
           }
         ],
-        "any'world'1,14,1,19|nl'\\n'1,19,1,19",
+        "any'def'1,12,1,15|nl'\\n'1,15,1,15|any'ghi%uvw'2,0,2,7|nl'\\n'2,7,2,7|any'xyz'3,0,3,3|nl'\\n'3,3,3,3",
         null
       ],
       [
@@ -434,18 +331,7 @@
             joiner: '%'
           }
         ],
-        "any'world'1,14,1,19|nl'\\n'1,19,1,19",
-        null
-      ],
-      [
-        [
-          'abc<?stop?>whatever<?start?>xyz',
-          {
-            active: true,
-            joiner: '%'
-          }
-        ],
-        "any'world'1,14,1,19|nl'\\n'1,19,1,19",
+        "any'abc'1,0,1,3|nl'\\n'1,3,1,3|any'uvw'3,9,3,12|nl'\\n'3,12,3,12|any'xyz'4,0,4,3|nl'\\n'4,3,4,3",
         null
       ],
       [
@@ -456,20 +342,48 @@
             joiner: '%'
           }
         ],
-        "any'world'1,14,1,19|nl'\\n'1,19,1,19",
+        "any'xyz'1,25,1,28|nl'\\n'1,28,1,28",
         null
-      ]
+      ],
+      [
+        [
+          'abc<?stop?>whatever<?start?>xyz',
+          {
+            active: true,
+            joiner: '%'
+          }
+        ],
+        "any'abc%xyz'1,0,1,7|nl'\\n'1,7,1,7",
+        null
+      ],
+      [
+        [
+          'abc<?stop?>whatever<?start?>xyz',
+          {
+            active: true,
+            eraser: '\x00'
+          }
+        ],
+        "any'abc\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00xyz'1,0,1,31|nl'\\n'1,31,1,31",
+        null
+      ],
+      [
+        [
+          'abc<?stop?>whatever<?start?>xyz',
+          {
+            active: true,
+            eraser: ''
+          }
+        ],
+        "any'abcxyz'1,0,1,6|nl'\\n'1,6,1,6",
+        null
+      ],
+      [['abc<?stop?>whatever<?start?>xyz',
+      null],
+      "any'abc                         xyz'1,0,1,31|nl'\\n'1,31,1,31",
+      null]
     ];
 //.........................................................................................................
-// abc                         xyz⏎
-// [ [ 'helo <?start?>\nworld<?stop?>\n<?start?>!!', { active: false, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
-// [ [ 'helo <?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'helo ', true ], [ '<?stop?>comments\n', false ], [ 'go\n', false ], [ 'here\n', false ], [ '\n', false ] ], null ]
-// [ [ 'abc<?stop?><?start?>xyz', { active: true, }, ], "any'world'1,14,1,19|nl'\\n'1,19,1,19", null ]
-
-    // [ [ 'helo <?start?>world<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop_all?>!\n', false ] ], null ]
-// [ [ 'helo <?start?>world<?stop-all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world', true ], [ '<?stop-all?>!\n', false ] ], null ]
-// [ [ 'helo <?start?>world<?stop-all\\?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world<?stop-all\\?>!\n', true ] ], null ]
-// [ [ 'helo <?start?>world\n<?stop_all?>!', { active: false, }, ], [ [ 'helo <?start?>', false ], [ 'world\n', true ], [ '<?stop_all?>!\n', false ] ], null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       // await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -481,10 +395,10 @@
       lexer = new_lexer();
       ref = parser.walk(source);
       for (d of ref) {
-        help('^33-1^', rpr(d.value), GUY.trm.truth(d.data.active));
+        // help '^33-1^', ( rpr d.value ), GUY.trm.truth d.data.active
         tokens.push(stamp(d));
         if (d.data.active) {
-          lexer.XXX_set_position(d); // { lnr1, }
+          lexer.set_position(d); // { lnr1, }
           ref1 = lexer.walk(d.value);
           for (token of ref1) {
             tokens.push(token);
@@ -505,28 +419,8 @@
         return results;
       })()).join('|');
       // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
-      H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, (function() {
-        var j, len1, results;
-        results = [];
-        for (j = 0, len1 = tokens.length; j < len1; j++) {
-          t = tokens[j];
-          if (t.$stamped) {
-            results.push(t);
-          }
-        }
-        return results;
-      })());
-      H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, (function() {
-        var j, len1, results;
-        results = [];
-        for (j = 0, len1 = tokens.length; j < len1; j++) {
-          t = tokens[j];
-          if (!t.$stamped) {
-            results.push(t);
-          }
-        }
-        return results;
-      })());
+      // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", ( t for t in tokens when     t.$stamped )
+      // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", ( t for t in tokens when not t.$stamped )
       result = result.join('|');
       echo([probe, result, error]);
       if (T != null) {
@@ -539,20 +433,262 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.positioning_api_explicit = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers, tools;
+    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(cfg) {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'any',
+          pattern: /.+/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          pattern: /$/u,
+          value: '\n'
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [['𝍲𝍳𝍴𝍵𝍶',
+      null],
+      "'𝍲𝍳𝍴𝍵𝍶'1,0...1,10|'\\n'1,10...1,10",
+      null],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: 5
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'5,0...5,10|'\\n'5,10...5,10",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            x1: 100
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'1,100...1,110|'\\n'1,110...1,110",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: 10,
+            x1: 100
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'10,100...10,110|'\\n'10,110...10,110",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            x1: -1
+          }
+        ],
+        null,
+        /not a valid ilx_set_position_cfg/
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: -1
+          }
+        ],
+        null,
+        /not a valid ilx_set_position_cfg/
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var cfg, d, lexer, ref, result, source, tokens;
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          [source, cfg] = probe;
+          result = [];
+          tokens = [];
+          lexer = new_lexer();
+          if (cfg != null) {
+            lexer.set_position(cfg);
+          }
+          ref = lexer.walk(source);
+          for (d of ref) {
+            result.push(`${rpr(d.value)}${d.lnr1},${d.x1}...${d.lnr2},${d.x2}`);
+            // result.push GUY.props.pick_with_fallback d, null, 'value', 'lnr1', 'x1', 'lnr2', 'x2'
+            tokens.push(d);
+          }
+          result = result.join('|');
+          H.tabulate(`${rpr(probe)}`, tokens);
+          // echo [ probe, result, error, ]
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.positioning_api_implicit = async function(T, done) {
+    var Interlex, compose, error, i, len, matcher, new_lexer, probe, probes_and_matchers, tools;
+    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(cfg) {
+      var lexer;
+      lexer = new Interlex({
+        split: 'lines',
+        ...cfg
+      });
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'plain';
+        lexer.add_lexeme({
+          mode,
+          tid: 'any',
+          pattern: /.+/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          tid: 'nl',
+          pattern: /$/u,
+          value: '\n'
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    probes_and_matchers = [
+      [['𝍲𝍳𝍴𝍵𝍶',
+      null],
+      "'𝍲𝍳𝍴𝍵𝍶'1,0...1,10|'\\n'1,10...1,10",
+      null],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: 5
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'5,0...5,10|'\\n'5,10...5,10",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            x1: 100
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'1,100...1,110|'\\n'1,110...1,110",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: 10,
+            x1: 100
+          }
+        ],
+        "'𝍲𝍳𝍴𝍵𝍶'10,100...10,110|'\\n'10,110...10,110",
+        null
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            x1: -1
+          }
+        ],
+        null,
+        /not a valid ilx_set_position_cfg/
+      ],
+      [
+        [
+          '𝍲𝍳𝍴𝍵𝍶',
+          {
+            lnr1: -1
+          }
+        ],
+        null,
+        /not a valid ilx_set_position_cfg/
+      ]
+    ];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var cfg, d, lexer, ref, result, tokens, value;
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          [value, cfg] = probe;
+          result = [];
+          tokens = [];
+          lexer = new_lexer();
+          if (cfg != null) {
+            lexer.set_position(cfg);
+          }
+          ref = lexer.walk({value, ...cfg});
+          for (d of ref) {
+            result.push(`${rpr(d.value)}${d.lnr1},${d.x1}...${d.lnr2},${d.x2}`);
+            // result.push GUY.props.pick_with_fallback d, null, 'value', 'lnr1', 'x1', 'lnr2', 'x2'
+            tokens.push(d);
+          }
+          result = result.join('|');
+          H.tabulate(`${rpr(probe)}`, tokens);
+          // echo [ probe, result, error, ]
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
-      // @positioning_api()
-      // test @positioning_api
-      // test @start_stop_preprocessor_basic
-      // @start_stop_preprocessor_instantiation()
-      return test(this.start_stop_preprocessor_instantiation);
+      // @positioning_api_explicit()
+      // test @positioning_api_explicit
+      return test(this.start_stop_preprocessor_basic);
     })();
   }
 
-  // @start_stop_preprocessor_positioning()
+  // @start_stop_preprocessor_instantiation()
+// test @start_stop_preprocessor_instantiation
+// @start_stop_preprocessor_positioning()
 // test @start_stop_preprocessor_positioning
+// test @positioning_api_explicit
+// test @positioning_api_implicit
 
 }).call(this);
 
