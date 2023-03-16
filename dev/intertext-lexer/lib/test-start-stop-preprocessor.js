@@ -250,6 +250,85 @@
         ['def',
         true]],
         null
+      ],
+      [
+        [
+          'abc<?stop?>def',
+          {
+            active: true
+          }
+        ],
+        [['<?stop?>def',
+        false],
+        ['abc',
+        true]],
+        null
+      ],
+      [
+        [
+          'abc\\<?stop?>def',
+          {
+            active: true
+          }
+        ],
+        [['abc\\<?stop?>def',
+        true]],
+        null
+      ],
+      [
+        [
+          'abc\\\\<?stop?>def',
+          {
+            active: true
+          }
+        ],
+        [['<?stop?>def',
+        false],
+        ['abc\\\\',
+        true]],
+        null
+      ],
+      [
+        [
+          '1<?stop?>2<?start?>3<?stop?>4<?start?>5<?stop?>6<?start?>7<?stop?>8<?start?>9<?stop?>10<?start?>',
+          {
+            active: false
+          }
+        ],
+        [['1<?stop?>2<?start?>',
+        false],
+        ['<?stop?>4<?start?>',
+        false],
+        ['<?stop?>6<?start?>',
+        false],
+        ['<?stop?>8<?start?>',
+        false],
+        ['<?stop?>10<?start?>',
+        false],
+        ['3                  5                  7                  9',
+        true]],
+        null
+      ],
+      [
+        [
+          '1<?stop?>2<?start?>3<?stop?>4<?start?>5<?stop?>6<?start?>7<?stop?>8<?start?>9<?stop?>10<?start?>',
+          {
+            active: true
+          }
+        ],
+        [['<?stop?>2<?start?>',
+        false],
+        ['<?stop?>4<?start?>',
+        false],
+        ['<?stop?>6<?start?>',
+        false],
+        ['<?stop?>8<?start?>',
+        false],
+        ['<?stop?>10<?start?>',
+        false],
+        ['1                  3                  5                  7                  9',
+        true]],
+        null
       ]
     ];
 //.........................................................................................................
@@ -259,6 +338,7 @@
         return new Promise(function(resolve, reject) {
           var cfg, d, parser, ref, result, source, tokens;
           // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          // echo '^97-1^', '————————————————————————————'
           [source, cfg] = probe;
           result = [];
           tokens = [];
