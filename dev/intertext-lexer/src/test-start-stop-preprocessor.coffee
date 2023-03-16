@@ -82,11 +82,17 @@ H                         = require './helpers'
     [ [ 'helo <?start?>world<?stop-all\\?>!', { active: false } ], [ [ 'helo <?start?>', false ], [ 'world<?stop-all\\?>!', true ] ], null ]
     [ [ 'helo <?start?>world\n<?stop_all?>!', { active: false } ], [ [ 'helo <?start?>', false ], [ '<?stop_all?>!', false ], [ 'world', true ] ], null ]
     [ [ 'abc\ndef<?stop?>comments\ngo\nhere\n', { active: true } ], [ [ 'abc', true ], [ '<?stop?>comments', false ], [ 'go', false ], [ 'here', false ], [ 'def', true ] ], null ]
+    [ [ 'abc<?stop?>def', { active: true } ], [ [ '<?stop?>def', false ], [ 'abc', true ] ], null ]
+    [ [ 'abc\\<?stop?>def', { active: true } ], [ [ 'abc\\<?stop?>def', true ] ], null ]
+    [ [ 'abc\\\\<?stop?>def', { active: true } ], [ [ '<?stop?>def', false ], [ 'abc\\\\', true ] ], null ]
+    [ [ '1<?stop?>2<?start?>3<?stop?>4<?start?>5<?stop?>6<?start?>7<?stop?>8<?start?>9<?stop?>10<?start?>', { active: false } ], [ [ '1<?stop?>2<?start?>', false ], [ '<?stop?>4<?start?>', false ], [ '<?stop?>6<?start?>', false ], [ '<?stop?>8<?start?>', false ], [ '<?stop?>10<?start?>', false ], [ '3                  5                  7                  9', true ] ], null ]
+    [ [ '1<?stop?>2<?start?>3<?stop?>4<?start?>5<?stop?>6<?start?>7<?stop?>8<?start?>9<?stop?>10<?start?>', { active: true } ], [ [ '<?stop?>2<?start?>', false ], [ '<?stop?>4<?start?>', false ], [ '<?stop?>6<?start?>', false ], [ '<?stop?>8<?start?>', false ], [ '<?stop?>10<?start?>', false ], [ '1                  3                  5                  7                  9', true ] ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      # echo '^97-1^', '————————————————————————————'
       [ source
         cfg     ] = probe
       result      = []
