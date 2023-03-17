@@ -44,6 +44,13 @@ H                         = require './helpers'
   method
 * ordering is preserved
 * modules may in turn be combined
+* can return list with
+  * functions that when called return a transform; these transforms must have a name that starts with a
+    dollar sign `$`
+  * functions (whose name must not start with a dollar sign `$`)
+  * instances of `Pipeline`
+  * instances of (derivatives of) `Pipeline_module`
+  * classes derivatived from `Pipeline_module` (will be instantiated)
 
 ###
 
@@ -54,18 +61,33 @@ class Pipeline_module
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
     GUY.props.hide @, 'types', types
+    return @_build()
+
+  #---------------------------------------------------------------------------------------------------------
+  _build: ( value = null ) ->
     R = new Pipeline()
     for k in GUY.props.keys @, { hidden: true, }
       continue unless /^\$/.test k
-      value = @[ k ]
-      if @types.isa.function value
-        R.push value.call @
-      # else if value instanceof @constructor
-      else if @types.isa.list value
-        R.push x for x in value
-      else
-        throw new Error "^Pipeline_module@1^ unable to ingest #{rpr value}"
+      R.push d for d from @_walk_values @[ k ]
     return R
+
+  #---------------------------------------------------------------------------------------------------------
+  _walk_values: ( value ) ->
+    value = new value() if @types.isa.class value
+    #.......................................................................................................
+    if @types.isa.function value
+      return yield value unless value.name.startsWith '$'
+      return yield value.call @
+    #.......................................................................................................
+    if @types.isa.list value
+      for e in value
+        yield d for d from @_walk_values e
+      return null
+    #.......................................................................................................
+    if value instanceof Pipeline
+      return yield value
+    #.......................................................................................................
+    throw new Error "^Pipeline_module@1^ unable to ingest #{rpr value}"
 
 
 #===========================================================================================================
@@ -96,8 +118,10 @@ class P_12 extends Pipeline_module
 class P_12_x extends Pipeline_module
 
   $: [
+    direct_fn     =    ( d ) -> help 'direct_fn'
+    $indirect_fn  = -> ( d ) -> help '$indirect_fn'
     new P_1()
-    new P_2()
+    P_2
     ]
 
 
