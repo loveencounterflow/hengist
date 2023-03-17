@@ -41,7 +41,8 @@
   Pipeline_module = class Pipeline_module {
     //---------------------------------------------------------------------------------------------------------
     constructor() {
-      var R, i, k, len, ref;
+      var R, i, j, k, len, len1, ref, value, x;
+      GUY.props.hide(this, 'types', types);
       R = new Pipeline();
       ref = GUY.props.keys(this, {
         hidden: true
@@ -51,25 +52,25 @@
         if (!/^\$/.test(k)) {
           continue;
         }
-        R.push(this[k]());
+        value = this[k];
+        if (this.types.isa.function(value)) {
+          R.push(value.call(this));
+        // else if value instanceof @constructor
+        } else if (this.types.isa.list(value)) {
+          for (j = 0, len1 = value.length; j < len1; j++) {
+            x = value[j];
+            R.push(x);
+          }
+        } else {
+          throw new Error(`^Pipeline_module@1^ unable to ingest ${rpr(value)}`);
+        }
       }
       return R;
     }
 
   };
 
-  // #===========================================================================================================
-  // class Pipeline_module_B extends Pipeline
-
-    //   #---------------------------------------------------------------------------------------------------------
-  //   constructor: ->
-  //     super()
-  //     for k in GUY.props.keys @, { hidden: true, depth: 1, }
-  //       continue unless /^\$.+/.test k
-  //       @push @[ k ]()
-  //     return undefined
-
-    //===========================================================================================================
+  //===========================================================================================================
   P_1 = class P_1 extends Pipeline_module {
     $p_1_1() {
       var p_1_1;
@@ -132,17 +133,15 @@
 
   };
 
-  //===========================================================================================================
-  P_12_x = class P_12_x extends Pipeline_module {
-    $() {
-      var R;
-      R = new Pipeline();
-      R.push(new P_1());
-      R.push(new P_2());
-      return R;
-    }
+  P_12_x = (function() {
+    //===========================================================================================================
+    class P_12_x extends Pipeline_module {};
 
-  };
+    P_12_x.prototype.$ = [new P_1(), new P_2()];
+
+    return P_12_x;
+
+  }).call(this);
 
   //===========================================================================================================
   demo_1 = function() {
