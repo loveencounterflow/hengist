@@ -53,22 +53,19 @@ class Pipeline_module
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
+    GUY.props.hide @, 'types', types
     R = new Pipeline()
     for k in GUY.props.keys @, { hidden: true, }
       continue unless /^\$/.test k
-      R.push @[ k ]()
+      value = @[ k ]
+      if @types.isa.function value
+        R.push value.call @
+      # else if value instanceof @constructor
+      else if @types.isa.list value
+        R.push x for x in value
+      else
+        throw new Error "^Pipeline_module@1^ unable to ingest #{rpr value}"
     return R
-
-# #===========================================================================================================
-# class Pipeline_module_B extends Pipeline
-
-#   #---------------------------------------------------------------------------------------------------------
-#   constructor: ->
-#     super()
-#     for k in GUY.props.keys @, { hidden: true, depth: 1, }
-#       continue unless /^\$.+/.test k
-#       @push @[ k ]()
-#     return undefined
 
 
 #===========================================================================================================
@@ -98,11 +95,10 @@ class P_12 extends Pipeline_module
 #===========================================================================================================
 class P_12_x extends Pipeline_module
 
-  $: ->
-    R = new Pipeline()
-    R.push new P_1()
-    R.push new P_2()
-    return R
+  $: [
+    new P_1()
+    new P_2()
+    ]
 
 
 #===========================================================================================================
