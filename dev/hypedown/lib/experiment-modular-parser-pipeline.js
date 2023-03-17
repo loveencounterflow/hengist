@@ -35,14 +35,26 @@
     method
   * ordering is preserved
   * modules may in turn be combined
+  * can return list with
+    * functions that when called return a transform; these transforms must have a name that starts with a
+      dollar sign `$`
+    * functions (whose name must not start with a dollar sign `$`)
+    * instances of `Pipeline`
+    * instances of (derivatives of) `Pipeline_module`
+    * classes derivatived from `Pipeline_module` (will be instantiated)
 
    */
   //===========================================================================================================
   Pipeline_module = class Pipeline_module {
     //---------------------------------------------------------------------------------------------------------
     constructor() {
-      var R, i, j, k, len, len1, ref, value, x;
       GUY.props.hide(this, 'types', types);
+      return this._build();
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _build(value = null) {
+      var R, d, i, k, len, ref, ref1;
       R = new Pipeline();
       ref = GUY.props.keys(this, {
         hidden: true
@@ -52,20 +64,44 @@
         if (!/^\$/.test(k)) {
           continue;
         }
-        value = this[k];
-        if (this.types.isa.function(value)) {
-          R.push(value.call(this));
-        // else if value instanceof @constructor
-        } else if (this.types.isa.list(value)) {
-          for (j = 0, len1 = value.length; j < len1; j++) {
-            x = value[j];
-            R.push(x);
-          }
-        } else {
-          throw new Error(`^Pipeline_module@1^ unable to ingest ${rpr(value)}`);
+        ref1 = this._walk_values(this[k]);
+        for (d of ref1) {
+          R.push(d);
         }
       }
       return R;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    * _walk_values(value) {
+      var d, e, i, len, ref;
+      if (this.types.isa.class(value)) {
+        value = new value();
+      }
+      //.......................................................................................................
+      if (this.types.isa.function(value)) {
+        if (!value.name.startsWith('$')) {
+          return (yield value);
+        }
+        return (yield value.call(this));
+      }
+      //.......................................................................................................
+      if (this.types.isa.list(value)) {
+        for (i = 0, len = value.length; i < len; i++) {
+          e = value[i];
+          ref = this._walk_values(e);
+          for (d of ref) {
+            yield d;
+          }
+        }
+        return null;
+      }
+      //.......................................................................................................
+      if (value instanceof Pipeline) {
+        return (yield value);
+      }
+      //.......................................................................................................
+      throw new Error(`^Pipeline_module@1^ unable to ingest ${rpr(value)}`);
     }
 
   };
@@ -134,10 +170,23 @@
   };
 
   P_12_x = (function() {
+    var $indirect_fn, direct_fn;
+
     //===========================================================================================================
     class P_12_x extends Pipeline_module {};
 
-    P_12_x.prototype.$ = [new P_1(), new P_2()];
+    P_12_x.prototype.$ = [
+      direct_fn = function(d) {
+        return help('direct_fn');
+      },
+      $indirect_fn = function() {
+        return function(d) {
+          return help('$indirect_fn');
+        };
+      },
+      new P_1(),
+      P_2
+    ];
 
     return P_12_x;
 
