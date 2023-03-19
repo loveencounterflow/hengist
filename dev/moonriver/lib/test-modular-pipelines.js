@@ -22,26 +22,7 @@
   // { new_datom
   //   lets
   //   stamp     }             = DATOM
-  /*
 
-   * Modular Pipeline
-
-  * derive pipeline module class from class `Pipeline_module`
-  * base class looks for methods on instance (prototype) whose names start with a dollar sign `$`
-  * each of these will be called, added to pipeline
-  * constructor returns new instance of a MoonRiver `Pipeline` containing the results of calling each `$`
-    method
-  * ordering is preserved
-  * modules may in turn be combined
-  * can return list with
-    * functions that when called return a transform; these transforms must have a name that starts with a
-      dollar sign `$`
-    * functions (whose name must not start with a dollar sign `$`)
-    * instances of `Pipeline`
-    * instances of (derivatives of) `Pipeline_module`
-    * classes derivatived from `Pipeline_module` (will be instantiated)
-
-   */
   //-----------------------------------------------------------------------------------------------------------
   get_modular_pipeline_classes = function() {
     var P_1, P_12, P_12_x, P_2, P_3, Pipeline, Pipeline_module;
