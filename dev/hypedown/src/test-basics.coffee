@@ -37,9 +37,8 @@ H                         = require './helpers'
 #
 #-----------------------------------------------------------------------------------------------------------
 @parse_md_stars_markup = ( T, done ) ->
-  { Hypedown_lexer
-    Hypedown_parser } = require '../../../apps/hypedown'
-  { XXX_new_token }   = require '../../../apps/hypedown/lib/helpers'
+  { Hypedown_lexer  } = require '../../../apps/hypedown'
+  { $040_stars      } = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
     [ '*abc*', '<p><i>abc</i>\n', null ]
     [ '*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null ]
@@ -58,15 +57,21 @@ H                         = require './helpers'
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      p           = new Hypedown_parser()
-      p.send probe
-      result      = p.run()
-      result_html = ( d.value for d in result when not d.$stamped ).join ''
-      # H.tabulate "#{rpr probe} -> #{rpr result_html}", result
-      # H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in result when not t.$stamped )
-      #.....................................................................................................
-      resolve result_html
+    # await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    lexer       = new Hypedown_lexer()
+    parser      = new $040_stars()
+    for d from lexer.walk probe
+      parser.send d
+      for token from parser.walk()
+        debug '^345^', ( rpr token.value )
+    # p           = new Hypedown_parser()
+    # p.send probe
+    # result      = p.run()
+    # result_html = ( d.value for d in result when not d.$stamped ).join ''
+    # H.tabulate "#{rpr probe} -> #{rpr result_html}", result
+    # H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in result when not t.$stamped )
+    #.....................................................................................................
+    # resolve result_html
   #.........................................................................................................
   done?()
 
@@ -177,7 +182,8 @@ H                         = require './helpers'
 if require.main is module then do =>
   # test @
   # test @parse_codespans_and_single_star
-  test @parse_codespans_with_whitespace
+  # test @parse_codespans_with_whitespace
+  @parse_md_stars_markup()
   # test @parse_md_stars_markup
   # @parse_headings()
   # test @parse_headings
