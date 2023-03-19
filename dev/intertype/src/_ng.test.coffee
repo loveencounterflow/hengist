@@ -2438,6 +2438,26 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@recognize_classes = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    isa
+    type_of
+    create        } = types
+  class X
+  T?.eq ( isa.class X       ), true
+  T?.eq ( isa.function X    ), true
+  T?.eq ( isa.class new X() ), false
+  T?.eq ( isa.class ->      ), false
+  T?.eq ( isa.function ->   ), true
+  T?.eq ( type_of X         ), 'class'
+  T?.eq ( type_of new X()   ), 'x'
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2489,7 +2509,8 @@ unless module.parent?
   # test @strange_naming_bug
   # @throws_validation_error_for_unfit_arguments()
   # test @throws_validation_error_for_unfit_arguments
-  test @
+  # test @
+  test @recognize_classes
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
   # test @_intertype_tracing_2
