@@ -491,9 +491,80 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.empty_pipeline_transports_data = function(T, done) {
+    var Pipeline, p, result;
+    // T?.halt_on_error()
+    ({Pipeline} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    p = new Pipeline();
+    p.send(1);
+    p.send(2);
+    p.send(3);
+    result = p.run();
+    help('^23-2^', result);
+    if (T != null) {
+      T.eq(result, [1, 2, 3]);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.empty_pipeline_is_noop_in_composition = function(T, done) {
+    var Pipeline;
+    // T?.halt_on_error()
+    ({Pipeline} = require('../../../apps/moonriver'));
+    (function() {      //.........................................................................................................
+      var p, plus_one_1, plus_one_2, result;
+      p = new Pipeline();
+      p.push(plus_one_1 = function(d, send) {
+        d++;
+        return send(d);
+      });
+      p.push(plus_one_2 = function(d, send) {
+        d++;
+        return send(d);
+      });
+      p.send(1);
+      p.send(2);
+      p.send(3);
+      help('^23-1^', p);
+      result = p.run();
+      help('^23-2^', result);
+      return T != null ? T.eq(result, [3, 4, 5]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var p, plus_one_1, plus_one_2, result;
+      p = new Pipeline();
+      p.push(plus_one_1 = function(d, send) {
+        d++;
+        return send(d);
+      });
+      p.push(new Pipeline());
+      p.push(plus_one_2 = function(d, send) {
+        d++;
+        return send(d);
+      });
+      p.send(1);
+      p.send(2);
+      p.send(3);
+      help('^23-3^', p);
+      result = p.run();
+      help('^23-4^', result);
+      return T != null ? T.eq(result, [3, 4, 5]) : void 0;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
+    (() => {
       // await @can_use_asyncgenerator_as_source()
       // await @can_use_asyncgeneratorfunction_as_source()
       // @simple()
@@ -509,8 +580,10 @@
       // test @can_use_asyncfunction_as_transform
       // @simple_with_generatorfunction()
       // test @simple_with_generatorfunction
-      await this.can_use_walk_with_async_pipeline();
-      return (await test(this.can_use_walk_with_async_pipeline));
+      // await @can_use_walk_with_async_pipeline()
+      // await test @can_use_walk_with_async_pipeline
+      // test @empty_pipeline_transports_data
+      return test(this.empty_pipeline_is_noop_in_composition);
     })();
   }
 
