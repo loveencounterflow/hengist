@@ -25,7 +25,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_modular_pipeline_classes = function() {
-    var P_1, P_12, P_12_x, P_2, P_3, Pipeline, Pipeline_module;
+    var P_1, P_12, P_12_x, P_2, P_3, Pipeline, Pipeline_module, p_4, p_4_1;
     ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
     //=========================================================================================================
     P_1 = class P_1 extends Pipeline_module {
@@ -99,6 +99,13 @@
       }
 
     };
+    //=========================================================================================================
+    p_4 = new Pipeline();
+    p_4.push(p_4_1 = function(d, send) {
+      help('p_4_1');
+      d.push('p_4_1');
+      return send(d);
+    });
     P_12_x = (function() {
       var $indirect_fn, direct_fn;
 
@@ -122,25 +129,33 @@
           };
         },
         new P_1(),
-        P_2
+        P_2,
+        p_4
       ];
 
       return P_12_x;
 
     }).call(this);
-    //=========================================================================================================
-    P_3 = class P_3 extends Pipeline_module {
-      foo(d, send) {
-        d.push('foo');
-        return send(d);
-      }
+    P_3 = (function() {
+      //=========================================================================================================
+      class P_3 extends Pipeline_module {
+        foo(d, send) {
+          d.push('foo');
+          return send(d);
+        }
 
-      bar(d, send) {
-        d.push('bar');
-        return send(d);
-      }
+        bar(d, send) {
+          d.push('bar');
+          return send(d);
+        }
 
-    };
+      };
+
+      P_3.prototype.baz = p_4_1;
+
+      return P_3;
+
+    }).call(this);
     //=========================================================================================================
     return {P_1, P_2, P_12, P_12_x, P_3};
   };
@@ -182,7 +197,7 @@
       p = new P_12_x();
       p.send([]);
       if (T != null) {
-        T.eq(p.run(), [['direct_fn', '$indirect_fn', '$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3']]);
+        T.eq(p.run(), [['direct_fn', '$indirect_fn', '$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3', 'p_4_1']]);
       }
       return null;
     })();
@@ -191,7 +206,7 @@
       p = new P_3();
       p.send([]);
       if (T != null) {
-        T.eq(p.run(), [['foo', 'bar']]);
+        T.eq(p.run(), [['foo', 'bar', 'p_4_1']]);
       }
       return null;
     })();
