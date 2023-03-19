@@ -18,13 +18,12 @@ GUY                       = require 'guy'
   echo
   log     }               = GUY.trm
 #...........................................................................................................
-# test                      = require '../../../apps/guy-test'
-types                     = new ( require 'intertype' ).Intertype
+test                      = require '../../../apps/guy-test'
+types                     = new ( require '../../../apps/intertype' ).Intertype
 { isa
   equals
   type_of
-  validate
-  validate_list_of }      = types.export()
+  validate }              = types
 # H                         = require './helpers'
 # after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout ( -> resolve f() ), dts * 1000
 # { DATOM }                 = require '../../../apps/datom'
