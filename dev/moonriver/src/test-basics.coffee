@@ -279,6 +279,55 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@empty_pipeline_transports_data = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  p = new Pipeline()
+  p.send 1
+  p.send 2
+  p.send 3
+  result = p.run()
+  help '^23-2^', result
+  T?.eq result, [ 1, 2, 3, ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@empty_pipeline_is_noop_in_composition = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push plus_one_1 = ( d, send ) -> d++; send d
+    p.push plus_one_2 = ( d, send ) -> d++; send d
+    p.send 1
+    p.send 2
+    p.send 3
+    help '^23-1^', p
+    result = p.run()
+    help '^23-2^', result
+    T?.eq result, [ 3, 4, 5, ]
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push plus_one_1 = ( d, send ) -> d++; send d
+    p.push new Pipeline()
+    p.push plus_one_2 = ( d, send ) -> d++; send d
+    p.send 1
+    p.send 2
+    p.send 3
+    help '^23-3^', p
+    result = p.run()
+    help '^23-4^', result
+    T?.eq result, [ 3, 4, 5, ]
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
@@ -298,7 +347,9 @@ if require.main is module then do =>
   # test @can_use_asyncfunction_as_transform
   # @simple_with_generatorfunction()
   # test @simple_with_generatorfunction
-  await @can_use_walk_with_async_pipeline()
-  await test @can_use_walk_with_async_pipeline
+  # await @can_use_walk_with_async_pipeline()
+  # await test @can_use_walk_with_async_pipeline
+  # test @empty_pipeline_transports_data
+  test @empty_pipeline_is_noop_in_composition
   # test @
 
