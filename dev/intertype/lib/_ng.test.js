@@ -4941,6 +4941,38 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.recognize_classes = function(T, done) {
+    var Intertype, X, create, declare, isa, type_of, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, isa, type_of, create} = types);
+    X = class X {};
+    if (T != null) {
+      T.eq(isa.class(X), true);
+    }
+    if (T != null) {
+      T.eq(isa.function(X), true);
+    }
+    if (T != null) {
+      T.eq(isa.class(new X()), false);
+    }
+    if (T != null) {
+      T.eq(isa.class(function() {}), false);
+    }
+    if (T != null) {
+      T.eq(isa.function(function() {}), true);
+    }
+    if (T != null) {
+      T.eq(type_of(X), 'class');
+    }
+    if (T != null) {
+      T.eq(type_of(new X()), 'x');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -4991,7 +5023,8 @@
     // test @strange_naming_bug
     // @throws_validation_error_for_unfit_arguments()
     // test @throws_validation_error_for_unfit_arguments
-    test(this);
+    // test @
+    test(this.recognize_classes);
   }
 
   // test @intertype_ordering_of_field_and_isa_tests
