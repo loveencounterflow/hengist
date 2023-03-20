@@ -188,45 +188,146 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_headings = async function(T, done) {
-    var Hypedown_lexer, Hypedown_parser, XXX_new_token, error, i, len, matcher, probe, probes_and_matchers;
-    ({XXX_new_token, Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
-    probes_and_matchers = [["# H1", "<h1>H1</h1>\n"]];
-// [ "\n# H1", "\n<h1>H1\n", ]
-// [ "## Section", "<h2>Section\n", ]
-// [ "not a\n# heading", 'not a\n# heading\n', ]
-// [ 'x', 'x\n', null ]
-// [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
-// [ "paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n', ]
-// [ '', '', ]
-// [ "\n", 'not a\nheading\n', ]
-// [ "\n\nnot a\nheading", 'not a\nheading\n', ]
+    var Hypedown_lexer, Md_parser, Pipeline, Pipeline_module, XXX_TEMP, error, i, len, matcher, probe, probes_and_matchers;
+    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    ({Hypedown_lexer} = require('../../../apps/hypedown'));
+    XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
+    probes_and_matchers = [["# H1", "<h1>H1\n"], ["x # H1", "x # H1\n"], ["x\n# H1", "x\n# H1\n"], ["x\n\n# H1", "x\n\n<h1> H1\n"]];
+    Md_parser = (function() {
+      //.........................................................................................................
+      // [ "\n# H1", "\n<h1>H1\n", ]
+      // [ "## Section", "<h2>Section\n", ]
+      // [ "not a\n# heading", 'not a\n# heading\n', ]
+      // [ 'x', 'x\n', null ]
+      // [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
+      // [ "paragraph 1\n\n\n\nparagraph 2", 'not a\nheading\n', ]
+      // [ '', '', ]
+      // [ "\n", 'not a\nheading\n', ]
+      // [ "\n\nnot a\nheading", 'not a\nheading\n', ]
+      class Md_parser extends Pipeline_module {};
+
+      Md_parser.prototype.$010_prepare_paragraphs = XXX_TEMP.$010_prepare_paragraphs;
+
+      Md_parser.prototype.$050_hash_headings = XXX_TEMP.$050_hash_headings;
+
+      return Md_parser;
+
+    }).call(this);
+//.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, eol, line, lnr, p, ref, result, result_rpr, x;
-          p = new Hypedown_parser();
-          ref = GUY.str.walk_lines_with_positions(probe);
-          for (x of ref) {
-            ({lnr, line, eol} = x);
-            debug('^');
-            p.send(line);
+          var d, lexer, parser, ref, ref1, result_html, t, token, tokens;
+          lexer = new Hypedown_lexer();
+          parser = new Md_parser();
+          tokens = [];
+          ref = lexer.walk(probe);
+          for (d of ref) {
+            parser.send(d);
+            ref1 = parser.walk();
+            for (token of ref1) {
+              debug('^345^', rpr(token.value));
+              tokens.push(token);
+            }
           }
-          result = p.run();
-          result_rpr = ((function() {
+          // p           = new Hypedown_parser()
+          // p.send probe
+          // result      = p.run()
+          result_html = ((function() {
             var j, len1, results;
             results = [];
-            for (j = 0, len1 = result.length; j < len1; j++) {
-              d = result[j];
-              if (!d.$stamped) {
-                results.push(d.value);
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t.value);
               }
             }
             return results;
           })()).join('');
-          // urge '^08-1^', ( Object.keys d ).sort() for d in result
-          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, result); // unless result_rpr is matcher
-          return resolve(result_rpr);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, tokens);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
+          //.....................................................................................................
+          return resolve(result_html);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.add_parbreak_markers = async function(T, done) {
+    var Hypedown_lexer, Md_parser, Pipeline, Pipeline_module, XXX_TEMP, error, i, len, matcher, probe, probes_and_matchers;
+    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    ({Hypedown_lexer} = require('../../../apps/hypedown'));
+    XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
+    probes_and_matchers = [['', '⏎', null], ['paragraph', '⎈paragraph⏎', null], ['par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null], ['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
+    Md_parser = (function() {
+      //.........................................................................................................
+      class Md_parser extends Pipeline_module {};
+
+      Md_parser.prototype.$010_prepare_paragraphs = XXX_TEMP.$010_prepare_paragraphs;
+
+      return Md_parser;
+
+    }).call(this);
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, parser, ref, ref1, ref2, result, result_html, t, token, tokens;
+          lexer = new Hypedown_lexer();
+          parser = new Md_parser();
+          tokens = [];
+          result = [];
+          ref = lexer.walk(probe);
+          for (d of ref) {
+            parser.send(d);
+            ref1 = parser.walk();
+            for (token of ref1) {
+              debug('^345^', rpr(token.value));
+              tokens.push(token);
+              if (((ref2 = token.data) != null ? ref2.virtual : void 0) === true) {
+                continue;
+              }
+              switch (token.mk) {
+                case 'html:parbreak':
+                  result.push('⎈');
+                  break;
+                case 'plain:nl':
+                  result.push('⏎');
+                  break;
+                case 'plain:other':
+                  result.push(token.value);
+              }
+            }
+          }
+          result_html = result.join('');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, tokens);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
+          //.....................................................................................................
+          return resolve(result_html);
         });
       });
     }
@@ -240,12 +341,11 @@
       // test @parse_codespans_and_single_star
       // test @parse_codespans_with_whitespace
       // @parse_md_stars_markup()
-      return test(this.parse_md_stars_markup);
+      // test @parse_md_stars_markup
+      // test @parse_headings
+      return test(this.add_parbreak_markers);
     })();
   }
-
-  // @parse_headings()
-// test @parse_headings
 
 }).call(this);
 
