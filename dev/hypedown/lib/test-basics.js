@@ -26,25 +26,59 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.parse_md_stars_markup = function(T, done) {
-    var $040_stars, Hypedown_lexer, d, error, i, len, lexer, matcher, parser, probe, probes_and_matchers, ref, ref1, token;
+  this.parse_md_stars_markup = async function(T, done) {
+    var $040_stars, Hypedown_lexer, error, i, len, matcher, probe, probes_and_matchers;
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     ({$040_stars} = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'));
-    probes_and_matchers = [['*abc*', '<p><i>abc</i>\n', null], ['*abc*\n*abc*', '<p><i>abc</i>\n<i>abc</i>\n', null], ['*abc*\n\n*abc*', '<p><i>abc</i>\n\n<p><i>abc</i>\n', null], ['**def**', '<p><b>def</b>\n', null], ['**x*def*x**', '<p><b>x<i>def</i>x</b>\n', null], ['*x**def**x*', '<p><i>x<b>def</b>x</i>\n', null], ['***abc*def**', '<p><b><i>abc</i>def</b>\n', null], ['*x***def**', '<p><i>x</i><b>def</b>\n', null], ['**x***def*', '<p><b>x</b><i>def</i>\n', null], ['*', '<p><i>\n', null], ['**', '<p><b>\n', null], ['***', '<p><b><i>\n', null], ['***def***', '<p><b><i>def</i></b>\n', null], ['***abc**def*', '<p><b><i>abc</i></b><i>def</i>\n', null]];
+    probes_and_matchers = [['*abc*', '<i>abc</i>\n', null], ['*abc*\n*abc*', '<i>abc</i>\n<i>abc</i>\n', null], ['*abc*\n\n*abc*', '<i>abc</i>\n\n<i>abc</i>\n', null], ['**def**', '<b>def</b>\n', null], ['**x*def*x**', '<b>x<i>def</i>x</b>\n', null], ['*x**def**x*', '<i>x<b>def</b>x</i>\n', null], ['***abc*def**', '<b><i>abc</i>def</b>\n', null], ['*x***def**', '<i>x</i><b>def</b>\n', null], ['**x***def*', '<b>x</b><i>def</i>\n', null], ['*', '<i>\n', null], ['**', '<b>\n', null], ['***', '<b><i>\n', null], ['***def***', '<b><i>def</i></b>\n', null], ['***abc**def*', '<b><i>abc</i></b><i>def</i>\n', null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
-      // await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer = new Hypedown_lexer();
-      parser = new $040_stars();
-      ref = lexer.walk(probe);
-      for (d of ref) {
-        parser.send(d);
-        ref1 = parser.walk();
-        for (token of ref1) {
-          debug('^345^', rpr(token.value));
-        }
-      }
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, lexer, parser, ref, ref1, result_html, t, token, tokens;
+          lexer = new Hypedown_lexer();
+          parser = new $040_stars();
+          tokens = [];
+          ref = lexer.walk(probe);
+          for (d of ref) {
+            parser.send(d);
+            ref1 = parser.walk();
+            for (token of ref1) {
+              debug('^345^', rpr(token.value));
+              tokens.push(token);
+            }
+          }
+          // p           = new Hypedown_parser()
+          // p.send probe
+          // result      = p.run()
+          result_html = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t.value);
+              }
+            }
+            return results;
+          })()).join('');
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, tokens);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
+          //.....................................................................................................
+          return resolve(result_html);
+        });
+      });
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -205,12 +239,12 @@
       // test @
       // test @parse_codespans_and_single_star
       // test @parse_codespans_with_whitespace
-      return this.parse_md_stars_markup();
+      // @parse_md_stars_markup()
+      return test(this.parse_md_stars_markup);
     })();
   }
 
-  // test @parse_md_stars_markup
-// @parse_headings()
+  // @parse_headings()
 // test @parse_headings
 
 }).call(this);
