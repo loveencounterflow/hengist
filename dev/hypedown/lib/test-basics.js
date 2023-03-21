@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var DATOM, GUY, H, alert, debug, echo, equals, help, info, inspect, isa, lets, log, new_datom, plain, praise, rpr, stamp, test, type_of, types, urge, validate, validate_list_of, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   GUY = require('guy');
@@ -271,10 +272,29 @@
     ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
-    probes_and_matchers = [['', '⏎', null], ['paragraph', '⎈paragraph⏎', null], ['par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null], ['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
+    // [ '', '⏎', null ]
+    // [ 'paragraph', '⎈paragraph⏎', null ]
+    // [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    probes_and_matchers = [['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
     Md_parser = (function() {
       //.........................................................................................................
-      class Md_parser extends Pipeline_module {};
+      class Md_parser extends Pipeline_module {
+        constructor() {
+          super(...arguments);
+          this.tokenize_line = this.tokenize_line.bind(this);
+        }
+
+        tokenize_line(line, send) {
+          var ref, token;
+          boundMethodCheck(this, Md_parser);
+          ref = this.lexer.walk(line);
+          for (token of ref) {
+            send(token);
+          }
+          return null;
+        }
+
+      };
 
       Md_parser.prototype.$010_prepare_paragraphs = XXX_TEMP.$010_prepare_paragraphs;
 
@@ -286,14 +306,14 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, lexer, parser, ref, ref1, ref2, result, result_html, t, token, tokens;
+          var lexer, line, parser, ref, ref1, ref2, result, result_html, t, token, tokens;
           lexer = new Hypedown_lexer();
           parser = new Md_parser();
           tokens = [];
           result = [];
-          ref = lexer.walk(probe);
-          for (d of ref) {
-            parser.send(d);
+          ref = GUY.str.walk_lines(probe);
+          for (line of ref) {
+            parser.send(line);
             ref1 = parser.walk();
             for (token of ref1) {
               debug('^345^', rpr(token.value));
@@ -334,6 +354,79 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.add_parbreak_markers_OLD = async function(T, done) {
+    var Hypedown_lexer, Hypedown_parser, Pipeline, Pipeline_module, error, i, len, matcher, probe, probes_and_matchers;
+    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    ({Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
+    // [ '', '⏎', null ]
+    // [ 'paragraph', '⎈paragraph⏎', null ]
+    // [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    probes_and_matchers = [['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, eol, line, lnr, p, ref, ref1, ref2, result, result_html, result_rpr, t, token, tokens, x;
+          p = new Hypedown_parser();
+          tokens = [];
+          result = [];
+          ref = GUY.str.walk_lines_with_positions(probe);
+          for (x of ref) {
+            ({lnr, line, eol} = x);
+            p.send(line);
+            ref1 = p.walk();
+            for (token of ref1) {
+              tokens.push(token);
+              if (((ref2 = token.data) != null ? ref2.virtual : void 0) === true) {
+                continue;
+              }
+              // debug '^345^', token.mk, ( rpr token.value )
+              switch (token.mk) {
+                case 'html:parbreak':
+                  result.push('⎈');
+                  break;
+                case 'plain:nl':
+                  result.push('⏎');
+                  break;
+                case 'plain:other':
+                  result.push(token.value);
+              }
+            }
+          }
+          result_html = result.join('');
+          result_rpr = ((function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = result.length; j < len1; j++) {
+              d = result[j];
+              if (!d.$stamped) {
+                results.push(d.value);
+              }
+            }
+            return results;
+          })()).join('');
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_rpr)} (${rpr(matcher)})`, tokens);
+          H.tabulate(`${rpr(probe)} -> ${rpr(result_html)}`, (function() {
+            var j, len1, results;
+            results = [];
+            for (j = 0, len1 = tokens.length; j < len1; j++) {
+              t = tokens[j];
+              if (!t.$stamped) {
+                results.push(t);
+              }
+            }
+            return results;
+          })());
+          return resolve(result_html);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -343,7 +436,9 @@
       // @parse_md_stars_markup()
       // test @parse_md_stars_markup
       // test @parse_headings
-      return test(this.add_parbreak_markers);
+      // test @add_parbreak_markers
+      // @add_parbreak_markers_OLD()
+      return test(this.add_parbreak_markers_OLD);
     })();
   }
 
