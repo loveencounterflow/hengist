@@ -61,6 +61,51 @@ H                         = require '../../../lib/helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@modifiers_start_and_stop = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    $,                \
+    transforms,     } = require '../../../apps/moonriver'
+  start               = Symbol 'start'
+  stop                = Symbol 'stop'
+  #.........................................................................................................
+  $with_stars         = -> with_stars = ( d, send ) -> send "*#{d}*"
+  $add_parentheses    = ->
+    return $ { start, stop, }, add_parentheses = ( d, send ) ->
+      return send '(' if d is start
+      return send ')' if d is stop
+      send d
+  new_pipeline = ( cfg ) ->
+    p = new Pipeline { cfg..., }
+    p.push $with_stars()
+    p.push $add_parentheses()
+    # p.push transforms.$collect()
+    p.push show = ( d ) -> whisper rpr d
+    return p
+  #.........................................................................................................
+  do ->
+    p       = new_pipeline()
+    result  = []
+    for chr in Array.from '氣場全開'
+      p.send chr
+    result.push d for d from p.walk()
+    result.push d for d from p.stop_walk()
+    urge '^735^', result
+    T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
+  #.........................................................................................................
+  do ->
+    p       = new_pipeline()
+    result  = []
+    for chr in Array.from '氣場全開'
+      p.send chr
+      result.push d for d from p.walk()
+    result.push d for d from p.stop_walk()
+    urge '^735^', result
+    T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @modifiers_first_and_last_2 = ( T, done ) ->
   # T?.halt_on_error()
   { Pipeline,         \
@@ -132,12 +177,15 @@ H                         = require '../../../lib/helpers'
     transforms      } = require '../../../apps/moonriver'
   first               = Symbol 'first'
   last                = Symbol 'last'
+  start               = Symbol 'start'
+  stop                = Symbol 'stop'
   #.........................................................................................................
   do ->
     p = new Pipeline { protocol: true, }
     p.push Array.from '氣場全開'
-    p.push $ { first, last, }, observe = ( d ) -> info '^79-1^', rpr d
+    p.push $ { first, last, start, stop, }, observe = ( d ) -> info '^79-1^', rpr d
     result = p.run()
+    result.push d for d from p.stop_walk()
     urge '^79-2^', p
     urge '^79-3^', result
     T?.eq result, [ '氣', '場', '全', '開', ]
@@ -146,8 +194,9 @@ H                         = require '../../../lib/helpers'
   await do ->
     p = new Async_pipeline { protocol: true, }
     p.push Array.from '氣場全開'
-    p.push $ { first, last, }, observe = ( d ) -> await GUY.async.after 0.1, -> info '^79-4^', rpr d
+    p.push $ { first, last, start, stop, }, observe = ( d ) -> await GUY.async.after 0.1, -> info '^79-4^', rpr d
     result = await p.run()
+    result.push d for await d from p.stop_walk()
     urge '^79-5^', p
     urge '^79-6^', result
     T?.eq result, [ '氣', '場', '全', '開', ]
@@ -223,6 +272,22 @@ H                         = require '../../../lib/helpers'
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@unknown_modifiers_cause_error = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY                   = require '../../../apps/guy'
+  { Pipeline,           \
+    $,                  \
+    transforms: TF    } = require '../../../apps/moonriver'
+  unknown               = Symbol 'unknown'
+  #.........................................................................................................
+  do ->
+    p = new Pipeline()
+    p.push 'abcd'
+    T?.throws /not a valid/, -> p.push $ { unknown, }, ( d ) ->
+  #.........................................................................................................
+  done?()
+
 
 
 
@@ -237,7 +302,10 @@ if require.main is module then do =>
   # @modifiers_with_empty_pipeline()
   # test @modifiers_with_empty_pipeline
   # await @modifiers_of_observers_do_not_leak()
-  test @modifiers_of_observers_do_not_leak
+  await test @modifiers_of_observers_do_not_leak
+  # test @modifiers_start_and_stop
+  # @unknown_modifiers_cause_error()
+  # test @unknown_modifiers_cause_error
   # test @modifiers_with_empty_pipeline
   # test @
 
