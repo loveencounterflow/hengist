@@ -202,23 +202,25 @@ H                         = require './helpers'
   { Hypedown_lexer      } = require '../../../apps/hypedown'
   XXX_TEMP                = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
-    [ '', '⏎', null ]
-    [ 'paragraph', '⎈paragraph⏎', null ]
-    [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    # [ '', '⏎', null ]
+    # [ 'paragraph', '⎈paragraph⏎', null ]
+    # [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
     [ 'par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null ]
     ]
   #.........................................................................................................
   new_parser = ( lexer ) ->
+    # lexer = new Hypedown_lexer()
     class Md_parser extends Pipeline_module
-      tokenize_line: ( line, send ) ->
-        send token for token from lexer.walk line
-        return null
+      # tokenize_line: ( line, send ) ->
+      #   send token for token from lexer.walk line
+      #   return null
+      $002_tokenize_lines:      XXX_TEMP.$002_tokenize_lines
       $010_prepare_paragraphs:  XXX_TEMP.$010_prepare_paragraphs
     return new Md_parser()
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      parser      = new_parser new Hypedown_lexer()
+      parser      = new_parser()
       tokens      = []
       result      = []
       #.....................................................................................................
@@ -232,8 +234,7 @@ H                         = require './helpers'
       #.....................................................................................................
       # for line from GUY.str.walk_lines probe
       parser.send probe
-      handle_token token for token from parser.walk()
-      handle_token token for token from parser.stop_walk()
+      handle_token token for token from parser.walk_and_stop()
       result_html = result.join ''
       H.tabulate "#{rpr probe} -> #{rpr result_html}", tokens
       H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in tokens when not t.$stamped )
@@ -243,7 +244,7 @@ H                         = require './helpers'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@add_parbreak_markers_OLD = ( T, done ) ->
+@_add_parbreak_markers_OLD = ( T, done ) ->
   { Pipeline
     Pipeline_module     } = require '../../../apps/hypedown'
   { Hypedown_lexer
@@ -294,6 +295,6 @@ if require.main is module then do =>
   # test @parse_headings
   # @add_parbreak_markers()
   test @add_parbreak_markers
-  # @add_parbreak_markers_OLD()
-  # test @add_parbreak_markers_OLD
+  # @_add_parbreak_markers_OLD()
+  # test @_add_parbreak_markers_OLD
 
