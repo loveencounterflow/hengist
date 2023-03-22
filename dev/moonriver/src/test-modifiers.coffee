@@ -66,25 +66,39 @@ H                         = require '../../../lib/helpers'
   { Pipeline,         \
     $,                \
     transforms,     } = require '../../../apps/moonriver'
+  first               = Symbol 'first'
+  last                = Symbol 'last'
   start               = Symbol 'start'
   stop                = Symbol 'stop'
   #.........................................................................................................
-  $with_stars         = -> with_stars = ( d, send ) -> send "*#{d}*"
-  $add_parentheses    = ->
-    return $ { start, stop, }, add_parentheses = ( d, send ) ->
+  $with_stars                 = -> with_stars = ( d, send ) -> send "*#{d}*"
+  $add_parentheses_start_stop = ->
+    return $ { start, stop, }, add_parentheses_start_stop = ( d, send ) ->
       return send '(' if d is start
       return send ')' if d is stop
       send d
-  new_pipeline = ( cfg ) ->
+  $add_parentheses_first_last  = ->
+    return $ { first, last, }, add_parentheses_first_last = ( d, send ) ->
+      return send '[' if d is first
+      return send ']' if d is last
+      send d
+  new_pipeline_start_stop = ( cfg ) ->
     p = new Pipeline { cfg..., }
     p.push $with_stars()
-    p.push $add_parentheses()
+    p.push $add_parentheses_start_stop()
     # p.push transforms.$collect()
-    p.push show = ( d ) -> whisper rpr d
+    # p.push show = ( d ) -> whisper rpr d
+    return p
+  new_pipeline_first_last = ( cfg ) ->
+    p = new Pipeline { cfg..., }
+    p.push $with_stars()
+    p.push $add_parentheses_first_last()
+    # p.push transforms.$collect()
+    # p.push show = ( d ) -> whisper rpr d
     return p
   #.........................................................................................................
   do ->
-    p       = new_pipeline()
+    p       = new_pipeline_start_stop()
     result  = []
     for chr in Array.from '氣場全開'
       p.send chr
@@ -94,7 +108,27 @@ H                         = require '../../../lib/helpers'
     T?.eq result, [ '(', '*氣*', '*場*', '*全*', '*開*', ')' ]
   #.........................................................................................................
   do ->
-    p       = new_pipeline()
+    p       = new_pipeline_first_last()
+    result  = []
+    for chr in Array.from '氣場全開'
+      p.send chr
+    result.push d for d from p.walk()
+    result.push d for d from p.stop_walk()
+    urge '^735^', result
+    T?.eq result, [ '[', '*氣*', '*場*', '*全*', '*開*', ']' ]
+  #.........................................................................................................
+  do ->
+    p       = new_pipeline_first_last()
+    result  = []
+    for chr in Array.from '氣場全開'
+      p.send chr
+      result.push d for d from p.walk()
+    result.push d for d from p.stop_walk()
+    urge '^735^', result
+    T?.eq result, [ '[', '*氣*', ']', '[', '*場*', ']', '[', '*全*', ']', '[', '*開*', ']' ]
+  #.........................................................................................................
+  do ->
+    p       = new_pipeline_start_stop()
     result  = []
     for chr in Array.from '氣場全開'
       p.send chr
@@ -162,6 +196,7 @@ H                         = require '../../../lib/helpers'
     p.push show = ( d ) -> urge rpr d
     p.push join = ( d, send ) -> send d.join ''
     result = p.run()
+    result.push d for d from p.stop_walk()
     urge '^77-3^', p
     urge '^77-4^', result
     T?.eq result, [ '(*氣**場**全**開*)' ]
@@ -268,6 +303,7 @@ H                         = require '../../../lib/helpers'
     #     collector.push d
     p.push ( d, send ) -> send d.join ''
     result = p.run()
+    result.push d for await d from p.stop_walk()
     T?.eq result, [ '(ABCD)', ]
   #.........................................................................................................
   done?()
@@ -302,8 +338,8 @@ if require.main is module then do =>
   # @modifiers_with_empty_pipeline()
   # test @modifiers_with_empty_pipeline
   # await @modifiers_of_observers_do_not_leak()
-  await test @modifiers_of_observers_do_not_leak
-  # test @modifiers_start_and_stop
+  # await test @modifiers_of_observers_do_not_leak
+  test @modifiers_start_and_stop
   # @unknown_modifiers_cause_error()
   # test @unknown_modifiers_cause_error
   # test @modifiers_with_empty_pipeline

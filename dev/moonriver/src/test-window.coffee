@@ -75,6 +75,7 @@ as_keysorted_list = ( d ) ->
   p.push ( d, send ) -> send ( "#{e}" for e in d ).join ''
   p.push show = ( d ) -> urge '^45-1^', d
   result = p.run()
+  result.push d for await d from p.stop_walk()
   T?.eq result, [
     '__123'
     '_1234'
@@ -101,6 +102,7 @@ as_keysorted_list = ( d ) ->
   p.push show = ([ ddd, dd, d, ]) -> urge '^45-1^', [ ddd, dd, d, ]
   p.push ( ds, send ) -> send ( "#{d}" for d in ds ).join ''
   result = p.run()
+  result.push d for await d from p.stop_walk()
   T?.eq result, [ '__1', '_12', '123', '234', '345', '456', '567', '678', '789' ]
   done?()
 
@@ -117,6 +119,34 @@ as_keysorted_list = ( d ) ->
   p.push show = ([ d_$3, d_$2, d_$1, d, d_1, d_2, d_3, ]) -> urge '^45-1^', [ d_$3, d_$2, d_$1, d, d_1, d_2, d_3, ]
   p.push ( ds, send ) -> send ( "#{d}" for d in ds ).join ''
   result = p.run()
+  result.push d for await d from p.stop_walk()
+  T?.eq result, [
+    '___1234'
+    '__12345'
+    '_123456'
+    '1234567'
+    '2345678'
+    '3456789'
+    '456789_'
+    '56789__'
+    '6789___' ]
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@window_transform_4 = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    transforms: TF  } = require '../../../apps/moonriver'
+  result              = []
+  p                   = new Pipeline()
+  #.........................................................................................................
+  p.push TF.$window { min: -3, max: +3, empty: '_', }
+  p.push show = ([ d_$3, d_$2, d_$1, d, d_1, d_2, d_3, ]) -> urge '^45-1^', [ d_$3, d_$2, d_$1, d, d_1, d_2, d_3, ]
+  p.push ( ds, send ) -> send ( "#{d}" for d in ds ).join ''
+  for d in [ 1 .. 9 ]
+    p.send d
+    result.push e for e from p.walk()
+  result.push e for e from p.stop_walk()
   T?.eq result, [
     '___1234'
     '__12345'
@@ -137,4 +167,5 @@ if require.main is module then await do =>
   # @window_transform_1()
   # test @window_transform_1
   # test @window_transform_2
-  test @window_transform_3
+  # test @window_transform_3
+  test @window_transform_4

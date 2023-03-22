@@ -108,6 +108,7 @@ as_keysorted_list = ( d ) ->
     outer.push ( d ) -> help 'outer', d
     #.......................................................................................................
     result = outer.run()
+    result.push d for d from outer.stop_walk()
     info '^34-1^', rpr result
     T?.eq result, [ 'ABCDE', ]
     return null
@@ -126,6 +127,7 @@ as_keysorted_list = ( d ) ->
     outer.push finish     = ( d ) -> help 'outer', d
     #.......................................................................................................
     result = outer.run()
+    result.push d for d from outer.stop_walk()
     info '^34-2^', rpr result
     T?.eq result, [ 'ABCDE', ]
     return null
@@ -273,8 +275,8 @@ as_keysorted_list = ( d ) ->
 
 ############################################################################################################
 if require.main is module then await do =>
-  test @
-
+  # test @
+  test @segment_pipelines_can_be_nested
 
 
 
