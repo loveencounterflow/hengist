@@ -132,7 +132,7 @@
       transforms: TF
     } = require('../../../apps/moonriver'));
     (function() {      //.........................................................................................................
-      var join, outer, result, show, uppercase;
+      var d, join, outer, ref, result, show, uppercase;
       outer = new Pipeline();
       //.......................................................................................................
       outer.push('abcde');
@@ -153,6 +153,10 @@
       });
       //.......................................................................................................
       result = outer.run();
+      ref = outer.stop_walk();
+      for (d of ref) {
+        result.push(d);
+      }
       info('^34-1^', rpr(result));
       if (T != null) {
         T.eq(result, ['ABCDE']);
@@ -160,7 +164,7 @@
       return null;
     })();
     (function() {      //.........................................................................................................
-      var finish, inner, join, outer, result, show, uppercase;
+      var d, finish, inner, join, outer, ref, result, show, uppercase;
       inner = new Pipeline();
       outer = new Pipeline();
       //.......................................................................................................
@@ -182,6 +186,10 @@
       });
       //.......................................................................................................
       result = outer.run();
+      ref = outer.stop_walk();
+      for (d of ref) {
+        result.push(d);
+      }
       info('^34-2^', rpr(result));
       if (T != null) {
         T.eq(result, ['ABCDE']);
@@ -418,7 +426,8 @@
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
-      return test(this);
+      // test @
+      return test(this.segment_pipelines_can_be_nested);
     })();
   }
 

@@ -71,9 +71,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.modifiers_start_and_stop = function(T, done) {
-    var $, $add_parentheses, $with_stars, Pipeline, new_pipeline, start, stop, transforms;
+    var $, $add_parentheses_first_last, $add_parentheses_start_stop, $with_stars, Pipeline, first, last, new_pipeline_first_last, new_pipeline_start_stop, start, stop, transforms;
     // T?.halt_on_error()
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
+    first = Symbol('first');
+    last = Symbol('last');
     start = Symbol('start');
     stop = Symbol('stop');
     //.........................................................................................................
@@ -83,9 +85,9 @@
         return send(`*${d}*`);
       };
     };
-    $add_parentheses = function() {
-      var add_parentheses;
-      return $({start, stop}, add_parentheses = function(d, send) {
+    $add_parentheses_start_stop = function() {
+      var add_parentheses_start_stop;
+      return $({start, stop}, add_parentheses_start_stop = function(d, send) {
         if (d === start) {
           return send('(');
         }
@@ -95,20 +97,39 @@
         return send(d);
       });
     };
-    new_pipeline = function(cfg) {
-      var p, show;
+    $add_parentheses_first_last = function() {
+      var add_parentheses_first_last;
+      return $({first, last}, add_parentheses_first_last = function(d, send) {
+        if (d === first) {
+          return send('[');
+        }
+        if (d === last) {
+          return send(']');
+        }
+        return send(d);
+      });
+    };
+    new_pipeline_start_stop = function(cfg) {
+      var p;
       p = new Pipeline({...cfg});
       p.push($with_stars());
-      p.push($add_parentheses());
+      p.push($add_parentheses_start_stop());
       // p.push transforms.$collect()
-      p.push(show = function(d) {
-        return whisper(rpr(d));
-      });
+      // p.push show = ( d ) -> whisper rpr d
+      return p;
+    };
+    new_pipeline_first_last = function(cfg) {
+      var p;
+      p = new Pipeline({...cfg});
+      p.push($with_stars());
+      p.push($add_parentheses_first_last());
+      // p.push transforms.$collect()
+      // p.push show = ( d ) -> whisper rpr d
       return p;
     };
     (function() {      //.........................................................................................................
       var chr, d, i, len, p, ref, ref1, ref2, result;
-      p = new_pipeline();
+      p = new_pipeline_start_stop();
       result = [];
       ref = Array.from('氣場全開');
       for (i = 0, len = ref.length; i < len; i++) {
@@ -128,7 +149,47 @@
     })();
     (function() {      //.........................................................................................................
       var chr, d, i, len, p, ref, ref1, ref2, result;
-      p = new_pipeline();
+      p = new_pipeline_first_last();
+      result = [];
+      ref = Array.from('氣場全開');
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        p.send(chr);
+      }
+      ref1 = p.walk();
+      for (d of ref1) {
+        result.push(d);
+      }
+      ref2 = p.stop_walk();
+      for (d of ref2) {
+        result.push(d);
+      }
+      urge('^735^', result);
+      return T != null ? T.eq(result, ['[', '*氣*', '*場*', '*全*', '*開*', ']']) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var chr, d, i, len, p, ref, ref1, ref2, result;
+      p = new_pipeline_first_last();
+      result = [];
+      ref = Array.from('氣場全開');
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        p.send(chr);
+        ref1 = p.walk();
+        for (d of ref1) {
+          result.push(d);
+        }
+      }
+      ref2 = p.stop_walk();
+      for (d of ref2) {
+        result.push(d);
+      }
+      urge('^735^', result);
+      return T != null ? T.eq(result, ['[', '*氣*', ']', '[', '*場*', ']', '[', '*全*', ']', '[', '*開*', ']']) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var chr, d, i, len, p, ref, ref1, ref2, result;
+      p = new_pipeline_start_stop();
       result = [];
       ref = Array.from('氣場全開');
       for (i = 0, len = ref.length; i < len; i++) {
@@ -219,7 +280,7 @@
       });
     };
     (function() {      //.........................................................................................................
-      var join, p, result, show;
+      var d, join, p, ref, result, show;
       p = new Pipeline();
       p.push(Array.from('氣場全開'));
       p.push($with_stars());
@@ -237,6 +298,10 @@
         return send(d.join(''));
       });
       result = p.run();
+      ref = p.stop_walk();
+      for (d of ref) {
+        result.push(d);
+      }
       urge('^77-3^', p);
       urge('^77-4^', result);
       return T != null ? T.eq(result, ['(*氣**場**全**開*)']) : void 0;
@@ -381,8 +446,8 @@
     } = require('../../../apps/moonriver'));
     first = Symbol('first');
     last = Symbol('last');
-    (function() {      //.........................................................................................................
-      var p, result;
+    (async function() {      //.........................................................................................................
+      var d, p, ref, result;
       p = new Pipeline();
       p.push('abcd');
       p.push($({first, last}, function(d, send) {
@@ -405,6 +470,10 @@
         return send(d.join(''));
       });
       result = p.run();
+      ref = p.stop_walk();
+      for await (d of ref) {
+        result.push(d);
+      }
       return T != null ? T.eq(result, ['(ABCD)']) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -434,7 +503,7 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (async() => {
+    (() => {
       // @modifiers_first_and_last()
       // test @modifiers_first_and_last_1
       // @modifiers_first_and_last_2()
@@ -444,12 +513,12 @@
       // @modifiers_with_empty_pipeline()
       // test @modifiers_with_empty_pipeline
       // await @modifiers_of_observers_do_not_leak()
-      return (await test(this.modifiers_of_observers_do_not_leak));
+      // await test @modifiers_of_observers_do_not_leak
+      return test(this.modifiers_start_and_stop);
     })();
   }
 
-  // test @modifiers_start_and_stop
-// @unknown_modifiers_cause_error()
+  // @unknown_modifiers_cause_error()
 // test @unknown_modifiers_cause_error
 // test @modifiers_with_empty_pipeline
 // test @

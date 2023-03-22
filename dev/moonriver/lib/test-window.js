@@ -112,8 +112,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.window_transform_1 = function(T, done) {
-    var Pipeline, TF, collector, p, result, show;
+  this.window_transform_1 = async function(T, done) {
+    var Pipeline, TF, collector, d, p, ref, result, show;
     ({
       // T?.halt_on_error()
       Pipeline,
@@ -146,6 +146,10 @@
       return urge('^45-1^', d);
     });
     result = p.run();
+    ref = p.stop_walk();
+    for await (d of ref) {
+      result.push(d);
+    }
     if (T != null) {
       T.eq(result, ['__123', '_1234', '12345', '23456', '34567', '45678', '56789', '6789_', '789__']);
     }
@@ -153,8 +157,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.window_transform_2 = function(T, done) {
-    var Pipeline, TF, collector, p, result, show;
+  this.window_transform_2 = async function(T, done) {
+    var Pipeline, TF, collector, d, p, ref, result, show;
     ({
       // T?.halt_on_error()
       Pipeline,
@@ -185,6 +189,10 @@
       })()).join(''));
     });
     result = p.run();
+    ref = p.stop_walk();
+    for await (d of ref) {
+      result.push(d);
+    }
     if (T != null) {
       T.eq(result, ['__1', '_12', '123', '234', '345', '456', '567', '678', '789']);
     }
@@ -192,8 +200,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.window_transform_3 = function(T, done) {
-    var Pipeline, TF, collector, p, result, show;
+  this.window_transform_3 = async function(T, done) {
+    var Pipeline, TF, collector, d, p, ref, result, show;
     ({
       // T?.halt_on_error()
       Pipeline,
@@ -224,6 +232,58 @@
       })()).join(''));
     });
     result = p.run();
+    ref = p.stop_walk();
+    for await (d of ref) {
+      result.push(d);
+    }
+    if (T != null) {
+      T.eq(result, ['___1234', '__12345', '_123456', '1234567', '2345678', '3456789', '456789_', '56789__', '6789___']);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.window_transform_4 = function(T, done) {
+    var Pipeline, TF, d, e, i, p, ref, ref1, result, show;
+    ({
+      // T?.halt_on_error()
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    result = [];
+    p = new Pipeline();
+    //.........................................................................................................
+    p.push(TF.$window({
+      min: -3,
+      max: +3,
+      empty: '_'
+    }));
+    p.push(show = function([d_$3, d_$2, d_$1, d, d_1, d_2, d_3]) {
+      return urge('^45-1^', [d_$3, d_$2, d_$1, d, d_1, d_2, d_3]);
+    });
+    p.push(function(ds, send) {
+      var d;
+      return send(((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = ds.length; i < len; i++) {
+          d = ds[i];
+          results.push(`${d}`);
+        }
+        return results;
+      })()).join(''));
+    });
+    for (d = i = 1; i <= 9; d = ++i) {
+      p.send(d);
+      ref = p.walk();
+      for (e of ref) {
+        result.push(e);
+      }
+    }
+    ref1 = p.stop_walk();
+    for (e of ref1) {
+      result.push(e);
+    }
     if (T != null) {
       T.eq(result, ['___1234', '__12345', '_123456', '1234567', '2345678', '3456789', '456789_', '56789__', '6789___']);
     }
@@ -236,7 +296,8 @@
       // @window_transform_1()
       // test @window_transform_1
       // test @window_transform_2
-      return test(this.window_transform_3);
+      // test @window_transform_3
+      return test(this.window_transform_4);
     })();
   }
 
