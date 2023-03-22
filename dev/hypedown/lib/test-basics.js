@@ -271,22 +271,21 @@
     ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
-    probes_and_matchers = [['', '⏎', null], ['paragraph', '⎈paragraph⏎', null], ['par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null], ['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
+    // [ '', '⏎', null ]
+    // [ 'paragraph', '⎈paragraph⏎', null ]
+    // [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    probes_and_matchers = [['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
     //.........................................................................................................
     new_parser = function(lexer) {
       var Md_parser;
       Md_parser = (function() {
-        class Md_parser extends Pipeline_module {
-          tokenize_line(line, send) {
-            var ref, token;
-            ref = lexer.walk(line);
-            for (token of ref) {
-              send(token);
-            }
-            return null;
-          }
+        // lexer = new Hypedown_lexer()
+        class Md_parser extends Pipeline_module {};
 
-        };
+        // tokenize_line: ( line, send ) ->
+        //   send token for token from lexer.walk line
+        //   return null
+        Md_parser.prototype.$002_tokenize_lines = XXX_TEMP.$002_tokenize_lines;
 
         Md_parser.prototype.$010_prepare_paragraphs = XXX_TEMP.$010_prepare_paragraphs;
 
@@ -300,8 +299,8 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var handle_token, parser, ref, ref1, result, result_html, t, token, tokens;
-          parser = new_parser(new Hypedown_lexer());
+          var handle_token, parser, ref, result, result_html, t, token, tokens;
+          parser = new_parser();
           tokens = [];
           result = [];
           //.....................................................................................................
@@ -323,12 +322,8 @@
           //.....................................................................................................
           // for line from GUY.str.walk_lines probe
           parser.send(probe);
-          ref = parser.walk();
+          ref = parser.walk_and_stop();
           for (token of ref) {
-            handle_token(token);
-          }
-          ref1 = parser.stop_walk();
-          for (token of ref1) {
             handle_token(token);
           }
           result_html = result.join('');
@@ -353,7 +348,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.add_parbreak_markers_OLD = async function(T, done) {
+  this._add_parbreak_markers_OLD = async function(T, done) {
     var Hypedown_lexer, Hypedown_parser, Pipeline, Pipeline_module, error, i, len, matcher, probe, probes_and_matchers;
     ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
     ({Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
@@ -444,8 +439,8 @@
     })();
   }
 
-  // @add_parbreak_markers_OLD()
-// test @add_parbreak_markers_OLD
+  // @_add_parbreak_markers_OLD()
+// test @_add_parbreak_markers_OLD
 
 }).call(this);
 

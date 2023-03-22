@@ -248,11 +248,55 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.pipeline_modules_methods_called_with_current_context = function(T, done) {
+    var Pipeline, Pipeline_module, X, Y, result, y;
+    ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    X = class X extends Pipeline_module {
+      constructor() {
+        super();
+        this.foo = 'class X';
+        return void 0;
+      }
+
+      $unbound_method() {
+        var unbound_method;
+        return unbound_method = function(d, send) {
+          debug('^98-1^', this.constructor.name);
+          return send(d ** 3);
+        };
+      }
+
+    };
+    //.........................................................................................................
+    Y = class Y extends Pipeline {
+      constructor() {
+        super();
+        this.foo = 'class Y';
+        this.push(new X());
+        return void 0;
+      }
+
+    };
+    //.........................................................................................................
+    y = new Y();
+    y.send(12);
+    y.send(34);
+    result = y.run_and_stop();
+    if (T != null) {
+      T.eq(result, [1728, 39304]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @pipeline_modules_1()
-      return test(this.pipeline_modules_1);
+      // test @pipeline_modules_1
+      // @pipeline_modules_methods_called_with_current_context()
+      return test(this.pipeline_modules_methods_called_with_current_context);
     })();
   }
 

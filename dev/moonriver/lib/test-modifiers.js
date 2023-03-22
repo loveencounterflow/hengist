@@ -207,6 +207,22 @@
       urge('^735^', result);
       return T != null ? T.eq(result, ['(', '*氣*', '*場*', '*全*', '*開*', ')']) : void 0;
     })();
+    (function() {      //.........................................................................................................
+      var chr, d, i, len, p, ref, ref1, result;
+      p = new_pipeline_start_stop();
+      result = [];
+      ref = Array.from('氣場全開');
+      for (i = 0, len = ref.length; i < len; i++) {
+        chr = ref[i];
+        p.send(chr);
+      }
+      ref1 = p.walk_and_stop();
+      for (d of ref1) {
+        result.push(d);
+      }
+      urge('^735^', result);
+      return T != null ? T.eq(result, ['(', '*氣*', '*場*', '*全*', '*開*', ')']) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
