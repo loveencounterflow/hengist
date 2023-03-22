@@ -208,29 +208,77 @@ H                         = require './helpers'
     [ 'par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null ]
     ]
   #.........................................................................................................
-  class Md_parser extends Pipeline_module
-    $010_prepare_paragraphs:  XXX_TEMP.$010_prepare_paragraphs
+  new_parser = ( lexer ) ->
+    class Md_parser extends Pipeline_module
+      tokenize_line: ( line, send ) ->
+        send token for token from lexer.walk line
+        return null
+      $010_prepare_paragraphs:  XXX_TEMP.$010_prepare_paragraphs
+    return new Md_parser()
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new Hypedown_lexer()
-      parser      = new Md_parser()
+      parser      = new_parser new Hypedown_lexer()
       tokens      = []
       result      = []
-      for d from lexer.walk probe
-        parser.send d
-        for token from parser.walk()
-          debug '^345^', ( rpr token.value )
-          tokens.push token
-          continue if token.data?.virtual is true
-          switch token.mk
-            when 'html:parbreak'  then result.push '⎈'
-            when 'plain:nl'       then result.push '⏎'
-            when 'plain:other'    then result.push token.value
+      #.....................................................................................................
+      handle_token = ( token ) ->
+        tokens.push token
+        return if token.data?.virtual is true
+        switch token.mk
+          when 'html:parbreak'  then result.push '⎈'
+          when 'plain:nl'       then result.push '⏎'
+          when 'plain:other'    then result.push token.value
+      #.....................................................................................................
+      # for line from GUY.str.walk_lines probe
+      parser.send probe
+      handle_token token for token from parser.walk()
+      handle_token token for token from parser.stop_walk()
       result_html = result.join ''
       H.tabulate "#{rpr probe} -> #{rpr result_html}", tokens
       H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in tokens when not t.$stamped )
       #.....................................................................................................
+      resolve result_html
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@add_parbreak_markers_OLD = ( T, done ) ->
+  { Pipeline
+    Pipeline_module     } = require '../../../apps/hypedown'
+  { Hypedown_lexer
+    Hypedown_parser     } = require '../../../apps/hypedown'
+  probes_and_matchers = [
+    [ '', '⏎', null ]
+    [ 'paragraph', '⎈paragraph⏎', null ]
+    [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    [ 'par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      p           = new Hypedown_parser()
+      tokens      = []
+      result      = []
+      #.....................................................................................................
+      handle_token = ( token ) ->
+        tokens.push token
+        return if token.data?.virtual is true
+        # debug '^345^', token.mk, ( rpr token.value )
+        switch token.mk
+          when 'html:parbreak'  then result.push '⎈'
+          when 'plain:nl'       then result.push '⏎'
+          when 'plain:other'    then result.push token.value
+      #.....................................................................................................
+      for { lnr, line, eol, } from GUY.str.walk_lines_with_positions probe
+        p.send line
+        handle_token token for token from p.walk()
+      handle_token token for token from p.stop_walk()
+      result_html = result.join ''
+      result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
+      # urge '^08-1^', ( Object.keys d ).sort() for d in result
+      H.tabulate "#{rpr probe} -> #{rpr result_rpr} (#{rpr matcher})", tokens
+      H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in tokens when not t.$stamped )
       resolve result_html
   #.........................................................................................................
   done?()
@@ -244,5 +292,8 @@ if require.main is module then do =>
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
   # test @parse_headings
+  # @add_parbreak_markers()
   test @add_parbreak_markers
+  # @add_parbreak_markers_OLD()
+  # test @add_parbreak_markers_OLD
 
