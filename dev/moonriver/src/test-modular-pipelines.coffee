@@ -156,9 +156,40 @@ get_modular_pipeline_classes = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@pipeline_modules_methods_called_with_current_context = ( T, done ) ->
+  { Pipeline
+    Pipeline_module } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  class X extends Pipeline_module
+    constructor: ->
+      super()
+      @foo = 'class X'
+      return undefined
+    $unbound_method: ->
+      return unbound_method = ( d, send ) ->
+        debug '^98-1^', @constructor.name
+        send d ** 3
+  #.........................................................................................................
+  class Y extends Pipeline
+    constructor: ->
+      super()
+      @foo = 'class Y'
+      @push new X()
+      return undefined
+  #.........................................................................................................
+  y = new Y()
+  y.send 12
+  y.send 34
+  result = y.run_and_stop()
+  T?.eq result, [ 1728, 39304 ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   # @pipeline_modules_1()
-  test @pipeline_modules_1
-
+  # test @pipeline_modules_1
+  # @pipeline_modules_methods_called_with_current_context()
+  test @pipeline_modules_methods_called_with_current_context
