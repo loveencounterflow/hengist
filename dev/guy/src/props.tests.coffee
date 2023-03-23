@@ -513,6 +513,35 @@ demo_keys = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@GUY_props_keys_depth_first = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  #.........................................................................................................
+  class A
+    is_a: true
+  class B extends A
+    is_b: true
+  class C extends B
+    is_c: true
+  class D extends C
+    is_d_1: true
+    constructor: ->
+      super()
+      @in_constructor = 's'
+      return undefined
+    is_d_2: 42
+    instance_method_on_d: ->
+    @class_method_on_D: ->
+  #.........................................................................................................
+  d = new D()
+  cfg = { depth: null, builtins: false, hidden: true, }
+  debug '^4243^', GUY.props.keys d, { cfg..., depth_first: false, }
+  debug '^4243^', GUY.props.keys d, { cfg..., depth_first: true, }
+  T?.eq ( GUY.props.keys d, { cfg..., depth_first: false, } ), [ 'in_constructor', 'constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2', 'is_c', 'is_b', 'is_a' ]
+  T?.eq ( GUY.props.keys d, { cfg..., depth_first: true,  } ), [ 'constructor', 'is_a', 'is_b', 'is_c', 'instance_method_on_d', 'is_d_1', 'is_d_2', 'in_constructor' ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @GUY_props_xray = ( T, done ) ->
   GUY       = require '../../../apps/guy'
   { Strict_owner
@@ -784,7 +813,7 @@ if require.main is module then do =>
   # demo_keys()
   # @[ "GUY.props.keys()" ]()
   # test @[ "GUY.props.keys()" ]
-  test @GUY_props_assign_with_defaults
+  # test @GUY_props_assign_with_defaults
   # @[ "GUY.props.Strict_owner 1" ]()
   # test @[ "GUY.props.Strict_owner 1" ]
   # @[ "GUY.props.has()" ]()
@@ -805,3 +834,5 @@ if require.main is module then do =>
   # test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
   # demo_strict_owner_with_proxy()
   # demo_seal_freeze()
+  # @GUY_props_keys_depth_first()
+  test @GUY_props_keys_depth_first
