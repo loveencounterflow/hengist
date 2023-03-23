@@ -54,14 +54,8 @@ get_modular_pipeline_classes = ->
 
   #=========================================================================================================
   class P_12 extends Pipeline_module
-
-    #-------------------------------------------------------------------------------------------------------
-    constructor: ->
-      super()
-      # R = new Pipeline()
-      @push new P_1()
-      @push new P_2()
-      return undefined
+    p_1: new P_1()
+    p_2: new P_2()
 
   #=========================================================================================================
   p_4 = new Pipeline()
@@ -96,6 +90,10 @@ get_modular_pipeline_classes = ->
     baz: p_4_1
 
   #=========================================================================================================
+  class P_6 extends P_5
+    last: ( d ) ->
+
+  #=========================================================================================================
   return {
     P_1
     P_2
@@ -103,7 +101,82 @@ get_modular_pipeline_classes = ->
     P_12_x
     P_3
     P_empty
-    P_5 }
+    P_5
+    P_6 }
+
+#-----------------------------------------------------------------------------------------------------------
+@can_iterate_over_transforms = ( T, done ) ->
+  { Pipeline
+    Pipeline_module } = require '../../../apps/moonriver'
+  { P_1
+    P_2
+    P_12
+    P_12_x
+    P_3
+    P_empty
+    P_5
+    P_6             } = get_modular_pipeline_classes()
+  #.........................................................................................................
+  do ->
+    whisper '^46-1^', '————————————————————————————————————————'
+    p = new P_empty()
+    info '^46-1^', p
+    T?.ok p instanceof Pipeline_module
+    T?.eq p._transforms, []
+    T?.eq p.length, 0
+    T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), []
+    p.length = 0
+    T?.eq p.length, 0
+    return null
+  #.........................................................................................................
+  do ->
+    whisper '^46-1^', '————————————————————————————————————————'
+    p = new P_1()
+    info '^46-1^', p
+    T?.ok p instanceof Pipeline_module
+    T?.eq p.length, 3
+    T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'p_1_1', 'p_1_2', 'p_1_3' ]
+    p.length = 0
+    T?.eq p.length, 0
+    return null
+  #.........................................................................................................
+  do ->
+    whisper '^46-1^', '————————————————————————————————————————'
+    p = new P_12_x()
+    info '^46-1^', p
+    info '^46-1^', p._transforms
+    T?.ok p instanceof Pipeline_module
+    T?.eq p.length, 5
+    T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'direct_fn', '', 'P_1', 'P_2', 'Pipeline' ]
+    p.length = 0
+    T?.eq p.length, 0
+    return null
+  #.........................................................................................................
+  do ->
+    whisper '^46-1^', '————————————————————————————————————————'
+    p = new P_5()
+    info '^46-1^', p
+    info '^46-1^', p._transforms
+    T?.ok p instanceof Pipeline_module
+    T?.eq p.length, 4
+    T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'foo', 'bar', 'P_empty', 'p_4_1' ]
+    p.length = 0
+    T?.eq p.length, 0
+    return null
+  #.........................................................................................................
+  do ->
+    whisper '^46-1^', '————————————————————————————————————————'
+    p = new P_6()
+    info '^46-1^', p
+    info '^46-1^', p._transforms
+    T?.ok p instanceof Pipeline_module
+    T?.eq p.length, 5
+    T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'foo', 'bar', 'P_empty', 'p_4_1', 'last' ]
+    p.length = 0
+    T?.eq p.length, 0
+    return null
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @pipeline_modules_1 = ( T, done ) ->
@@ -117,37 +190,45 @@ get_modular_pipeline_classes = ->
     P_5     } = get_modular_pipeline_classes()
   #.........................................................................................................
   do ->
-    p = new P_1()
+    p = new Pipeline()
+    p.push P_1
     p.send []
+    urge '^234^', p
+    # urge '^234^', p.run()
     T?.eq p.run(), [ [ '$p_1_1', '$p_1_2', '$p_1_3' ] ]
     return null
   #.........................................................................................................
   do ->
-    p = new P_2()
+    p = new Pipeline()
+    p.push P_2
     p.send []
     T?.eq p.run(), [ [ '$p_2_1', '$p_2_2', '$p_2_3' ] ]
     return null
   #.........................................................................................................
   do ->
-    p = new P_12()
+    p = new Pipeline()
+    p.push P_12
     p.send []
     T?.eq p.run(), [ [ '$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3' ] ]
     return null
   #.........................................................................................................
   do ->
-    p = new P_12_x()
+    p = new Pipeline()
+    p.push P_12_x
     p.send []
     T?.eq p.run(), [ [ 'direct_fn', '$indirect_fn', '$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3', 'p_4_1' ] ]
     return null
   #.........................................................................................................
   do ->
-    p = new P_5()
+    p = new Pipeline()
+    p.push P_5
     p.send []
     T?.eq p.run(), [ [ 'foo', 'bar', 'p_4_1' ] ]
     return null
   #.........................................................................................................
   do ->
-    p = new P_empty()
+    p = new Pipeline()
+    p.push P_empty
     p.send 1
     p.send 2
     p.send 3
@@ -168,7 +249,7 @@ get_modular_pipeline_classes = ->
       return undefined
     $unbound_method: ->
       return unbound_method = ( d, send ) ->
-        debug '^98-1^', @constructor.name
+        # debug '^98-1^', @constructor.name
         send d ** 3
   #.........................................................................................................
   class Y extends Pipeline
@@ -190,6 +271,10 @@ get_modular_pipeline_classes = ->
 ############################################################################################################
 if require.main is module then do =>
   # @pipeline_modules_1()
+  # @pipeline_modules_1()
   # test @pipeline_modules_1
   # @pipeline_modules_methods_called_with_current_context()
-  test @pipeline_modules_methods_called_with_current_context
+  # @can_iterate_over_transforms()
+  test @
+  # test @can_iterate_over_transforms
+  # test @pipeline_modules_methods_called_with_current_context
