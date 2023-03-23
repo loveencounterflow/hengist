@@ -25,7 +25,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_modular_pipeline_classes = function() {
-    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_empty, Pipeline, Pipeline_module, p_4, p_4_1;
+    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Pipeline_module, p_4, p_4_1;
     ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
     //=========================================================================================================
     P_1 = class P_1 extends Pipeline_module {
@@ -87,18 +87,17 @@
       }
 
     };
-    //=========================================================================================================
-    P_12 = class P_12 extends Pipeline_module {
-      //-------------------------------------------------------------------------------------------------------
-      constructor() {
-        super();
-        // R = new Pipeline()
-        this.push(new P_1());
-        this.push(new P_2());
-        return void 0;
-      }
+    P_12 = (function() {
+      //=========================================================================================================
+      class P_12 extends Pipeline_module {};
 
-    };
+      P_12.prototype.p_1 = new P_1();
+
+      P_12.prototype.p_2 = new P_2();
+
+      return P_12;
+
+    }).call(this);
     //=========================================================================================================
     p_4 = new Pipeline();
     p_4.push(p_4_1 = function(d, send) {
@@ -181,14 +180,19 @@
 
     }).call(this);
     //=========================================================================================================
-    return {P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5};
+    P_6 = class P_6 extends P_5 {
+      last(d) {}
+
+    };
+    //=========================================================================================================
+    return {P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5, P_6};
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_iterate_over_transforms = function(T, done) {
-    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_empty, Pipeline, Pipeline_module;
+    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Pipeline_module;
     ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
-    ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5} = get_modular_pipeline_classes());
+    ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5, P_6} = get_modular_pipeline_classes());
     (function() {      //.........................................................................................................
       var p, t;
       whisper('^46-1^', '————————————————————————————————————————');
@@ -302,6 +306,34 @@
       }
       return null;
     })();
+    (function() {      //.........................................................................................................
+      var p, t;
+      whisper('^46-1^', '————————————————————————————————————————');
+      p = new P_6();
+      info('^46-1^', p);
+      info('^46-1^', p._transforms);
+      if (T != null) {
+        T.ok(p instanceof Pipeline_module);
+      }
+      if (T != null) {
+        T.eq(p.length, 5);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var ref, ref1, ref2, results;
+          results = [];
+          for (t of p) {
+            results.push((ref = (ref1 = t.name) != null ? ref1 : (ref2 = t.constructor) != null ? ref2.name : void 0) != null ? ref : '???');
+          }
+          return results;
+        })(), ['foo', 'bar', 'P_empty', 'p_4_1', 'last']);
+      }
+      p.length = 0;
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -312,8 +344,11 @@
     ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5} = get_modular_pipeline_classes());
     (function() {      //.........................................................................................................
       var p;
-      p = new P_1();
+      p = new Pipeline();
+      p.push(P_1);
       p.send([]);
+      urge('^234^', p);
+      // urge '^234^', p.run()
       if (T != null) {
         T.eq(p.run(), [['$p_1_1', '$p_1_2', '$p_1_3']]);
       }
@@ -321,7 +356,8 @@
     })();
     (function() {      //.........................................................................................................
       var p;
-      p = new P_2();
+      p = new Pipeline();
+      p.push(P_2);
       p.send([]);
       if (T != null) {
         T.eq(p.run(), [['$p_2_1', '$p_2_2', '$p_2_3']]);
@@ -330,7 +366,8 @@
     })();
     (function() {      //.........................................................................................................
       var p;
-      p = new P_12();
+      p = new Pipeline();
+      p.push(P_12);
       p.send([]);
       if (T != null) {
         T.eq(p.run(), [['$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3']]);
@@ -339,7 +376,8 @@
     })();
     (function() {      //.........................................................................................................
       var p;
-      p = new P_12_x();
+      p = new Pipeline();
+      p.push(P_12_x);
       p.send([]);
       if (T != null) {
         T.eq(p.run(), [['direct_fn', '$indirect_fn', '$p_1_1', '$p_1_2', '$p_1_3', '$p_2_1', '$p_2_2', '$p_2_3', 'p_4_1']]);
@@ -348,7 +386,8 @@
     })();
     (function() {      //.........................................................................................................
       var p;
-      p = new P_5();
+      p = new Pipeline();
+      p.push(P_5);
       p.send([]);
       if (T != null) {
         T.eq(p.run(), [['foo', 'bar', 'p_4_1']]);
@@ -357,7 +396,8 @@
     })();
     (function() {      //.........................................................................................................
       var p;
-      p = new P_empty();
+      p = new Pipeline();
+      p.push(P_empty);
       p.send(1);
       p.send(2);
       p.send(3);
@@ -415,14 +455,16 @@
   if (require.main === module) {
     (() => {
       // @pipeline_modules_1()
+      // @pipeline_modules_1()
       // test @pipeline_modules_1
       // @pipeline_modules_methods_called_with_current_context()
       // @can_iterate_over_transforms()
-      return test(this.can_iterate_over_transforms);
+      return test(this);
     })();
   }
 
-  // test @pipeline_modules_methods_called_with_current_context
+  // test @can_iterate_over_transforms
+// test @pipeline_modules_methods_called_with_current_context
 
 }).call(this);
 
