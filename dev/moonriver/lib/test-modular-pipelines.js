@@ -185,6 +185,127 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.can_iterate_over_transforms = function(T, done) {
+    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_empty, Pipeline, Pipeline_module;
+    ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
+    ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5} = get_modular_pipeline_classes());
+    (function() {      //.........................................................................................................
+      var p, t;
+      whisper('^46-1^', '————————————————————————————————————————');
+      p = new P_empty();
+      info('^46-1^', p);
+      if (T != null) {
+        T.ok(p instanceof Pipeline_module);
+      }
+      if (T != null) {
+        T.eq(p._transforms, []);
+      }
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var ref, ref1, ref2, results;
+          results = [];
+          for (t of p) {
+            results.push((ref = (ref1 = t.name) != null ? ref1 : (ref2 = t.constructor) != null ? ref2.name : void 0) != null ? ref : '???');
+          }
+          return results;
+        })(), []);
+      }
+      p.length = 0;
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var p, t;
+      whisper('^46-1^', '————————————————————————————————————————');
+      p = new P_1();
+      info('^46-1^', p);
+      if (T != null) {
+        T.ok(p instanceof Pipeline_module);
+      }
+      if (T != null) {
+        T.eq(p.length, 3);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var ref, ref1, ref2, results;
+          results = [];
+          for (t of p) {
+            results.push((ref = (ref1 = t.name) != null ? ref1 : (ref2 = t.constructor) != null ? ref2.name : void 0) != null ? ref : '???');
+          }
+          return results;
+        })(), ['p_1_1', 'p_1_2', 'p_1_3']);
+      }
+      p.length = 0;
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var p, t;
+      whisper('^46-1^', '————————————————————————————————————————');
+      p = new P_12_x();
+      info('^46-1^', p);
+      info('^46-1^', p._transforms);
+      if (T != null) {
+        T.ok(p instanceof Pipeline_module);
+      }
+      if (T != null) {
+        T.eq(p.length, 5);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var ref, ref1, ref2, results;
+          results = [];
+          for (t of p) {
+            results.push((ref = (ref1 = t.name) != null ? ref1 : (ref2 = t.constructor) != null ? ref2.name : void 0) != null ? ref : '???');
+          }
+          return results;
+        })(), ['direct_fn', '', 'P_1', 'P_2', 'Pipeline']);
+      }
+      p.length = 0;
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var p, t;
+      whisper('^46-1^', '————————————————————————————————————————');
+      p = new P_5();
+      info('^46-1^', p);
+      info('^46-1^', p._transforms);
+      if (T != null) {
+        T.ok(p instanceof Pipeline_module);
+      }
+      if (T != null) {
+        T.eq(p.length, 4);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var ref, ref1, ref2, results;
+          results = [];
+          for (t of p) {
+            results.push((ref = (ref1 = t.name) != null ? ref1 : (ref2 = t.constructor) != null ? ref2.name : void 0) != null ? ref : '???');
+          }
+          return results;
+        })(), ['foo', 'bar', 'P_empty', 'p_4_1']);
+      }
+      p.length = 0;
+      if (T != null) {
+        T.eq(p.length, 0);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.pipeline_modules_1 = function(T, done) {
     var P_1, P_12, P_12_x, P_2, P_3, P_5, P_empty, Pipeline;
     ({Pipeline} = require('../../../apps/moonriver'));
@@ -263,7 +384,7 @@
       $unbound_method() {
         var unbound_method;
         return unbound_method = function(d, send) {
-          debug('^98-1^', this.constructor.name);
+          // debug '^98-1^', @constructor.name
           return send(d ** 3);
         };
       }
@@ -296,9 +417,12 @@
       // @pipeline_modules_1()
       // test @pipeline_modules_1
       // @pipeline_modules_methods_called_with_current_context()
-      return test(this.pipeline_modules_methods_called_with_current_context);
+      // @can_iterate_over_transforms()
+      return test(this.can_iterate_over_transforms);
     })();
   }
+
+  // test @pipeline_modules_methods_called_with_current_context
 
 }).call(this);
 

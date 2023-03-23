@@ -1380,6 +1380,86 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_keys_depth_first = function(T, done) {
+    var A, B, C, D, GUY, cfg, d;
+    GUY = require('../../../apps/guy');
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.is_a = true;
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.is_b = true;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      class C extends B {};
+
+      C.prototype.is_c = true;
+
+      return C;
+
+    }).call(this);
+    D = (function() {
+      class D extends C {
+        constructor() {
+          super();
+          this.in_constructor = 's';
+          return void 0;
+        }
+
+        instance_method_on_d() {}
+
+        static class_method_on_D() {}
+
+      };
+
+      D.prototype.is_d_1 = true;
+
+      D.prototype.is_d_2 = 42;
+
+      return D;
+
+    }).call(this);
+    //.........................................................................................................
+    d = new D();
+    cfg = {
+      depth: null,
+      builtins: false,
+      hidden: true
+    };
+    debug('^4243^', GUY.props.keys(d, {
+      ...cfg,
+      depth_first: false
+    }));
+    debug('^4243^', GUY.props.keys(d, {
+      ...cfg,
+      depth_first: true
+    }));
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        ...cfg,
+        depth_first: false
+      }), ['in_constructor', 'constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2', 'is_c', 'is_b', 'is_a']);
+    }
+    if (T != null) {
+      T.eq(GUY.props.keys(d, {
+        ...cfg,
+        depth_first: true
+      }), ['constructor', 'is_a', 'is_b', 'is_c', 'instance_method_on_d', 'is_d_1', 'is_d_2', 'in_constructor']);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.GUY_props_xray = function(T, done) {
     var GUY, Strict_owner, d, hide, hs, keys, soc, xray;
     GUY = require('../../../apps/guy');
@@ -1934,30 +2014,31 @@
       // demo_keys()
       // @[ "GUY.props.keys()" ]()
       // test @[ "GUY.props.keys()" ]
-      return test(this.GUY_props_assign_with_defaults);
+      // test @GUY_props_assign_with_defaults
+      // @[ "GUY.props.Strict_owner 1" ]()
+      // test @[ "GUY.props.Strict_owner 1" ]
+      // @[ "GUY.props.has()" ]()
+      // test @[ "GUY.props.has()" ]
+      // @GUY_props_get()
+      // test @GUY_props_get
+      // @GUY_props_xray()
+      // test @GUY_props_xray
+      // @GUY_props_locking()
+      // test @GUY_props_locking
+      // @[ "GUY.props.Strict_owner 2" ]()
+      // test @[ "GUY.props.Strict_owner 2" ]
+      // test @[ "GUY.props.Strict_owner can use explicit target" ]
+      // @[ "GUY.props.Strict_owner can use Reflect.has" ]()
+      // test @[ "GUY.props.Strict_owner can use Reflect.has" ]
+      // test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
+      // @[ "GUY.props.Strict_owner can disallow reassining keys" ]()
+      // test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
+      // demo_strict_owner_with_proxy()
+      // demo_seal_freeze()
+      // @GUY_props_keys_depth_first()
+      return test(this.GUY_props_keys_depth_first);
     })();
   }
-
-  // @[ "GUY.props.Strict_owner 1" ]()
-// test @[ "GUY.props.Strict_owner 1" ]
-// @[ "GUY.props.has()" ]()
-// test @[ "GUY.props.has()" ]
-// @GUY_props_get()
-// test @GUY_props_get
-// @GUY_props_xray()
-// test @GUY_props_xray
-// @GUY_props_locking()
-// test @GUY_props_locking
-// @[ "GUY.props.Strict_owner 2" ]()
-// test @[ "GUY.props.Strict_owner 2" ]
-// test @[ "GUY.props.Strict_owner can use explicit target" ]
-// @[ "GUY.props.Strict_owner can use Reflect.has" ]()
-// test @[ "GUY.props.Strict_owner can use Reflect.has" ]
-// test @[ "GUY.props.Strict_owner can disallow redefining keys" ]
-// @[ "GUY.props.Strict_owner can disallow reassining keys" ]()
-// test @[ "GUY.props.Strict_owner can disallow reassining keys" ]
-// demo_strict_owner_with_proxy()
-// demo_seal_freeze()
 
 }).call(this);
 
