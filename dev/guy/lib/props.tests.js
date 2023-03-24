@@ -1461,7 +1461,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.GUY_props_get_prototype_chain = function(T, done) {
-    var A, B, C, D, GUY, chain, d, i, idx, j, len, ref, x;
+    var A, B, C, D, GUY;
     GUY = require('../../../apps/guy');
     A = (function() {
       //.........................................................................................................
@@ -1509,40 +1509,87 @@
       return D;
 
     }).call(this);
-    //.........................................................................................................
-    d = new D();
-    chain = GUY.props.get_prototype_chain(d);
-    for (i = 0, len = chain.length; i < len; i++) {
-      x = chain[i];
-      debug('^4243^', rpr(x), rpr(x.constructor.name), type_of(x));
-    }
-    if (T != null) {
-      T.eq((function() {
-        var j, len1, results;
-        results = [];
-        for (j = 0, len1 = chain.length; j < len1; j++) {
-          x = chain[j];
-          results.push(x.constructor.name);
-        }
-        return results;
-      })(), ['D', 'D', 'C', 'B', 'A', 'Object']);
-    }
-    for (idx = j = 0, ref = chain.length - 1; (0 <= ref ? j < ref : j > ref); idx = 0 <= ref ? ++j : --j) {
+    (() => {      //.........................................................................................................
+      var chain, d, i, idx, ref, x;
+      d = new D();
+      // debug '^32424^', Object.getPrototypeOf null
+      chain = GUY.props.get_prototype_chain(d);
+      // debug '^4243^', ( rpr x ), ( rpr x.constructor.name ), ( type_of x ) for x in chain
       if (T != null) {
-        T.eq((Object.getPrototypeOf(chain[idx])) === chain[idx + 1], true);
+        T.eq((function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = chain.length; i < len; i++) {
+            x = chain[i];
+            results.push(x.constructor.name);
+          }
+          return results;
+        })(), ['D', 'D', 'C', 'B', 'A', 'Object']);
       }
-    }
-    if (T != null) {
-      T.eq((function() {
-        var l, len1, results;
+      for (idx = i = 0, ref = chain.length - 1; (0 <= ref ? i < ref : i > ref); idx = 0 <= ref ? ++i : --i) {
+        if (T != null) {
+          T.eq((Object.getPrototypeOf(chain[idx])) === chain[idx + 1], true);
+        }
+      }
+      return T != null ? T.eq((function() {
+        var j, len, results;
         results = [];
-        for (l = 0, len1 = chain.length; l < len1; l++) {
-          x = chain[l];
+        for (j = 0, len = chain.length; j < len; j++) {
+          x = chain[j];
           results.push(Object.getOwnPropertyNames(x));
         }
         return results;
-      })(), [['in_constructor'], ['constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2'], ['constructor', 'is_c'], ['constructor', 'is_b'], ['constructor', 'is_a'], ['constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']]);
-    }
+      })(), [['in_constructor'], ['constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2'], ['constructor', 'is_c'], ['constructor', 'is_b'], ['constructor', 'is_a'], ['constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var x;
+      if (T != null) {
+        T.eq((function() {
+          var i, len, ref, ref1, ref2, results;
+          ref = GUY.props.get_prototype_chain(null);
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push((ref1 = x != null ? (ref2 = x.constructor) != null ? ref2.name : void 0 : void 0) != null ? ref1 : '???');
+          }
+          return results;
+        })(), []);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var i, len, ref, ref1, ref2, results;
+          ref = GUY.props.get_prototype_chain(void 0);
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push((ref1 = x != null ? (ref2 = x.constructor) != null ? ref2.name : void 0 : void 0) != null ? ref1 : '???');
+          }
+          return results;
+        })(), []);
+      }
+      if (T != null) {
+        T.eq((function() {
+          var i, len, ref, ref1, ref2, results;
+          ref = GUY.props.get_prototype_chain(42);
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            x = ref[i];
+            results.push((ref1 = x != null ? (ref2 = x.constructor) != null ? ref2.name : void 0 : void 0) != null ? ref1 : '???');
+          }
+          return results;
+        })(), ['Number', 'Number', 'Object']);
+      }
+      return T != null ? T.eq((function() {
+        var i, len, ref, ref1, ref2, results;
+        ref = GUY.props.get_prototype_chain(Object.create(null));
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          x = ref[i];
+          results.push((ref1 = x != null ? (ref2 = x.constructor) != null ? ref2.name : void 0 : void 0) != null ? ref1 : '???');
+        }
+        return results;
+      })(), ['???']) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -2124,6 +2171,7 @@
       // demo_seal_freeze()
       // @GUY_props_keys_depth_first()
       // test @GUY_props_keys_depth_first
+      // @GUY_props_get_prototype_chain()
       return test(this.GUY_props_get_prototype_chain);
     })();
   }

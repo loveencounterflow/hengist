@@ -188,8 +188,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.parse_headings = async function(T, done) {
-    var Hypedown_lexer, Md_parser, Pipeline, Pipeline_module, XXX_TEMP, error, i, len, matcher, probe, probes_and_matchers;
-    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    var Hypedown_lexer, Md_parser, Pipeline, Transformer, XXX_TEMP, error, i, len, matcher, probe, probes_and_matchers;
+    ({Pipeline, Transformer} = require('../../../apps/hypedown'));
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
     probes_and_matchers = [["# H1", "<h1>H1\n"], ["x # H1", "x # H1\n"], ["x\n# H1", "x\n# H1\n"], ["x\n\n# H1", "x\n\n<h1> H1\n"]];
@@ -204,7 +204,7 @@
       // [ '', '', ]
       // [ "\n", 'not a\nheading\n', ]
       // [ "\n\nnot a\nheading", 'not a\nheading\n', ]
-      class Md_parser extends Pipeline_module {};
+      class Md_parser extends Transformer {};
 
       Md_parser.prototype.$010_prepare_paragraphs = XXX_TEMP.$010_prepare_paragraphs;
 
@@ -267,20 +267,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.add_parbreak_markers = async function(T, done) {
-    var Hypedown_lexer, Pipeline, Pipeline_module, XXX_TEMP, error, i, len, matcher, new_parser, probe, probes_and_matchers;
-    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    var Hypedown_lexer, Pipeline, Transformer, XXX_TEMP, error, i, len, matcher, new_parser, probe, probes_and_matchers;
+    ({Pipeline, Transformer} = require('../../../apps/hypedown'));
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
-    // [ '', '⏎', null ]
-    // [ 'paragraph', '⎈paragraph⏎', null ]
-    // [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
-    probes_and_matchers = [['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
+    probes_and_matchers = [['', '⏎', null], ['paragraph', '⎈paragraph⏎', null], ['par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null], ['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
     //.........................................................................................................
     new_parser = function(lexer) {
       var Md_parser;
       Md_parser = (function() {
         // lexer = new Hypedown_lexer()
-        class Md_parser extends Pipeline_module {};
+        class Md_parser extends Transformer {};
 
         // tokenize_line: ( line, send ) ->
         //   send token for token from lexer.walk line
@@ -292,7 +289,7 @@
         return Md_parser;
 
       }).call(this);
-      return new Md_parser();
+      return Md_parser.as_pipeline();
     };
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -349,8 +346,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this._add_parbreak_markers_OLD = async function(T, done) {
-    var Hypedown_lexer, Hypedown_parser, Pipeline, Pipeline_module, error, i, len, matcher, probe, probes_and_matchers;
-    ({Pipeline, Pipeline_module} = require('../../../apps/hypedown'));
+    var Hypedown_lexer, Hypedown_parser, Pipeline, Transformer, error, i, len, matcher, probe, probes_and_matchers;
+    ({Pipeline, Transformer} = require('../../../apps/hypedown'));
     ({Hypedown_lexer, Hypedown_parser} = require('../../../apps/hypedown'));
     probes_and_matchers = [['', '⏎', null], ['paragraph', '⎈paragraph⏎', null], ['par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null], ['par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null]];
 //.........................................................................................................
