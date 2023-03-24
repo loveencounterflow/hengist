@@ -36,24 +36,24 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
 #-----------------------------------------------------------------------------------------------------------
 get_modular_pipeline_classes = ->
   { Pipeline
-    Pipeline_module } = require '../../../apps/moonriver'
+    Transformer } = require '../../../apps/moonriver'
 
   #=========================================================================================================
-  class P_1 extends Pipeline_module
+  class P_1 extends Transformer
 
     $p_1_1: -> p_1_1 = ( d, send ) -> help '$p_1_1'; d.push '$p_1_1'; send d
     $p_1_2: -> p_1_2 = ( d, send ) -> help '$p_1_2'; d.push '$p_1_2'; send d
     $p_1_3: -> p_1_3 = ( d, send ) -> help '$p_1_3'; d.push '$p_1_3'; send d
 
   #=========================================================================================================
-  class P_2 extends Pipeline_module
+  class P_2 extends Transformer
 
     $p_2_1: -> p_2_1 = ( d, send ) -> help '$p_2_1'; d.push '$p_2_1'; send d
     $p_2_2: -> p_2_2 = ( d, send ) -> help '$p_2_2'; d.push '$p_2_2'; send d
     $p_2_3: -> p_2_3 = ( d, send ) -> help '$p_2_3'; d.push '$p_2_3'; send d
 
   #=========================================================================================================
-  class P_12 extends Pipeline_module
+  class P_12 extends Transformer
     p_1: new P_1()
     p_2: new P_2()
 
@@ -62,7 +62,7 @@ get_modular_pipeline_classes = ->
   p_4.push p_4_1 = ( d, send ) -> help 'p_4_1'; d.push 'p_4_1'; send d
 
   #=========================================================================================================
-  class P_12_x extends Pipeline_module
+  class P_12_x extends Transformer
 
     #-------------------------------------------------------------------------------------------------------
     $: [
@@ -74,16 +74,16 @@ get_modular_pipeline_classes = ->
       ]
 
   #=========================================================================================================
-  class P_3 extends Pipeline_module
+  class P_3 extends Transformer
     foo: ( d, send ) -> d.push 'foo'; send d
     bar: ( d, send ) -> d.push 'bar'; send d
     baz: p_4_1
 
   #=========================================================================================================
-  class P_empty extends Pipeline_module
+  class P_empty extends Transformer
 
   #=========================================================================================================
-  class P_5 extends Pipeline_module
+  class P_5 extends Transformer
     foo: ( d, send ) -> d.push 'foo'; send d
     bar: ( d, send ) -> d.push 'bar'; send d
     empty: P_empty
@@ -107,7 +107,7 @@ get_modular_pipeline_classes = ->
 #-----------------------------------------------------------------------------------------------------------
 @can_iterate_over_transforms = ( T, done ) ->
   { Pipeline
-    Pipeline_module } = require '../../../apps/moonriver'
+    Transformer } = require '../../../apps/moonriver'
   { P_1
     P_2
     P_12
@@ -121,7 +121,7 @@ get_modular_pipeline_classes = ->
     whisper '^46-1^', '————————————————————————————————————————'
     p = new P_empty()
     info '^46-1^', p
-    T?.ok p instanceof Pipeline_module
+    T?.ok p instanceof Transformer
     T?.eq p._transforms, []
     T?.eq p.length, 0
     T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), []
@@ -133,7 +133,7 @@ get_modular_pipeline_classes = ->
     whisper '^46-1^', '————————————————————————————————————————'
     p = new P_1()
     info '^46-1^', p
-    T?.ok p instanceof Pipeline_module
+    T?.ok p instanceof Transformer
     T?.eq p.length, 3
     T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'p_1_1', 'p_1_2', 'p_1_3' ]
     p.length = 0
@@ -145,7 +145,7 @@ get_modular_pipeline_classes = ->
     p = new P_12_x()
     info '^46-1^', p
     info '^46-1^', p._transforms
-    T?.ok p instanceof Pipeline_module
+    T?.ok p instanceof Transformer
     T?.eq p.length, 5
     T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'direct_fn', '', 'P_1', 'P_2', 'Pipeline' ]
     p.length = 0
@@ -157,7 +157,7 @@ get_modular_pipeline_classes = ->
     p = new P_5()
     info '^46-1^', p
     info '^46-1^', p._transforms
-    T?.ok p instanceof Pipeline_module
+    T?.ok p instanceof Transformer
     T?.eq p.length, 4
     T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'foo', 'bar', 'P_empty', 'p_4_1' ]
     p.length = 0
@@ -169,7 +169,7 @@ get_modular_pipeline_classes = ->
     p = new P_6()
     info '^46-1^', p
     info '^46-1^', p._transforms
-    T?.ok p instanceof Pipeline_module
+    T?.ok p instanceof Transformer
     T?.eq p.length, 5
     T?.eq ( t.name ? t.constructor?.name ? '???' for t from p ), [ 'foo', 'bar', 'P_empty', 'p_4_1', 'last' ]
     p.length = 0
@@ -179,7 +179,7 @@ get_modular_pipeline_classes = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@pipeline_modules_1 = ( T, done ) ->
+@transformers_1 = ( T, done ) ->
   { Pipeline }              = require '../../../apps/moonriver'
   { P_1
     P_2
@@ -238,11 +238,11 @@ get_modular_pipeline_classes = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@pipeline_modules_methods_called_with_current_context = ( T, done ) ->
+@transformers_methods_called_with_current_context = ( T, done ) ->
   { Pipeline
-    Pipeline_module } = require '../../../apps/moonriver'
+    Transformer } = require '../../../apps/moonriver'
   #.........................................................................................................
-  class X extends Pipeline_module
+  class X extends Transformer
     constructor: ->
       super()
       @foo = 'class X'
@@ -270,11 +270,11 @@ get_modular_pipeline_classes = ->
 
 ############################################################################################################
 if require.main is module then do =>
-  # @pipeline_modules_1()
-  # @pipeline_modules_1()
-  # test @pipeline_modules_1
-  # @pipeline_modules_methods_called_with_current_context()
+  # @transformers_1()
+  # @transformers_1()
+  # test @transformers_1
+  # @transformers_methods_called_with_current_context()
   # @can_iterate_over_transforms()
   test @
   # test @can_iterate_over_transforms
-  # test @pipeline_modules_methods_called_with_current_context
+  # test @transformers_methods_called_with_current_context
