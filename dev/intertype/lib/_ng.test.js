@@ -4973,6 +4973,28 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.extends_recognizes_derivatives = function(T, done) {
+    var Base, Derived, Intertype, Unrelated, create, declare, is_extension_of, isa, type_of, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    ({declare, is_extension_of, isa, type_of, create} = types);
+    Base = class Base {};
+    Derived = class Derived extends Base {};
+    Unrelated = class Unrelated {};
+    if (T != null) {
+      T.eq(is_extension_of(Base, Derived), false);
+    }
+    if (T != null) {
+      T.eq(is_extension_of(Derived, Base), true);
+    }
+    if (T != null) {
+      T.eq(is_extension_of(Unrelated, Base), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // demo()
@@ -5023,11 +5045,12 @@
     // test @strange_naming_bug
     // @throws_validation_error_for_unfit_arguments()
     // test @throws_validation_error_for_unfit_arguments
-    // test @
-    test(this.recognize_classes);
+    test(this);
   }
 
-  // test @intertype_ordering_of_field_and_isa_tests
+  // test @recognize_classes
+// test @extends_recognizes_derivatives
+// test @intertype_ordering_of_field_and_isa_tests
 // test @intertype_tracing
 // test @_intertype_tracing_2
 // test @intertype_improved_validation_errors

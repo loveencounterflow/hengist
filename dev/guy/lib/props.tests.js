@@ -1460,6 +1460,93 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.GUY_props_get_prototype_chain = function(T, done) {
+    var A, B, C, D, GUY, chain, d, i, idx, j, len, ref, x;
+    GUY = require('../../../apps/guy');
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.is_a = true;
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.is_b = true;
+
+      return B;
+
+    }).call(this);
+    C = (function() {
+      class C extends B {};
+
+      C.prototype.is_c = true;
+
+      return C;
+
+    }).call(this);
+    D = (function() {
+      class D extends C {
+        constructor() {
+          super();
+          this.in_constructor = 's';
+          return void 0;
+        }
+
+        instance_method_on_d() {}
+
+        static class_method_on_D() {}
+
+      };
+
+      D.prototype.is_d_1 = true;
+
+      D.prototype.is_d_2 = 42;
+
+      return D;
+
+    }).call(this);
+    //.........................................................................................................
+    d = new D();
+    chain = GUY.props.get_prototype_chain(d);
+    for (i = 0, len = chain.length; i < len; i++) {
+      x = chain[i];
+      debug('^4243^', rpr(x), rpr(x.constructor.name), type_of(x));
+    }
+    if (T != null) {
+      T.eq((function() {
+        var j, len1, results;
+        results = [];
+        for (j = 0, len1 = chain.length; j < len1; j++) {
+          x = chain[j];
+          results.push(x.constructor.name);
+        }
+        return results;
+      })(), ['D', 'D', 'C', 'B', 'A', 'Object']);
+    }
+    for (idx = j = 0, ref = chain.length - 1; (0 <= ref ? j < ref : j > ref); idx = 0 <= ref ? ++j : --j) {
+      if (T != null) {
+        T.eq((Object.getPrototypeOf(chain[idx])) === chain[idx + 1], true);
+      }
+    }
+    if (T != null) {
+      T.eq((function() {
+        var l, len1, results;
+        results = [];
+        for (l = 0, len1 = chain.length; l < len1; l++) {
+          x = chain[l];
+          results.push(Object.getOwnPropertyNames(x));
+        }
+        return results;
+      })(), [['in_constructor'], ['constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2'], ['constructor', 'is_c'], ['constructor', 'is_b'], ['constructor', 'is_a'], ['constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString']]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.GUY_props_xray = function(T, done) {
     var GUY, Strict_owner, d, hide, hs, keys, soc, xray;
     GUY = require('../../../apps/guy');
@@ -2036,7 +2123,8 @@
       // demo_strict_owner_with_proxy()
       // demo_seal_freeze()
       // @GUY_props_keys_depth_first()
-      return test(this.GUY_props_keys_depth_first);
+      // test @GUY_props_keys_depth_first
+      return test(this.GUY_props_get_prototype_chain);
     })();
   }
 

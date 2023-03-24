@@ -451,6 +451,77 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.transformers_do_no_overrides = function(T, done) {
+    var A, B, Pipeline, Transformer, p, result;
+    ({Pipeline, Transformer} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    A = class A extends Transformer {
+      $source() {
+        return [['*']];
+      }
+
+      $a1() {
+        return function(d, send) {
+          d.push('a1');
+          return send(d);
+        };
+      }
+
+      $a2() {
+        return function(d, send) {
+          d.push('a2');
+          return send(d);
+        };
+      }
+
+      $a3() {
+        return function(d, send) {
+          d.push('a3');
+          return send(d);
+        };
+      }
+
+    };
+    //.........................................................................................................
+    B = class B extends A {
+      $b1() {
+        return function(d, send) {
+          d.push('b1');
+          return send(d);
+        };
+      }
+
+      $a2() {
+        return (d, send) => {
+          d.push('!b2!');
+          return send(d);
+        };
+      }
+
+      $b3() {
+        return function(d, send) {
+          d.push('b3');
+          return send(d);
+        };
+      }
+
+      $show() {
+        return function(d) {
+          return urge('^a@1^', d);
+        };
+      }
+
+    };
+    //.........................................................................................................
+    p = B.as_pipeline();
+    result = p.run_and_stop();
+    if (T != null) {
+      T.eq(result, [['*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3']]);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -459,11 +530,13 @@
       // test @transformers_1
       // @transformers_methods_called_with_current_context()
       // @can_iterate_over_transforms()
-      return test(this);
+      // @transformers_do_no_overrides()
+      return test(this.transformers_do_no_overrides);
     })();
   }
 
-  // test @can_iterate_over_transforms
+  // test @
+// test @can_iterate_over_transforms
 // test @transformers_methods_called_with_current_context
 
 }).call(this);
