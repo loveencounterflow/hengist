@@ -2458,6 +2458,25 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@extends_recognizes_derivatives = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    is_extension_of
+    isa
+    type_of
+    create        } = types
+  class Base
+  class Derived extends Base
+  class Unrelated
+  T?.eq ( is_extension_of Base, Derived   ), false
+  T?.eq ( is_extension_of Derived, Base   ), true
+  T?.eq ( is_extension_of Unrelated, Base ), false
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
@@ -2509,8 +2528,9 @@ unless module.parent?
   # test @strange_naming_bug
   # @throws_validation_error_for_unfit_arguments()
   # test @throws_validation_error_for_unfit_arguments
-  # test @
-  test @recognize_classes
+  test @
+  # test @recognize_classes
+  # test @extends_recognizes_derivatives
   # test @intertype_ordering_of_field_and_isa_tests
   # test @intertype_tracing
   # test @_intertype_tracing_2
