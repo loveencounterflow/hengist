@@ -25,10 +25,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   get_modular_pipeline_classes = function() {
-    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Pipeline_module, p_4, p_4_1;
-    ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
+    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Transformer, p_4, p_4_1;
+    ({Pipeline, Transformer} = require('../../../apps/moonriver'));
     //=========================================================================================================
-    P_1 = class P_1 extends Pipeline_module {
+    P_1 = class P_1 extends Transformer {
       $p_1_1() {
         var p_1_1;
         return p_1_1 = function(d, send) {
@@ -58,7 +58,7 @@
 
     };
     //=========================================================================================================
-    P_2 = class P_2 extends Pipeline_module {
+    P_2 = class P_2 extends Transformer {
       $p_2_1() {
         var p_2_1;
         return p_2_1 = function(d, send) {
@@ -89,7 +89,7 @@
     };
     P_12 = (function() {
       //=========================================================================================================
-      class P_12 extends Pipeline_module {};
+      class P_12 extends Transformer {};
 
       P_12.prototype.p_1 = new P_1();
 
@@ -109,7 +109,7 @@
       var $indirect_fn, direct_fn;
 
       //=========================================================================================================
-      class P_12_x extends Pipeline_module {};
+      class P_12_x extends Transformer {};
 
       //-------------------------------------------------------------------------------------------------------
       P_12_x.prototype.$ = [
@@ -137,7 +137,7 @@
     }).call(this);
     P_3 = (function() {
       //=========================================================================================================
-      class P_3 extends Pipeline_module {
+      class P_3 extends Transformer {
         foo(d, send) {
           d.push('foo');
           return send(d);
@@ -156,10 +156,10 @@
 
     }).call(this);
     //=========================================================================================================
-    P_empty = class P_empty extends Pipeline_module {};
+    P_empty = class P_empty extends Transformer {};
     P_5 = (function() {
       //=========================================================================================================
-      class P_5 extends Pipeline_module {
+      class P_5 extends Transformer {
         foo(d, send) {
           d.push('foo');
           return send(d);
@@ -190,8 +190,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.can_iterate_over_transforms = function(T, done) {
-    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Pipeline_module;
-    ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
+    var P_1, P_12, P_12_x, P_2, P_3, P_5, P_6, P_empty, Pipeline, Transformer;
+    ({Pipeline, Transformer} = require('../../../apps/moonriver'));
     ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5, P_6} = get_modular_pipeline_classes());
     (function() {      //.........................................................................................................
       var p, t;
@@ -199,7 +199,7 @@
       p = new P_empty();
       info('^46-1^', p);
       if (T != null) {
-        T.ok(p instanceof Pipeline_module);
+        T.ok(p instanceof Transformer);
       }
       if (T != null) {
         T.eq(p._transforms, []);
@@ -229,7 +229,7 @@
       p = new P_1();
       info('^46-1^', p);
       if (T != null) {
-        T.ok(p instanceof Pipeline_module);
+        T.ok(p instanceof Transformer);
       }
       if (T != null) {
         T.eq(p.length, 3);
@@ -257,7 +257,7 @@
       info('^46-1^', p);
       info('^46-1^', p._transforms);
       if (T != null) {
-        T.ok(p instanceof Pipeline_module);
+        T.ok(p instanceof Transformer);
       }
       if (T != null) {
         T.eq(p.length, 5);
@@ -285,7 +285,7 @@
       info('^46-1^', p);
       info('^46-1^', p._transforms);
       if (T != null) {
-        T.ok(p instanceof Pipeline_module);
+        T.ok(p instanceof Transformer);
       }
       if (T != null) {
         T.eq(p.length, 4);
@@ -313,7 +313,7 @@
       info('^46-1^', p);
       info('^46-1^', p._transforms);
       if (T != null) {
-        T.ok(p instanceof Pipeline_module);
+        T.ok(p instanceof Transformer);
       }
       if (T != null) {
         T.eq(p.length, 5);
@@ -338,7 +338,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.pipeline_modules_1 = function(T, done) {
+  this.transformers_1 = function(T, done) {
     var P_1, P_12, P_12_x, P_2, P_3, P_5, P_empty, Pipeline;
     ({Pipeline} = require('../../../apps/moonriver'));
     ({P_1, P_2, P_12, P_12_x, P_3, P_empty, P_5} = get_modular_pipeline_classes());
@@ -410,11 +410,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.pipeline_modules_methods_called_with_current_context = function(T, done) {
-    var Pipeline, Pipeline_module, X, Y, result, y;
-    ({Pipeline, Pipeline_module} = require('../../../apps/moonriver'));
+  this.transformers_methods_called_with_current_context = function(T, done) {
+    var Pipeline, Transformer, X, Y, result, y;
+    ({Pipeline, Transformer} = require('../../../apps/moonriver'));
     //.........................................................................................................
-    X = class X extends Pipeline_module {
+    X = class X extends Transformer {
       constructor() {
         super();
         this.foo = 'class X';
@@ -454,17 +454,17 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // @pipeline_modules_1()
-      // @pipeline_modules_1()
-      // test @pipeline_modules_1
-      // @pipeline_modules_methods_called_with_current_context()
+      // @transformers_1()
+      // @transformers_1()
+      // test @transformers_1
+      // @transformers_methods_called_with_current_context()
       // @can_iterate_over_transforms()
       return test(this);
     })();
   }
 
   // test @can_iterate_over_transforms
-// test @pipeline_modules_methods_called_with_current_context
+// test @transformers_methods_called_with_current_context
 
 }).call(this);
 
