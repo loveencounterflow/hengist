@@ -542,6 +542,42 @@ demo_keys = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@GUY_props_get_prototype_chain = ( T, done ) ->
+  GUY       = require '../../../apps/guy'
+  #.........................................................................................................
+  class A
+    is_a: true
+  class B extends A
+    is_b: true
+  class C extends B
+    is_c: true
+  class D extends C
+    is_d_1: true
+    constructor: ->
+      super()
+      @in_constructor = 's'
+      return undefined
+    is_d_2: 42
+    instance_method_on_d: ->
+    @class_method_on_D: ->
+  #.........................................................................................................
+  d     = new D()
+  chain = GUY.props.get_prototype_chain d
+  debug '^4243^', ( rpr x ), ( rpr x.constructor.name ), ( type_of x ) for x in chain
+  T?.eq ( x.constructor.name for x in chain ), [ 'D', 'D', 'C', 'B', 'A', 'Object', ]
+  for idx in [ 0 ... chain.length - 1 ]
+    T?.eq ( Object.getPrototypeOf chain[ idx ] ) is chain[ idx + 1 ], true
+  T?.eq ( ( Object.getOwnPropertyNames x ) for x in chain ), [
+    [ 'in_constructor' ]
+    [ 'constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2' ]
+    [ 'constructor', 'is_c' ]
+    [ 'constructor', 'is_b' ]
+    [ 'constructor', 'is_a' ]
+    [ 'constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ] ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @GUY_props_xray = ( T, done ) ->
   GUY       = require '../../../apps/guy'
   { Strict_owner
@@ -835,4 +871,5 @@ if require.main is module then do =>
   # demo_strict_owner_with_proxy()
   # demo_seal_freeze()
   # @GUY_props_keys_depth_first()
-  test @GUY_props_keys_depth_first
+  # test @GUY_props_keys_depth_first
+  test @GUY_props_get_prototype_chain
