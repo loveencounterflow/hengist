@@ -561,19 +561,30 @@ demo_keys = ->
     instance_method_on_d: ->
     @class_method_on_D: ->
   #.........................................................................................................
-  d     = new D()
-  chain = GUY.props.get_prototype_chain d
-  debug '^4243^', ( rpr x ), ( rpr x.constructor.name ), ( type_of x ) for x in chain
-  T?.eq ( x.constructor.name for x in chain ), [ 'D', 'D', 'C', 'B', 'A', 'Object', ]
-  for idx in [ 0 ... chain.length - 1 ]
-    T?.eq ( Object.getPrototypeOf chain[ idx ] ) is chain[ idx + 1 ], true
-  T?.eq ( ( Object.getOwnPropertyNames x ) for x in chain ), [
-    [ 'in_constructor' ]
-    [ 'constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2' ]
-    [ 'constructor', 'is_c' ]
-    [ 'constructor', 'is_b' ]
-    [ 'constructor', 'is_a' ]
-    [ 'constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ] ]
+  do =>
+    d     = new D()
+    # debug '^32424^', Object.getPrototypeOf null
+    chain = GUY.props.get_prototype_chain d
+    # debug '^4243^', ( rpr x ), ( rpr x.constructor.name ), ( type_of x ) for x in chain
+    T?.eq ( x.constructor.name for x in chain ), [ 'D', 'D', 'C', 'B', 'A', 'Object', ]
+    for idx in [ 0 ... chain.length - 1 ]
+      T?.eq ( Object.getPrototypeOf chain[ idx ] ) is chain[ idx + 1 ], true
+    T?.eq ( ( Object.getOwnPropertyNames x ) for x in chain ), [
+      [ 'in_constructor' ]
+      [ 'constructor', 'instance_method_on_d', 'is_d_1', 'is_d_2' ]
+      [ 'constructor', 'is_c' ]
+      [ 'constructor', 'is_b' ]
+      [ 'constructor', 'is_a' ]
+      [ 'constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString' ] ]
+  #.........................................................................................................
+  do =>
+    T?.eq ( x?.constructor?.name ? '???' for x in GUY.props.get_prototype_chain null ), []
+    T?.eq ( x?.constructor?.name ? '???' for x in GUY.props.get_prototype_chain undefined ), []
+    T?.eq ( x?.constructor?.name ? '???' for x in GUY.props.get_prototype_chain 42 ), [ 'Number', 'Number', 'Object' ]
+    T?.eq ( x?.constructor?.name ? '???' for x in GUY.props.get_prototype_chain Object.create null ), [ '???' ]
+    # urge '^234^', GUY.props.get_prototype_chain Object.create null
+    # urge '^234^', ( GUY.props.get_prototype_chain Object.create null )[ 0 ] is ( GUY.props.get_prototype_chain Object.create null )[ 0 ]
+    # urge '^234^', Object.getPrototypeOf Object.create null
   #.........................................................................................................
   done?()
 
@@ -872,4 +883,5 @@ if require.main is module then do =>
   # demo_seal_freeze()
   # @GUY_props_keys_depth_first()
   # test @GUY_props_keys_depth_first
+  # @GUY_props_get_prototype_chain()
   test @GUY_props_get_prototype_chain

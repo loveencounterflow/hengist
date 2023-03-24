@@ -151,7 +151,7 @@ H                         = require './helpers'
 #-----------------------------------------------------------------------------------------------------------
 @parse_headings = ( T, done ) ->
   { Pipeline
-    Pipeline_module     } = require '../../../apps/hypedown'
+    Transformer         } = require '../../../apps/hypedown'
   { Hypedown_lexer      } = require '../../../apps/hypedown'
   XXX_TEMP                = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
@@ -170,7 +170,7 @@ H                         = require './helpers'
     # [ "\n\nnot a\nheading", 'not a\nheading\n', ]
     ]
   #.........................................................................................................
-  class Md_parser extends Pipeline_module
+  class Md_parser extends Transformer
     $010_prepare_paragraphs:  XXX_TEMP.$010_prepare_paragraphs
     $050_hash_headings:       XXX_TEMP.$050_hash_headings
   #.........................................................................................................
@@ -198,25 +198,25 @@ H                         = require './helpers'
 #-----------------------------------------------------------------------------------------------------------
 @add_parbreak_markers = ( T, done ) ->
   { Pipeline
-    Pipeline_module     } = require '../../../apps/hypedown'
+    Transformer     } = require '../../../apps/hypedown'
   { Hypedown_lexer      } = require '../../../apps/hypedown'
   XXX_TEMP                = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
-    # [ '', '⏎', null ]
-    # [ 'paragraph', '⎈paragraph⏎', null ]
-    # [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
+    [ '', '⏎', null ]
+    [ 'paragraph', '⎈paragraph⏎', null ]
+    [ 'par1 lnr 1\npar1 lnr 2', '⎈par1 lnr 1⏎par1 lnr 2⏎', null ]
     [ 'par1 lnr 1\n\npar2 lnr 1', '⎈par1 lnr 1⏎⏎⎈par2 lnr 1⏎', null ]
     ]
   #.........................................................................................................
   new_parser = ( lexer ) ->
     # lexer = new Hypedown_lexer()
-    class Md_parser extends Pipeline_module
+    class Md_parser extends Transformer
       # tokenize_line: ( line, send ) ->
       #   send token for token from lexer.walk line
       #   return null
       $002_tokenize_lines:      XXX_TEMP.$002_tokenize_lines
       $010_prepare_paragraphs:  XXX_TEMP.$010_prepare_paragraphs
-    return new Md_parser()
+    return Md_parser.as_pipeline()
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -246,7 +246,7 @@ H                         = require './helpers'
 #-----------------------------------------------------------------------------------------------------------
 @_add_parbreak_markers_OLD = ( T, done ) ->
   { Pipeline
-    Pipeline_module     } = require '../../../apps/hypedown'
+    Transformer     } = require '../../../apps/hypedown'
   { Hypedown_lexer
     Hypedown_parser     } = require '../../../apps/hypedown'
   probes_and_matchers = [
