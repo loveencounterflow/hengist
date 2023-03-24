@@ -267,6 +267,29 @@ get_modular_pipeline_classes = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@transformers_do_no_overrides = ( T, done ) ->
+  { Pipeline
+    Transformer } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  class A extends Transformer
+    $source: -> [ [ '*', ], ]
+    $a1: -> ( d, send ) -> d.push 'a1'; send d
+    $a2: -> ( d, send ) -> d.push 'a2'; send d
+    $a3: -> ( d, send ) -> d.push 'a3'; send d
+  #.........................................................................................................
+  class B extends A
+    $b1: -> ( d, send ) -> d.push 'b1'; send d
+    $a2: -> ( d, send ) => d.push '!b2!'; send d
+    $b3: -> ( d, send ) -> d.push 'b3'; send d
+    $show: -> ( d ) -> urge '^a@1^', d
+  #.........................................................................................................
+  p = B.as_pipeline()
+  result = p.run_and_stop()
+  T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', '!b2!', 'b3' ] ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -275,6 +298,8 @@ if require.main is module then do =>
   # test @transformers_1
   # @transformers_methods_called_with_current_context()
   # @can_iterate_over_transforms()
-  test @
+  # @transformers_do_no_overrides()
+  test @transformers_do_no_overrides
+  # test @
   # test @can_iterate_over_transforms
   # test @transformers_methods_called_with_current_context
