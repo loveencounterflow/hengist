@@ -333,7 +333,7 @@
     ({Pipeline, Transformer} = require('../../../apps/hypedown'));
     ({Hypedown_lexer} = require('../../../apps/hypedown'));
     XXX_TEMP = require('../../../apps/hypedown/lib/_hypedown-parser-xxx-temp');
-    probes_and_matchers = [['', '⏎', null], ['\n', '⏎⏎', null], ['\n\n', '⏎⏎⏎', null], ['\n\n\n', '⏎⏎⏎⏎', null], ['\n\n\n\n', '⏎⏎⏎⏎⏎', null], ['\n\n\n\n\nxxxxx', '⏎⏎⏎⏎⏎|【|xxxxx|】|⏎', null], ['\n# H1', '⏎|【|<h1>|H1|</h1>|】|⏎', null]];
+    probes_and_matchers = [['', '⏎', null], ['x', '【|x|】|⏎', null], ['\nx', '⏎|【|x|】|⏎', null], ['\n\nx', '⏎⏎|【|x|】|⏎', null], ['\n', '⏎⏎', null], ['\n\n', '⏎⏎⏎', null], ['\n\n\n', '⏎⏎⏎⏎', null], ['\n\n\n\n', '⏎⏎⏎⏎⏎', null], ['\n\n\n\n\nxxxxx', '⏎⏎⏎⏎⏎|【|xxxxx|】|⏎', null], ['\n# H1', '⏎|【|<h1>|H1|</h1>|】|⏎', null]];
     Md_parser = (function() {
       //.........................................................................................................
       class Md_parser extends Transformer {};
@@ -374,7 +374,6 @@
           parser.send(probe);
           ref = parser.walk_and_stop();
           for (token of ref) {
-            tokens.push(token);
             handle_token(token);
           }
           result = result.join('|');
