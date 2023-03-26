@@ -261,6 +261,9 @@ H                         = require './helpers'
   XXX_TEMP                = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
     [ '', '⏎', null ]
+    [ 'x', '【|x|】|⏎', null ]
+    [ '\nx', '⏎|【|x|】|⏎', null ]
+    [ '\n\nx', '⏎⏎|【|x|】|⏎', null ]
     [ '\n', '⏎⏎', null ]
     [ '\n\n', '⏎⏎⏎', null ]
     [ '\n\n\n', '⏎⏎⏎⏎', null ]
@@ -293,9 +296,7 @@ H                         = require './helpers'
       #.....................................................................................................
       # for line from GUY.str.walk_lines probe
       parser.send probe
-      for token from parser.walk_and_stop()
-        tokens.push token
-        handle_token token
+      handle_token token for token from parser.walk_and_stop()
       result = result.join '|'
       # H.tabulate "#{rpr probe} -> #{rpr result}", tokens
       # H.tabulate "#{rpr probe} -> #{rpr result}", ( t for t in tokens when not t.$stamped )
