@@ -328,6 +328,64 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@walk_run_stop_equivalence = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    transforms: TF  } = require '../../../apps/moonriver'
+  matcher = [
+    '___1234'
+    '__12345'
+    '_123456'
+    '1234567'
+    '2345678'
+    '3456789'
+    '456789_'
+    '56789__'
+    '6789___' ]
+  #.........................................................................................................
+  new_pipeline = ->
+    p = new Pipeline()
+    p.push TF.$window { min: -3, max: +3, empty: '_', }, ( ds, send ) ->
+      info '^walk_run_stop_equivalence@1^', ds
+      send ( "#{d}" for d in ds ).join ''
+    return p
+  #.........................................................................................................
+  do =>
+    result  = []
+    p       = new_pipeline()
+    for d in [ 1 .. 9 ]
+      p.send d
+      result.push e for e from p.walk()
+    result.push e for e from p.stop_walk()
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    result  = []
+    p       = new_pipeline()
+    for d in [ 1 .. 9 ]
+      p.send d
+    result.push e for e from p.walk_and_stop()
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    result  = []
+    p       = new_pipeline()
+    for d in [ 1 .. 9 ]
+      p.send d
+      result = [ result..., p.walk()..., ]
+    result = [ result..., p.stop_walk()..., ]
+    T?.eq result, matcher
+  #.........................................................................................................
+  do =>
+    result  = null
+    p       = new_pipeline()
+    for d in [ 1 .. 9 ]
+      p.send d
+    result = p.run_and_stop()
+    T?.eq result, matcher
+  #.........................................................................................................
+  done?()
 
 
 ############################################################################################################
@@ -350,6 +408,7 @@ if require.main is module then do =>
   # await @can_use_walk_with_async_pipeline()
   # await test @can_use_walk_with_async_pipeline
   # test @empty_pipeline_transports_data
-  test @empty_pipeline_is_noop_in_composition
+  # test @empty_pipeline_is_noop_in_composition
+  test @walk_run_stop_equivalence
   # test @
 
