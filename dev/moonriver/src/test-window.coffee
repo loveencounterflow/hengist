@@ -159,6 +159,35 @@ as_keysorted_list = ( d ) ->
     '6789___' ]
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@window_transform_as_modifier = ( T, done ) ->
+  # T?.halt_on_error()
+  { Pipeline,         \
+    transforms: TF  } = require '../../../apps/moonriver'
+  result              = []
+  p                   = new Pipeline()
+  #.........................................................................................................
+  p.push TF.$window { min: -3, max: +3, empty: '_', }, ( ds, send ) ->
+    info '^window_transform_as_modifier@1^', ds
+    send ( "#{d}" for d in ds ).join ''
+  #.........................................................................................................
+  for d in [ 1 .. 9 ]
+    p.send d
+    # result.push e for e from p.walk_and_stop()
+    result.push e for e from p.walk()
+  result.push e for e from p.stop_walk()
+  T?.eq result, [
+    '___1234'
+    '__12345'
+    '_123456'
+    '1234567'
+    '2345678'
+    '3456789'
+    '456789_'
+    '56789__'
+    '6789___' ]
+  done?()
+
 
 
 
@@ -168,4 +197,6 @@ if require.main is module then await do =>
   # test @window_transform_1
   # test @window_transform_2
   # test @window_transform_3
-  test @window_transform_4
+  # test @window_transform_4
+  test @window_transform_as_modifier
+
