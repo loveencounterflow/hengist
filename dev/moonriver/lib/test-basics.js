@@ -562,6 +562,92 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.walk_run_stop_equivalence = function(T, done) {
+    var Pipeline, TF, matcher, new_pipeline;
+    ({
+      // T?.halt_on_error()
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    matcher = ['___1234', '__12345', '_123456', '1234567', '2345678', '3456789', '456789_', '56789__', '6789___'];
+    //.........................................................................................................
+    new_pipeline = function() {
+      var p;
+      p = new Pipeline();
+      p.push(TF.$window({
+        min: -3,
+        max: +3,
+        empty: '_'
+      }, function(ds, send) {
+        var d;
+        info('^walk_run_stop_equivalence@1^', ds);
+        return send(((function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = ds.length; i < len; i++) {
+            d = ds[i];
+            results.push(`${d}`);
+          }
+          return results;
+        })()).join(''));
+      }));
+      return p;
+    };
+    (() => {      //.........................................................................................................
+      var d, e, i, p, ref, ref1, result;
+      result = [];
+      p = new_pipeline();
+      for (d = i = 1; i <= 9; d = ++i) {
+        p.send(d);
+        ref = p.walk();
+        for (e of ref) {
+          result.push(e);
+        }
+      }
+      ref1 = p.stop_walk();
+      for (e of ref1) {
+        result.push(e);
+      }
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, e, i, p, ref, result;
+      result = [];
+      p = new_pipeline();
+      for (d = i = 1; i <= 9; d = ++i) {
+        p.send(d);
+      }
+      ref = p.walk_and_stop();
+      for (e of ref) {
+        result.push(e);
+      }
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, i, p, result;
+      result = [];
+      p = new_pipeline();
+      for (d = i = 1; i <= 9; d = ++i) {
+        p.send(d);
+        result = [...result, ...p.walk()];
+      }
+      result = [...result, ...p.stop_walk()];
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, i, p, result;
+      result = null;
+      p = new_pipeline();
+      for (d = i = 1; i <= 9; d = ++i) {
+        p.send(d);
+      }
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, matcher) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -583,7 +669,8 @@
       // await @can_use_walk_with_async_pipeline()
       // await test @can_use_walk_with_async_pipeline
       // test @empty_pipeline_transports_data
-      return test(this.empty_pipeline_is_noop_in_composition);
+      // test @empty_pipeline_is_noop_in_composition
+      return test(this.walk_run_stop_equivalence);
     })();
   }
 

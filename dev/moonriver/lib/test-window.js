@@ -290,6 +290,53 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.window_transform_as_modifier = function(T, done) {
+    var Pipeline, TF, d, e, i, p, ref, ref1, result;
+    ({
+      // T?.halt_on_error()
+      Pipeline,
+      transforms: TF
+    } = require('../../../apps/moonriver'));
+    result = [];
+    p = new Pipeline();
+    //.........................................................................................................
+    p.push(TF.$window({
+      min: -3,
+      max: +3,
+      empty: '_'
+    }, function(ds, send) {
+      var d;
+      info('^window_transform_as_modifier@1^', ds);
+      return send(((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = ds.length; i < len; i++) {
+          d = ds[i];
+          results.push(`${d}`);
+        }
+        return results;
+      })()).join(''));
+    }));
+//.........................................................................................................
+    for (d = i = 1; i <= 9; d = ++i) {
+      p.send(d);
+      ref = p.walk();
+      for (e of ref) {
+        // result.push e for e from p.walk_and_stop()
+        result.push(e);
+      }
+    }
+    ref1 = p.stop_walk();
+    for (e of ref1) {
+      result.push(e);
+    }
+    if (T != null) {
+      T.eq(result, ['___1234', '__12345', '_123456', '1234567', '2345678', '3456789', '456789_', '56789__', '6789___']);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
@@ -297,7 +344,8 @@
       // test @window_transform_1
       // test @window_transform_2
       // test @window_transform_3
-      return test(this.window_transform_4);
+      // test @window_transform_4
+      return test(this.window_transform_as_modifier);
     })();
   }
 
