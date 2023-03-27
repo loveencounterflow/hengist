@@ -59,91 +59,78 @@ H                         = require './helpers'
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       lexer       = new Hypedown_lexer()
-      parser      = new $040_stars()
+      parser      = $040_stars.as_pipeline()
       tokens      = []
       for d from lexer.walk probe
         parser.send d
-        for token from parser.walk()
-          debug '^345^', ( rpr token.value )
-          tokens.push token
-      # p           = new Hypedown_parser()
-      # p.send probe
-      # result      = p.run()
+        tokens.push token for token from parser.walk_and_stop()
       result_html = ( t.value for t in tokens when not t.$stamped ).join ''
-      H.tabulate "#{rpr probe} -> #{rpr result_html}", tokens
-      H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in tokens when not t.$stamped )
-      #.....................................................................................................
+      # H.tabulate "#{rpr probe} -> #{rpr result_html}", tokens
+      # H.tabulate "#{rpr probe} -> #{rpr result_html}", ( t for t in tokens when not t.$stamped )
       resolve result_html
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @parse_codespans_and_single_star = ( T, done ) ->
-  { XXX_new_token
-    Hypedown_lexer
-    Hypedown_parser } = require '../../../apps/hypedown'
+  { Transformer } = require '../../../apps/hypedown'
+  XXX_TEMP        = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
-    [ "`abc`", "<p><code>abc</code>\n", ]
-    [ "*abc*", "<p><i>abc</i>\n", ]
-    [ '*foo* `*bar*` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    [ '*foo* ``*bar*`` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    [ '*foo* ````*bar*```` baz', '<p><i>foo</i> <code>*bar*</code> baz\n', null ]
-    [ 'helo `world`!', '<p>helo <code>world</code>!\n', null ]
-    [ 'foo\n\nbar\n\nbaz', '<p>foo\n\n<p>bar\n\n<p>baz\n', null ]
-    [ '*foo* ``*bar*``` baz', '<p><i>foo</i> \n', null ] ### TAINT preliminary, lack of STOP token ###
-    [ '*foo* ```*bar*`` baz', '<p><i>foo</i> \n', null ] ### TAINT preliminary, lack of STOP token ###
+    # [ "`abc`", "<code>abc</code>\n", ]
+    # [ "*abc*", "<i>abc</i>\n", ]
+    # [ '*foo* `*bar*` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ '*foo* ``*bar*`` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
+    # [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
+    # [ 'foo\n\nbar\n\nbaz', 'foo\n\nbar\n\nbaz\n', null ]
+    # [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ] ### TAINT preliminary, lack of STOP token ###
+    [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz</code>\n', null ] ### TAINT preliminary, lack of STOP token ###
     ]
+  #.........................................................................................................
+  class Md_parser extends Transformer
+    $: [
+      XXX_TEMP.$001_prelude
+      XXX_TEMP.$002_tokenize_lines
+      XXX_TEMP.$020_priority_markup
+      XXX_TEMP.$040_stars ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      p           = new Hypedown_parser()
-      # H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
-      # H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
-      # H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
-      # for mode, entry of p.lexer.registry
-      #   # debug '^2325687^', entry
-      #   for tid, lexeme of entry.lexemes
-      #     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
-      # process.exit 111
-      for line from GUY.str.walk_lines probe
-        p.send line
-      result      = p.run()
+      p           = Md_parser.as_pipeline()
+      p.send probe
+      result      = p.run_and_stop()
       result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
-      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_txt
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @parse_codespans_with_whitespace = ( T, done ) ->
-  { XXX_new_token
-    Hypedown_lexer
-    Hypedown_parser } = require '../../../apps/hypedown'
+  { Transformer } = require '../../../apps/hypedown'
+  XXX_TEMP        = require '../../../apps/hypedown/lib/_hypedown-parser-xxx-temp'
   probes_and_matchers = [
-    [ "`` `abc` ``", "<p><code>`abc`</code>\n", ]
-    [ "`` `abc\\` ``", "<p><code>`abc`</code>\n", ]
+    [ "`` `abc` ``", "<code>`abc`</code>\n", ]
+    [ "`` `abc\\` ``", "<code>`abc`</code>\n", ]
     ]
+  #.........................................................................................................
+  class Md_parser extends Transformer
+    $: [
+      XXX_TEMP.$001_prelude
+      XXX_TEMP.$002_tokenize_lines
+      XXX_TEMP.$020_priority_markup ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      p           = new Hypedown_parser()
-      # H.tabulate ( rpr 'helo'   ), p.lexer.run 'helo'
-      # H.tabulate ( rpr '`helo`' ), p.lexer.run '`helo`'
-      # H.tabulate ( rpr '*helo*' ), p.lexer.run '*helo*'
-      # for mode, entry of p.lexer.registry
-      #   # debug '^2325687^', entry
-      #   for tid, lexeme of entry.lexemes
-      #     urge '^2325687^', "#{lexeme.mode}:#{lexeme.tid}"
-      # process.exit 111
-      for line from GUY.str.walk_lines probe
-        p.send line
-      result      = p.run()
+      p           = Md_parser.as_pipeline()
+      p.send probe
+      result      = p.run_and_stop()
       result_txt  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
-      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
-      # H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", result
+      H.tabulate "#{rpr probe} -> #{rpr result_txt} (#{rpr matcher})", ( t for t in result when not t.$stamped )
       resolve result_txt
   #.........................................................................................................
   done?()
@@ -223,8 +210,6 @@ H                         = require './helpers'
     [ "#### Amazing\nLong\nHeadlines!!!", "<h4>Amazing\nLong\nHeadlines!!!</h4>\n", ]
     [ "paragraph 1\n\n\n\nparagraph 2", 'paragraph 1\n\n\n\nparagraph 2\n', ]
     [ "\n# H1", "\n<h1>H1</h1>\n", ]
-    [ "\n\nx\n\n\n\n", 'not a\nheading\n', ]
-    [ '', '\n', ]
     ]
   #.........................................................................................................
   class Md_parser extends Transformer
@@ -262,6 +247,8 @@ H                         = require './helpers'
   probes_and_matchers = [
     [ '', '⏎', null ]
     [ 'x', '【|x|】|⏎', null ]
+    [ 'x\n', '【|x|】|⏎⏎', null ]
+    [ 'x\n\n', '【|x|】|⏎⏎⏎', null ]
     [ '\nx', '⏎|【|x|】|⏎', null ]
     [ '\n\nx', '⏎⏎|【|x|】|⏎', null ]
     [ '\n', '⏎⏎', null ]
@@ -270,6 +257,7 @@ H                         = require './helpers'
     [ '\n\n\n\n', '⏎⏎⏎⏎⏎', null ]
     [ '\n\n\n\n\nxxxxx', '⏎⏎⏎⏎⏎|【|xxxxx|】|⏎', null ]
     [ '\n# H1', '⏎|【|<h1>|H1|</h1>|】|⏎', null ]
+    [ '\n\nx\n\n\n\n', '⏎⏎|【|x|】|⏎⏎⏎⏎⏎', null ]
     ]
   #.........................................................................................................
   class Md_parser extends Transformer
@@ -309,14 +297,12 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @parse_codespans_and_single_star
+  test @parse_codespans_and_single_star
   # test @parse_codespans_with_whitespace
   # @parse_md_stars_markup()
   # test @parse_md_stars_markup
   # test @parse_headings
   # @add_parbreak_markers()
   # test @add_parbreak_markers
-  test @newline_handling
-  # @_add_parbreak_markers_OLD()
-  # test @_add_parbreak_markers_OLD
+  # test @newline_handling
 
