@@ -80,13 +80,20 @@
     // [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
     // [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
     // [ 'foo\n\nbar\n\nbaz', 'foo\n\nbar\n\nbaz\n', null ]
-    // [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ] ### TAINT preliminary, lack of STOP token ###
-    probes_and_matchers = [['*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz</code>\n', null]];
+    probes_and_matchers = [['abc\n\n`def\n\nghi`\n\nxyz', 'foo\n\nbar\n\nbaz\n', null]];
     Md_parser = (function() {
       //.........................................................................................................
-      /* TAINT preliminary, lack of STOP token */      class Md_parser extends Transformer {};
+      // [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ] ### TAINT preliminary, lack of STOP token ###
+      // [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz</code>\n', null ] ### TAINT preliminary, lack of STOP token ###
+      class Md_parser extends Transformer {};
 
-      Md_parser.prototype.$ = [XXX_TEMP.$001_prelude, XXX_TEMP.$002_tokenize_lines, XXX_TEMP.$020_priority_markup, XXX_TEMP.$040_stars];
+      Md_parser.prototype.$ = [
+        XXX_TEMP.$001_prelude,
+        XXX_TEMP.$002_tokenize_lines,
+        XXX_TEMP.$010_prepare_paragraphs,
+        // XXX_TEMP.$020_priority_markup
+        XXX_TEMP.$040_stars
+      ];
 
       return Md_parser;
 
@@ -381,6 +388,7 @@
   if (require.main === module) {
     (() => {
       // test @
+      // @parse_codespans_and_single_star()
       return test(this.parse_codespans_and_single_star);
     })();
   }
