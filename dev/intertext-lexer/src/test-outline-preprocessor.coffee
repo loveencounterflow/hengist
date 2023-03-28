@@ -79,7 +79,8 @@ H                         = require './helpers'
       # echo '^97-1^', '————————————————————————————'
       result      = []
       tokens      = []
-      parser      = new tools.Outline_preprocessor()
+      parser      = tools.outliner.$010_lexing.as_pipeline()
+      parser.send probe
       for d from parser.walk probe
         tokens.push d
         switch d.tid
@@ -96,9 +97,50 @@ H                         = require './helpers'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@outline_blank_line_consolidation = ( T, done ) ->
+  { Interlex
+    compose
+    tools       } = require '../../../apps/intertext-lexer'
+  { Transformer } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '', "N", null ]
+    [ 'helo', "0'helo'", null ]
+    [ 'abc\ndef', "0'abc',0'def'", null ]
+    [ 'abc\ndef\n\n', "0'abc',0'def',N,N", null ]
+    [ 'abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      # echo '^97-1^', '————————————————————————————'
+      result      = []
+      tokens      = []
+      parser      = tools.outliner.$020_consolidate.as_pipeline()
+      parser.send probe
+      for d from parser.walk probe
+        tokens.push d
+        switch d.tid
+          when 'blank'
+            result.push 'N'
+          when 'material'
+            result.push "#{d.data.level}#{rpr d.value}"
+      result = result.join ','
+      # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+      H.tabulate "#{rpr probe}", tokens
+      # echo [ probe, result, error, ]
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>
   # @outline_preprocessor_instantiation()
-  @outline_preprocessor_basic()
+  # @outline_preprocessor_basic()
+  # test @outline_preprocessor_basic
+  test @outline_blank_line_consolidation
   # test @
