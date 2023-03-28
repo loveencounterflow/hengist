@@ -59,31 +59,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.outline_preprocessor_basic = async function(T, done) {
-    var Interlex, Ol_preproc, Transformer, compose, error, i, len, matcher, p, preparser, probe, probes_and_matchers, tools;
+    var Interlex, Transformer, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
     //.........................................................................................................
-    // preprocessor  = new tools.Outline_preprocessor()
-    // preparser     = new preprocessor._Preparser()
-    preparser = new tools.outline._Preparser();
-    Ol_preproc = (function() {
-      // p = tools.outline._Preparser.as_pipeline()
-      // p.send 'foo'
-      // debug '^32346^', p
-      // debug '^32346^', p.run()
-      // process.exit 111
-      class Ol_preproc extends Transformer {};
-
-      Ol_preproc.prototype.$ = [preparser.$parse];
-
-      return Ol_preproc;
-
-    }).call(this);
-    p = Ol_preproc.as_pipeline();
-    p.send(42);
-    debug('^3423^', p.run());
-    //.........................................................................................................
-    probes_and_matchers = [['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
+    probes_and_matchers = [['', "N", null], ['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -94,7 +74,8 @@
           // echo '^97-1^', '————————————————————————————'
           result = [];
           tokens = [];
-          parser = new tools.Outline_preprocessor();
+          parser = tools.outliner.$010_lexing.as_pipeline();
+          parser.send(probe);
           ref = parser.walk(probe);
           for (d of ref) {
             tokens.push(d);
@@ -120,11 +101,57 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.outline_blank_line_consolidation = async function(T, done) {
+    var Interlex, Transformer, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
+    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    ({Transformer} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    probes_and_matchers = [['', "N", null], ['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, parser, ref, result, tokens;
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          // echo '^97-1^', '————————————————————————————'
+          result = [];
+          tokens = [];
+          parser = tools.outliner.$020_consolidate.as_pipeline();
+          parser.send(probe);
+          ref = parser.walk(probe);
+          for (d of ref) {
+            tokens.push(d);
+            switch (d.tid) {
+              case 'blank':
+                result.push('N');
+                break;
+              case 'material':
+                result.push(`${d.data.level}${rpr(d.value)}`);
+            }
+          }
+          result = result.join(',');
+          // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+          H.tabulate(`${rpr(probe)}`, tokens);
+          // echo [ probe, result, error, ]
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @outline_preprocessor_instantiation()
-      return this.outline_preprocessor_basic();
+      // @outline_preprocessor_basic()
+      // test @outline_preprocessor_basic
+      return test(this.outline_blank_line_consolidation);
     })();
   }
 
