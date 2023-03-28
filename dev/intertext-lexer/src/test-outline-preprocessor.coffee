@@ -65,23 +65,8 @@ H                         = require './helpers'
     tools       } = require '../../../apps/intertext-lexer'
   { Transformer } = require '../../../apps/moonriver'
   #.........................................................................................................
-  # preprocessor  = new tools.Outline_preprocessor()
-  # preparser     = new preprocessor._Preparser()
-  preparser     = new tools.outline._Preparser()
-  # p = tools.outline._Preparser.as_pipeline()
-  # p.send 'foo'
-  # debug '^32346^', p
-  # debug '^32346^', p.run()
-  # process.exit 111
-  class Ol_preproc extends Transformer
-    $: [
-      preparser.$parse
-      ]
-  p = Ol_preproc.as_pipeline()
-  p.send 42
-  debug '^3423^', p.run()
-  #.........................................................................................................
   probes_and_matchers = [
+    [ '', "N", null ]
     [ 'helo', "0'helo'", null ]
     [ 'abc\ndef', "0'abc',0'def'", null ]
     [ 'abc\ndef\n\n', "0'abc',0'def',N,N", null ]
