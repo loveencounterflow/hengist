@@ -46,7 +46,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var parser;
-          parser = new tools.Outline_preprocessor(probe);
+          parser = new tools.outline._Preparser(probe);
           return resolve(parser.cfg);
         });
       });
@@ -59,8 +59,29 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.outline_preprocessor_basic = async function(T, done) {
-    var Interlex, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
+    var Interlex, Ol_preproc, Transformer, compose, error, i, len, matcher, p, preparser, probe, probes_and_matchers, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    ({Transformer} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    // preprocessor  = new tools.Outline_preprocessor()
+    // preparser     = new preprocessor._Preparser()
+    preparser = new tools.outline._Preparser();
+    Ol_preproc = (function() {
+      // p = tools.outline._Preparser.as_pipeline()
+      // p.send 'foo'
+      // debug '^32346^', p
+      // debug '^32346^', p.run()
+      // process.exit 111
+      class Ol_preproc extends Transformer {};
+
+      Ol_preproc.prototype.$ = [preparser.$parse];
+
+      return Ol_preproc;
+
+    }).call(this);
+    p = Ol_preproc.as_pipeline();
+    p.send(42);
+    debug('^3423^', p.run());
     //.........................................................................................................
     probes_and_matchers = [['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
 //.........................................................................................................
@@ -102,9 +123,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // @outline_preprocessor_instantiation()
+      return this.outline_preprocessor_basic();
     })();
   }
+
+  // test @
 
 }).call(this);
 
