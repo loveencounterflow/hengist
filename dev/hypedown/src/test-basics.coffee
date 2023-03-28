@@ -83,15 +83,17 @@ H                         = require './helpers'
     # [ '*foo* ````*bar*```` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ]
     # [ 'helo `world`!', 'helo <code>world</code>!\n', null ]
     # [ 'foo\n\nbar\n\nbaz', 'foo\n\nbar\n\nbaz\n', null ]
+    [ 'abc\n\n`def\n\nghi`\n\nxyz', 'foo\n\nbar\n\nbaz\n', null ]
     # [ '*foo* ``*bar*``` baz', '<i>foo</i> <code>*bar*</code> baz\n', null ] ### TAINT preliminary, lack of STOP token ###
-    [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz</code>\n', null ] ### TAINT preliminary, lack of STOP token ###
+    # [ '*foo* ```*bar*`` baz', '<i>foo</i> <code>*bar*`` baz</code>\n', null ] ### TAINT preliminary, lack of STOP token ###
     ]
   #.........................................................................................................
   class Md_parser extends Transformer
     $: [
       XXX_TEMP.$001_prelude
       XXX_TEMP.$002_tokenize_lines
-      XXX_TEMP.$020_priority_markup
+      XXX_TEMP.$010_prepare_paragraphs
+      # XXX_TEMP.$020_priority_markup
       XXX_TEMP.$040_stars ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -297,6 +299,7 @@ H                         = require './helpers'
 ############################################################################################################
 if require.main is module then do =>
   # test @
+  # @parse_codespans_and_single_star()
   test @parse_codespans_and_single_star
   # test @parse_codespans_with_whitespace
   # @parse_md_stars_markup()

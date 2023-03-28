@@ -49,7 +49,7 @@ H                         = require './helpers'
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      parser  = new tools.Outline_preprocessor probe
+      parser  = new tools.outline._Preparser probe
       resolve parser.cfg
   #.........................................................................................................
   # lexer = new Interlex()
@@ -62,7 +62,24 @@ H                         = require './helpers'
 @outline_preprocessor_basic = ( T, done ) ->
   { Interlex
     compose
-    tools   } = require '../../../apps/intertext-lexer'
+    tools       } = require '../../../apps/intertext-lexer'
+  { Transformer } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  # preprocessor  = new tools.Outline_preprocessor()
+  # preparser     = new preprocessor._Preparser()
+  preparser     = new tools.outline._Preparser()
+  # p = tools.outline._Preparser.as_pipeline()
+  # p.send 'foo'
+  # debug '^32346^', p
+  # debug '^32346^', p.run()
+  # process.exit 111
+  class Ol_preproc extends Transformer
+    $: [
+      preparser.$parse
+      ]
+  p = Ol_preproc.as_pipeline()
+  p.send 42
+  debug '^3423^', p.run()
   #.........................................................................................................
   probes_and_matchers = [
     [ 'helo', "0'helo'", null ]
@@ -97,4 +114,6 @@ H                         = require './helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # @outline_preprocessor_instantiation()
+  @outline_preprocessor_basic()
+  # test @
