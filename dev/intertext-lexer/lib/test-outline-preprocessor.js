@@ -63,7 +63,7 @@
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
     //.........................................................................................................
-    probes_and_matchers = [['', "N", null], ['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
+    probes_and_matchers = [['', 'N', null], ['helo', "0'helo',N", null], ['abc\ndef', "0'abc',N,0'def',N", null], ['abc\ndef\n\n', "0'abc',N,0'def',N,N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',N,0'def',N,N,N,0'xyz',N", null], ['abc\n def\n\n\nxyz', "0'abc',N,1'def',N,N,N,0'xyz',N", null], ['abc\n  def\n\n\nxyz', "0'abc',N,2'def',N,N,N,0'xyz',N", null], ['abc\n   def\n\n\nxyz', "0'abc',N,3'def',N,N,N,0'xyz',N", null], ['abc\n    def\n\n\nxyz', "0'abc',N,4'def',N,N,N,0'xyz',N", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -76,20 +76,20 @@
           tokens = [];
           parser = tools.outliner.$010_lexing.as_pipeline();
           parser.send(probe);
-          ref = parser.walk(probe);
+          ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
             switch (d.tid) {
-              case 'blank':
+              case 'nl':
                 result.push('N');
                 break;
               case 'material':
-                result.push(`${d.data.level}${rpr(d.value)}`);
+                result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
             }
           }
           result = result.join(',');
           // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-          // H.tabulate "#{rpr probe}", tokens
+          H.tabulate(`${rpr(probe)}`, tokens);
           // echo [ probe, result, error, ]
           return resolve(result);
         });
@@ -107,7 +107,7 @@
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
     //.........................................................................................................
-    probes_and_matchers = [['', "N", null], ['helo', "0'helo'", null], ['abc\ndef', "0'abc',0'def'", null], ['abc\ndef\n\n', "0'abc',0'def',N,N", null], ['abc\ndef\n\n\nxyz', "0'abc',0'def',N,N,0'xyz'", null]];
+    probes_and_matchers = [['', 'N1', null], ['helo', "0'helo',N1", null], ['abc\ndef', "0'abc',N1,0'def',N1", null], ['abc\ndef\n\n', "0'abc',N1,0'def',N3", null], ['abc\ndef\n\n\nxyz', "0'abc',N1,0'def',N3,0'xyz',N1", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -120,20 +120,20 @@
           tokens = [];
           parser = tools.outliner.$020_consolidate.as_pipeline();
           parser.send(probe);
-          ref = parser.walk(probe);
+          ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
             switch (d.tid) {
-              case 'blank':
-                result.push('N');
+              case 'nls':
+                result.push(`N${d.data.count}`);
                 break;
               case 'material':
-                result.push(`${d.data.level}${rpr(d.value)}`);
+                result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
             }
           }
           result = result.join(',');
           // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-          H.tabulate(`${rpr(probe)}`, tokens);
+          // H.tabulate "#{rpr probe}", tokens
           // echo [ probe, result, error, ]
           return resolve(result);
         });
