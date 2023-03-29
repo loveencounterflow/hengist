@@ -290,6 +290,103 @@ get_modular_pipeline_classes = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@transformers_can_pick_methods = ( T, done ) ->
+  { Pipeline
+    Transformer } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  class A extends Transformer
+    $source: -> [ [ '*', ], ]
+    $a1: -> ( d, send ) -> d.push 'a1'; send d
+    $a2: -> ( d, send ) -> d.push 'a2'; send d
+    $a3: -> ( d, send ) -> d.push 'a3'; send d
+  #.........................................................................................................
+  class B extends A
+    $b1: -> ( d, send ) -> d.push 'b1'; send d
+    $b2: -> ( d, send ) -> d.push 'b2'; send d
+    $b3: -> ( d, send ) -> d.push 'b3'; send d
+    $bound: => ( d, send ) => d.push "bound to #{@constructor.name}"; send d
+    $show: -> ( d ) -> urge '^a@1^', d
+  #.........................................................................................................
+  do =>
+    p = B.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ '*', 'a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'bound to B' ] ]
+  #.........................................................................................................
+  do =>
+    a = new A()
+    b = new B()
+    class C extends Transformer
+      $source: -> [ [], ]
+      $: [
+        a.$a3
+        a.$a2
+        b.$b2
+        b.$bound()
+        b.$show ]
+    p = C.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ 'a3', 'a2', 'b2', 'bound to B' ] ]
+  #.........................................................................................................
+  do =>
+    a = new A()
+    b = new B()
+    class C extends Transformer
+      $source: -> [ [], ]
+      $c1:      a.$a3
+      $c2:      a.$a2
+      $c3:      b.$b2
+      bound:    b.$bound()
+      $show_2:  b.$show
+    p = C.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ 'a3', 'a2', 'b2', 'bound to B' ] ]
+  #.........................................................................................................
+  do =>
+    a = new A()
+    b = new B()
+    class C extends Transformer
+      $source: -> [ [], ]
+      $: [
+        b.$show
+        a.$a3
+        a.$a2
+        b.$b2
+        b.$bound
+        b.$show ]
+    p = C.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ 'a3', 'a2', 'b2', 'bound to B' ] ]
+  #.........................................................................................................
+  do =>
+    a = new A()
+    b = new B()
+    class C extends Transformer
+      $source: -> [ [], ]
+      $c1:      a.$a3
+      $c2:      a.$a2
+      $c3:      b.$b2
+      bound:    b.$bound
+      $show_2:  b.$show
+    p = C.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ 'a3', 'a2', 'b2', 'bound to B' ] ]
+  #.........................................................................................................
+  do =>
+    class C extends Transformer
+      $source: -> [ [], ]
+      $show_1:  B::$show
+      $c1:      A::$a3
+      $c2:      A::$a2
+      $c3:      B::$b2
+      # bound:    B::$bound() ### NOTE bound method nonsensical here as there is no instance ###
+      $show_2:  B::$show
+    p = C.as_pipeline()
+    result = p.run_and_stop()
+    T?.eq result, [ [ 'a3', 'a2', 'b2' ] ]
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
@@ -299,7 +396,9 @@ if require.main is module then do =>
   # @transformers_methods_called_with_current_context()
   # @can_iterate_over_transforms()
   # @transformers_do_no_overrides()
-  test @transformers_do_no_overrides
+  # test @transformers_do_no_overrides
+  @transformers_can_pick_methods()
+  test @transformers_can_pick_methods
   # test @
   # test @can_iterate_over_transforms
   # test @transformers_methods_called_with_current_context
