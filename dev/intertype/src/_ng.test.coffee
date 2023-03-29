@@ -2510,62 +2510,7 @@ demo_size_of = ->
 
 ############################################################################################################
 unless module.parent?
-  # demo()
-  # @_demo_hedgepath_resolution()
-  # @validate_1()
-  # @isa_x_or_y()
-  # test @isa_x_or_y
-  # @create_with_seal_freeze_extra()
-  # test @create_with_seal_freeze_extra
-  # test @intertype_existential_types
-  # @intertype_collection_of_t()
-  # test @intertype_collection_of_t
-  # @intertype_even_odd_for_bigints()
-  # test @intertype_even_odd_for_bigints
-  # @intertype_declaration_with_per_key_clauses()
-  # test @intertype_declaration_with_per_key_clauses
-  # @_demo_type_cfgs_as_functions_1()
-  # @_demo_type_cfgs_as_functions_2()
-  # @_demo_nameit()
-  # test @[ "forbidden to overwrite declarations" ]
-  # @intertype_normalize_type_cfg()
-  # test @intertype_normalize_type_cfg
-  # @_intermezzo_private_class_features_in_coffeescript()
-  # test @intertype_empty_and_nonempty
-  # @_intertype_isa_arity_check()
-  # test @intertype_exception_guarding
-  # @intertype_declaration_with_per_key_clauses()
-  # test @intertype_isa_arity_check
-  # test @intertype_check_complex_recursive_types
-  # @_demo_postconditions()
-  # @validate_1()
-  # test @validate_1
-  # @_intertype_demo_improved_validation_errors()
-  # test @intertype_cast
-  # test @intertype_can_use_subobject_fields
-  # test @intertype_create_has_correct_binding
-  # @intertype_type_regex()
-  # test @intertype_type_regex
-  # @override_types_are_honored()
-  # @can_clone_instance()
-  # test @can_clone_instance
-  # @can_replace_declarations()
-  # test @can_replace_declarations
-  # @can_delete_and_redeclare_types()
-  # test @can_delete_and_redeclare_types
-  # test @detect_circular_declarations
-  # @strange_naming_bug()
-  # test @strange_naming_bug
-  # @throws_validation_error_for_unfit_arguments()
-  # test @throws_validation_error_for_unfit_arguments
+  # test @is_extension_of_allows_all_values
   test @
-  # test @recognize_classes
-  # test @extends_recognizes_derivatives
-  # test @intertype_ordering_of_field_and_isa_tests
-  # test @intertype_tracing
-  # test @_intertype_tracing_2
-  # test @intertype_improved_validation_errors
-  # @validate_returns_value()
-  # test @validate_returns_value
 
 
