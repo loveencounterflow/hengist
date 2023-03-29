@@ -2459,7 +2459,7 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@extends_recognizes_derivatives = ( T, done ) ->
+@is_extension_of_recognizes_derivatives = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype     } = require '../../../apps/intertype'
   types             = new Intertype()
@@ -2474,6 +2474,36 @@ demo_size_of = ->
   T?.eq ( is_extension_of Base, Derived   ), false
   T?.eq ( is_extension_of Derived, Base   ), true
   T?.eq ( is_extension_of Unrelated, Base ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@is_extension_of_allows_all_values = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  { declare
+    is_extension_of
+    isa
+    type_of
+    create        } = types
+  class Base
+  class Derived extends Base
+  class Unrelated
+  T?.eq ( is_extension_of Base, Derived       ), false
+  T?.eq ( is_extension_of null, Derived       ), false
+  T?.eq ( is_extension_of undefined, Derived  ), false
+  T?.eq ( is_extension_of 42, Derived         ), false
+  T?.eq ( is_extension_of Derived, null       ), false
+  T?.eq ( is_extension_of Derived, undefined  ), false
+  T?.eq ( is_extension_of Derived, 42         ), false
+  T?.eq ( is_extension_of 42, Number          ), false
+  T?.eq ( is_extension_of Derived, Base       ), true
+  T?.eq ( is_extension_of Derived, Derived    ), true
+  T?.eq ( is_extension_of Base, Base          ), true
+  T?.eq ( is_extension_of null, null          ), true
+  T?.eq ( is_extension_of '', ''              ), true
+  T?.eq ( is_extension_of '', 'x'             ), false
   #.........................................................................................................
   done?()
 
