@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, echo, equals, get_modular_pipeline_classes, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var GUY, alert, debug, echo, equals, get_modular_pipeline_classes, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, warn, whisper,
+    boundMethodCheck = function(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new Error('Bound instance method accessed before binding'); } };
 
   //###########################################################################################################
   GUY = require('guy');
@@ -522,6 +523,218 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.transformers_can_pick_methods = function(T, done) {
+    var A, B, Pipeline, Transformer;
+    ({Pipeline, Transformer} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    A = class A extends Transformer {
+      $source() {
+        return [['*']];
+      }
+
+      $a1() {
+        return function(d, send) {
+          d.push('a1');
+          return send(d);
+        };
+      }
+
+      $a2() {
+        return function(d, send) {
+          d.push('a2');
+          return send(d);
+        };
+      }
+
+      $a3() {
+        return function(d, send) {
+          d.push('a3');
+          return send(d);
+        };
+      }
+
+    };
+    //.........................................................................................................
+    B = class B extends A {
+      constructor() {
+        super(...arguments);
+        this.$bound = this.$bound.bind(this);
+      }
+
+      $b1() {
+        return function(d, send) {
+          d.push('b1');
+          return send(d);
+        };
+      }
+
+      $b2() {
+        return function(d, send) {
+          d.push('b2');
+          return send(d);
+        };
+      }
+
+      $b3() {
+        return function(d, send) {
+          d.push('b3');
+          return send(d);
+        };
+      }
+
+      $bound() {
+        boundMethodCheck(this, B);
+        return (d, send) => {
+          d.push(`bound to ${this.constructor.name}`);
+          return send(d);
+        };
+      }
+
+      $show() {
+        return function(d) {
+          return urge('^a@1^', d);
+        };
+      }
+
+    };
+    (() => {      //.........................................................................................................
+      var p, result;
+      p = B.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['*', 'a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'bound to B']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var C, a, b, p, result;
+      a = new A();
+      b = new B();
+      C = (function() {
+        class C extends Transformer {
+          $source() {
+            return [[]];
+          }
+
+        };
+
+        C.prototype.$ = [a.$a3, a.$a2, b.$b2, b.$bound(), b.$show];
+
+        return C;
+
+      }).call(this);
+      p = C.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['a3', 'a2', 'b2', 'bound to B']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var C, a, b, p, result;
+      a = new A();
+      b = new B();
+      C = (function() {
+        class C extends Transformer {
+          $source() {
+            return [[]];
+          }
+
+        };
+
+        C.prototype.$c1 = a.$a3;
+
+        C.prototype.$c2 = a.$a2;
+
+        C.prototype.$c3 = b.$b2;
+
+        C.prototype.bound = b.$bound();
+
+        C.prototype.$show_2 = b.$show;
+
+        return C;
+
+      }).call(this);
+      p = C.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['a3', 'a2', 'b2', 'bound to B']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var C, a, b, p, result;
+      a = new A();
+      b = new B();
+      C = (function() {
+        class C extends Transformer {
+          $source() {
+            return [[]];
+          }
+
+        };
+
+        C.prototype.$ = [b.$show, a.$a3, a.$a2, b.$b2, b.$bound, b.$show];
+
+        return C;
+
+      }).call(this);
+      p = C.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['a3', 'a2', 'b2', 'bound to B']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var C, a, b, p, result;
+      a = new A();
+      b = new B();
+      C = (function() {
+        class C extends Transformer {
+          $source() {
+            return [[]];
+          }
+
+        };
+
+        C.prototype.$c1 = a.$a3;
+
+        C.prototype.$c2 = a.$a2;
+
+        C.prototype.$c3 = b.$b2;
+
+        C.prototype.bound = b.$bound;
+
+        C.prototype.$show_2 = b.$show;
+
+        return C;
+
+      }).call(this);
+      p = C.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['a3', 'a2', 'b2', 'bound to B']]) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var C, p, result;
+      C = (function() {
+        class C extends Transformer {
+          $source() {
+            return [[]];
+          }
+
+        };
+
+        C.prototype.$show_1 = B.prototype.$show;
+
+        C.prototype.$c1 = A.prototype.$a3;
+
+        C.prototype.$c2 = A.prototype.$a2;
+
+        C.prototype.$c3 = B.prototype.$b2;
+
+        // bound:    B::$bound() ### NOTE bound method nonsensical here as there is no instance ###
+        C.prototype.$show_2 = B.prototype.$show;
+
+        return C;
+
+      }).call(this);
+      p = C.as_pipeline();
+      result = p.run_and_stop();
+      return T != null ? T.eq(result, [['a3', 'a2', 'b2']]) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
@@ -531,7 +744,9 @@
       // @transformers_methods_called_with_current_context()
       // @can_iterate_over_transforms()
       // @transformers_do_no_overrides()
-      return test(this.transformers_do_no_overrides);
+      // test @transformers_do_no_overrides
+      this.transformers_can_pick_methods();
+      return test(this.transformers_can_pick_methods);
     })();
   }
 
