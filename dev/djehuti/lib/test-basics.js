@@ -8,7 +8,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DATOM/TESTS/XEMITTER';
+  badge = 'DJEHUTI/TESTS';
 
   debug = CND.get_logger('debug', badge);
 
@@ -34,6 +34,7 @@
   //   { DATOM }                 = require '../../../apps/datom'
   //   { new_datom
   //     select }                = DATOM
+  // { Djehuti }               = require '../../../apps/djehuti'
   //   #.........................................................................................................
   //   probes_and_matchers = [
   //     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -47,14 +48,15 @@
   //   return null
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XEMITTER: public API shape"] = function(T, done) {
-    var DATOM, XE, isa, k, known_keys, new_datom, new_xemitter, select, type_of, types, validate;
+  this["DJEHUTI: public API shape"] = function(T, done) {
+    var DATOM, Djehuti, XE, isa, k, known_keys, new_datom, select, type_of, types, validate;
     ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, new_xemitter, select} = DATOM);
+    ({new_datom, select} = DATOM);
     types = DATOM.types;
     ({isa, validate, type_of} = types);
+    ({Djehuti} = require('../../../apps/djehuti'));
     //.........................................................................................................
-    XE = new_xemitter();
+    XE = new Djehuti();
     T.ok(isa.asyncfunction(XE.emit));
     T.ok(isa.asyncfunction(XE.delegate));
     T.ok(isa.function(XE.contract));
@@ -82,13 +84,14 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XEMITTER: emit equivalently accepts key, value or datom"] = async function(T, done) {
-    var DATOM, XE, count, error, new_datom, new_xemitter, pattern, select;
+  this["DJEHUTI: emit equivalently accepts key, value or datom"] = async function(T, done) {
+    var DATOM, Djehuti, XE, count, error, new_datom, pattern, select;
     ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, new_xemitter, select} = DATOM);
+    ({new_datom, select} = DATOM);
+    ({Djehuti} = require('../../../apps/djehuti'));
     //.........................................................................................................
     count = 0;
-    XE = new_xemitter();
+    XE = new Djehuti();
     XE.listen_to('^mykey', function(d) {
       count++;
       return T.eq(d, {
@@ -126,11 +129,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XEMITTER: throws when more than one contractor is added for given event key"] = function(T, done) {
-    var DATOM, XE, new_datom, new_xemitter, select;
+  this["DJEHUTI: throws when more than one contractor is added for given event key"] = function(T, done) {
+    var DATOM, Djehuti, XE, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, new_xemitter, select} = DATOM);
-    XE = new_xemitter();
+    ({new_datom, select} = DATOM);
+    ({Djehuti} = require('../../../apps/djehuti'));
+    XE = new Djehuti();
     //.........................................................................................................
     XE.contract('^mykey', function(d) {});
     XE.contract('^otherkey', function(d) {});
@@ -142,11 +146,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XEMITTER: can listen to events that have no specific listener"] = async function(T, done) {
-    var DATOM, XE, keys, new_datom, new_xemitter, select;
+  this["DJEHUTI: can listen to events that have no specific listener"] = async function(T, done) {
+    var DATOM, Djehuti, XE, keys, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, new_xemitter, select} = DATOM);
-    XE = new_xemitter();
+    ({new_datom, select} = DATOM);
+    ({Djehuti} = require('../../../apps/djehuti'));
+    XE = new Djehuti();
     //.........................................................................................................
     keys = {
       listen: [],
@@ -183,11 +188,12 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["XEMITTER: delegation"] = async function(T, done) {
-    var DATOM, XE, keys, new_datom, new_xemitter, select;
+  this["DJEHUTI: delegation"] = async function(T, done) {
+    var DATOM, Djehuti, XE, keys, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, new_xemitter, select} = DATOM);
-    XE = new_xemitter();
+    ({new_datom, select} = DATOM);
+    ({Djehuti} = require('../../../apps/djehuti'));
+    XE = new Djehuti();
     //.........................................................................................................
     keys = {
       listen: [],
@@ -237,8 +243,8 @@
   }
 
   // test @[ "public API shape" ]
-// test @[ "XEMITTER: can listen to events that have no specific listener" ]
-// test @[ "XEMITTER: delegation" ]
+// test @[ "DJEHUTI: can listen to events that have no specific listener" ]
+// test @[ "DJEHUTI: delegation" ]
 // test @[ "can listen to events that have no specific listener 2" ]
 // test @[ "emit equivalently accepts key, value or datom" ]
 
