@@ -24,80 +24,6 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   type_of }               = types
 
 
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "selector keypatterns" ] = ( T, done ) ->
-#   probes_and_matchers = [
-#     ["",{"sigils":"","name":""},null]
-#     ["^foo",{"sigils":"^","name":"foo"},null]
-#     ["<foo",{"sigils":"<","name":"foo"},null]
-#     ["  ",null,null]
-#     [">foo",{"sigils":">","name":"foo"},null]
-#     ["<>foo",{"sigils":"<>","name":"foo"},null]
-#     ["<>^foo",{"sigils":"<>^","name":"foo"},null]
-#     ["^ foo",null,null]
-#     ["^prfx:foo",{"sigils":"^","prefix":"prfx","name":"foo"},null]
-#     ["<prfx:foo",{"sigils":"<","prefix":"prfx","name":"foo"},null]
-#     [">prfx:foo",{"sigils":">","prefix":"prfx","name":"foo"},null]
-#     ["<>prfx:foo",{"sigils":"<>","prefix":"prfx","name":"foo"},null]
-#     ["<>^prfx:foo",{"sigils":"<>^","prefix":"prfx","name":"foo"},null]
-#     ["^<>",{"sigils":"^<>","name":""},null]
-#     ]
-#   #.........................................................................................................
-#   for [ probe, matcher, error, ] in probes_and_matchers
-#     await T.perform probe, matcher, error, ->
-#       R = ( probe.match DATOM._selector_keypattern )?.groups ? null
-#       return null unless R?
-#       for key, value of R
-#         delete R[ key ] if value is undefined
-#       return R
-#   done()
-#   return null
-
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "datom keypatterns" ] = ( T, done ) ->
-#   probes_and_matchers = [
-#     ["text",null,null]
-#     ["^text",{"sigil":"^","name":"text"},null]
-#     ["<bold",{"sigil":"<","name":"bold"},null]
-#     [">bold",{"sigil":">","name":"bold"},null]
-#     ["~collect",{"sigil":"~","name":"collect"},null]
-#     ["~kwic:collect",{"sigil":"~","prefix":"kwic","name":"collect"},null]
-#     ["<kwic:bar",{"sigil":"<","prefix":"kwic","name":"bar"},null]
-#     [">kwic:bar",{"sigil":">","prefix":"kwic","name":"bar"},null]
-#     [">!kwic:bar",null,null]
-#     ["<>kwic:bar",null,null]
-#     ]
-#   #.........................................................................................................
-#   for [ probe, matcher, error, ] in probes_and_matchers
-#     await T.perform probe, matcher, error, ->
-#       R = ( probe.match DATOM._datom_keypattern )?.groups ? null
-#       return null unless R?
-#       for key, value of R
-#         delete R[ key ] if value is undefined
-#       return R
-#   done()
-#   return null
-
-# #-----------------------------------------------------------------------------------------------------------
-# @[ "classify_selector" ] = ( T, done ) ->
-#   probes_and_matchers = [
-#     ["#justatag",["tag","justatag"],'illegal']
-#     ["^bar",["keypattern",{"sigils":"^","name":"bar"}],null]
-#     ]
-#   #.........................................................................................................
-#   for [ probe, matcher, error, ] in probes_and_matchers
-#     await T.perform probe, matcher, error, ->
-#       probe = ( -> ) if probe.startsWith '!!!'
-#       R     = DATOM._classify_selector probe
-#       if R[ 0 ] is 'keypattern'
-#         for key, value of R[ 1 ]
-#           delete R[ 1 ][ key ] if value is undefined
-#       else if R[ 0 ] is 'function'
-#         R[ 1 ] = null
-#       return R
-#   done()
-#   return null
-
 #-----------------------------------------------------------------------------------------------------------
 @select_2 = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
@@ -144,7 +70,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "select ignores values other than PODs" ] = ( T, done ) ->
+@select_ignores_values_other_than_objects = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
@@ -166,7 +92,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "new_datom complains when value has `$key`" ] = ( T, done ) ->
+@new_datom_complains_when_value_has_$key = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
@@ -184,7 +110,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "xxx" ] = ( T, done ) ->
+@xxx = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
@@ -201,7 +127,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "new_datom (default settings)" ] = ( T, done ) ->
+@new_datom_using_default_settings = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
@@ -228,34 +154,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "new_datom (without value merging)" ] = ( T, done ) ->
-  DATOM                     = new ( require '../../../apps/datom' ).Datom { merge_values: false, }
-  { new_datom
-    select }                = DATOM
-  #.........................................................................................................
-  probes_and_matchers = [
-    [["^number",null],{"$key":"^number"},null]
-    [["^number",123],{"$key":"^number","$value":123},null]
-    [["^number",{"$value":123,}],{"$key":"^number","$value":{"$value":123}},null]
-    [["^number",{"value":123,}],{"$key":"^number","$value":{"value":123}},null]
-    [["^number",{"$value":{"$value":123,}}],{"$key":"^number","$value":{"$value": { "$value": 123, }, }, },null]
-    [["^number",{"value":{"$value":123,}}],{"$key":"^number","$value":{"value": { "$value": 123, }}, },null]
-    [["^number",{"$value":{"value":123,}}],{"$key":"^number","$value":{ "$value": { "value": 123, }}, },null]
-    [["^number",{"value":{"value":123,}}],{"$key":"^number","$value":{ "value": { "value": 123, }}, },null]
-    [["^value",123],{"$key":"^value","$value":123},null]
-    [["<start",123],{"$key":"<start","$value":123},null]
-    [[">stop",123],{"$key":">stop","$value":123},null]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ key, value, ] = probe
-      resolve new_datom key, value
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "freezing" ] = ( T, done ) ->
+@freezing = ( T, done ) ->
   DATOM_FREEZE                        = new ( require '../../../apps/datom' ).Datom { freeze: true, }
   { new_datom: new_datom_freeze, }    = DATOM_FREEZE
   DATOM_NOFREEZE                      = new ( require '../../../apps/datom' ).Datom { freeze: false, }
@@ -267,14 +166,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "_regex performance, runaway test" ] = ( T, done ) ->
-  ###
-  See https://github.com/loveencounterflow/runaway-regex-test
-  and select-benchmark in this project
-  ###
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "dirty" ] = ( T, done ) ->
+@dirty = ( T, done ) ->
   DATOM_DIRTY                         = new ( require '../../../apps/datom' ).Datom { dirty: true, }
   DATOM_NODIRTY                       = new ( require '../../../apps/datom' ).Datom { dirty: false, }
   DATOM_DEFAULT                       = new ( require '../../../apps/datom' ).Datom()
@@ -294,12 +186,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @[ "dirty" ]
-  # test @[ "new_datom complains when value has `$key`" ]
-  # test @[ "selector keypatterns" ]
   test @select_2
-  # test @[ "new_datom (default settings)" ]
-  # debug new_datom '^helo', 42
 
 
 
