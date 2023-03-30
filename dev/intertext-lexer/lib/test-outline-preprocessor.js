@@ -151,7 +151,7 @@
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
     //.........................................................................................................
-    probes_and_matchers = [['', '0>0,0N1,0>0', null], ['helo', "0>0,0'helo',0N1,0>0", null], ['abc\ndef', "0>0,0'abc',0N1,0'def',0N1,0>0", null], ['abc\ndef\n\n', "0>0,0'abc',0N1,0'def',0N3,0>0", null], ['abc\ndef\n\n\nxyz', "0>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>0", null], ['abc\ndef\n\n\n  xyz\n  !', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>0", null]];
+    probes_and_matchers = [['', 'null>0,0N1,0>null', null], ['helo', "null>0,0'helo',0N1,0>null", null], ['abc\ndef', "null>0,0'abc',0N1,0'def',0N1,0>null", null], ['abc\ndef\n\n', "null>0,0'abc',0N1,0'def',0N3,0>null", null], ['abc\ndef\n\n\nxyz', "null>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>null", null], ['abc\ndef\n\n\n  xyz\n  !', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>null", null], ['abc\ndef\n\n\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>null", null], ['abc\ndef\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>null", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -168,6 +168,7 @@
           for (d of ref) {
             tokens.push(d);
             switch (d.tid) {
+              case 'nl':
               case 'nls':
                 result.push(`${d.data.spc_count}N${d.data.nl_count}`);
                 break;
@@ -176,6 +177,60 @@
                 break;
               case 'dentchg':
                 result.push(`${d.data.from}>${rpr(d.data.to)}`);
+            }
+          }
+          result = result.join(',');
+          // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+          // H.norm_tabulate "#{rpr probe}", tokens
+          // echo [ probe, result, error, ]
+          return resolve(result);
+        });
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.outline_blocks = async function(T, done) {
+    var Interlex, Transformer, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
+    ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
+    ({Transformer} = require('../../../apps/moonriver'));
+    //.........................................................................................................
+    probes_and_matchers = [['', '0>0,0N1,0>0', null], ['\n', '0>0,0N1,0>0', null], ['\n\n', '0>0,0N1,0>0', null], ['helo', "0>0,0'helo',0N1,0>0", null], ['abc\ndef', "0>0,0'abc',0N1,0'def',0N1,0>0", null], ['abc\ndef\n\n', "0>0,0'abc',0N1,0'def',0N3,0>0", null], ['abc\ndef\n\n\nxyz', "0>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>0", null], ['abc\ndef\n\n\n  xyz\n  !', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>0", null], ['abc\ndef\n\n\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>0", null], ['abc\ndef\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>0", null]];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var d, parser, ref, result, tokens;
+          // H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+          // echo '^97-1^', '————————————————————————————'
+          result = [];
+          tokens = [];
+          parser = tools.outliner.$040_blocks.as_pipeline();
+          parser.send(probe);
+          ref = parser.walk_and_stop(probe);
+          for (d of ref) {
+            tokens.push(d);
+            switch (d.tid) {
+              case 'nl':
+              case 'nls':
+                result.push(`${d.data.spc_count}N${d.data.nl_count}`);
+                break;
+              case 'material':
+                result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
+                break;
+              case 'dentchg':
+                result.push(`${d.data.from}>${rpr(d.data.to)}`);
+                break;
+              case 'block:start':
+                result.push(`${d.data.spc_count}【`);
+                break;
+              case 'block:stop':
+                result.push(`${d.data.spc_count}】`);
             }
           }
           result = result.join(',');
@@ -199,7 +254,8 @@
       // @outline_preprocessor_basic()
       // test @outline_preprocessor_basic
       // test @outline_blank_line_consolidation
-      return test(this.outline_structure);
+      // test @outline_structure
+      return test(this.outline_blocks);
     })();
   }
 
