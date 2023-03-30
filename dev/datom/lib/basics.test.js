@@ -62,10 +62,14 @@
         null
       ],
       [
-        ['^foo',
-        42],
+        [
+          '^foo',
+          {
+            value: 42
+          }
+        ],
         {
-          '$value': 42,
+          value: 42,
           '$fresh': true,
           '$key': '^foo'
         },
@@ -74,13 +78,15 @@
       [
         [
           '^foo',
-          42,
+          {
+            value: 42
+          },
           {
             '$fresh': false
           }
         ],
         {
-          '$value': 42,
+          value: 42,
           '$fresh': true,
           '$key': '^foo'
         },
@@ -134,10 +140,14 @@
         null
       ],
       [
-        ['^foo',
-        42],
+        [
+          '^foo',
+          {
+            value: 42
+          }
+        ],
         {
-          '$value': 42,
+          value: 42,
           '$fresh': true,
           '$key': '^foo'
         },
@@ -146,13 +156,15 @@
       [
         [
           '^foo',
-          42,
+          {
+            value: 42
+          },
           {
             '$fresh': false
           }
         ],
         {
-          '$value': 42,
+          value: 42,
           '$fresh': true,
           '$key': '^foo'
         },
@@ -179,7 +191,9 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @fresh_datom_with_freeze
+      return test(this.fresh_datom_nofreeze);
     })();
   }
 

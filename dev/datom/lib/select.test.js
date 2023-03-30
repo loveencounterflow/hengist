@@ -333,53 +333,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.new_datom_complains_when_value_has_$key = async function(T, done) {
-    var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        [
-          "^number",
-          {
-            "$value": 123
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": 123,
-            "$key": "something"
-          }
-        ],
-        null,
-        "value must not have attribute '\\$key'"
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var key, value;
-          [key, value] = probe;
-          return resolve(new_datom(key, value));
-        });
-      });
-    }
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.xxx = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
@@ -425,140 +378,22 @@
     //.........................................................................................................
     probes_and_matchers = [
       [
-        ["^number",
-        null],
+        ["number"],
         {
-          "$key": "^number"
-        },
-        null
-      ],
-      [
-        ["^number",
-        123],
-        {
-          "$key": "^number",
-          "$value": 123
+          "$key": "number"
         },
         null
       ],
       [
         [
-          "^number",
+          "number",
           {
-            "$value": 123
+            value: 42
           }
         ],
         {
-          "$key": "^number",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": 123
-          }
-        ],
-        {
-          "$key": "^number",
-          "value": 123
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": {
-              "$value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "$value": 123
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": {
-              "$value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "value": {
-            "$value": 123
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": {
-              "value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "value": 123
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": {
-              "value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "value": {
-            "value": 123
-          }
-        },
-        null
-      ],
-      [
-        ["^value",
-        123],
-        {
-          "$key": "^value",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        ["<start",
-        123],
-        {
-          "$key": "<start",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        [">stop",
-        123],
-        {
-          "$key": ">stop",
-          "$value": 123
+          "$key": "number",
+          value: 42
         },
         null
       ]
@@ -615,7 +450,7 @@
       x: 42,
       y: 108
     });
-    // debug d
+    // debug '^56456^', d
     // debug DATOM_DEFAULT.lets d, ( d ) -> null
     T.eq(DATOM_DIRTY.lets(d, function(d) {
       return delete d.x;
@@ -644,7 +479,8 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this.select_2);
+      // test @select_2
+      return test(this.dirty);
     })();
   }
 
