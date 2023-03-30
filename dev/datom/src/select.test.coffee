@@ -18,10 +18,10 @@ echo                      = CND.echo.bind CND
 test                      = require 'guy-test'
 jr                        = JSON.stringify
 #...........................................................................................................
-# types                     = require '../types'
-# { isa
-#   validate
-#   type_of }               = types
+types                     = new ( require '../../../apps/intertype' ).Intertype
+{ isa
+  validate
+  type_of }               = types
 
 
 # #-----------------------------------------------------------------------------------------------------------
@@ -99,35 +99,43 @@ jr                        = JSON.stringify
 #   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "select 2" ] = ( T, done ) ->
+@select_2 = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
-    [[ {$key:'^number',$value:42,$stamped:true}, '^number#stamped:*'],true]
-    [[ {$key:'<italic',$stamped:true}, '<italic#stamped:*'],true]
-    [[ {$key:'<italic',$stamped:true}, '<italic#stamped:*'],true]
-    [[ {$key:'<italic'}, '<italic#stamped:*'],true]
-    [[ {$key:'<italic',$stamped:true}, '>italic#stamped:*'],false]
-    [[ {$key:'<italic'}, '>italic#stamped:*'],false]
-    [[ {$key:'^number',$value:42,$stamped:true}, '^number'],false]
-    [[ {$key:'<italic',$stamped:true}, '<italic'],false]
-    [[ {$key:'<italic',$stamped:true}, '>italic'],false]
-    [[ {$key:'^number',$value:42}, '^number'],true]
-    [[ {$key:'<italic',$stamped:true}, '>italic'],false]
-    [[ {$key:"*data"},'*data'],null,'illegal selector']
-    [[ {$key:"data>"},'data>'],null,'illegal selector']
-    [[ {$key:"%data"},'%data'],null,'illegal selector']
-    [[ {$key:"[data"},'[data'],true,null]
-    [[ {$key:"data]"},'data]'],null,'illegal selector']
-    [[ {$key:"]data"},']data'],true,null]
+    [ [ { '$key': 'number', '$stamped': true }, 'number' ], false, null ]
+    [ [ { '$key': 'number' }, 'number' ], true, null ]
+    [ [ { '$key': 'math:number' }, 'number' ], false, null ]
+    [ [ { '$key': 'math:number' }, 'math' ], false, null ]
+    [ [ { '$key': 'math:number:integer' }, 'math:*:int*' ], true, null ]
+    # [ [ { '$key': 'outline:nl' }, 'outline:nl[s]' ], true, null ]
+    [ [ { '$key': 'x' }, '?' ], true, null ]
+    [ [ { '$key': 'xx' }, '?' ], false, null ]
+    [ [ { '$key': 'wat' }, '?' ], false, null ]
+    [ [ { '$key': '福' }, '?' ], true, null ]
+    [ [ { '$key': 'math:' }, 'math:*' ], true, null ]
+    [ [ { '$key': 'math:*' }, 'math:*' ], true, null ]
+    [ [ { '$key': '𫝂' }, '?' ], true, null ]
+    [ [ { '$key': 'math:*' }, 'math:\\*' ], true, null ]
+    [ [ { '$key': 'math:number' }, '*:number' ], true, null ]
+    [ [ { '$key': 'math:number' }, 'math:*' ], true, null ]
+    [ [ { '$key': 'math:' }, 'math:\\*' ], false, null ]
+    [ [ { '$key': 'math:' }, [ 'math:\\*', '*:' ] ], true, null ]
+    [ [ { '$key': 'math:number' }, 'm?th:n?mber' ], true, null ]
+    [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, ->
-      [ d, selector, ] = probe
-      return select d, selector
+    await T.perform probe, matcher, error, -> return new Promise ( resolve ) ->
+      [ d, selector, ]  = probe
+      if isa.text selector
+        result  = select d, selector
+      else
+        result  = select d, selector...
+      resolve result
+  # debug '^23-4^', DATOM.matcher_cache
   done()
   return null
 
@@ -216,27 +224,6 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "wrap_datom" ] = ( T, done ) ->
-  { DATOM } = require '../../../apps/datom'
-  { new_datom
-    wrap_datom
-    select }                = DATOM
-  #.........................................................................................................
-  probes_and_matchers = [
-    [["^text",'helo'],{"$key":"^wrapper","$value":{"$key":"^text","$value":"helo"}},null]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ key, value, ] = probe
-      d               = new_datom key, value
-      debug '^33398^', d
-      debug '^33398^', wrap_datom '^wrapper', d
-      resolve wrap_datom '^wrapper', d
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @[ "new_datom (without value merging)" ] = ( T, done ) ->
   DATOM                     = new ( require '../../../apps/datom' ).Datom { merge_values: false, }
   { new_datom
@@ -302,12 +289,11 @@ jr                        = JSON.stringify
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
   # test @[ "dirty" ]
-  # test @[ "wrap_datom" ]
   # test @[ "new_datom complains when value has `$key`" ]
   # test @[ "selector keypatterns" ]
-  # test @[ "select 2" ]
+  test @select_2
   # test @[ "new_datom (default settings)" ]
   # debug new_datom '^helo', 42
 

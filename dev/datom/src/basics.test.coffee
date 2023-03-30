@@ -36,7 +36,7 @@ jr                        = JSON.stringify
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      d = DATOM.fresh_datom probe...
+      d = DATOM.new_fresh_datom probe...
       T.ok Object.isFrozen d
       resolve d
       return null
@@ -55,7 +55,7 @@ jr                        = JSON.stringify
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      d = DATOM.fresh_datom probe...
+      d = DATOM.new_fresh_datom probe...
       T.ok not Object.isFrozen d
       resolve d
       return null
@@ -68,14 +68,6 @@ jr                        = JSON.stringify
 ############################################################################################################
 if require.main is module then do =>
   test @
-  # test @[ "fresh_datom (freeze)" ]
-  # test @[ "fresh_datom (nofreeze)" ]
-  # test @[ "wrap_datom" ]
-  # test @[ "new_datom complains when value has `$key`" ]
-  # test @[ "selector keypatterns" ]
-  # test @[ "select 2" ]
-  # test @[ "new_datom (default settings)" ]
-  # debug new_datom '^helo', 42
 
 
 
