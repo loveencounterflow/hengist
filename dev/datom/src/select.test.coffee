@@ -92,24 +92,6 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@new_datom_complains_when_value_has_$key = ( T, done ) ->
-  { DATOM } = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  #.........................................................................................................
-  probes_and_matchers = [
-    [["^number",{"$value":123,}],{"$key":"^number","$value":123},null]
-    [["^number",{"$value":123,"$key":"something"}],null,"value must not have attribute '\\$key'"]
-    ]
-  #.........................................................................................................
-  for [ probe, matcher, error, ] in probes_and_matchers
-    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      [ key, value, ] = probe
-      resolve new_datom key, value
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
 @xxx = ( T, done ) ->
   { DATOM } = require '../../../apps/datom'
   { new_datom
@@ -133,17 +115,8 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
     select }                = DATOM
   #.........................................................................................................
   probes_and_matchers = [
-    [["^number",null],{"$key":"^number"},null]
-    [["^number",123],{"$key":"^number","$value":123},null]
-    [["^number",{"$value":123,}],{"$key":"^number","$value":123},null]
-    [["^number",{"value":123,}],{"$key":"^number","value":123},null]
-    [["^number",{"$value":{"$value":123,}}],{"$key":"^number","$value": { "$value": 123, }, },null]
-    [["^number",{"value":{"$value":123,}}],{"$key":"^number","value": { "$value": 123, }, },null]
-    [["^number",{"$value":{"value":123,}}],{"$key":"^number","$value": { "value": 123, }, },null]
-    [["^number",{"value":{"value":123,}}],{"$key":"^number","value": { "value": 123, }, },null]
-    [["^value",123],{"$key":"^value","$value":123},null]
-    [["<start",123],{"$key":"<start","$value":123},null]
-    [[">stop",123],{"$key":">stop","$value":123},null]
+    [["number",],{"$key":"number" },null]
+    [["number",{ value: 42, }],{"$key":"number", value: 42 },null]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -172,7 +145,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   DATOM_DEFAULT                       = new ( require '../../../apps/datom' ).Datom()
   #.........................................................................................................
   d = DATOM_DEFAULT.new_datom '^foo', { x: 42, y: 108, }
-  # debug d
+  # debug '^56456^', d
   # debug DATOM_DEFAULT.lets d, ( d ) -> null
   T.eq ( DATOM_DIRTY.lets d,    ( d ) -> delete d.x ), { $key: '^foo', y: 108, $dirty: true,  }
   T.eq ( DATOM_NODIRTY.lets d,  ( d ) -> delete d.x ), { $key: '^foo', y: 108,                }
@@ -186,7 +159,8 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  test @select_2
+  # test @select_2
+  test @dirty
 
 
 

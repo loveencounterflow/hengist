@@ -30,8 +30,8 @@ jr                        = JSON.stringify
   probes_and_matchers = [
     [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
     [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
-    [ [ '^foo', 42 ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
-    [ [ '^foo', 42, { '$fresh': false } ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -49,8 +49,8 @@ jr                        = JSON.stringify
   probes_and_matchers = [
     [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
     [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
-    [ [ '^foo', 42 ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
-    [ [ '^foo', 42, { '$fresh': false } ], { '$value': 42, '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+    [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -67,7 +67,8 @@ jr                        = JSON.stringify
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
-
+  # test @
+  # test @fresh_datom_with_freeze
+  test @fresh_datom_nofreeze
 
 
