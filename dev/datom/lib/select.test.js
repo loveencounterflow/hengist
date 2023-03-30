@@ -168,7 +168,59 @@
       [
         [
           {
-            // [ [ { '$key': 'outline:nl' }, 'outline:nl[s]' ], true, null ]
+            '$key': 'outline:nl'
+          },
+          'outline:nl*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'outline:nlsuper'
+          },
+          'outline:nl*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'outline:nl'
+          },
+          ['outline:nl',
+          'outline:nls']
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'outline:nls'
+          },
+          ['outline:nl',
+          'outline:nls']
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'outline:nlsuper'
+          },
+          ['outline:nl',
+          'outline:nls']
+        ],
+        false,
+        null
+      ],
+      [
+        [
+          {
             '$key': 'x'
           },
           '?'
@@ -296,10 +348,17 @@
         ],
         true,
         null
-      ]
+      ],
+      [[42,
+      'm?th:n?mber'],
+      false,
+      null],
+      [[42,
+      '*'],
+      false,
+      null]
     ];
 //.........................................................................................................
-// [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
@@ -315,7 +374,6 @@
         });
       });
     }
-    // debug '^23-4^', DATOM.matcher_cache
     done();
     return null;
   };
