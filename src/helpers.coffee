@@ -48,3 +48,19 @@ PATH                      = require 'path'
   @banner title if title?
   echo dtab._tabulate query
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+@norm_tabulate = ( title, query ) ->
+  ### same as `tabulate()` but works on a copy of `query` where all rows have same properties to avoid
+  jumbling of column widths ###
+  rows  = ( { row..., } for row from query )
+  keys  = new Set()
+  for row in rows
+    keys.add key for key of row
+  keys = [ keys..., ]
+  for row, idx in rows
+    d = {}
+    for key in keys
+      d[ key ] = if ( value = row[ key ] ) is undefined then undefined else value
+    rows[ idx ] = d
+  return @tabulate title, rows
