@@ -180,7 +180,7 @@
           }
           result = result.join(',');
           // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-          // H.tabulate "#{rpr probe}", tokens
+          H.norm_tabulate(`${rpr(probe)}`, tokens);
           // echo [ probe, result, error, ]
           return resolve(result);
         });
