@@ -35,7 +35,7 @@
   //   type_of }               = types
 
   //-----------------------------------------------------------------------------------------------------------
-  this["fresh_datom (freeze)"] = async function(T, done) {
+  this.fresh_datom_with_freeze = async function(T, done) {
     var DATOM, error, i, len, matcher, probe, probes_and_matchers;
     ({DATOM} = require('../../../apps/datom'));
     probes_and_matchers = [
@@ -105,7 +105,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["fresh_datom (nofreeze)"] = async function(T, done) {
+  this.fresh_datom_nofreeze = async function(T, done) {
     var DATOM, error, i, len, matcher, probe, probes_and_matchers;
     DATOM = new (require('../../../apps/datom')).Datom({
       freeze: false

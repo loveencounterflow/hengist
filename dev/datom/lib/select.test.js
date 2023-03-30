@@ -33,80 +33,6 @@
 
   ({isa, validate, type_of} = types);
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "selector keypatterns" ] = ( T, done ) ->
-  //   probes_and_matchers = [
-  //     ["",{"sigils":"","name":""},null]
-  //     ["^foo",{"sigils":"^","name":"foo"},null]
-  //     ["<foo",{"sigils":"<","name":"foo"},null]
-  //     ["  ",null,null]
-  //     [">foo",{"sigils":">","name":"foo"},null]
-  //     ["<>foo",{"sigils":"<>","name":"foo"},null]
-  //     ["<>^foo",{"sigils":"<>^","name":"foo"},null]
-  //     ["^ foo",null,null]
-  //     ["^prfx:foo",{"sigils":"^","prefix":"prfx","name":"foo"},null]
-  //     ["<prfx:foo",{"sigils":"<","prefix":"prfx","name":"foo"},null]
-  //     [">prfx:foo",{"sigils":">","prefix":"prfx","name":"foo"},null]
-  //     ["<>prfx:foo",{"sigils":"<>","prefix":"prfx","name":"foo"},null]
-  //     ["<>^prfx:foo",{"sigils":"<>^","prefix":"prfx","name":"foo"},null]
-  //     ["^<>",{"sigils":"^<>","name":""},null]
-  //     ]
-  //   #.........................................................................................................
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, ->
-  //       R = ( probe.match DATOM._selector_keypattern )?.groups ? null
-  //       return null unless R?
-  //       for key, value of R
-  //         delete R[ key ] if value is undefined
-  //       return R
-  //   done()
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "datom keypatterns" ] = ( T, done ) ->
-  //   probes_and_matchers = [
-  //     ["text",null,null]
-  //     ["^text",{"sigil":"^","name":"text"},null]
-  //     ["<bold",{"sigil":"<","name":"bold"},null]
-  //     [">bold",{"sigil":">","name":"bold"},null]
-  //     ["~collect",{"sigil":"~","name":"collect"},null]
-  //     ["~kwic:collect",{"sigil":"~","prefix":"kwic","name":"collect"},null]
-  //     ["<kwic:bar",{"sigil":"<","prefix":"kwic","name":"bar"},null]
-  //     [">kwic:bar",{"sigil":">","prefix":"kwic","name":"bar"},null]
-  //     [">!kwic:bar",null,null]
-  //     ["<>kwic:bar",null,null]
-  //     ]
-  //   #.........................................................................................................
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, ->
-  //       R = ( probe.match DATOM._datom_keypattern )?.groups ? null
-  //       return null unless R?
-  //       for key, value of R
-  //         delete R[ key ] if value is undefined
-  //       return R
-  //   done()
-  //   return null
-
-  // #-----------------------------------------------------------------------------------------------------------
-  // @[ "classify_selector" ] = ( T, done ) ->
-  //   probes_and_matchers = [
-  //     ["#justatag",["tag","justatag"],'illegal']
-  //     ["^bar",["keypattern",{"sigils":"^","name":"bar"}],null]
-  //     ]
-  //   #.........................................................................................................
-  //   for [ probe, matcher, error, ] in probes_and_matchers
-  //     await T.perform probe, matcher, error, ->
-  //       probe = ( -> ) if probe.startsWith '!!!'
-  //       R     = DATOM._classify_selector probe
-  //       if R[ 0 ] is 'keypattern'
-  //         for key, value of R[ 1 ]
-  //           delete R[ 1 ][ key ] if value is undefined
-  //       else if R[ 0 ] is 'function'
-  //         R[ 1 ] = null
-  //       return R
-  //   done()
-  //   return null
-
   //-----------------------------------------------------------------------------------------------------------
   this.select_2 = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
@@ -379,7 +305,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["select ignores values other than PODs"] = async function(T, done) {
+  this.select_ignores_values_other_than_objects = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
@@ -407,7 +333,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["new_datom complains when value has `$key`"] = async function(T, done) {
+  this.new_datom_complains_when_value_has_$key = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
@@ -454,7 +380,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["xxx"] = async function(T, done) {
+  this.xxx = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
@@ -492,7 +418,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["new_datom (default settings)"] = async function(T, done) {
+  this.new_datom_using_default_settings = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
@@ -653,182 +579,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["new_datom (without value merging)"] = async function(T, done) {
-    var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
-    DATOM = new (require('../../../apps/datom')).Datom({
-      merge_values: false
-    });
-    ({new_datom, select} = DATOM);
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        ["^number",
-        null],
-        {
-          "$key": "^number"
-        },
-        null
-      ],
-      [
-        ["^number",
-        123],
-        {
-          "$key": "^number",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": 123
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "$value": 123
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": 123
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "value": 123
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": {
-              "$value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "$value": {
-              "$value": 123
-            }
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": {
-              "$value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "value": {
-              "$value": 123
-            }
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "$value": {
-              "value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "$value": {
-              "value": 123
-            }
-          }
-        },
-        null
-      ],
-      [
-        [
-          "^number",
-          {
-            "value": {
-              "value": 123
-            }
-          }
-        ],
-        {
-          "$key": "^number",
-          "$value": {
-            "value": {
-              "value": 123
-            }
-          }
-        },
-        null
-      ],
-      [
-        ["^value",
-        123],
-        {
-          "$key": "^value",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        ["<start",
-        123],
-        {
-          "$key": "<start",
-          "$value": 123
-        },
-        null
-      ],
-      [
-        [">stop",
-        123],
-        {
-          "$key": ">stop",
-          "$value": 123
-        },
-        null
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var key, value;
-          [key, value] = probe;
-          return resolve(new_datom(key, value));
-        });
-      });
-    }
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["freezing"] = function(T, done) {
+  this.freezing = function(T, done) {
     var DATOM_FREEZE, DATOM_NOFREEZE, new_datom_freeze, new_datom_nofreeze;
     DATOM_FREEZE = new (require('../../../apps/datom')).Datom({
       freeze: true
@@ -850,14 +601,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["_regex performance, runaway test"] = function(T, done) {};
-
-  /*
-  See https://github.com/loveencounterflow/runaway-regex-test
-  and select-benchmark in this project
-  */
-  //-----------------------------------------------------------------------------------------------------------
-  this["dirty"] = function(T, done) {
+  this.dirty = function(T, done) {
     var DATOM_DEFAULT, DATOM_DIRTY, DATOM_NODIRTY, d;
     DATOM_DIRTY = new (require('../../../apps/datom')).Datom({
       dirty: true
@@ -900,15 +644,9 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @[ "dirty" ]
-      // test @[ "new_datom complains when value has `$key`" ]
-      // test @[ "selector keypatterns" ]
       return test(this.select_2);
     })();
   }
-
-  // test @[ "new_datom (default settings)" ]
-// debug new_datom '^helo', 42
 
 }).call(this);
 
