@@ -148,12 +148,14 @@ H                         = require './helpers'
   { Transformer } = require '../../../apps/moonriver'
   #.........................................................................................................
   probes_and_matchers = [
-    [ '', '0>0,0N1,0>0', null ]
-    [ 'helo', "0>0,0'helo',0N1,0>0", null ]
-    [ 'abc\ndef', "0>0,0'abc',0N1,0'def',0N1,0>0", null ]
-    [ 'abc\ndef\n\n', "0>0,0'abc',0N1,0'def',0N3,0>0", null ]
-    [ 'abc\ndef\n\n\nxyz', "0>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>0", null ]
-    [ 'abc\ndef\n\n\n  xyz\n  !', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>0", null ]
+    [ '', 'null>0,0N1,0>null', null ]
+    [ 'helo', "null>0,0'helo',0N1,0>null", null ]
+    [ 'abc\ndef', "null>0,0'abc',0N1,0'def',0N1,0>null", null ]
+    [ 'abc\ndef\n\n', "null>0,0'abc',0N1,0'def',0N3,0>null", null ]
+    [ 'abc\ndef\n\n\nxyz', "null>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>null", null ]
+    [ 'abc\ndef\n\n\n  xyz\n  !', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>null", null ]
+    [ 'abc\ndef\n\n\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>null", null ]
+    [ 'abc\ndef\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>null", null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -167,12 +169,62 @@ H                         = require './helpers'
       for d from parser.walk_and_stop probe
         tokens.push d
         switch d.tid
-          when 'nls'
+          when 'nl', 'nls'
             result.push "#{d.data.spc_count}N#{d.data.nl_count}"
           when 'material'
             result.push "#{d.data.spc_count}#{rpr d.data.material}"
           when 'dentchg'
             result.push "#{d.data.from}>#{rpr d.data.to}"
+      result = result.join ','
+      # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
+      # H.norm_tabulate "#{rpr probe}", tokens
+      # echo [ probe, result, error, ]
+      resolve result
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@outline_blocks = ( T, done ) ->
+  { Interlex
+    compose
+    tools       } = require '../../../apps/intertext-lexer'
+  { Transformer } = require '../../../apps/moonriver'
+  #.........................................................................................................
+  probes_and_matchers = [
+    [ '', '0>0,0N1,0>0', null ]
+    [ '\n', '0>0,0N1,0>0', null ]
+    [ '\n\n', '0>0,0N1,0>0', null ]
+    [ 'helo', "0>0,0'helo',0N1,0>0", null ]
+    [ 'abc\ndef', "0>0,0'abc',0N1,0'def',0N1,0>0", null ]
+    [ 'abc\ndef\n\n', "0>0,0'abc',0N1,0'def',0N3,0>0", null ]
+    [ 'abc\ndef\n\n\nxyz', "0>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>0", null ]
+    [ 'abc\ndef\n\n\n  xyz\n  !', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>0", null ]
+    [ 'abc\ndef\n\n\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>0", null ]
+    [ 'abc\ndef\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>0", null ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
+      # echo '^97-1^', '————————————————————————————'
+      result      = []
+      tokens      = []
+      parser      = tools.outliner.$040_blocks.as_pipeline()
+      parser.send probe
+      for d from parser.walk_and_stop probe
+        tokens.push d
+        switch d.tid
+          when 'nl', 'nls'
+            result.push "#{d.data.spc_count}N#{d.data.nl_count}"
+          when 'material'
+            result.push "#{d.data.spc_count}#{rpr d.data.material}"
+          when 'dentchg'
+            result.push "#{d.data.from}>#{rpr d.data.to}"
+          when 'block:start'
+            result.push "#{d.data.spc_count}【"
+          when 'block:stop'
+            result.push "#{d.data.spc_count}】"
       result = result.join ','
       # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
       H.norm_tabulate "#{rpr probe}", tokens
@@ -189,5 +241,6 @@ if require.main is module then do =>
   # @outline_preprocessor_basic()
   # test @outline_preprocessor_basic
   # test @outline_blank_line_consolidation
-  test @outline_structure
+  # test @outline_structure
+  test @outline_blocks
   # test @
