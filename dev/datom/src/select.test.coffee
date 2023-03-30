@@ -110,7 +110,11 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
     [ [ { '$key': 'math:number' }, 'number' ], false, null ]
     [ [ { '$key': 'math:number' }, 'math' ], false, null ]
     [ [ { '$key': 'math:number:integer' }, 'math:*:int*' ], true, null ]
-    # [ [ { '$key': 'outline:nl' }, 'outline:nl[s]' ], true, null ]
+    [ [ { '$key': 'outline:nl' }, 'outline:nl*' ], true, null ]
+    [ [ { '$key': 'outline:nlsuper' }, 'outline:nl*' ], true, null ]
+    [ [ { '$key': 'outline:nl' }, [ 'outline:nl', 'outline:nls', ] ], true, null ]
+    [ [ { '$key': 'outline:nls' }, [ 'outline:nl', 'outline:nls', ] ], true, null ]
+    [ [ { '$key': 'outline:nlsuper' }, [ 'outline:nl', 'outline:nls', ] ], false, null ]
     [ [ { '$key': 'x' }, '?' ], true, null ]
     [ [ { '$key': 'xx' }, '?' ], false, null ]
     [ [ { '$key': 'wat' }, '?' ], false, null ]
@@ -124,7 +128,8 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
     [ [ { '$key': 'math:' }, 'math:\\*' ], false, null ]
     [ [ { '$key': 'math:' }, [ 'math:\\*', '*:' ] ], true, null ]
     [ [ { '$key': 'math:number' }, 'm?th:n?mber' ], true, null ]
-    # [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
+    [ [ 42, 'm?th:n?mber' ], false, null ]
+    [ [ 42, '*' ], false, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -135,7 +140,6 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
       else
         result  = select d, selector...
       resolve result
-  # debug '^23-4^', DATOM.matcher_cache
   done()
   return null
 
