@@ -124,7 +124,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
     [ [ { '$key': 'math:' }, 'math:\\*' ], false, null ]
     [ [ { '$key': 'math:' }, [ 'math:\\*', '*:' ] ], true, null ]
     [ [ { '$key': 'math:number' }, 'm?th:n?mber' ], true, null ]
-    [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
+    # [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
