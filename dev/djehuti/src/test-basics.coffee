@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DATOM/TESTS/XEMITTER'
+badge                     = 'DJEHUTI/TESTS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -23,6 +23,7 @@ jr                        = JSON.stringify
 #   { DATOM }                 = require '../../../apps/datom'
 #   { new_datom
 #     select }                = DATOM
+  # { Djehuti }               = require '../../../apps/djehuti'
 #   #.........................................................................................................
 #   probes_and_matchers = [
 #     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -36,17 +37,17 @@ jr                        = JSON.stringify
 #   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XEMITTER: public API shape" ] = ( T, done ) ->
+@[ "DJEHUTI: public API shape" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
-    new_xemitter
     select }                = DATOM
   types                     = DATOM.types
   { isa
     validate
     type_of }               = types
+  { Djehuti }               = require '../../../apps/djehuti'
   #.........................................................................................................
-  XE = new_xemitter()
+  XE = new Djehuti()
   T.ok isa.asyncfunction  XE.emit
   T.ok isa.asyncfunction  XE.delegate
   T.ok isa.function       XE.contract
@@ -64,14 +65,14 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XEMITTER: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
+@[ "DJEHUTI: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
-    new_xemitter
     select }                = DATOM
+  { Djehuti }               = require '../../../apps/djehuti'
   #.........................................................................................................
   count = 0
-  XE    = new_xemitter()
+  XE    = new Djehuti()
   XE.listen_to '^mykey', ( d ) ->
     count++
     T.eq d, { $key: '^mykey', $value: 42, }
@@ -94,12 +95,12 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XEMITTER: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
+@[ "DJEHUTI: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
-    new_xemitter
     select }                = DATOM
-  XE                        = new_xemitter()
+  { Djehuti }               = require '../../../apps/djehuti'
+  XE                        = new Djehuti()
   #.........................................................................................................
   XE.contract '^mykey', ( d ) ->
   XE.contract '^otherkey', ( d ) ->
@@ -108,12 +109,12 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XEMITTER: can listen to events that have no specific listener" ] = ( T, done ) ->
+@[ "DJEHUTI: can listen to events that have no specific listener" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
-    new_xemitter
     select }                = DATOM
-  XE                        = new_xemitter()
+  { Djehuti }               = require '../../../apps/djehuti'
+  XE                        = new Djehuti()
   #.........................................................................................................
   keys =
     listen:     []
@@ -138,12 +139,12 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "XEMITTER: delegation" ] = ( T, done ) ->
+@[ "DJEHUTI: delegation" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
-    new_xemitter
     select }                = DATOM
-  XE                        = new_xemitter()
+  { Djehuti }               = require '../../../apps/djehuti'
+  XE                        = new Djehuti()
   #.........................................................................................................
   keys = { listen: [], all: [], contract: [] }
   XE.listen_to          '^log',       ( d       ) ->  keys.listen   .push d.$key; urge d
@@ -164,8 +165,8 @@ jr                        = JSON.stringify
 if require.main is module then do =>
   test @
   # test @[ "public API shape" ]
-  # test @[ "XEMITTER: can listen to events that have no specific listener" ]
-  # test @[ "XEMITTER: delegation" ]
+  # test @[ "DJEHUTI: can listen to events that have no specific listener" ]
+  # test @[ "DJEHUTI: delegation" ]
   # test @[ "can listen to events that have no specific listener 2" ]
   # test @[ "emit equivalently accepts key, value or datom" ]
 
