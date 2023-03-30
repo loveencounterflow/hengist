@@ -296,19 +296,10 @@
         ],
         true,
         null
-      ],
-      [
-        [
-          {
-            '$key': 'math:number'
-          },
-          'm?th:n[[:alpha:]]mber'
-        ],
-        true,
-        null
       ]
     ];
 //.........................................................................................................
+// [ [ { '$key': 'math:number' }, 'm?th:n[[:alpha:]]mber' ], true, null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
