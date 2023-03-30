@@ -93,7 +93,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var d;
-          d = DATOM.fresh_datom(...probe);
+          d = DATOM.new_fresh_datom(...probe);
           T.ok(Object.isFrozen(d));
           resolve(d);
           return null;
@@ -165,7 +165,7 @@
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var d;
-          d = DATOM.fresh_datom(...probe);
+          d = DATOM.new_fresh_datom(...probe);
           T.ok(!Object.isFrozen(d));
           resolve(d);
           return null;
@@ -182,15 +182,6 @@
       return test(this);
     })();
   }
-
-  // test @[ "fresh_datom (freeze)" ]
-// test @[ "fresh_datom (nofreeze)" ]
-// test @[ "wrap_datom" ]
-// test @[ "new_datom complains when value has `$key`" ]
-// test @[ "selector keypatterns" ]
-// test @[ "select 2" ]
-// test @[ "new_datom (default settings)" ]
-// debug new_datom '^helo', 42
 
 }).call(this);
 

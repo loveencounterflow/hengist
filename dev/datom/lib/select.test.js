@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper;
+  var CND, badge, debug, echo, help, info, isa, jr, rpr, test, type_of, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -29,10 +29,9 @@
   jr = JSON.stringify;
 
   //...........................................................................................................
-  // types                     = require '../types'
-  // { isa
-  //   validate
-  //   type_of }               = types
+  types = new (require('../../../apps/intertype')).Intertype();
+
+  ({isa, validate, type_of} = types);
 
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "selector keypatterns" ] = ( T, done ) ->
@@ -109,7 +108,7 @@
   //   return null
 
   //-----------------------------------------------------------------------------------------------------------
-  this["select 2"] = async function(T, done) {
+  this.select_2 = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
@@ -118,149 +117,20 @@
       [
         [
           {
-            $key: '^number',
-            $value: 42,
-            $stamped: true
+            '$key': 'number',
+            '$stamped': true
           },
-          '^number#stamped:*'
+          'number'
         ],
-        true
+        false,
+        null
       ],
       [
         [
           {
-            $key: '<italic',
-            $stamped: true
+            '$key': 'number'
           },
-          '<italic#stamped:*'
-        ],
-        true
-      ],
-      [
-        [
-          {
-            $key: '<italic',
-            $stamped: true
-          },
-          '<italic#stamped:*'
-        ],
-        true
-      ],
-      [
-        [
-          {
-            $key: '<italic'
-          },
-          '<italic#stamped:*'
-        ],
-        true
-      ],
-      [
-        [
-          {
-            $key: '<italic',
-            $stamped: true
-          },
-          '>italic#stamped:*'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: '<italic'
-          },
-          '>italic#stamped:*'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: '^number',
-            $value: 42,
-            $stamped: true
-          },
-          '^number'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: '<italic',
-            $stamped: true
-          },
-          '<italic'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: '<italic',
-            $stamped: true
-          },
-          '>italic'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: '^number',
-            $value: 42
-          },
-          '^number'
-        ],
-        true
-      ],
-      [
-        [
-          {
-            $key: '<italic',
-            $stamped: true
-          },
-          '>italic'
-        ],
-        false
-      ],
-      [
-        [
-          {
-            $key: "*data"
-          },
-          '*data'
-        ],
-        null,
-        'illegal selector'
-      ],
-      [
-        [
-          {
-            $key: "data>"
-          },
-          'data>'
-        ],
-        null,
-        'illegal selector'
-      ],
-      [
-        [
-          {
-            $key: "%data"
-          },
-          '%data'
-        ],
-        null,
-        'illegal selector'
-      ],
-      [
-        [
-          {
-            $key: "[data"
-          },
-          '[data'
+          'number'
         ],
         true,
         null
@@ -268,19 +138,171 @@
       [
         [
           {
-            $key: "data]"
+            '$key': 'math:number'
           },
-          'data]'
+          'number'
         ],
-        null,
-        'illegal selector'
+        false,
+        null
       ],
       [
         [
           {
-            $key: "]data"
+            '$key': 'math:number'
           },
-          ']data'
+          'math'
+        ],
+        false,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:number:integer'
+          },
+          'math:*:int*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            // [ [ { '$key': 'outline:nl' }, 'outline:nl[s]' ], true, null ]
+            '$key': 'x'
+          },
+          '?'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'xx'
+          },
+          '?'
+        ],
+        false,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'wat'
+          },
+          '?'
+        ],
+        false,
+        null
+      ],
+      [
+        [
+          {
+            '$key': '福'
+          },
+          '?'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:'
+          },
+          'math:*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:*'
+          },
+          'math:*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': '𫝂'
+          },
+          '?'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:*'
+          },
+          'math:\\*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:number'
+          },
+          '*:number'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:number'
+          },
+          'math:*'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:'
+          },
+          'math:\\*'
+        ],
+        false,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:'
+          },
+          ['math:\\*',
+          '*:']
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:number'
+          },
+          'm?th:n?mber'
+        ],
+        true,
+        null
+      ],
+      [
+        [
+          {
+            '$key': 'math:number'
+          },
+          'm?th:n[[:alpha:]]mber'
         ],
         true,
         null
@@ -290,11 +312,19 @@
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
-        var d, selector;
-        [d, selector] = probe;
-        return select(d, selector);
+        return new Promise(function(resolve) {
+          var d, result, selector;
+          [d, selector] = probe;
+          if (isa.text(selector)) {
+            result = select(d, selector);
+          } else {
+            result = select(d, ...selector);
+          }
+          return resolve(result);
+        });
       });
     }
+    // debug '^23-4^', DATOM.matcher_cache
     done();
     return null;
   };
@@ -574,44 +604,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["wrap_datom"] = async function(T, done) {
-    var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select, wrap_datom;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, wrap_datom, select} = DATOM);
-    //.........................................................................................................
-    probes_and_matchers = [
-      [
-        ["^text",
-        'helo'],
-        {
-          "$key": "^wrapper",
-          "$value": {
-            "$key": "^text",
-            "$value": "helo"
-          }
-        },
-        null
-      ]
-    ];
-//.........................................................................................................
-    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
-      [probe, matcher, error] = probes_and_matchers[i];
-      await T.perform(probe, matcher, error, function() {
-        return new Promise(function(resolve, reject) {
-          var d, key, value;
-          [key, value] = probe;
-          d = new_datom(key, value);
-          debug('^33398^', d);
-          debug('^33398^', wrap_datom('^wrapper', d));
-          return resolve(wrap_datom('^wrapper', d));
-        });
-      });
-    }
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this["new_datom (without value merging)"] = async function(T, done) {
     var DATOM, error, i, len, matcher, new_datom, probe, probes_and_matchers, select;
     DATOM = new (require('../../../apps/datom')).Datom({
@@ -858,16 +850,15 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @[ "dirty" ]
+      // test @[ "new_datom complains when value has `$key`" ]
+      // test @[ "selector keypatterns" ]
+      return test(this.select_2);
     })();
   }
 
-  // test @[ "dirty" ]
-// test @[ "wrap_datom" ]
-// test @[ "new_datom complains when value has `$key`" ]
-// test @[ "selector keypatterns" ]
-// test @[ "select 2" ]
-// test @[ "new_datom (default settings)" ]
+  // test @[ "new_datom (default settings)" ]
 // debug new_datom '^helo', 42
 
 }).call(this);
