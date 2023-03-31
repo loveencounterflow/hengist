@@ -198,8 +198,9 @@
     var Interlex, Transformer, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
+    ({DATOM} = require('../../../apps/datom'));
     //.........................................................................................................
-    probes_and_matchers = [['', '0>0,0N1,0>0', null], ['\n', '0>0,0N1,0>0', null], ['\n\n', '0>0,0N1,0>0', null], ['helo', "0>0,0'helo',0N1,0>0", null], ['abc\ndef', "0>0,0'abc',0N1,0'def',0N1,0>0", null], ['abc\ndef\n\n', "0>0,0'abc',0N1,0'def',0N3,0>0", null], ['abc\ndef\n\n\nxyz', "0>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>0", null], ['abc\ndef\n\n\n  xyz\n  !', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>0", null], ['abc\ndef\n\n\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>0", null], ['abc\ndef\n  xyz\n\n\n', "0>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>0", null]];
+    probes_and_matchers = [['', 'null>0,0N1,0>null', null], ['\n', 'null>0,0N1,0>null', null], ['\n\n', 'null>0,0N1,0>null', null], ['helo', "null>0,0'helo',0N1,0>null", null], ['abc\ndef', "null>0,0'abc',0N1,0'def',0N1,0>null", null], ['abc\ndef\n\n', "null>0,0'abc',0N1,0'def',0N3,0>null", null], ['abc\ndef\n\n\nxyz', "null>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>null", null], ['abc\ndef\n\n\n  xyz\n  !', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>null", null], ['abc\ndef\n\n\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>null", null], ['abc\ndef\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>null", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -215,21 +216,24 @@
           ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
-            switch (d.tid) {
-              case 'nl':
-              case 'nls':
+            if (d.$stamped) {
+              continue;
+            }
+            switch (d.$key) {
+              case 'outline:nl':
+              case 'outline:nls':
                 result.push(`${d.data.spc_count}N${d.data.nl_count}`);
                 break;
-              case 'material':
+              case 'outline:material':
                 result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
                 break;
-              case 'dentchg':
+              case 'outline:dentchg':
                 result.push(`${d.data.from}>${rpr(d.data.to)}`);
                 break;
-              case 'block:start':
+              case 'outline:block:start':
                 result.push(`${d.data.spc_count}【`);
                 break;
-              case 'block:stop':
+              case 'outline:block:stop':
                 result.push(`${d.data.spc_count}】`);
             }
           }
@@ -255,6 +259,7 @@
       // test @outline_preprocessor_basic
       // test @outline_blank_line_consolidation
       // test @outline_structure
+      // @outline_blocks()
       return test(this.outline_blocks);
     })();
   }
