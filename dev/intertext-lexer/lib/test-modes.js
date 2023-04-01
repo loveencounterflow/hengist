@@ -103,11 +103,11 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -117,23 +117,23 @@
         'helo "world"',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'world'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -143,35 +143,35 @@
         'helo "everyone\nout there"!',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'everyone'
           },
           {
-            mk: 'dq1:nl',
+            $key: 'dq1:nl',
             value: '\n'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'out there'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: '!'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -184,7 +184,7 @@
 //     # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
 //     result      = []
 //     for token from lexer.walk probe
-//       result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+//       result.push GUY.props.pick_with_fallback token, null, '$key', 'value'
 //     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
 //     H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
@@ -197,7 +197,7 @@
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -301,11 +301,11 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -315,23 +315,23 @@
         'helo "world"',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'world'
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -341,35 +341,35 @@
         'helo "everyone\nout there"!',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'everyone'
           },
           {
-            mk: 'dq1:nl',
+            $key: 'dq1:nl',
             value: '\n'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'out there'
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: '!'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -379,31 +379,31 @@
         '"one""two"',
         [
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'one'
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'two'
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -423,7 +423,7 @@
           ref = lexer.walk(probe);
           for (token of ref) {
             tokens.push(token);
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -527,11 +527,11 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -541,23 +541,23 @@
         'helo "world"',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'world'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -567,35 +567,35 @@
         'helo "everyone\nout there"!',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'everyone'
           },
           {
-            mk: 'dq1:nl',
+            $key: 'dq1:nl',
             value: '\n'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'out there'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: '!'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -605,31 +605,31 @@
         '"one""two"',
         [
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'one'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'two'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -649,7 +649,7 @@
           ref = lexer.walk(probe);
           for (token of ref) {
             tokens.push(token);
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -761,12 +761,12 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             data: null
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             data: null
           }
@@ -777,12 +777,12 @@
         'helo "world"',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo ',
             data: null
           },
           {
-            mk: 'dqstr:$border',
+            $key: 'dqstr:$border',
             value: '',
             data: {
               prv: 'plain',
@@ -790,22 +790,22 @@
             }
           },
           {
-            mk: 'dqstr:dq1',
+            $key: 'dqstr:dq1',
             value: '"',
             data: null
           },
           {
-            mk: 'dqstr:text',
+            $key: 'dqstr:text',
             value: 'world',
             data: null
           },
           {
-            mk: 'dqstr:dq1',
+            $key: 'dqstr:dq1',
             value: '"',
             data: null
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '',
             data: {
               prv: 'dqstr',
@@ -813,7 +813,7 @@
             }
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             data: null
           }
@@ -824,12 +824,12 @@
         'abc "" xyz',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'abc ',
             data: null
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '',
             data: {
               prv: 'plain',
@@ -837,12 +837,12 @@
             }
           },
           {
-            mk: 'dqstr:dq2',
+            $key: 'dqstr:dq2',
             value: '""',
             data: null
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '',
             data: {
               prv: 'dqstr',
@@ -850,12 +850,12 @@
             }
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: ' xyz',
             data: null
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             data: null
           }
@@ -881,7 +881,7 @@
           ref = lexer.walk(probe);
           for (token of ref) {
             tokens.push(token);
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'data'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -996,7 +996,7 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             data: null
           }
@@ -1007,12 +1007,12 @@
         'abc</>def<what>',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'abc',
             data: null
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '',
             data: {
               prv: 'plain',
@@ -1020,12 +1020,12 @@
             }
           },
           {
-            mk: 'tag:c_lsr',
+            $key: 'tag:c_lsr',
             value: '</>',
             data: null
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '',
             data: {
               prv: 'tag',
@@ -1033,12 +1033,12 @@
             }
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'def',
             data: null
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '',
             data: {
               prv: 'plain',
@@ -1046,17 +1046,17 @@
             }
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             data: null
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 'what',
             data: null
           },
           {
-            mk: 'tag:rbp',
+            $key: 'tag:rbp',
             value: '>',
             data: null
           }
@@ -1082,7 +1082,7 @@
           ref = lexer.walk(probe);
           for (token of ref) {
             tokens.push(token);
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'data'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -1281,13 +1281,13 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             x1: 0,
             x2: 4
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             x1: 4,
             x2: 4
@@ -1299,43 +1299,43 @@
         'helo<t1>',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             x1: 0,
             x2: 4
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '|',
             x1: 4,
             x2: 4
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             x1: 4,
             x2: 5
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 't1',
             x1: 5,
             x2: 7
           },
           {
-            mk: 'tag:rpb',
+            $key: 'tag:rpb',
             value: '>',
             x1: 7,
             x2: 8
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '|',
             x1: 8,
             x2: 8
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             x1: 8,
             x2: 8
@@ -1347,73 +1347,73 @@
         'helo<t1><t2>',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             x1: 0,
             x2: 4
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '|',
             x1: 4,
             x2: 4
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             x1: 4,
             x2: 5
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 't1',
             x1: 5,
             x2: 7
           },
           {
-            mk: 'tag:rpb',
+            $key: 'tag:rpb',
             value: '>',
             x1: 7,
             x2: 8
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '|',
             x1: 8,
             x2: 8
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '|',
             x1: 8,
             x2: 8
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             x1: 8,
             x2: 9
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 't2',
             x1: 9,
             x2: 11
           },
           {
-            mk: 'tag:rpb',
+            $key: 'tag:rpb',
             value: '>',
             x1: 11,
             x2: 12
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '|',
             x1: 12,
             x2: 12
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             x1: 12,
             x2: 12
@@ -1425,61 +1425,61 @@
         'helo<t1><t2',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             x1: 0,
             x2: 4
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '|',
             x1: 4,
             x2: 4
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             x1: 4,
             x2: 5
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 't1',
             x1: 5,
             x2: 7
           },
           {
-            mk: 'tag:rpb',
+            $key: 'tag:rpb',
             value: '>',
             x1: 7,
             x2: 8
           },
           {
-            mk: 'plain:$border',
+            $key: 'plain:$border',
             value: '|',
             x1: 8,
             x2: 8
           },
           {
-            mk: 'tag:$border',
+            $key: 'tag:$border',
             value: '|',
             x1: 8,
             x2: 8
           },
           {
-            mk: 'tag:lpb',
+            $key: 'tag:lpb',
             value: '<',
             x1: 8,
             x2: 9
           },
           {
-            mk: 'tag:text',
+            $key: 'tag:text',
             value: 't2',
             x1: 9,
             x2: 11
           },
           {
-            mk: 'tag:nl',
+            $key: 'tag:nl',
             value: '\n',
             x1: 11,
             x2: 11
@@ -1508,7 +1508,7 @@
       ref = lexer.walk(probe);
       for (token of ref) {
         tokens.push(token);
-        result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'x1', 'x2'));
+        result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'x1', 'x2'));
       }
       result_rpr = ((function() {
         var j, len1, results;
@@ -1830,13 +1830,17 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @markup_with_variable_length
-      // test @auto_inserted_border_posts_exclusive
-      // @singular_jumps()
-      return test(this.singular_jumps);
+      return test(this);
     })();
   }
+
+  // test @markup_with_variable_length
+// test @auto_inserted_border_posts_exclusive
+// @singular_jumps()
+// test @singular_jumps
+// test @new_syntax_for_in_and_exclusive_jumps_1
+// @new_syntax_for_in_and_exclusive_jumps_2()
+// test @new_syntax_for_in_and_exclusive_jumps_2
 
 }).call(this);
 
