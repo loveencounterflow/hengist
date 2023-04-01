@@ -51,19 +51,19 @@ tabulate_lexer = ( lexer ) ->
   GUY     = require '../../../apps/guy'
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
   probes_and_matchers = [
-    [ [ '../../../assets/a-few-words.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: "Ångström's", lnr1: 1, x1: 0, lnr2: 1, x2: 10, data: null, source: "Ångström's", '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'éclair', lnr1: 2, x1: 0, lnr2: 2, x2: 6, data: null, source: 'éclair', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: "éclair's", lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: "éclair's", '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'éclairs', lnr1: 4, x1: 0, lnr2: 4, x2: 7, data: null, source: 'éclairs', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'éclat', lnr1: 5, x1: 0, lnr2: 5, x2: 5, data: null, source: 'éclat', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: "éclat's", lnr1: 6, x1: 0, lnr2: 6, x2: 7, data: null, source: "éclat's", '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'élan', lnr1: 7, x1: 0, lnr2: 7, x2: 4, data: null, source: 'élan', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: "élan's", lnr1: 8, x1: 0, lnr2: 8, x2: 6, data: null, source: "élan's", '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'émigré', lnr1: 9, x1: 0, lnr2: 9, x2: 6, data: null, source: 'émigré', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: "émigré's", lnr1: 10, x1: 0, lnr2: 10, x2: 8, data: null, source: "émigré's", '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 2, x1: 0, lnr2: 2, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '1', lnr1: 1, x1: 0, lnr2: 1, x2: 1, data: null, source: '1', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '2', lnr1: 2, x1: 0, lnr2: 2, x2: 1, data: null, source: '2', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '3', lnr1: 3, x1: 0, lnr2: 3, x2: 1, data: null, source: '3', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '1', lnr1: 1, x1: 0, lnr2: 1, x2: 1, data: null, source: '1', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '2', lnr1: 2, x1: 0, lnr2: 2, x2: 1, data: null, source: '2', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '3', lnr1: 3, x1: 0, lnr2: 3, x2: 1, data: null, source: '3', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'this', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'this', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'file', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'file', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'written', lnr1: 3, x1: 0, lnr2: 3, x2: 7, data: null, source: 'written', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'on', lnr1: 4, x1: 0, lnr2: 4, x2: 2, data: null, source: 'on', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'MS', lnr1: 5, x1: 0, lnr2: 5, x2: 2, data: null, source: 'MS Notepad', '$key': '^plain' }, { mode: 'plain', tid: 'ws', mk: 'plain:ws', jump: null, value: ' ', lnr1: 5, x1: 2, lnr2: 5, x2: 3, data: null, source: 'MS Notepad', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'Notepad', lnr1: 5, x1: 3, lnr2: 5, x2: 10, data: null, source: 'MS Notepad', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'all', lnr1: 1, x1: 0, lnr2: 1, x2: 3, data: null, source: 'all', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '𠀀bases', lnr1: 2, x1: 0, lnr2: 2, x2: 7, data: null, source: '𠀀bases', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 3, x1: 0, lnr2: 3, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'are', lnr1: 4, x1: 0, lnr2: 4, x2: 3, data: null, source: 'are belong', '$key': '^plain' }, { mode: 'plain', tid: 'ws', mk: 'plain:ws', jump: null, value: ' ', lnr1: 4, x1: 3, lnr2: 4, x2: 4, data: null, source: 'are belong', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'belong', lnr1: 4, x1: 4, lnr2: 4, x2: 10, data: null, source: 'are belong', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: '𠀀to', lnr1: 5, x1: 0, lnr2: 5, x2: 4, data: null, source: '𠀀to us', '$key': '^plain' }, { mode: 'plain', tid: 'ws', mk: 'plain:ws', jump: null, value: ' ', lnr1: 5, x1: 4, lnr2: 5, x2: 5, data: null, source: '𠀀to us', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'us', lnr1: 5, x1: 5, lnr2: 5, x2: 7, data: null, source: '𠀀to us', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 6, x1: 0, lnr2: 6, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 2, x1: 0, lnr2: 2, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 3, x1: 0, lnr2: 3, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 5, x1: 0, lnr2: 5, x2: 0, data: null, source: '', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 6, x1: 0, lnr2: 6, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line1', lnr1: 1, x1: 0, lnr2: 1, x2: 5, data: null, source: 'line1', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line2', lnr1: 2, x1: 0, lnr2: 2, x2: 5, data: null, source: 'line2', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line3', lnr1: 3, x1: 0, lnr2: 3, x2: 5, data: null, source: 'line3', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
-    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line1', lnr1: 1, x1: 0, lnr2: 1, x2: 5, data: null, source: 'line1', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line2', lnr1: 2, x1: 0, lnr2: 2, x2: 5, data: null, source: 'line2', '$key': '^plain' }, { mode: 'plain', tid: 'word', mk: 'plain:word', jump: null, value: 'line3', lnr1: 3, x1: 0, lnr2: 3, x2: 5, data: null, source: 'line3', '$key': '^plain' }, { mode: 'plain', tid: 'empty', mk: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', '$key': '^plain' } ] ]
+    [ [ '../../../assets/a-few-words.txt', null ], [ { $key: 'plain:word', jump: null, value: "Ångström's", lnr1: 1, x1: 0, lnr2: 1, x2: 10, data: null, source: "Ångström's", }, { $key: 'plain:word', jump: null, value: 'éclair', lnr1: 2, x1: 0, lnr2: 2, x2: 6, data: null, source: 'éclair', }, { $key: 'plain:word', jump: null, value: "éclair's", lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: "éclair's", }, { $key: 'plain:word', jump: null, value: 'éclairs', lnr1: 4, x1: 0, lnr2: 4, x2: 7, data: null, source: 'éclairs', }, { $key: 'plain:word', jump: null, value: 'éclat', lnr1: 5, x1: 0, lnr2: 5, x2: 5, data: null, source: 'éclat', }, { $key: 'plain:word', jump: null, value: "éclat's", lnr1: 6, x1: 0, lnr2: 6, x2: 7, data: null, source: "éclat's", }, { $key: 'plain:word', jump: null, value: 'élan', lnr1: 7, x1: 0, lnr2: 7, x2: 4, data: null, source: 'élan', }, { $key: 'plain:word', jump: null, value: "élan's", lnr1: 8, x1: 0, lnr2: 8, x2: 6, data: null, source: "élan's", }, { $key: 'plain:word', jump: null, value: 'émigré', lnr1: 9, x1: 0, lnr2: 9, x2: 6, data: null, source: 'émigré', }, { $key: 'plain:word', jump: null, value: "émigré's", lnr1: 10, x1: 0, lnr2: 10, x2: 8, data: null, source: "émigré's", } ] ]
+    [ [ '../../../assets/datamill/empty-file.txt', null ], [ { $key: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/file-with-single-nl.txt', null ], [ { $key: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 2, x1: 0, lnr2: 2, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-no-eofnl.txt', null ], [ { $key: 'plain:word', jump: null, value: '1', lnr1: 1, x1: 0, lnr2: 1, x2: 1, data: null, source: '1', }, { $key: 'plain:word', jump: null, value: '2', lnr1: 2, x1: 0, lnr2: 2, x2: 1, data: null, source: '2', }, { $key: 'plain:word', jump: null, value: '3', lnr1: 3, x1: 0, lnr2: 3, x2: 1, data: null, source: '3', } ] ]
+    [ [ '../../../assets/datamill/file-with-3-lines-with-eofnl.txt', null ], [ { $key: 'plain:word', jump: null, value: '1', lnr1: 1, x1: 0, lnr2: 1, x2: 1, data: null, source: '1', }, { $key: 'plain:word', jump: null, value: '2', lnr1: 2, x1: 0, lnr2: 2, x2: 1, data: null, source: '2', }, { $key: 'plain:word', jump: null, value: '3', lnr1: 3, x1: 0, lnr2: 3, x2: 1, data: null, source: '3', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/windows-crlf.txt', null ], [ { $key: 'plain:word', jump: null, value: 'this', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'this', }, { $key: 'plain:word', jump: null, value: 'file', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'file', }, { $key: 'plain:word', jump: null, value: 'written', lnr1: 3, x1: 0, lnr2: 3, x2: 7, data: null, source: 'written', }, { $key: 'plain:word', jump: null, value: 'on', lnr1: 4, x1: 0, lnr2: 4, x2: 2, data: null, source: 'on', }, { $key: 'plain:word', jump: null, value: 'MS', lnr1: 5, x1: 0, lnr2: 5, x2: 2, data: null, source: 'MS Notepad', }, { $key: 'plain:ws', jump: null, value: ' ', lnr1: 5, x1: 2, lnr2: 5, x2: 3, data: null, source: 'MS Notepad', }, { $key: 'plain:word', jump: null, value: 'Notepad', lnr1: 5, x1: 3, lnr2: 5, x2: 10, data: null, source: 'MS Notepad', } ] ]
+    [ [ '../../../assets/datamill/mixed-usage.txt', null ], [ { $key: 'plain:word', jump: null, value: 'all', lnr1: 1, x1: 0, lnr2: 1, x2: 3, data: null, source: 'all', }, { $key: 'plain:word', jump: null, value: '𠀀bases', lnr1: 2, x1: 0, lnr2: 2, x2: 7, data: null, source: '𠀀bases', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 3, x1: 0, lnr2: 3, x2: 0, data: null, source: '', }, { $key: 'plain:word', jump: null, value: 'are', lnr1: 4, x1: 0, lnr2: 4, x2: 3, data: null, source: 'are belong', }, { $key: 'plain:ws', jump: null, value: ' ', lnr1: 4, x1: 3, lnr2: 4, x2: 4, data: null, source: 'are belong', }, { $key: 'plain:word', jump: null, value: 'belong', lnr1: 4, x1: 4, lnr2: 4, x2: 10, data: null, source: 'are belong', }, { $key: 'plain:word', jump: null, value: '𠀀to', lnr1: 5, x1: 0, lnr2: 5, x2: 4, data: null, source: '𠀀to us', }, { $key: 'plain:ws', jump: null, value: ' ', lnr1: 5, x1: 4, lnr2: 5, x2: 5, data: null, source: '𠀀to us', }, { $key: 'plain:word', jump: null, value: 'us', lnr1: 5, x1: 5, lnr2: 5, x2: 7, data: null, source: '𠀀to us', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 6, x1: 0, lnr2: 6, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/all-empty-mixed.txt', null ], [ { $key: 'plain:empty', jump: null, value: '', lnr1: 1, x1: 0, lnr2: 1, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 2, x1: 0, lnr2: 2, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 3, x1: 0, lnr2: 3, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 5, x1: 0, lnr2: 5, x2: 0, data: null, source: '', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 6, x1: 0, lnr2: 6, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', null ], [ { $key: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', }, { $key: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', }, { $key: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', }, { $key: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: true } ], [ { $key: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', }, { $key: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', }, { $key: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', }, { $key: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', } ] ]
+    [ [ '../../../assets/datamill/lines-with-trailing-spcs.txt', { trim: false } ], [ { $key: 'plain:word', jump: null, value: 'line', lnr1: 1, x1: 0, lnr2: 1, x2: 4, data: null, source: 'line', }, { $key: 'plain:word', jump: null, value: 'with', lnr1: 2, x1: 0, lnr2: 2, x2: 4, data: null, source: 'with', }, { $key: 'plain:word', jump: null, value: 'trailing', lnr1: 3, x1: 0, lnr2: 3, x2: 8, data: null, source: 'trailing', }, { $key: 'plain:word', jump: null, value: 'whitespace', lnr1: 4, x1: 0, lnr2: 4, x2: 10, data: null, source: 'whitespace', } ] ]
+    [ [ '../../../assets/datamill/lines-with-lf.txt', null ], [ { $key: 'plain:word', jump: null, value: 'line1', lnr1: 1, x1: 0, lnr2: 1, x2: 5, data: null, source: 'line1', }, { $key: 'plain:word', jump: null, value: 'line2', lnr1: 2, x1: 0, lnr2: 2, x2: 5, data: null, source: 'line2', }, { $key: 'plain:word', jump: null, value: 'line3', lnr1: 3, x1: 0, lnr2: 3, x2: 5, data: null, source: 'line3', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', } ] ]
+    [ [ '../../../assets/datamill/lines-with-crlf.txt', null ], [ { $key: 'plain:word', jump: null, value: 'line1', lnr1: 1, x1: 0, lnr2: 1, x2: 5, data: null, source: 'line1', }, { $key: 'plain:word', jump: null, value: 'line2', lnr1: 2, x1: 0, lnr2: 2, x2: 5, data: null, source: 'line2', }, { $key: 'plain:word', jump: null, value: 'line3', lnr1: 3, x1: 0, lnr2: 3, x2: 5, data: null, source: 'line3', }, { $key: 'plain:empty', jump: null, value: '', lnr1: 4, x1: 0, lnr2: 4, x2: 0, data: null, source: '', } ] ]
     ]
   #.........................................................................................................
   new_lexer = ->
@@ -71,10 +71,10 @@ tabulate_lexer = ( lexer ) ->
     # T?.eq lexer.cfg.linewise, true
     # T?.eq lexer.state.lnr1, 0
     mode    = 'plain'
-    # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-    lexer.add_lexeme { mode, tid: 'ws',       pattern: ( /\s+/u ), }
-    lexer.add_lexeme { mode, tid: 'word',     pattern: ( /\S+/u ), }
-    lexer.add_lexeme { mode, tid: 'empty',    pattern: ( /^$/u ), }
+    # lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, lxid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, lxid: 'word',     pattern: ( /\S+/u ), }
+    lexer.add_lexeme { mode, lxid: 'empty',    pattern: ( /^$/u ), }
     return lexer
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
@@ -127,10 +127,10 @@ tabulate_lexer = ( lexer ) ->
     # T?.eq lexer.cfg.linewise, true
     # T?.eq lexer.state.lnr1, 0
     mode    = 'plain'
-    # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-    lexer.add_lexeme { mode, tid: 'ws',       pattern: ( /\s+/u ), }
-    lexer.add_lexeme { mode, tid: 'word',     pattern: ( /\S+/u ), }
-    lexer.add_lexeme { mode, tid: 'empty',    pattern: ( /^$/u ), }
+    # lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, lxid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, lxid: 'word',     pattern: ( /\S+/u ), }
+    lexer.add_lexeme { mode, lxid: 'empty',    pattern: ( /^$/u ), }
     return lexer
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
@@ -170,10 +170,10 @@ tabulate_lexer = ( lexer ) ->
     # T?.eq lexer.cfg.linewise, true
     # T?.eq lexer.state.lnr1, 0
     mode    = 'plain'
-    # lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
-    lexer.add_lexeme { mode, tid: 'ws',       pattern: ( /\s+/u ), }
-    lexer.add_lexeme { mode, tid: 'word',     pattern: ( /\S+\n?/u ), }
-    lexer.add_lexeme { mode, tid: 'nl',       pattern: ( /\n/u ), }
+    # lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
+    lexer.add_lexeme { mode, lxid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, lxid: 'word',     pattern: ( /\S+\n?/u ), }
+    lexer.add_lexeme { mode, lxid: 'nl',       pattern: ( /\n/u ), }
     return lexer
   #.........................................................................................................
   for [ probe, matcher, ] in probes_and_matchers
@@ -214,15 +214,15 @@ tabulate_lexer = ( lexer ) ->
     #.........................................................................................................
     do ->
       mode = 'plain'
-      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
-      lexer.add_lexeme { mode,  tid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
-      lexer.add_lexeme { mode,  tid: 'backtick',  jump: 'literal[',  pattern:  /(?<!`)`(?!`)/u,    }
-      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        }
-      lexer.add_lexeme { mode,  tid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
+      lexer.add_lexeme { mode,  lxid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u,     }
+      lexer.add_lexeme { mode,  lxid: 'star1',     jump: null,       pattern:  /(?<!\*)\*(?!\*)/u, }
+      lexer.add_lexeme { mode,  lxid: 'backtick',  jump: 'literal[',  pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  lxid: 'nl',        jump: null,       pattern:  /\n|$/u,        }
+      lexer.add_lexeme { mode,  lxid: 'other',     jump: null,       pattern:  /[^*`\\]+/u,        }
     do ->
       mode = 'literal'
-      lexer.add_lexeme { mode,  tid: 'backtick',  jump: '.]',        pattern:  /(?<!`)`(?!`)/u,    }
-      lexer.add_lexeme { mode,  tid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
+      lexer.add_lexeme { mode,  lxid: 'backtick',  jump: '.]',        pattern:  /(?<!`)`(?!`)/u,    }
+      lexer.add_lexeme { mode,  lxid: 'text',      jump: null,       pattern:  /(?:\\`|[^`])+/u,   }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -237,12 +237,12 @@ tabulate_lexer = ( lexer ) ->
     within_codespan = false
     collector       = []
     mode            = 'plain'
-    tid             = 'codespan'
-    mk              = 'plain:codespan'
+    lxid             = 'codespan'
+    $key              = 'plain:codespan'
     lnr1            = null
     x1              = null
     return ( d, send ) ->
-      switch d.mk
+      switch d.$key
         when 'plain:backtick'
           send stamp d
           within_codespan = true
@@ -257,7 +257,7 @@ tabulate_lexer = ( lexer ) ->
           within_codespan = false
           value           = ( e.value for e in collector ).join '\n'
           { lnr2, x2, }   = d
-          send { mode, tid, mk, value, lnr1, x1, lnr2, x2, }
+          send { mode, lxid, $key, value, lnr1, x1, lnr2, x2, }
         else
           send d
       return null
@@ -282,7 +282,7 @@ tabulate_lexer = ( lexer ) ->
       p.send source
       result = []
       for token from p.walk()
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
       H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
       resolve ( lexer.rpr_token token for token in result when not token.$stamped ).join ''
   #.........................................................................................................
@@ -299,17 +299,17 @@ tabulate_lexer = ( lexer ) ->
     #.........................................................................................................
     do ->
       mode = 'plain'
-      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
-      lexer.add_lexeme { mode,  tid: 'sep',       jump: null,       pattern:  /,/u,           reserved: ',',  }
-      lexer.add_lexeme { mode,  tid: 'dq',        jump: 'dq[',       pattern:  /"/u,           reserved: '"',  }
-      lexer.add_catchall_lexeme { mode, tid: 'value', concat: true, }
+      lexer.add_lexeme { mode,  lxid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode,  lxid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
+      lexer.add_lexeme { mode,  lxid: 'sep',       jump: null,       pattern:  /,/u,           reserved: ',',  }
+      lexer.add_lexeme { mode,  lxid: 'dq',        jump: 'dq[',       pattern:  /"/u,           reserved: '"',  }
+      lexer.add_catchall_lexeme { mode, lxid: 'value', concat: true, }
     do ->
       mode = 'dq'
-      lexer.add_lexeme { mode,  tid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode,  tid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
-      lexer.add_lexeme { mode,  tid: 'dq',        jump: '.]',        pattern:  /"/u,           reserved: '"',  }
-      lexer.add_catchall_lexeme { mode, tid: 'string', concat: true, }
+      lexer.add_lexeme { mode,  lxid: 'escchr',    jump: null,       pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode,  lxid: 'nl',        jump: null,       pattern:  /\n|$/u,        reserved: '\n', }
+      lexer.add_lexeme { mode,  lxid: 'dq',        jump: '.]',        pattern:  /"/u,           reserved: '"',  }
+      lexer.add_catchall_lexeme { mode, lxid: 'string', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -329,9 +329,9 @@ tabulate_lexer = ( lexer ) ->
       #.....................................................................................................
       result = []
       for token from lexer.walk source
-        result.push token # GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
+        result.push token # GUY.props.pick_with_fallback token, null, '$key', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
       # H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
-      result  = ( "#{t.mk}:#{rpr t.value}" for t in result when not token.$stamped ).join ','
+      result  = ( "#{t.$key}:#{rpr t.value}" for t in result when not token.$stamped ).join ','
       resolve result
   #.........................................................................................................
   done?()
@@ -342,11 +342,11 @@ tabulate_lexer = ( lexer ) ->
 ############################################################################################################
 if require.main is module then do =>
   # @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
-  # test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
+  test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
   # test @use_linewise_with_single_text
   # test @parse_nested_codespan_across_lines
   # @read_csv()
-  test @use_linewise_with_prepend_and_append
+  # test @use_linewise_with_prepend_and_append
   # test @read_csv
   # test @throws_error_on_linewise_with_nl_in_source
   # test @

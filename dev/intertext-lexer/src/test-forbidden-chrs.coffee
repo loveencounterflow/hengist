@@ -46,13 +46,13 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   #.........................................................................................................
   add_lexemes   = ( lexer, concat ) ->
     mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
-    lexer.add_lexeme { mode, tid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
-    lexer.add_lexeme { mode, tid: 'heading',          pattern: ( /^(?<hashes>#+)\s+/u ), reserved: '#', }
-    lexer.add_lexeme { mode, tid: 'word',             pattern: ( /\p{Letter}+/u ), }
-    lexer.add_lexeme { mode, tid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
-    lexer.add_lexeme { mode, tid: 'number',           pattern: ( /\p{Number}+/u ), }
-    lexer.add_lexeme { mode, tid: 'ws',               pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, lxid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+    lexer.add_lexeme { mode, lxid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
+    lexer.add_lexeme { mode, lxid: 'heading',          pattern: ( /^(?<hashes>#+)\s+/u ), reserved: '#', }
+    lexer.add_lexeme { mode, lxid: 'word',             pattern: ( /\p{Letter}+/u ), }
+    lexer.add_lexeme { mode, lxid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
+    lexer.add_lexeme { mode, lxid: 'number',           pattern: ( /\p{Number}+/u ), }
+    lexer.add_lexeme { mode, lxid: 'ws',               pattern: ( /\s+/u ), }
     lexer.add_catchall_lexeme { mode, concat, }
     lexer.add_reserved_lexeme { mode, concat, }
     return null
@@ -73,7 +73,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         # H.tabulate ( rpr probe ), result
-        result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join ''
+        result_rpr  = ( "#{lexer.get_token_lxid t}:#{rpr t.value}" for t in result ).join ''
         resolve result_rpr
   #.........................................................................................................
   await do =>
@@ -92,7 +92,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         # H.tabulate ( rpr probe ), result
-        result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join ''
+        result_rpr  = ( "#{lexer.get_token_lxid t}:#{rpr t.value}" for t in result ).join ''
         resolve result_rpr
   #.........................................................................................................
   done?()
@@ -105,15 +105,15 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   #.........................................................................................................
   add_lexemes   = ( lexer, concat ) ->
     mode    = 'plain'
-    lexer.add_lexeme { mode, tid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
-    lexer.add_lexeme { mode, tid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
-    lexer.add_lexeme { mode, tid: 'heading',          pattern: ( /^(?<hashes>#+)\s+/u ), reserved: '#', }
-    lexer.add_lexeme { mode, tid: 'word',             pattern: ( /\p{Letter}+/u ), }
-    lexer.add_lexeme { mode, tid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
-    lexer.add_lexeme { mode, tid: 'number',           pattern: ( /\p{Number}+/u ), }
-    lexer.add_lexeme { mode, tid: 'ws',               pattern: ( /\s+/u ), }
-    lexer.add_catchall_lexeme { mode, tid: 'other',     concat, }
-    lexer.add_reserved_lexeme { mode, tid: 'forbidden', concat, }
+    lexer.add_lexeme { mode, lxid: 'escchr',           pattern:  /\\(?<chr>.)/u, reserved: '\\', }
+    lexer.add_lexeme { mode, lxid: 'star2',            pattern: ( /(?<!\*)\*\*(?!\*)/u   ), reserved: '*', }
+    lexer.add_lexeme { mode, lxid: 'heading',          pattern: ( /^(?<hashes>#+)\s+/u ), reserved: '#', }
+    lexer.add_lexeme { mode, lxid: 'word',             pattern: ( /\p{Letter}+/u ), }
+    lexer.add_lexeme { mode, lxid: 'number_symbol',    pattern: ( /#(?=\p{Number})/u ), }
+    lexer.add_lexeme { mode, lxid: 'number',           pattern: ( /\p{Number}+/u ), }
+    lexer.add_lexeme { mode, lxid: 'ws',               pattern: ( /\s+/u ), }
+    lexer.add_catchall_lexeme { mode, lxid: 'other',     concat, }
+    lexer.add_reserved_lexeme { mode, lxid: 'forbidden', concat, }
     return null
   #.........................................................................................................
   await do =>
@@ -132,7 +132,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
         # H.tabulate "lexer", ( x for _, x of lexer.registry.plain.lexemes )
         result      = lexer.run probe
         H.tabulate ( rpr probe ), result
-        result_rpr  = ( "#{t.tid}:#{rpr t.value}" for t in result ).join ''
+        result_rpr  = ( "#{lexer.get_token_lxid t}:#{rpr t.value}" for t in result ).join ''
         resolve result_rpr
   #.........................................................................................................
   done?()
@@ -142,6 +142,6 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 ############################################################################################################
 if require.main is module then do =>
   # @add_reserved_chrs()
-  # test @add_reserved_chrs
+  test @add_reserved_chrs
   # test @catchall_and_reserved_with_custom_names
-  test @
+  # test @

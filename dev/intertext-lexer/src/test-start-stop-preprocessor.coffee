@@ -120,8 +120,8 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'any',    pattern: /.+/u, }
-      lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, value: '\n', }
+      lexer.add_lexeme { mode, lxid: 'any',    pattern: /.+/u, }
+      lexer.add_lexeme { mode, lxid: 'nl',     pattern: /$/u, value: '\n', }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -151,7 +151,8 @@ H                         = require './helpers'
         lexer.set_position d # { lnr1, }
         for token from lexer.walk d.value
           tokens.push token
-          result.push "#{token.tid}#{rpr token.value}#{token.lnr1},#{token.x1},#{token.lnr2},#{token.x2}"
+          lxid = token.$key.replace /^.+:/, ''
+          result.push "#{lxid}#{rpr token.value}#{token.lnr1},#{token.x1},#{token.lnr2},#{token.x2}"
     # debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
     result_rpr = ( t.value for t in tokens when not t.$stamped ).join '|'
     # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
@@ -175,8 +176,8 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'any',    pattern: /.+/u, }
-      lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, value: '\n', }
+      lexer.add_lexeme { mode, lxid: 'any',    pattern: /.+/u, }
+      lexer.add_lexeme { mode, lxid: 'nl',     pattern: /$/u, value: '\n', }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -221,8 +222,8 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'any',    pattern: /.+/u, }
-      lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, value: '\n', }
+      lexer.add_lexeme { mode, lxid: 'any',    pattern: /.+/u, }
+      lexer.add_lexeme { mode, lxid: 'nl',     pattern: /$/u, value: '\n', }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -261,14 +262,14 @@ H                         = require './helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @positioning_api_explicit()
   # test @positioning_api_explicit
-  test @start_stop_preprocessor_basic
+  # test @start_stop_preprocessor_basic
   # @start_stop_preprocessor_instantiation()
   # test @start_stop_preprocessor_instantiation
   # @start_stop_preprocessor_positioning()
   # test @start_stop_preprocessor_positioning
   # test @positioning_api_explicit
-  # test @positioning_api_implicit
+  # @positioning_api_implicit()
 

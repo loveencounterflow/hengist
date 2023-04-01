@@ -44,17 +44,17 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: 'dq1[',         pattern: /(?<!")"(?!")/u, reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: 'dq1[',         pattern: /(?<!")"(?!")/u, reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'dq1'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -97,17 +97,17 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '[dq1',         pattern: /"/u,            reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '[dq1',         pattern: /"/u,            reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'dq1'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '].',           pattern: /"/u, reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '].',           pattern: /"/u, reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -145,17 +145,17 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '[dq1',         pattern: /"/u,            reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '[dq1',         pattern: /"/u,            reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'dq1'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -193,18 +193,18 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,       pattern: /\\(?<chr>.)/u,    reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq2',    jump: '[dqstr]',  pattern: /(?<!")""(?!")/u,  reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '[dqstr',   pattern: /(?<!")"(?!")/u,   reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,       pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,       pattern: /\\(?<chr>.)/u,    reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq2',    jump: '[dqstr]',  pattern: /(?<!")""(?!")/u,  reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '[dqstr',   pattern: /(?<!")"(?!")/u,   reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,       pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'dqstr'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'dq1',    jump: '.]',           pattern: /"/u, reserved: '"', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -242,19 +242,19 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,       pattern: /\\(?<chr>.)/u,    reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'c_lsr',  jump: '[tag]',    pattern: '</>',             reserved: '<', }
-      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',     pattern: '<',               reserved: '<', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
-      lexer.add_reserved_lexeme { mode, tid: '$forbidden', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,       pattern: /\\(?<chr>.)/u,    reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'c_lsr',  jump: '[tag]',    pattern: '</>',             reserved: '<', }
+      lexer.add_lexeme { mode, lxid: 'lpb',    jump: '[tag',     pattern: '<',               reserved: '<', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
+      lexer.add_reserved_lexeme { mode, lxid: '$forbidden', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'tag'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'lbp',    jump: null,           pattern: '<',            reserved: '<', }
-      lexer.add_lexeme { mode, tid: 'rbp',    jump: null,           pattern: '>',            reserved: '>', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
-      lexer.add_reserved_lexeme { mode, tid: '$forbidden', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'lbp',    jump: null,           pattern: '<',            reserved: '<', }
+      lexer.add_lexeme { mode, lxid: 'rbp',    jump: null,           pattern: '>',            reserved: '>', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
+      lexer.add_reserved_lexeme { mode, lxid: '$forbidden', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -291,17 +291,17 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'dq1'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -329,17 +329,17 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'lpb',    jump: '[tag',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'tag'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'rpb',    jump: '.]',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -380,25 +380,25 @@ H                         = require './helpers'
     #.........................................................................................................
     do =>
       mode = 'plain'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'lpb',    jump: 'tag[',         pattern: /</u,            reserved: '<', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u,  reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'lpb',    jump: 'tag[',         pattern: /</u,            reserved: '<', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     do =>
       mode = 'tag'
-      lexer.add_lexeme { mode, tid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
-      lexer.add_lexeme { mode, tid: 'rpb',    jump: '].',           pattern: />/u, reserved: '>', }
-      lexer.add_lexeme { mode, tid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
-      lexer.add_catchall_lexeme { mode, tid: 'text', concat: true, }
+      lexer.add_lexeme { mode, lxid: 'escchr', jump: null,           pattern: /\\(?<chr>.)/u, reserved: '\\', }
+      lexer.add_lexeme { mode, lxid: 'rpb',    jump: '].',           pattern: />/u, reserved: '>', }
+      lexer.add_lexeme { mode, lxid: 'nl',     jump: null,           pattern: /$/u, value: '\n', }
+      lexer.add_catchall_lexeme { mode, lxid: 'text', concat: true, }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
-    [ 'helo<t1>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
-    [ 'helo<t1><t2>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:$border', value: '|', x1: 9, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'plain:$border', value: '|', x1: 11, x2: 11 }, { mk: 'plain:rpb', value: '>', x1: 11, x2: 12 }, { mk: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
-    [ 'helo<t1><t2', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:$border', value: '|', x1: 5, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'plain:$border', value: '|', x1: 7, x2: 7 }, { mk: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:$border', value: '|', x1: 9, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    # [ 'helo<t1>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
+    # [ 'helo<t1><t2>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:$border', value: '|', x1: 9, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'plain:$border', value: '|', x1: 11, x2: 11 }, { $key: 'plain:rpb', value: '>', x1: 11, x2: 12 }, { $key: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
+    # [ 'helo<t1><t2', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:$border', value: '|', x1: 9, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -411,10 +411,10 @@ H                         = require './helpers'
     tokens      = []
     for token from lexer.walk probe
       tokens.push token
-      result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x1', 'x2'
+      result.push GUY.props.pick_with_fallback token, null, '$key', 'value', 'x1', 'x2'
     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
     echo [ probe, result, error, ]
-    # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+    H.norm_tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
     #.....................................................................................................
     T?.eq result, matcher
   #.........................................................................................................
@@ -431,6 +431,8 @@ H                         = require './helpers'
     transforms,     } = require '../../../apps/moonriver'
   { Interlex
     compose  }        = require '../../../apps/intertext-lexer'
+  { DATOM }           = require '../../../apps/datom'
+  { new_datom }       = DATOM
   first               = Symbol 'first'
   last                = Symbol 'last'
   #.........................................................................................................
@@ -448,29 +450,27 @@ H                         = require './helpers'
       if token.value.length is backtick_count
         backtick_count = null
         return '.]'
-      ### TAINT setting `token.mk` should not have to be done manually ###
-      token = lets token, ( token ) -> token.tid = 'text'; token.mk = "#{token.mode}:text"
-      # debug '^345^', token
+      token = lets token, ( token ) -> token.$key = "#{token.mode}:text"
       return { token, }
     #.......................................................................................................
-    lexer.add_lexeme { mode: 'plain',   tid: 'escchr',    jump: null,           pattern:  /\\(?<chr>.)/u,     }
-    lexer.add_lexeme { mode: 'plain',   tid: 'star1',     jump: null,           pattern:  /(?<!\*)\*(?!\*)/u, }
-    lexer.add_lexeme { mode: 'plain',   tid: 'codespan',  jump: enter_codespan, pattern:  /(?<!`)`+(?!`)/u,   }
-    lexer.add_lexeme { mode: 'plain',   tid: 'other',     jump: null,           pattern:  /[^*`\\]+/u,        }
-    lexer.add_lexeme { mode: 'literal', tid: 'codespan',  jump: exit_codespan,  pattern:  /(?<!`)`+(?!`)/u,   }
-    lexer.add_lexeme { mode: 'literal', tid: 'text',      jump: null,           pattern:  /(?:\\`|[^`])+/u,   }
+    lexer.add_lexeme { mode: 'plain',   lxid: 'escchr',    jump: null,           pattern:  /\\(?<chr>.)/u,     }
+    lexer.add_lexeme { mode: 'plain',   lxid: 'star1',     jump: null,           pattern:  /(?<!\*)\*(?!\*)/u, }
+    lexer.add_lexeme { mode: 'plain',   lxid: 'codespan',  jump: enter_codespan, pattern:  /(?<!`)`+(?!`)/u,   }
+    lexer.add_lexeme { mode: 'plain',   lxid: 'other',     jump: null,           pattern:  /[^*`\\]+/u,        }
+    lexer.add_lexeme { mode: 'literal', lxid: 'codespan',  jump: exit_codespan,  pattern:  /(?<!`)`+(?!`)/u,   }
+    lexer.add_lexeme { mode: 'literal', lxid: 'text',      jump: null,           pattern:  /(?:\\`|[^`])+/u,   }
     #.......................................................................................................
     return lexer
   #.........................................................................................................
   $parse_md_codespan = ->
     return ( d, send ) ->
-      switch d.mk
+      switch d.$key
         when  'plain:codespan'
           send stamp d
-          send H.new_token '^æ2^', d, 'html', 'tag', 'code', '<code>'
+          send new_datom 'html:tag', { value: '<code>', }
         when 'literal:codespan'
           send stamp d
-          send H.new_token '^æ1^', d, 'html', 'tag', 'code', '</code>'
+          send new_datom 'html:tag', { value: '</code>', }
         else
           send d
       return null
@@ -490,13 +490,11 @@ H                         = require './helpers'
       md_lexer  = new_toy_md_lexer 'md'
       #.....................................................................................................
       p = new Pipeline()
-      p.push ( d, send ) ->
-        return send d unless d.tid is 'p'
-        send e for e from md_lexer.walk d.value
+      p.push ( source, send ) -> send e for e from md_lexer.walk source
       p.push H.$parse_md_star()
       p.push $parse_md_codespan()
       #.....................................................................................................
-      p.send H.new_token '^æ19^', { x1: 0, x2: probe.length, }, 'plain', 'p', null, probe
+      p.send probe
       result      = p.run()
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # urge '^08-1^', ( Object.keys d ).sort() for d in result
@@ -513,4 +511,8 @@ H                         = require './helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # test @markup_with_variable_length
+  # test @auto_inserted_border_posts_exclusive
+  # @singular_jumps()
+  test @singular_jumps

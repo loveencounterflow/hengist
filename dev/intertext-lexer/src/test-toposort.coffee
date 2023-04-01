@@ -70,11 +70,11 @@ show = ( topograph ) ->
   new_toy_md_lexer = ( mode = 'plain' ) ->
     lexer   = new Interlex { split: false, dotall: false, end_token: true, }
     #.........................................................................................................
-    lexer.add_lexeme { mode, tid: 'star1',  pattern: /\*{1}/u, needs: 'star2', }
-    lexer.add_lexeme { mode, tid: 'star2',  pattern: /\*{2}/u, precedes: 'star1', needs: 'star3', }
-    lexer.add_lexeme { mode, tid: 'star3',  pattern: /\*{3}/u, precedes: '*', }
-    lexer.add_lexeme { mode, tid: 'escchr', pattern: /\\(?<chr>.)/u, precedes: '*', }
-    lexer.add_lexeme { mode, tid: 'other',  pattern: /[^*\\]+/u, needs: '*', }
+    lexer.add_lexeme { mode, lxid: 'star1',  pattern: /\*{1}/u, needs: 'star2', }
+    lexer.add_lexeme { mode, lxid: 'star2',  pattern: /\*{2}/u, precedes: 'star1', needs: 'star3', }
+    lexer.add_lexeme { mode, lxid: 'star3',  pattern: /\*{3}/u, precedes: '*', }
+    lexer.add_lexeme { mode, lxid: 'escchr', pattern: /\\(?<chr>.)/u, precedes: '*', }
+    lexer.add_lexeme { mode, lxid: 'other',  pattern: /[^*\\]+/u, needs: '*', }
     #.........................................................................................................
     return lexer
   #.........................................................................................................
@@ -87,9 +87,9 @@ show = ( topograph ) ->
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
       lexer       = new_toy_md_lexer 'md'
-      T?.eq ( tid for tid of lexer.registry.md.lexemes ), [ 'star1', 'star2', 'star3', 'escchr', 'other', ]
+      T?.eq ( lxid for lxid of lexer.registry.md.lexemes ), [ 'star1', 'star2', 'star3', 'escchr', 'other', ]
       result      = lexer.run probe
-      T?.eq ( tid for tid of lexer.registry.md.lexemes ), [ 'escchr', 'star3', 'star2', 'star1', 'other' ]
+      T?.eq ( lxid for lxid of lexer.registry.md.lexemes ), [ 'escchr', 'star3', 'star2', 'star1', 'other' ]
       result_rpr  = ( lexer.rpr_token t for t in result ).join ''
       #.....................................................................................................
       resolve result_rpr

@@ -56,9 +56,9 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   new_lexer = ( mode = 'plain' ) ->
     lexer   = new Interlex { split: 'lines', }
     #.......................................................................................................
-    lexer.add_lexeme { mode, tid: 'star',   pattern: /[*]/u, }
-    lexer.add_lexeme { mode, tid: 'nl',     pattern: /$/u, }
-    lexer.add_lexeme { mode, tid: 'letter', pattern: /[^*]/u, }
+    lexer.add_lexeme { mode, lxid: 'star',   pattern: /[*]/u, }
+    lexer.add_lexeme { mode, lxid: 'nl',     pattern: /$/u, }
+    lexer.add_lexeme { mode, lxid: 'letter', pattern: /[^*]/u, }
     #.......................................................................................................
     return lexer
   #.........................................................................................................

@@ -83,12 +83,12 @@ Methods =
     exit.one = => exit 'one'
     #.........................................................................................................
     return ( d, send ) =>
-      switch d.tid
+      switch d.$key
         #.....................................................................................................
-        when 'star1'
+        when 'plain:star1'
           send stamp d
-          if within.one then  exit.one();      send @new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
-          else                enter.one d.x1;  send @new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
+          if within.one then  exit.one();      send new_datom 'html:tag', { value: '</i>', }
+          else                enter.one d.x1;  send new_datom 'html:tag', { value: '<i>',  }
         #.....................................................................................................
         else send d
       return null
@@ -117,48 +117,48 @@ Methods =
     exit.two = => exit 'two'
     #.........................................................................................................
     return parse_md_stars = ( d, send ) =>
-      switch d.tid
+      switch d.$key
         #.....................................................................................................
-        when 'star1'
+        when 'plain:star1'
           send stamp d
-          if within.one then  exit.one();         send @new_token '^æ1^', d, 'html', 'tag', 'i', '</i>'
-          else                enter.one d.x1;  send @new_token '^æ2^', d, 'html', 'tag', 'i', '<i>'
+          if within.one then  exit.one();         send new_datom 'html:tag', { value: '</i>', }
+          else                enter.one d.x1;     send new_datom 'html:tag', { value: '<i>', }
         #.....................................................................................................
-        when 'star2'
+        when 'plain:star2'
           send stamp d
           if within.two
             if within.one
               if start_of.one > start_of.two
-                exit.one();         send @new_token '^æ3^', d, 'html', 'tag', 'i', '</i>'
-                exit.two();         send @new_token '^æ4^', d, 'html', 'tag', 'b', '</b>'
-                enter.one d.x1;  send @new_token '^æ5^', d, 'html', 'tag', 'i', '<i>'
+                exit.one();                       send new_datom 'html:tag', { value: '</i>', }
+                exit.two();                       send new_datom 'html:tag', { value: '</b>', }
+                enter.one d.x1;                   send new_datom 'html:tag', { value: '<i>', }
               else
-                exit.two();         send @new_token '^æ6^', d, 'html', 'tag', 'b', '</b>'
+                exit.two();                       send new_datom 'html:tag', { value: '</b>', }
             else
-              exit.two();         send @new_token '^æ7^', d, 'html', 'tag', 'b', '</b>'
+              exit.two();                         send new_datom 'html:tag', { value: '</b>', }
           else
-            enter.two d.x1;  send @new_token '^æ8^', d, 'html', 'tag', 'b', '<b>'
+            enter.two d.x1;                       send new_datom 'html:tag', { value: '<b>', }
         #.....................................................................................................
-        when 'star3'
+        when 'plain:star3'
           send stamp d
           if within.one
             if within.two
               if start_of.one > start_of.two
-                exit.one();       send @new_token '^æ9^', d, 'html', 'tag', 'i', '</i>'
-                exit.two();       send @new_token '^æ10^', d, 'html', 'tag', 'b', '</b>'
+                exit.one();                       send new_datom 'html:tag', { value: '</i>', }
+                exit.two();                       send new_datom 'html:tag', { value: '</b>', }
               else
-                exit.two();       send @new_token '^æ11^', d, 'html', 'tag', 'b', '</b>'
-                exit.one();       send @new_token '^æ12^', d, 'html', 'tag', 'i', '</i>'
+                exit.two();                       send new_datom 'html:tag', { value: '</b>', }
+                exit.one();                       send new_datom 'html:tag', { value: '</i>', }
             else
-              exit.one();         send @new_token '^æ13^', d, 'html', 'tag', 'i', '</i>'
-              enter.two d.x1;  send @new_token '^æ14^', d, 'html', 'tag', 'b', '<b>'
+              exit.one();                         send new_datom 'html:tag', { value: '</i>', }
+              enter.two d.x1;                     send new_datom 'html:tag', { value: '<b>', }
           else
             if within.two
-              exit.two();         send @new_token '^æ15^', d, 'html', 'tag', 'b', '</b>'
-              enter.one d.x1;  send @new_token '^æ16^', d, 'html', 'tag', 'i', '<i>'
+              exit.two();                         send new_datom 'html:tag', { value: '</b>', }
+              enter.one d.x1;                     send new_datom 'html:tag', { value: '<i>', }
             else
-              enter.two d.x1;  send @new_token '^æ17^', d, 'html', 'tag', 'b', '<b>'
-              enter.one d.x1 + 2;  send @new_token '^æ18^', { x1: d.x1 + 2, x2: d.x2, }, 'html', 'tag', 'i', '<i>'
+              enter.two d.x1;                     send new_datom 'html:tag', { value: '<b>', }
+              enter.one d.x1 + 2;                 send new_datom 'html:tag', { value: '<i>', x1: d.x1 + 2, x2: d.x2, }
         #.....................................................................................................
         else send d
       return null
