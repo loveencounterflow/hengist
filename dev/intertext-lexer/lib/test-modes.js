@@ -39,28 +39,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: 'dq1[',
           pattern: /(?<!")"(?!")/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -69,28 +69,28 @@
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -237,28 +237,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '[dq1',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -267,28 +267,28 @@
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '].',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -463,28 +463,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '[dq1',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -493,28 +493,28 @@
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -690,35 +690,35 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq2',
+          lxid: 'dq2',
           jump: '[dqstr]',
           pattern: /(?<!")""(?!")/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '[dqstr',
           pattern: /(?<!")"(?!")/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -727,28 +727,28 @@
         mode = 'dqstr';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -922,33 +922,33 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'c_lsr',
+          lxid: 'c_lsr',
           jump: '[tag]',
           pattern: '</>',
           reserved: '<'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'lpb',
+          lxid: 'lpb',
           jump: '[tag',
           pattern: '<',
           reserved: '<'
         });
         lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
         return lexer.add_reserved_lexeme({
           mode,
-          tid: '$forbidden',
+          lxid: '$forbidden',
           concat: true
         });
       })();
@@ -957,33 +957,33 @@
         mode = 'tag';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'lbp',
+          lxid: 'lbp',
           jump: null,
           pattern: '<',
           reserved: '<'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'rbp',
+          lxid: 'rbp',
           jump: null,
           pattern: '>',
           reserved: '>'
         });
         lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
         return lexer.add_reserved_lexeme({
           mode,
-          tid: '$forbidden',
+          lxid: '$forbidden',
           concat: true
         });
       })();
@@ -1122,28 +1122,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'lpb',
+          lxid: 'lpb',
           jump: '[tag',
           pattern: /</u,
           reserved: '<'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1152,28 +1152,28 @@
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'rpb',
+          lxid: 'rpb',
           jump: '.]',
           pattern: />/u,
           reserved: '>'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1217,28 +1217,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'lpb',
+          lxid: 'lpb',
           jump: '[tag',
           pattern: /</u,
           reserved: '<'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1247,28 +1247,28 @@
         mode = 'tag';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'rpb',
+          lxid: 'rpb',
           jump: '.]',
           pattern: />/u,
           reserved: '>'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1550,28 +1550,28 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'lpb',
+          lxid: 'lpb',
           jump: 'tag[',
           pattern: /</u,
           reserved: '<'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1580,28 +1580,28 @@
         mode = 'tag';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'rpb',
+          lxid: 'rpb',
           jump: '].',
           pattern: />/u,
           reserved: '>'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -1614,214 +1614,25 @@
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo',
             x1: 0,
             x2: 4
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n',
             x1: 4,
             x2: 4
-          }
-        ],
-        null
-      ],
-      [
-        'helo<t1>',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:lpb',
-            value: '<',
-            x1: 4,
-            x2: 5
-          },
-          {
-            mk: 'tag:$border',
-            value: '|',
-            x1: 5,
-            x2: 5
-          },
-          {
-            mk: 'tag:text',
-            value: 't1',
-            x1: 5,
-            x2: 7
-          },
-          {
-            mk: 'plain:$border',
-            value: '|',
-            x1: 7,
-            x2: 7
-          },
-          {
-            mk: 'plain:rpb',
-            value: '>',
-            x1: 7,
-            x2: 8
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 8,
-            x2: 8
-          }
-        ],
-        null
-      ],
-      [
-        'helo<t1><t2>',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:lpb',
-            value: '<',
-            x1: 4,
-            x2: 5
-          },
-          {
-            mk: 'tag:$border',
-            value: '|',
-            x1: 5,
-            x2: 5
-          },
-          {
-            mk: 'tag:text',
-            value: 't1',
-            x1: 5,
-            x2: 7
-          },
-          {
-            mk: 'plain:$border',
-            value: '|',
-            x1: 7,
-            x2: 7
-          },
-          {
-            mk: 'plain:rpb',
-            value: '>',
-            x1: 7,
-            x2: 8
-          },
-          {
-            mk: 'plain:lpb',
-            value: '<',
-            x1: 8,
-            x2: 9
-          },
-          {
-            mk: 'tag:$border',
-            value: '|',
-            x1: 9,
-            x2: 9
-          },
-          {
-            mk: 'tag:text',
-            value: 't2',
-            x1: 9,
-            x2: 11
-          },
-          {
-            mk: 'plain:$border',
-            value: '|',
-            x1: 11,
-            x2: 11
-          },
-          {
-            mk: 'plain:rpb',
-            value: '>',
-            x1: 11,
-            x2: 12
-          },
-          {
-            mk: 'plain:nl',
-            value: '\n',
-            x1: 12,
-            x2: 12
-          }
-        ],
-        null
-      ],
-      [
-        'helo<t1><t2',
-        [
-          {
-            mk: 'plain:text',
-            value: 'helo',
-            x1: 0,
-            x2: 4
-          },
-          {
-            mk: 'plain:lpb',
-            value: '<',
-            x1: 4,
-            x2: 5
-          },
-          {
-            mk: 'tag:$border',
-            value: '|',
-            x1: 5,
-            x2: 5
-          },
-          {
-            mk: 'tag:text',
-            value: 't1',
-            x1: 5,
-            x2: 7
-          },
-          {
-            mk: 'plain:$border',
-            value: '|',
-            x1: 7,
-            x2: 7
-          },
-          {
-            mk: 'plain:rpb',
-            value: '>',
-            x1: 7,
-            x2: 8
-          },
-          {
-            mk: 'plain:lpb',
-            value: '<',
-            x1: 8,
-            x2: 9
-          },
-          {
-            mk: 'tag:$border',
-            value: '|',
-            x1: 9,
-            x2: 9
-          },
-          {
-            mk: 'tag:text',
-            value: 't2',
-            x1: 9,
-            x2: 11
-          },
-          {
-            mk: 'tag:nl',
-            value: '\n',
-            x1: 11,
-            x2: 11
           }
         ],
         null
       ]
     ];
 //.........................................................................................................
+// [ 'helo<t1>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
+// [ 'helo<t1><t2>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:$border', value: '|', x1: 9, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'plain:$border', value: '|', x1: 11, x2: 11 }, { $key: 'plain:rpb', value: '>', x1: 11, x2: 12 }, { $key: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
+// [ 'helo<t1><t2', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:$border', value: '|', x1: 5, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'plain:$border', value: '|', x1: 7, x2: 7 }, { $key: 'plain:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:$border', value: '|', x1: 9, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       // await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
@@ -1841,7 +1652,7 @@
       ref = lexer.walk(probe);
       for (token of ref) {
         tokens.push(token);
-        result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'x1', 'x2'));
+        result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'x1', 'x2'));
       }
       result_rpr = ((function() {
         var j, len1, results;
@@ -1855,7 +1666,7 @@
         return results;
       })()).join('');
       echo([probe, result, error]);
-      // H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
+      H.norm_tabulate(`${rpr(probe)} -> ${rpr(result_rpr)}`, tokens);
       //.....................................................................................................
       if (T != null) {
         T.eq(result, matcher);
@@ -1874,6 +1685,8 @@
     var $, $parse_md_codespan, Interlex, Pipeline, compose, error, first, i, last, len, matcher, new_toy_md_lexer, probe, probes_and_matchers, transforms;
     ({Pipeline, $, transforms} = require('../../../apps/moonriver'));
     ({Interlex, compose} = require('../../../apps/intertext-lexer'));
+    ({DATOM} = require('../../../apps/datom'));
+    ({new_datom} = DATOM);
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
@@ -1899,46 +1712,44 @@
           return '.]';
         }
         token = lets(token, function(token) {
-          token.tid = 'text';
-          return token.mk = `${token.mode}:text`;
+          return token.$key = `${token.mode}:text`;
         });
-        // debug '^345^', token
         return {token};
       };
       //.......................................................................................................
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'escchr',
+        lxid: 'escchr',
         jump: null,
         pattern: /\\(?<chr>.)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'star1',
+        lxid: 'star1',
         jump: null,
         pattern: /(?<!\*)\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'codespan',
+        lxid: 'codespan',
         jump: enter_codespan,
         pattern: /(?<!`)`+(?!`)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'other',
+        lxid: 'other',
         jump: null,
         pattern: /[^*`\\]+/u
       });
       lexer.add_lexeme({
         mode: 'literal',
-        tid: 'codespan',
+        lxid: 'codespan',
         jump: exit_codespan,
         pattern: /(?<!`)`+(?!`)/u
       });
       lexer.add_lexeme({
         mode: 'literal',
-        tid: 'text',
+        lxid: 'text',
         jump: null,
         pattern: /(?:\\`|[^`])+/u
       });
@@ -1948,14 +1759,18 @@
     //.........................................................................................................
     $parse_md_codespan = function() {
       return function(d, send) {
-        switch (d.mk) {
+        switch (d.$key) {
           case 'plain:codespan':
             send(stamp(d));
-            send(H.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
+            send(new_datom('html:tag', {
+              value: '<code>'
+            }));
             break;
           case 'literal:codespan':
             send(stamp(d));
-            send(H.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
+            send(new_datom('html:tag', {
+              value: '</code>'
+            }));
             break;
           default:
             send(d);
@@ -1974,12 +1789,9 @@
           md_lexer = new_toy_md_lexer('md');
           //.....................................................................................................
           p = new Pipeline();
-          p.push(function(d, send) {
+          p.push(function(source, send) {
             var e, ref, results;
-            if (d.tid !== 'p') {
-              return send(d);
-            }
-            ref = md_lexer.walk(d.value);
+            ref = md_lexer.walk(source);
             results = [];
             for (e of ref) {
               results.push(send(e));
@@ -1989,10 +1801,7 @@
           p.push(H.$parse_md_star());
           p.push($parse_md_codespan());
           //.....................................................................................................
-          p.send(H.new_token('^æ19^', {
-            x1: 0,
-            x2: probe.length
-          }, 'plain', 'p', null, probe));
+          p.send(probe);
           result = p.run();
           result_rpr = ((function() {
             var j, len1, results;
@@ -2021,7 +1830,11 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @markup_with_variable_length
+      // test @auto_inserted_border_posts_exclusive
+      // @singular_jumps()
+      return test(this.singular_jumps);
     })();
   }
 

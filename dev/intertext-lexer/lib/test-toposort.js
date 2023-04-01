@@ -90,32 +90,32 @@
       //.........................................................................................................
       lexer.add_lexeme({
         mode,
-        tid: 'star1',
+        lxid: 'star1',
         pattern: /\*{1}/u,
         needs: 'star2'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star2',
+        lxid: 'star2',
         pattern: /\*{2}/u,
         precedes: 'star1',
         needs: 'star3'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star3',
+        lxid: 'star3',
         pattern: /\*{3}/u,
         precedes: '*'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'escchr',
+        lxid: 'escchr',
         pattern: /\\(?<chr>.)/u,
         precedes: '*'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         pattern: /[^*\\]+/u,
         needs: '*'
       });
@@ -129,14 +129,14 @@
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var lexer, result, result_rpr, t, tid;
+          var lexer, lxid, result, result_rpr, t;
           lexer = new_toy_md_lexer('md');
           if (T != null) {
             T.eq((function() {
               var results;
               results = [];
-              for (tid in lexer.registry.md.lexemes) {
-                results.push(tid);
+              for (lxid in lexer.registry.md.lexemes) {
+                results.push(lxid);
               }
               return results;
             })(), ['star1', 'star2', 'star3', 'escchr', 'other']);
@@ -146,8 +146,8 @@
             T.eq((function() {
               var results;
               results = [];
-              for (tid in lexer.registry.md.lexemes) {
-                results.push(tid);
+              for (lxid in lexer.registry.md.lexemes) {
+                results.push(lxid);
               }
               return results;
             })(), ['escchr', 'star3', 'star2', 'star1', 'other']);

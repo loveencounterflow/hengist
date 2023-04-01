@@ -50,40 +50,40 @@
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'escchr',
+        lxid: 'escchr',
         pattern: /\\(?<chr>.)/u,
         reserved: '\\'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star2',
+        lxid: 'star2',
         pattern: /(?<!\*)\*\*(?!\*)/u,
         reserved: '*'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'heading',
+        lxid: 'heading',
         pattern: /^(?<hashes>#+)\s+/u,
         reserved: '#'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\p{Letter}+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'number_symbol',
+        lxid: 'number_symbol',
         pattern: /#(?=\p{Number})/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'number',
+        lxid: 'number',
         pattern: /\p{Number}+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       lexer.add_catchall_lexeme({mode, concat});
@@ -109,7 +109,7 @@
               results1 = [];
               for (j = 0, len1 = result.length; j < len1; j++) {
                 t = result[j];
-                results1.push(`${t.tid}:${rpr(t.value)}`);
+                results1.push(`${lexer.get_token_lxid(t)}:${rpr(t.value)}`);
               }
               return results1;
             })()).join('');
@@ -138,7 +138,7 @@
               results1 = [];
               for (j = 0, len1 = result.length; j < len1; j++) {
                 t = result[j];
-                results1.push(`${t.tid}:${rpr(t.value)}`);
+                results1.push(`${lexer.get_token_lxid(t)}:${rpr(t.value)}`);
               }
               return results1;
             })()).join('');
@@ -165,50 +165,50 @@
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'escchr',
+        lxid: 'escchr',
         pattern: /\\(?<chr>.)/u,
         reserved: '\\'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star2',
+        lxid: 'star2',
         pattern: /(?<!\*)\*\*(?!\*)/u,
         reserved: '*'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'heading',
+        lxid: 'heading',
         pattern: /^(?<hashes>#+)\s+/u,
         reserved: '#'
       });
       lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\p{Letter}+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'number_symbol',
+        lxid: 'number_symbol',
         pattern: /#(?=\p{Number})/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'number',
+        lxid: 'number',
         pattern: /\p{Number}+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       lexer.add_catchall_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         concat
       });
       lexer.add_reserved_lexeme({
         mode,
-        tid: 'forbidden',
+        lxid: 'forbidden',
         concat
       });
       return null;
@@ -232,7 +232,7 @@
               results1 = [];
               for (j = 0, len1 = result.length; j < len1; j++) {
                 t = result[j];
-                results1.push(`${t.tid}:${rpr(t.value)}`);
+                results1.push(`${lexer.get_token_lxid(t)}:${rpr(t.value)}`);
               }
               return results1;
             })()).join('');
@@ -252,11 +252,12 @@
   if (require.main === module) {
     (() => {
       // @add_reserved_chrs()
-      // test @add_reserved_chrs
-      // test @catchall_and_reserved_with_custom_names
-      return test(this);
+      return test(this.add_reserved_chrs);
     })();
   }
+
+  // test @catchall_and_reserved_with_custom_names
+// test @
 
 }).call(this);
 

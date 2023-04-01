@@ -76,27 +76,27 @@
     lexer = new Interlex();
     lexer.add_lexeme({
       mode: 'sql',
-      tid: 'select',
+      lxid: 'select',
       pattern: 'select'
     });
     lexer.add_lexeme({
       mode: 'sql',
-      tid: 'from',
+      lxid: 'from',
       pattern: 'from'
     });
     lexer.add_lexeme({
       mode: 'sql',
-      tid: 'star',
+      lxid: 'star',
       pattern: '*'
     });
     lexer.add_lexeme({
       mode: 'sql',
-      tid: 'ws',
+      lxid: 'ws',
       pattern: /\s+/u
     });
     lexer.add_lexeme({
       mode: 'sql',
-      tid: 'other',
+      lxid: 'other',
       pattern: /\S+/u
     });
     //.........................................................................................................
@@ -115,7 +115,7 @@
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
               t = result[j];
-              results.push(`${t.tid}:${rpr(t.value)}`);
+              results.push(`${lexer.get_token_lxid(t)}:${rpr(t.value)}`);
             }
             return results;
           })()).join('|');
@@ -152,7 +152,7 @@
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
               t = result[j];
-              results.push(`${t.tid}:${rpr(t.value)}`);
+              results.push(`${lexer.get_token_lxid(t)}:${rpr(t.value)}`);
             }
             return results;
           })()).join('|');
@@ -180,29 +180,29 @@
       });
       lexer.add_lexeme({
         mode: 'base',
-        tid: 'a',
+        lxid: 'a',
         pattern: 'a'
       });
       lexer.add_lexeme({
         mode: 'base',
-        tid: 'b',
+        lxid: 'b',
         jump: 'up[',
         pattern: 'b'
       });
       lexer.add_lexeme({
         mode: 'up',
-        tid: 'c',
+        lxid: 'c',
         pattern: 'c'
       });
       lexer.add_lexeme({
         mode: 'up',
-        tid: 'd',
+        lxid: 'd',
         jump: '.]',
         pattern: 'd'
       });
       lexer.add_lexeme({
         mode: 'base',
-        tid: 'e',
+        lxid: 'e',
         jump: '.]',
         pattern: 'e'
       });
@@ -225,7 +225,7 @@
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
               t = result[j];
-              results.push(`${t.mk}:${rpr(t.value)}`);
+              results.push(`${t.$key}:${rpr(t.value)}`);
             }
             return results;
           })()).join('|');
@@ -261,23 +261,23 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
         });
         lexer.add_lexeme({
           mode,
-          tid: 'tag',
+          lxid: 'tag',
           jump: 'tag[',
           pattern: /<(?<lslash>\/?)/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'E_backticks',
+          lxid: 'E_backticks',
           pattern: /`+/
         });
       })();
@@ -287,23 +287,23 @@
         mode = 'tag';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'end',
+          lxid: 'end',
           jump: '.]',
           pattern: />/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'other',
+          lxid: 'other',
           pattern: /./u
         });
       })();
@@ -315,9 +315,7 @@
         'helo <bold>`world`</bold>',
         [
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'helo ',
             lnr1: 0,
@@ -325,13 +323,10 @@
             lnr2: 0,
             x2: 5,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -341,13 +336,10 @@
             data: {
               lslash: null
             },
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'bold',
             lnr1: 0,
@@ -355,13 +347,10 @@
             lnr2: 0,
             x2: 10,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -369,13 +358,10 @@
             lnr2: 0,
             x2: 11,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -383,13 +369,10 @@
             lnr2: 0,
             x2: 12,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'world',
             lnr1: 0,
@@ -397,13 +380,10 @@
             lnr2: 0,
             x2: 17,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -411,13 +391,10 @@
             lnr2: 0,
             x2: 18,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -427,13 +404,10 @@
             data: {
               lslash: '/'
             },
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'bold',
             lnr1: 0,
@@ -441,13 +415,10 @@
             lnr2: 0,
             x2: 24,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -455,13 +426,10 @@
             lnr2: 0,
             x2: 25,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo <bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -469,8 +437,7 @@
             lnr2: 0,
             x2: 25,
             data: null,
-            source: 'helo <bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo <bold>`world`</bold>'
           }
         ],
         null
@@ -479,9 +446,7 @@
         '<x v=\\> z=42>',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -491,13 +456,10 @@
             data: {
               lslash: null
             },
-            source: '<x v=\\> z=42>',
-            '$key': '^plain'
+            source: '<x v=\\> z=42>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'x v=',
             lnr1: 0,
@@ -505,13 +467,10 @@
             lnr2: 0,
             x2: 5,
             data: null,
-            source: '<x v=\\> z=42>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42>'
           },
           {
-            mode: 'tag',
-            tid: 'escchr',
-            mk: 'tag:escchr',
+            '$key': 'tag:escchr',
             jump: null,
             value: '\\>',
             lnr1: 0,
@@ -521,13 +480,10 @@
             data: {
               chr: '>'
             },
-            source: '<x v=\\> z=42>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: ' z=42',
             lnr1: 0,
@@ -535,13 +491,10 @@
             lnr2: 0,
             x2: 12,
             data: null,
-            source: '<x v=\\> z=42>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -549,13 +502,10 @@
             lnr2: 0,
             x2: 13,
             data: null,
-            source: '<x v=\\> z=42>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42>'
           },
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -563,8 +513,7 @@
             lnr2: 0,
             x2: 13,
             data: null,
-            source: '<x v=\\> z=42>',
-            '$key': '^plain'
+            source: '<x v=\\> z=42>'
           }
         ],
         null
@@ -573,9 +522,7 @@
         '<x v=\\> z=42\\>',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -585,13 +532,10 @@
             data: {
               lslash: null
             },
-            source: '<x v=\\> z=42\\>',
-            '$key': '^plain'
+            source: '<x v=\\> z=42\\>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'x v=',
             lnr1: 0,
@@ -599,13 +543,10 @@
             lnr2: 0,
             x2: 5,
             data: null,
-            source: '<x v=\\> z=42\\>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42\\>'
           },
           {
-            mode: 'tag',
-            tid: 'escchr',
-            mk: 'tag:escchr',
+            '$key': 'tag:escchr',
             jump: null,
             value: '\\>',
             lnr1: 0,
@@ -615,13 +556,10 @@
             data: {
               chr: '>'
             },
-            source: '<x v=\\> z=42\\>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42\\>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: ' z=42',
             lnr1: 0,
@@ -629,13 +567,10 @@
             lnr2: 0,
             x2: 12,
             data: null,
-            source: '<x v=\\> z=42\\>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42\\>'
           },
           {
-            mode: 'tag',
-            tid: 'escchr',
-            mk: 'tag:escchr',
+            '$key': 'tag:escchr',
             jump: null,
             value: '\\>',
             lnr1: 0,
@@ -645,13 +580,10 @@
             data: {
               chr: '>'
             },
-            source: '<x v=\\> z=42\\>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42\\>'
           },
           {
-            mode: 'tag',
-            tid: '$eof',
-            mk: 'tag:$eof',
+            '$key': 'tag:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -659,8 +591,7 @@
             lnr2: 0,
             x2: 14,
             data: null,
-            source: '<x v=\\> z=42\\>',
-            '$key': '^tag'
+            source: '<x v=\\> z=42\\>'
           }
         ],
         null
@@ -669,9 +600,7 @@
         'a <b',
         [
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'a ',
             lnr1: 0,
@@ -679,13 +608,10 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: 'a <b',
-            '$key': '^plain'
+            source: 'a <b'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -695,13 +621,10 @@
             data: {
               lslash: null
             },
-            source: 'a <b',
-            '$key': '^plain'
+            source: 'a <b'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'b',
             lnr1: 0,
@@ -709,13 +632,10 @@
             lnr2: 0,
             x2: 4,
             data: null,
-            source: 'a <b',
-            '$key': '^tag'
+            source: 'a <b'
           },
           {
-            mode: 'tag',
-            tid: '$eof',
-            mk: 'tag:$eof',
+            '$key': 'tag:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -723,8 +643,7 @@
             lnr2: 0,
             x2: 4,
             data: null,
-            source: 'a <b',
-            '$key': '^tag'
+            source: 'a <b'
           }
         ],
         null
@@ -733,9 +652,7 @@
         'what? error?',
         [
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'what',
             lnr1: 0,
@@ -743,13 +660,10 @@
             lnr2: 0,
             x2: 4,
             data: null,
-            source: 'what? error?',
-            '$key': '^plain'
+            source: 'what? error?'
           },
           {
-            mode: 'plain',
-            tid: '$error',
-            mk: 'plain:$error',
+            '$key': 'plain:$error',
             jump: null,
             value: '',
             lnr1: 0,
@@ -759,8 +673,7 @@
             data: {
               code: 'nomatch'
             },
-            source: 'what? error?',
-            '$key': '^plain'
+            source: 'what? error?'
           }
         ],
         null
@@ -769,9 +682,7 @@
         'd <',
         [
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'd ',
             lnr1: 0,
@@ -779,13 +690,10 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: 'd <',
-            '$key': '^plain'
+            source: 'd <'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -795,13 +703,10 @@
             data: {
               lslash: null
             },
-            source: 'd <',
-            '$key': '^plain'
+            source: 'd <'
           },
           {
-            mode: 'tag',
-            tid: '$eof',
-            mk: 'tag:$eof',
+            '$key': 'tag:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -809,8 +714,7 @@
             lnr2: 0,
             x2: 3,
             data: null,
-            source: 'd <',
-            '$key': '^tag'
+            source: 'd <'
           }
         ],
         null
@@ -819,9 +723,7 @@
         '<c',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -831,13 +733,10 @@
             data: {
               lslash: null
             },
-            source: '<c',
-            '$key': '^plain'
+            source: '<c'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'c',
             lnr1: 0,
@@ -845,13 +744,10 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: '<c',
-            '$key': '^tag'
+            source: '<c'
           },
           {
-            mode: 'tag',
-            tid: '$eof',
-            mk: 'tag:$eof',
+            '$key': 'tag:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -859,8 +755,7 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: '<c',
-            '$key': '^tag'
+            source: '<c'
           }
         ],
         null
@@ -869,9 +764,7 @@
         '<',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -881,13 +774,10 @@
             data: {
               lslash: null
             },
-            source: '<',
-            '$key': '^plain'
+            source: '<'
           },
           {
-            mode: 'tag',
-            tid: '$eof',
-            mk: 'tag:$eof',
+            '$key': 'tag:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -895,8 +785,7 @@
             lnr2: 0,
             x2: 1,
             data: null,
-            source: '<',
-            '$key': '^tag'
+            source: '<'
           }
         ],
         null
@@ -905,9 +794,7 @@
         '',
         [
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -915,8 +802,7 @@
             lnr2: 0,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ],
         null
@@ -925,9 +811,7 @@
         'helo \\<bold>`world`</bold>',
         [
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'helo ',
             lnr1: 0,
@@ -935,13 +819,10 @@
             lnr2: 0,
             x2: 5,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'escchr',
-            mk: 'plain:escchr',
+            '$key': 'plain:escchr',
             jump: null,
             value: '\\<',
             lnr1: 0,
@@ -951,13 +832,10 @@
             data: {
               chr: '<'
             },
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'bold>',
             lnr1: 0,
@@ -965,13 +843,10 @@
             lnr2: 0,
             x2: 12,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -979,13 +854,10 @@
             lnr2: 0,
             x2: 13,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'world',
             lnr1: 0,
@@ -993,13 +865,10 @@
             lnr2: 0,
             x2: 18,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -1007,13 +876,10 @@
             lnr2: 0,
             x2: 19,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -1023,13 +889,10 @@
             data: {
               lslash: '/'
             },
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'bold',
             lnr1: 0,
@@ -1037,13 +900,10 @@
             lnr2: 0,
             x2: 25,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1051,13 +911,10 @@
             lnr2: 0,
             x2: 26,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^tag'
+            source: 'helo \\<bold>`world`</bold>'
           },
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -1065,8 +922,7 @@
             lnr2: 0,
             x2: 26,
             data: null,
-            source: 'helo \\<bold>`world`</bold>',
-            '$key': '^plain'
+            source: 'helo \\<bold>`world`</bold>'
           }
         ],
         null
@@ -1075,9 +931,7 @@
         '<b>helo \\<bold>`world`</bold></b>',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -1087,13 +941,10 @@
             data: {
               lslash: null
             },
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'b',
             lnr1: 0,
@@ -1101,13 +952,10 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1115,13 +963,10 @@
             lnr2: 0,
             x2: 3,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'helo ',
             lnr1: 0,
@@ -1129,13 +974,10 @@
             lnr2: 0,
             x2: 8,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'escchr',
-            mk: 'plain:escchr',
+            '$key': 'plain:escchr',
             jump: null,
             value: '\\<',
             lnr1: 0,
@@ -1145,13 +987,10 @@
             data: {
               chr: '<'
             },
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'bold>',
             lnr1: 0,
@@ -1159,13 +998,10 @@
             lnr2: 0,
             x2: 15,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -1173,13 +1009,10 @@
             lnr2: 0,
             x2: 16,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'text',
-            mk: 'plain:text',
+            '$key': 'plain:text',
             jump: null,
             value: 'world',
             lnr1: 0,
@@ -1187,13 +1020,10 @@
             lnr2: 0,
             x2: 21,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'E_backticks',
-            mk: 'plain:E_backticks',
+            '$key': 'plain:E_backticks',
             jump: null,
             value: '`',
             lnr1: 0,
@@ -1201,13 +1031,10 @@
             lnr2: 0,
             x2: 22,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -1217,13 +1044,10 @@
             data: {
               lslash: '/'
             },
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'bold',
             lnr1: 0,
@@ -1231,13 +1055,10 @@
             lnr2: 0,
             x2: 28,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1245,13 +1066,10 @@
             lnr2: 0,
             x2: 29,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -1261,13 +1079,10 @@
             data: {
               lslash: '/'
             },
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'b',
             lnr1: 0,
@@ -1275,13 +1090,10 @@
             lnr2: 0,
             x2: 32,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1289,13 +1101,10 @@
             lnr2: 0,
             x2: 33,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^tag'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           },
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -1303,8 +1112,7 @@
             lnr2: 0,
             x2: 33,
             data: null,
-            source: '<b>helo \\<bold>`world`</bold></b>',
-            '$key': '^plain'
+            source: '<b>helo \\<bold>`world`</bold></b>'
           }
         ],
         null
@@ -1313,9 +1121,7 @@
         '<i><b></b></i>',
         [
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -1325,13 +1131,10 @@
             data: {
               lslash: null
             },
-            source: '<i><b></b></i>',
-            '$key': '^plain'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'i',
             lnr1: 0,
@@ -1339,13 +1142,10 @@
             lnr2: 0,
             x2: 2,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1353,13 +1153,10 @@
             lnr2: 0,
             x2: 3,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '<',
             lnr1: 0,
@@ -1369,13 +1166,10 @@
             data: {
               lslash: null
             },
-            source: '<i><b></b></i>',
-            '$key': '^plain'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'b',
             lnr1: 0,
@@ -1383,13 +1177,10 @@
             lnr2: 0,
             x2: 5,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1397,13 +1188,10 @@
             lnr2: 0,
             x2: 6,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -1413,13 +1201,10 @@
             data: {
               lslash: '/'
             },
-            source: '<i><b></b></i>',
-            '$key': '^plain'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'b',
             lnr1: 0,
@@ -1427,13 +1212,10 @@
             lnr2: 0,
             x2: 9,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1441,13 +1223,10 @@
             lnr2: 0,
             x2: 10,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'plain',
-            tid: 'tag',
-            mk: 'plain:tag',
+            '$key': 'plain:tag',
             jump: 'tag',
             value: '</',
             lnr1: 0,
@@ -1457,13 +1236,10 @@
             data: {
               lslash: '/'
             },
-            source: '<i><b></b></i>',
-            '$key': '^plain'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'text',
-            mk: 'tag:text',
+            '$key': 'tag:text',
             jump: null,
             value: 'i',
             lnr1: 0,
@@ -1471,13 +1247,10 @@
             lnr2: 0,
             x2: 13,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'tag',
-            tid: 'end',
-            mk: 'tag:end',
+            '$key': 'tag:end',
             jump: 'plain',
             value: '>',
             lnr1: 0,
@@ -1485,13 +1258,10 @@
             lnr2: 0,
             x2: 14,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^tag'
+            source: '<i><b></b></i>'
           },
           {
-            mode: 'plain',
-            tid: '$eof',
-            mk: 'plain:$eof',
+            '$key': 'plain:$eof',
             jump: null,
             value: '',
             lnr1: 0,
@@ -1499,8 +1269,7 @@
             lnr2: 0,
             x2: 14,
             data: null,
-            source: '<i><b></b></i>',
-            '$key': '^plain'
+            source: '<i><b></b></i>'
           }
         ],
         null
@@ -1520,7 +1289,7 @@
               T.eq(probe.slice(token.x1, token.x2), token.value);
             }
           }
-          H.tabulate(rpr(probe), result);
+          // H.tabulate ( rpr probe ), result
           return resolve(result);
         });
       });
@@ -1551,23 +1320,23 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           pattern: c.suffix('+', c.charSet.complement(/[<`\\?]/u))
         });
         lexer.add_lexeme({
           mode,
-          tid: 'tag',
+          lxid: 'tag',
           jump: 'tag[',
           pattern: /<(?<lslash>\/?)/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'E_backticks',
+          lxid: 'E_backticks',
           pattern: /`+/
         });
       })();
@@ -1577,23 +1346,23 @@
         mode = 'tag';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'end',
+          lxid: 'end',
           jump: '.]',
           pattern: />/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           pattern: c.suffix('+', c.charSet.complement(/[>\\]/u))
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'other',
+          lxid: 'other',
           pattern: /./u
         });
       })();
@@ -1640,35 +1409,36 @@
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
-    new_toy_md_lexer = function(mode = 'plain') {
-      var lexer;
+    new_toy_md_lexer = function() {
+      var lexer, mode;
       lexer = new Interlex({
         dotall: false
       });
+      mode = 'plain';
       //.........................................................................................................
       lexer.add_lexeme({
         mode,
-        tid: 'escchr',
+        lxid: 'escchr',
         pattern: /\\(?<chr>.)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star1',
+        lxid: 'star1',
         pattern: /(?<!\*)\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star2',
+        lxid: 'star2',
         pattern: /(?<!\*)\*\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star3',
+        lxid: 'star3',
         pattern: /(?<!\*)\*\*\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         pattern: /[^*]+/u
       });
       //.........................................................................................................
@@ -1677,21 +1447,18 @@
     //.........................................................................................................
     probes_and_matchers = [["*abc*", "<i>abc</i>"], ["**def**", "<b>def</b>"], ["***def***", "<b><i>def</i></b>"], ["**x*def*x**", "<b>x<i>def</i>x</b>"], ["*x**def**x*", "<i>x<b>def</b>x</i>"], ["***abc*def**", "<b><i>abc</i>def</b>"], ["***abc**def*", "<b><i>abc</i></b><i>def</i>"], ["*x***def**", "<i>x</i><b>def</b>"], ["**x***def*", "<b>x</b><i>def</i>"], ["*", "<i>"], ["**", "<b>"], ["***", "<b><i>"]];
     //.........................................................................................................
-    md_lexer = new_toy_md_lexer('md');
+    md_lexer = new_toy_md_lexer();
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
-          var d, j, len1, p, result, result_rpr;
+          var d, p, result, result_rpr;
           //.....................................................................................................
           p = new Pipeline();
-          p.push(function(d, send) {
+          p.push(function(source, send) {
             var e, ref, results;
-            if (d.tid !== 'p') {
-              return send(d);
-            }
-            ref = md_lexer.walk(d.value);
+            ref = md_lexer.walk(source);
             results = [];
             for (e of ref) {
               results.push(send(e));
@@ -1700,11 +1467,8 @@
           });
           p.push(H2.$parse_md_stars());
           //.....................................................................................................
-          p.send(H2.new_token('^æ19^', {
-            x1: 0,
-            x2: probe.length
-          }, 'plain', 'p', null, probe));
-          result = p.run();
+          p.send(probe);
+          result = p.run_and_stop();
           result_rpr = ((function() {
             var j, len1, results;
             results = [];
@@ -1716,11 +1480,8 @@
             }
             return results;
           })()).join('');
-          for (j = 0, len1 = result.length; j < len1; j++) {
-            d = result[j];
-            urge('^08-1^', (Object.keys(d)).sort());
-          }
-          H.tabulate(`${probe} -> ${result_rpr} (${matcher})`, result); // unless result_rpr is matcher
+          // urge '^08-1^', ( Object.keys d ).sort() for d in result
+          // H.tabulate "#{probe} -> #{result_rpr} (#{matcher})", result # unless result_rpr is matcher
           //.....................................................................................................
           return resolve(result_rpr);
         });
@@ -1747,25 +1508,25 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: 'dq1[',
           pattern: /(?<!")"(?!")/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'other',
+          lxid: 'other',
           jump: null,
           pattern: /[^"]+/u
         });
@@ -1775,25 +1536,25 @@
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           jump: null,
           pattern: /[^"]+/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '.]',
           pattern: /"/u
         });
@@ -1807,11 +1568,11 @@
         'helo',
         [
           {
-            mk: 'plain:other',
+            $key: 'plain:other',
             value: 'helo'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -1821,23 +1582,23 @@
         'helo "world"',
         [
           {
-            mk: 'plain:other',
+            $key: 'plain:other',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'world'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -1847,35 +1608,35 @@
         'helo "everyone\nout there"!',
         [
           {
-            mk: 'plain:other',
+            $key: 'plain:other',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'everyone'
           },
           {
-            mk: 'dq1:nl',
+            $key: 'dq1:nl',
             value: ''
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'out there'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:other',
+            $key: 'plain:other',
             value: '!'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -1892,7 +1653,7 @@
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -1941,27 +1702,27 @@ the
       //.........................................................................................................
       lexer.add_lexeme({
         mode,
-        tid: 'escchr',
+        lxid: 'escchr',
         pattern: /\\(?<chr>.)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star1',
+        lxid: 'star1',
         pattern: /(?<!\*)\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star2',
+        lxid: 'star2',
         pattern: /(?<!\*)\*\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'star3',
+        lxid: 'star3',
         pattern: /(?<!\*)\*\*\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         pattern: /[^*]+/u
       });
       //.........................................................................................................
@@ -1982,7 +1743,7 @@ the
         ref = lexer.walk(d);
         results = [];
         for (e of ref) {
-          // send H2.new_token = ref: 'x1', token, mode, tid, name, value, x1, x2
+          // send H2.new_token = ref: 'x1', token, mode, lxid, name, value, x1, x2
           // send new_datom { }
           results.push(send(e));
         }
@@ -2034,45 +1795,46 @@ the
     first = Symbol('first');
     last = Symbol('last');
     //.........................................................................................................
-    new_toy_md_lexer = function(mode = 'plain') {
-      var lexer;
+    new_toy_md_lexer = function() {
+      var lexer, mode;
       lexer = new Interlex({
         dotall: false
       });
+      mode = 'plain';
       //.........................................................................................................
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'escchr',
+        lxid: 'escchr',
         jump: null,
         pattern: /\\(?<chr>.)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'star1',
+        lxid: 'star1',
         jump: null,
         pattern: /(?<!\*)\*(?!\*)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'codespan',
+        lxid: 'codespan',
         jump: 'literal[',
         pattern: /(?<!`)`(?!`)/u
       });
       lexer.add_lexeme({
         mode: 'plain',
-        tid: 'other',
+        lxid: 'other',
         jump: null,
         pattern: /[^*`\\]+/u
       });
       lexer.add_lexeme({
         mode: 'literal',
-        tid: 'codespan',
+        lxid: 'codespan',
         jump: '.]',
         pattern: /(?<!`)`(?!`)/u
       });
       lexer.add_lexeme({
         mode: 'literal',
-        tid: 'text',
+        lxid: 'text',
         jump: null,
         pattern: /(?:\\`|[^`])+/u
       });
@@ -2084,11 +1846,11 @@ the
     //.........................................................................................................
     $parse_md_codespan = function() {
       return function(d, send) {
-        if (d.mk === 'plain:codespan') {
+        if (d.$key === 'plain:codespan') {
           send(stamp(d));
           return send(H2.new_token('^æ2^', d, 'html', 'tag', 'code', '<code>'));
         }
-        if (d.mk === 'literal:codespan') {
+        if (d.$key === 'literal:codespan') {
           send(stamp(d));
           return send(H2.new_token('^æ1^', d, 'html', 'tag', 'code', '</code>'));
         }
@@ -2097,7 +1859,7 @@ the
       };
     };
     //.........................................................................................................
-    md_lexer = new_toy_md_lexer('md');
+    md_lexer = new_toy_md_lexer();
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -2106,12 +1868,9 @@ the
           var d, p, result, result_rpr;
           //.....................................................................................................
           p = new Pipeline();
-          p.push(function(d, send) {
+          p.push(function(source, send) {
             var e, ref, results;
-            if (d.tid !== 'p') {
-              return send(d);
-            }
-            ref = md_lexer.walk(d.value);
+            ref = md_lexer.walk(source);
             results = [];
             for (e of ref) {
               results.push(send(e));
@@ -2121,10 +1880,7 @@ the
           p.push(H2.$parse_md_star());
           p.push($parse_md_codespan());
           //.....................................................................................................
-          p.send(H2.new_token('^æ19^', {
-            x1: 0,
-            x2: probe.length
-          }, 'plain', 'p', null, probe));
+          p.send(probe);
           result = p.run();
           result_rpr = ((function() {
             var j, len1, results;
@@ -2167,14 +1923,14 @@ the
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'b_after_a',
+        lxid: 'b_after_a',
         pattern: /(?<=a)b/u
       });
-      // lexer.add_lexeme { mode, tid: 'other_a',          pattern: ( /a/u                             ), }
-      // lexer.add_lexeme { mode, tid: 'other_b',          pattern: ( /b/u                             ), }
+      // lexer.add_lexeme { mode, lxid: 'other_a',          pattern: ( /a/u                             ), }
+      // lexer.add_lexeme { mode, lxid: 'other_b',          pattern: ( /b/u                             ), }
       return lexer.add_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         pattern: /((?<!a)b|[^b])+/u
       });
     })();
@@ -2225,17 +1981,17 @@ the
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'b_after_nl',
+        lxid: 'b_after_nl',
         pattern: /(?<=\n)b/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'b_first',
+        lxid: 'b_first',
         pattern: /^b/u
       });
       return lexer.add_lexeme({
         mode,
-        tid: 'other',
+        lxid: 'other',
         pattern: /((?<!\n)b|[^b])+/u
       });
     })();
@@ -2284,17 +2040,17 @@ the
       mode = 'plain';
       lexer.add_lexeme({
         mode,
-        tid: 'eol',
+        lxid: 'eol',
         pattern: /$/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       return lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\S+/u
       });
     })();
@@ -2342,12 +2098,12 @@ probe\x20\x20\x20`;
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'eol',
+          lxid: 'eol',
           pattern: /$/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'eol',
+          lxid: 'eol',
           pattern: /$/u
         });
       });
@@ -2373,7 +2129,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'eol',
+            lxid: 'eol',
             empty_value: '\n',
             pattern: /$/u
           },
@@ -2381,7 +2137,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:eol',
+            $key: 'plain:eol',
             value: '\n'
           }
         ],
@@ -2391,14 +2147,14 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'eol',
+            lxid: 'eol',
             pattern: /$/u
           },
           ''
         ],
         [
           {
-            mk: 'plain:eol',
+            $key: 'plain:eol',
             value: ''
           }
         ],
@@ -2408,7 +2164,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'eol',
+            lxid: 'eol',
             value: '\n',
             pattern: /$/u
           },
@@ -2416,7 +2172,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:eol',
+            $key: 'plain:eol',
             value: '\n'
           }
         ],
@@ -2426,7 +2182,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             pattern: 'x'
           },
@@ -2434,7 +2190,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           }
         ],
@@ -2444,7 +2200,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             pattern: /x/u
           },
@@ -2452,7 +2208,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           }
         ],
@@ -2462,7 +2218,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             empty_value: '!!!',
             pattern: /x|/u
@@ -2471,7 +2227,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: '!!!'
           }
         ],
@@ -2481,7 +2237,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             empty_value: '!!!',
             pattern: /x/u
@@ -2490,7 +2246,7 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           }
         ],
@@ -2500,7 +2256,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             pattern: /x|/u
           },
@@ -2508,11 +2264,11 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           },
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           }
         ],
@@ -2522,7 +2278,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: 'u',
             empty_value: '!!!',
             pattern: /x|/u
@@ -2531,11 +2287,11 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           },
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: '!!!'
           }
         ],
@@ -2545,7 +2301,7 @@ probe\x20\x20\x20`;
         [
           {
             mode,
-            tid: 'x',
+            lxid: 'x',
             value: (function() {
               return 'u';
             }),
@@ -2558,11 +2314,11 @@ probe\x20\x20\x20`;
         ],
         [
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: 'u'
           },
           {
-            mk: 'plain:x',
+            $key: 'plain:x',
             value: '!!!'
           }
         ],
@@ -2592,7 +2348,7 @@ probe\x20\x20\x20`;
             results = [];
             for (j = 0, len1 = result.length; j < len1; j++) {
               token = result[j];
-              results.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+              results.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
             }
             return results;
           })();
@@ -2621,28 +2377,28 @@ probe\x20\x20\x20`;
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: 'dq1[',
           pattern: /(?<!")"(?!")/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -2651,28 +2407,28 @@ probe\x20\x20\x20`;
         mode = 'dq1';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq1',
+          lxid: 'dq1',
           jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u,
           value: '\n'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           concat: true
         });
       })();
@@ -2685,11 +2441,11 @@ probe\x20\x20\x20`;
         'helo',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -2699,23 +2455,23 @@ probe\x20\x20\x20`;
         'helo "world"',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'world'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -2725,35 +2481,35 @@ probe\x20\x20\x20`;
         'helo "everyone\nout there"!',
         [
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: 'helo '
           },
           {
-            mk: 'plain:dq1',
+            $key: 'plain:dq1',
             value: '"'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'everyone'
           },
           {
-            mk: 'dq1:nl',
+            $key: 'dq1:nl',
             value: '\n'
           },
           {
-            mk: 'dq1:text',
+            $key: 'dq1:text',
             value: 'out there'
           },
           {
-            mk: 'dq1:dq1',
+            $key: 'dq1:dq1',
             value: '"'
           },
           {
-            mk: 'plain:text',
+            $key: 'plain:text',
             value: '!'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: '\n'
           }
         ],
@@ -2771,7 +2527,7 @@ probe\x20\x20\x20`;
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value'));
           }
           result_rpr = ((function() {
             var j, len1, results;
@@ -2822,7 +2578,7 @@ probe\x20\x20\x20`;
         };
         return {
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           pattern: /\\(?<chr>.|$)/u,
           reserved: '\\',
           create
@@ -2834,30 +2590,30 @@ probe\x20\x20\x20`;
         lexer.add_lexeme(new_escchr_descriptor(mode));
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /$/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'ws',
+          lxid: 'ws',
           jump: null,
           pattern: /\s+/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'word',
+          lxid: 'word',
           jump: null,
           pattern: /\S+/u
         });
         lexer.add_catchall_lexeme({
           mode,
-          tid: 'other',
+          lxid: 'other',
           concat: true
         });
         return lexer.add_reserved_lexeme({
           mode,
-          tid: 'forbidden',
+          lxid: 'forbidden',
           concat: true
         });
       })();
@@ -2869,43 +2625,43 @@ probe\x20\x20\x20`;
         'foo <!-- comment --> bar',
         [
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'foo'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '<!--'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'comment'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '-->'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'bar'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -2915,54 +2671,54 @@ probe\x20\x20\x20`;
         'foo <!-- \\comment \n --> bar',
         [
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'foo'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '<!--'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:escchr',
+            $key: 'plain:escchr',
             value: '\\c',
             data: {
               chr: 'c'
             }
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'omment'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '-->'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'bar'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -2972,58 +2728,58 @@ probe\x20\x20\x20`;
         'foo <!-- comment \\\n --> bar',
         [
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'foo'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '<!--'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'comment'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:escchr',
+            $key: 'plain:escchr',
             value: '\\',
             data: {
               chr: '\n'
             }
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: '-->'
           },
           {
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             value: ' '
           },
           {
-            mk: 'plain:word',
+            $key: 'plain:word',
             value: 'bar'
           },
           {
-            mk: 'plain:nl',
+            $key: 'plain:nl',
             value: ''
           }
         ],
@@ -3043,8 +2799,8 @@ probe\x20\x20\x20`;
           result = [];
           ref = lexer.walk(probe);
           for (token of ref) {
-            d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'data'));
-            // debug '^432^', d if d.mk.endsWith ':escchr'
+            d = GUY.props.omit_nullish(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'data'));
+            // debug '^432^', d if d.$key.endsWith ':escchr'
             result.push(d);
           }
           // H.tabulate ( rpr probe ), result
@@ -3062,11 +2818,13 @@ probe\x20\x20\x20`;
   //###########################################################################################################
   if (require.main === module) {
     (() => {
+      // test @lex_tags
       return test(this);
     })();
   }
 
   // test @lex_tags_with_rpr
+// test @parse_md_stars_markup
 
 }).call(this);
 

@@ -71,9 +71,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: "Ångström's",
             lnr1: 1,
@@ -81,13 +79,10 @@
             lnr2: 1,
             x2: 10,
             data: null,
-            source: "Ångström's",
-            '$key': '^plain'
+            source: "Ångström's"
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'éclair',
             lnr1: 2,
@@ -95,13 +90,10 @@
             lnr2: 2,
             x2: 6,
             data: null,
-            source: 'éclair',
-            '$key': '^plain'
+            source: 'éclair'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: "éclair's",
             lnr1: 3,
@@ -109,13 +101,10 @@
             lnr2: 3,
             x2: 8,
             data: null,
-            source: "éclair's",
-            '$key': '^plain'
+            source: "éclair's"
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'éclairs',
             lnr1: 4,
@@ -123,13 +112,10 @@
             lnr2: 4,
             x2: 7,
             data: null,
-            source: 'éclairs',
-            '$key': '^plain'
+            source: 'éclairs'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'éclat',
             lnr1: 5,
@@ -137,13 +123,10 @@
             lnr2: 5,
             x2: 5,
             data: null,
-            source: 'éclat',
-            '$key': '^plain'
+            source: 'éclat'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: "éclat's",
             lnr1: 6,
@@ -151,13 +134,10 @@
             lnr2: 6,
             x2: 7,
             data: null,
-            source: "éclat's",
-            '$key': '^plain'
+            source: "éclat's"
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'élan',
             lnr1: 7,
@@ -165,13 +145,10 @@
             lnr2: 7,
             x2: 4,
             data: null,
-            source: 'élan',
-            '$key': '^plain'
+            source: 'élan'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: "élan's",
             lnr1: 8,
@@ -179,13 +156,10 @@
             lnr2: 8,
             x2: 6,
             data: null,
-            source: "élan's",
-            '$key': '^plain'
+            source: "élan's"
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'émigré',
             lnr1: 9,
@@ -193,13 +167,10 @@
             lnr2: 9,
             x2: 6,
             data: null,
-            source: 'émigré',
-            '$key': '^plain'
+            source: 'émigré'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: "émigré's",
             lnr1: 10,
@@ -207,8 +178,7 @@
             lnr2: 10,
             x2: 8,
             data: null,
-            source: "émigré's",
-            '$key': '^plain'
+            source: "émigré's"
           }
         ]
       ],
@@ -217,9 +187,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 1,
@@ -227,8 +195,7 @@
             lnr2: 1,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -237,9 +204,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 1,
@@ -247,13 +212,10 @@
             lnr2: 1,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 2,
@@ -261,8 +223,7 @@
             lnr2: 2,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -271,9 +232,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '1',
             lnr1: 1,
@@ -281,13 +240,10 @@
             lnr2: 1,
             x2: 1,
             data: null,
-            source: '1',
-            '$key': '^plain'
+            source: '1'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '2',
             lnr1: 2,
@@ -295,13 +251,10 @@
             lnr2: 2,
             x2: 1,
             data: null,
-            source: '2',
-            '$key': '^plain'
+            source: '2'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '3',
             lnr1: 3,
@@ -309,8 +262,7 @@
             lnr2: 3,
             x2: 1,
             data: null,
-            source: '3',
-            '$key': '^plain'
+            source: '3'
           }
         ]
       ],
@@ -319,9 +271,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '1',
             lnr1: 1,
@@ -329,13 +279,10 @@
             lnr2: 1,
             x2: 1,
             data: null,
-            source: '1',
-            '$key': '^plain'
+            source: '1'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '2',
             lnr1: 2,
@@ -343,13 +290,10 @@
             lnr2: 2,
             x2: 1,
             data: null,
-            source: '2',
-            '$key': '^plain'
+            source: '2'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '3',
             lnr1: 3,
@@ -357,13 +301,10 @@
             lnr2: 3,
             x2: 1,
             data: null,
-            source: '3',
-            '$key': '^plain'
+            source: '3'
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 4,
@@ -371,8 +312,7 @@
             lnr2: 4,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -381,9 +321,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'this',
             lnr1: 1,
@@ -391,13 +329,10 @@
             lnr2: 1,
             x2: 4,
             data: null,
-            source: 'this',
-            '$key': '^plain'
+            source: 'this'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'file',
             lnr1: 2,
@@ -405,13 +340,10 @@
             lnr2: 2,
             x2: 4,
             data: null,
-            source: 'file',
-            '$key': '^plain'
+            source: 'file'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'written',
             lnr1: 3,
@@ -419,13 +351,10 @@
             lnr2: 3,
             x2: 7,
             data: null,
-            source: 'written',
-            '$key': '^plain'
+            source: 'written'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'on',
             lnr1: 4,
@@ -433,13 +362,10 @@
             lnr2: 4,
             x2: 2,
             data: null,
-            source: 'on',
-            '$key': '^plain'
+            source: 'on'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'MS',
             lnr1: 5,
@@ -447,13 +373,10 @@
             lnr2: 5,
             x2: 2,
             data: null,
-            source: 'MS Notepad',
-            '$key': '^plain'
+            source: 'MS Notepad'
           },
           {
-            mode: 'plain',
-            tid: 'ws',
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             jump: null,
             value: ' ',
             lnr1: 5,
@@ -461,13 +384,10 @@
             lnr2: 5,
             x2: 3,
             data: null,
-            source: 'MS Notepad',
-            '$key': '^plain'
+            source: 'MS Notepad'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'Notepad',
             lnr1: 5,
@@ -475,8 +395,7 @@
             lnr2: 5,
             x2: 10,
             data: null,
-            source: 'MS Notepad',
-            '$key': '^plain'
+            source: 'MS Notepad'
           }
         ]
       ],
@@ -485,9 +404,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'all',
             lnr1: 1,
@@ -495,13 +412,10 @@
             lnr2: 1,
             x2: 3,
             data: null,
-            source: 'all',
-            '$key': '^plain'
+            source: 'all'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '𠀀bases',
             lnr1: 2,
@@ -509,13 +423,10 @@
             lnr2: 2,
             x2: 7,
             data: null,
-            source: '𠀀bases',
-            '$key': '^plain'
+            source: '𠀀bases'
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 3,
@@ -523,13 +434,10 @@
             lnr2: 3,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'are',
             lnr1: 4,
@@ -537,13 +445,10 @@
             lnr2: 4,
             x2: 3,
             data: null,
-            source: 'are belong',
-            '$key': '^plain'
+            source: 'are belong'
           },
           {
-            mode: 'plain',
-            tid: 'ws',
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             jump: null,
             value: ' ',
             lnr1: 4,
@@ -551,13 +456,10 @@
             lnr2: 4,
             x2: 4,
             data: null,
-            source: 'are belong',
-            '$key': '^plain'
+            source: 'are belong'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'belong',
             lnr1: 4,
@@ -565,13 +467,10 @@
             lnr2: 4,
             x2: 10,
             data: null,
-            source: 'are belong',
-            '$key': '^plain'
+            source: 'are belong'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: '𠀀to',
             lnr1: 5,
@@ -579,13 +478,10 @@
             lnr2: 5,
             x2: 4,
             data: null,
-            source: '𠀀to us',
-            '$key': '^plain'
+            source: '𠀀to us'
           },
           {
-            mode: 'plain',
-            tid: 'ws',
-            mk: 'plain:ws',
+            $key: 'plain:ws',
             jump: null,
             value: ' ',
             lnr1: 5,
@@ -593,13 +489,10 @@
             lnr2: 5,
             x2: 5,
             data: null,
-            source: '𠀀to us',
-            '$key': '^plain'
+            source: '𠀀to us'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'us',
             lnr1: 5,
@@ -607,13 +500,10 @@
             lnr2: 5,
             x2: 7,
             data: null,
-            source: '𠀀to us',
-            '$key': '^plain'
+            source: '𠀀to us'
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 6,
@@ -621,8 +511,7 @@
             lnr2: 6,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -631,9 +520,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 1,
@@ -641,13 +528,10 @@
             lnr2: 1,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 2,
@@ -655,13 +539,10 @@
             lnr2: 2,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 3,
@@ -669,13 +550,10 @@
             lnr2: 3,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 4,
@@ -683,13 +561,10 @@
             lnr2: 4,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 5,
@@ -697,13 +572,10 @@
             lnr2: 5,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 6,
@@ -711,8 +583,7 @@
             lnr2: 6,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -721,9 +592,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line',
             lnr1: 1,
@@ -731,13 +600,10 @@
             lnr2: 1,
             x2: 4,
             data: null,
-            source: 'line',
-            '$key': '^plain'
+            source: 'line'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'with',
             lnr1: 2,
@@ -745,13 +611,10 @@
             lnr2: 2,
             x2: 4,
             data: null,
-            source: 'with',
-            '$key': '^plain'
+            source: 'with'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'trailing',
             lnr1: 3,
@@ -759,13 +622,10 @@
             lnr2: 3,
             x2: 8,
             data: null,
-            source: 'trailing',
-            '$key': '^plain'
+            source: 'trailing'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'whitespace',
             lnr1: 4,
@@ -773,8 +633,7 @@
             lnr2: 4,
             x2: 10,
             data: null,
-            source: 'whitespace',
-            '$key': '^plain'
+            source: 'whitespace'
           }
         ]
       ],
@@ -787,9 +646,7 @@
         ],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line',
             lnr1: 1,
@@ -797,13 +654,10 @@
             lnr2: 1,
             x2: 4,
             data: null,
-            source: 'line',
-            '$key': '^plain'
+            source: 'line'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'with',
             lnr1: 2,
@@ -811,13 +665,10 @@
             lnr2: 2,
             x2: 4,
             data: null,
-            source: 'with',
-            '$key': '^plain'
+            source: 'with'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'trailing',
             lnr1: 3,
@@ -825,13 +676,10 @@
             lnr2: 3,
             x2: 8,
             data: null,
-            source: 'trailing',
-            '$key': '^plain'
+            source: 'trailing'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'whitespace',
             lnr1: 4,
@@ -839,8 +687,7 @@
             lnr2: 4,
             x2: 10,
             data: null,
-            source: 'whitespace',
-            '$key': '^plain'
+            source: 'whitespace'
           }
         ]
       ],
@@ -853,9 +700,7 @@
         ],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line',
             lnr1: 1,
@@ -863,13 +708,10 @@
             lnr2: 1,
             x2: 4,
             data: null,
-            source: 'line',
-            '$key': '^plain'
+            source: 'line'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'with',
             lnr1: 2,
@@ -877,13 +719,10 @@
             lnr2: 2,
             x2: 4,
             data: null,
-            source: 'with',
-            '$key': '^plain'
+            source: 'with'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'trailing',
             lnr1: 3,
@@ -891,13 +730,10 @@
             lnr2: 3,
             x2: 8,
             data: null,
-            source: 'trailing',
-            '$key': '^plain'
+            source: 'trailing'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'whitespace',
             lnr1: 4,
@@ -905,8 +741,7 @@
             lnr2: 4,
             x2: 10,
             data: null,
-            source: 'whitespace',
-            '$key': '^plain'
+            source: 'whitespace'
           }
         ]
       ],
@@ -915,9 +750,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line1',
             lnr1: 1,
@@ -925,13 +758,10 @@
             lnr2: 1,
             x2: 5,
             data: null,
-            source: 'line1',
-            '$key': '^plain'
+            source: 'line1'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line2',
             lnr1: 2,
@@ -939,13 +769,10 @@
             lnr2: 2,
             x2: 5,
             data: null,
-            source: 'line2',
-            '$key': '^plain'
+            source: 'line2'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line3',
             lnr1: 3,
@@ -953,13 +780,10 @@
             lnr2: 3,
             x2: 5,
             data: null,
-            source: 'line3',
-            '$key': '^plain'
+            source: 'line3'
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 4,
@@ -967,8 +791,7 @@
             lnr2: 4,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ],
@@ -977,9 +800,7 @@
         null],
         [
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line1',
             lnr1: 1,
@@ -987,13 +808,10 @@
             lnr2: 1,
             x2: 5,
             data: null,
-            source: 'line1',
-            '$key': '^plain'
+            source: 'line1'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line2',
             lnr1: 2,
@@ -1001,13 +819,10 @@
             lnr2: 2,
             x2: 5,
             data: null,
-            source: 'line2',
-            '$key': '^plain'
+            source: 'line2'
           },
           {
-            mode: 'plain',
-            tid: 'word',
-            mk: 'plain:word',
+            $key: 'plain:word',
             jump: null,
             value: 'line3',
             lnr1: 3,
@@ -1015,13 +830,10 @@
             lnr2: 3,
             x2: 5,
             data: null,
-            source: 'line3',
-            '$key': '^plain'
+            source: 'line3'
           },
           {
-            mode: 'plain',
-            tid: 'empty',
-            mk: 'plain:empty',
+            $key: 'plain:empty',
             jump: null,
             value: '',
             lnr1: 4,
@@ -1029,8 +841,7 @@
             lnr2: 4,
             x2: 0,
             data: null,
-            source: '',
-            '$key': '^plain'
+            source: ''
           }
         ]
       ]
@@ -1044,20 +855,20 @@
       // T?.eq lexer.cfg.linewise, true
       // T?.eq lexer.state.lnr1, 0
       mode = 'plain';
-      // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+      // lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\S+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'empty',
+        lxid: 'empty',
         pattern: /^$/u
       });
       return lexer;
@@ -1171,20 +982,20 @@
       // T?.eq lexer.cfg.linewise, true
       // T?.eq lexer.state.lnr1, 0
       mode = 'plain';
-      // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+      // lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\S+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'empty',
+        lxid: 'empty',
         pattern: /^$/u
       });
       return lexer;
@@ -1240,20 +1051,20 @@
       // T?.eq lexer.cfg.linewise, true
       // T?.eq lexer.state.lnr1, 0
       mode = 'plain';
-      // lexer.add_lexeme { mode, tid: 'eol',      pattern: ( /$/u  ), }
+      // lexer.add_lexeme { mode, lxid: 'eol',      pattern: ( /$/u  ), }
       lexer.add_lexeme({
         mode,
-        tid: 'ws',
+        lxid: 'ws',
         pattern: /\s+/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'word',
+        lxid: 'word',
         pattern: /\S+\n?/u
       });
       lexer.add_lexeme({
         mode,
-        tid: 'nl',
+        lxid: 'nl',
         pattern: /\n/u
       });
       return lexer;
@@ -1304,31 +1115,31 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'star1',
+          lxid: 'star1',
           jump: null,
           pattern: /(?<!\*)\*(?!\*)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'backtick',
+          lxid: 'backtick',
           jump: 'literal[',
           pattern: /(?<!`)`(?!`)/u
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /\n|$/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'other',
+          lxid: 'other',
           jump: null,
           pattern: /[^*`\\]+/u
         });
@@ -1338,13 +1149,13 @@
         mode = 'literal';
         lexer.add_lexeme({
           mode,
-          tid: 'backtick',
+          lxid: 'backtick',
           jump: '.]',
           pattern: /(?<!`)`(?!`)/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'text',
+          lxid: 'text',
           jump: null,
           pattern: /(?:\\`|[^`])+/u
         });
@@ -1401,17 +1212,17 @@
     ];
     //.........................................................................................................
     $parse_md_codespan = function() {
-      var collector, lnr1, mk, mode, tid, within_codespan, x1;
+      var $key, collector, lnr1, lxid, mode, within_codespan, x1;
       within_codespan = false;
       collector = [];
       mode = 'plain';
-      tid = 'codespan';
-      mk = 'plain:codespan';
+      lxid = 'codespan';
+      $key = 'plain:codespan';
       lnr1 = null;
       x1 = null;
       return function(d, send) {
         var e, lnr2, value, x2;
-        switch (d.mk) {
+        switch (d.$key) {
           case 'plain:backtick':
             send(stamp(d));
             within_codespan = true;
@@ -1440,7 +1251,7 @@
               return results;
             })()).join('\n');
             ({lnr2, x2} = d);
-            send({mode, tid, mk, value, lnr1, x1, lnr2, x2});
+            send({mode, lxid, $key, value, lnr1, x1, lnr2, x2});
             break;
           default:
             send(d);
@@ -1481,7 +1292,7 @@
           result = [];
           ref = p.walk();
           for (token of ref) {
-            result.push(GUY.props.pick_with_fallback(token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'));
+            result.push(GUY.props.pick_with_fallback(token, null, '$key', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'));
           }
           H.tabulate(`${rpr(probe)}`, result); // unless result_rpr is matcher
           return resolve(((function() {
@@ -1517,35 +1328,35 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /\n|$/u,
           reserved: '\n'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'sep',
+          lxid: 'sep',
           jump: null,
           pattern: /,/u,
           reserved: ','
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq',
+          lxid: 'dq',
           jump: 'dq[',
           pattern: /"/u,
           reserved: '"'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'value',
+          lxid: 'value',
           concat: true
         });
       })();
@@ -1554,28 +1365,28 @@
         mode = 'dq';
         lexer.add_lexeme({
           mode,
-          tid: 'escchr',
+          lxid: 'escchr',
           jump: null,
           pattern: /\\(?<chr>.)/u,
           reserved: '\\'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           jump: null,
           pattern: /\n|$/u,
           reserved: '\n'
         });
         lexer.add_lexeme({
           mode,
-          tid: 'dq',
+          lxid: 'dq',
           jump: '.]',
           pattern: /"/u,
           reserved: '"'
         });
         return lexer.add_catchall_lexeme({
           mode,
-          tid: 'string',
+          lxid: 'string',
           concat: true
         });
       })();
@@ -1642,7 +1453,7 @@
           result = [];
           ref = lexer.walk(source);
           for (token of ref) {
-            result.push(token); // GUY.props.pick_with_fallback token, null, 'mk', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
+            result.push(token); // GUY.props.pick_with_fallback token, null, '$key', 'value', 'lnr1', 'x1', 'lnr2', 'x2', '$stamped'
           }
           // H.tabulate "#{rpr probe}", result # unless result_rpr is matcher
           result = ((function() {
@@ -1651,7 +1462,7 @@
             for (j = 0, len1 = result.length; j < len1; j++) {
               t = result[j];
               if (!token.$stamped) {
-                results.push(`${t.mk}:${rpr(t.value)}`);
+                results.push(`${t.$key}:${rpr(t.value)}`);
               }
             }
             return results;
@@ -1670,15 +1481,15 @@
   if (require.main === module) {
     (() => {
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
-      // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
-      // test @use_linewise_with_single_text
-      // test @parse_nested_codespan_across_lines
-      // @read_csv()
-      return test(this.use_linewise_with_prepend_and_append);
+      return test(this.use_linewise_lexing_with_external_iterator_no_linewise_cfg);
     })();
   }
 
-  // test @read_csv
+  // test @use_linewise_with_single_text
+// test @parse_nested_codespan_across_lines
+// @read_csv()
+// test @use_linewise_with_prepend_and_append
+// test @read_csv
 // test @throws_error_on_linewise_with_nl_in_source
 // test @
 

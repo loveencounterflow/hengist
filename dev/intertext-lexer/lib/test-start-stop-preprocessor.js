@@ -363,7 +363,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.start_stop_preprocessor_positioning = function(T, done) {
-    var Interlex, cfg, compose, d, error, i, len, lexer, matcher, new_lexer, parser, probe, probes_and_matchers, ref, ref1, result, result_rpr, source, t, token, tokens, tools;
+    var Interlex, cfg, compose, d, error, i, len, lexer, lxid, matcher, new_lexer, parser, probe, probes_and_matchers, ref, ref1, result, result_rpr, source, t, token, tokens, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     //.........................................................................................................
     new_lexer = function(cfg) {
@@ -377,12 +377,12 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'any',
+          lxid: 'any',
           pattern: /.+/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           pattern: /$/u,
           value: '\n'
         });
@@ -482,7 +482,8 @@
           ref1 = lexer.walk(d.value);
           for (token of ref1) {
             tokens.push(token);
-            result.push(`${token.tid}${rpr(token.value)}${token.lnr1},${token.x1},${token.lnr2},${token.x2}`);
+            lxid = token.$key.replace(/^.+:/, '');
+            result.push(`${lxid}${rpr(token.value)}${token.lnr1},${token.x1},${token.lnr2},${token.x2}`);
           }
         }
       }
@@ -529,12 +530,12 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'any',
+          lxid: 'any',
           pattern: /.+/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           pattern: /$/u,
           value: '\n'
         });
@@ -649,12 +650,12 @@
         mode = 'plain';
         lexer.add_lexeme({
           mode,
-          tid: 'any',
+          lxid: 'any',
           pattern: /.+/u
         });
         return lexer.add_lexeme({
           mode,
-          tid: 'nl',
+          lxid: 'nl',
           pattern: /$/u,
           value: '\n'
         });
@@ -756,19 +757,19 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // @positioning_api_explicit()
-      // test @positioning_api_explicit
-      return test(this.start_stop_preprocessor_basic);
+      return test(this);
     })();
   }
 
-  // @start_stop_preprocessor_instantiation()
+  // @positioning_api_explicit()
+// test @positioning_api_explicit
+// test @start_stop_preprocessor_basic
+// @start_stop_preprocessor_instantiation()
 // test @start_stop_preprocessor_instantiation
 // @start_stop_preprocessor_positioning()
 // test @start_stop_preprocessor_positioning
 // test @positioning_api_explicit
-// test @positioning_api_implicit
+// @positioning_api_implicit()
 
 }).call(this);
 

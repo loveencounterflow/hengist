@@ -31,22 +31,14 @@
     var Interlex, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     //.........................................................................................................
-    probes_and_matchers = [
-      [
-        null,
-        {
-          blank_line_count: 2,
-          indent_module: 2
-        }
-      ]
-    ];
+    probes_and_matchers = [[null, void 0]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       await T.perform(probe, matcher, error, function() {
         return new Promise(function(resolve, reject) {
           var parser;
-          parser = new tools.outline._Preparser(probe);
+          parser = new tools.Outliner(probe);
           return resolve(parser.cfg);
         });
       });
@@ -58,7 +50,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.outline_preprocessor_basic = async function(T, done) {
+  this.outline_preprocessor_lexing = async function(T, done) {
     var Interlex, Transformer, compose, error, i, len, matcher, probe, probes_and_matchers, tools;
     ({Interlex, compose, tools} = require('../../../apps/intertext-lexer'));
     ({Transformer} = require('../../../apps/moonriver'));
@@ -74,17 +66,21 @@
           // echo '^97-1^', '————————————————————————————'
           result = [];
           tokens = [];
-          parser = tools.outliner.$010_lexing.as_pipeline();
+          parser = tools.Outliner.$010_lexing.as_pipeline();
           parser.send(probe);
           ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
-            switch (d.tid) {
-              case 'nl':
+            switch (d.$key) {
+              case 'outline:nl':
+              case 'outline:nls':
                 result.push('N');
                 break;
-              case 'material':
+              case 'outline:material':
                 result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
+                break;
+              default:
+                result.push(rpr(d));
             }
           }
           result = result.join(',');
@@ -118,17 +114,21 @@
           // echo '^97-1^', '————————————————————————————'
           result = [];
           tokens = [];
-          parser = tools.outliner.$020_consolidate.as_pipeline();
+          parser = tools.Outliner.$020_consolidate.as_pipeline();
           parser.send(probe);
           ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
-            switch (d.tid) {
-              case 'nls':
-                result.push(`N${d.data.count}`);
+            switch (d.$key) {
+              case 'outline:nl':
+              case 'outline:nls':
+                result.push(`N${d.data.nl_count}`);
                 break;
-              case 'material':
+              case 'outline:material':
                 result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
+                break;
+              default:
+                result.push(rpr(d));
             }
           }
           result = result.join(',');
@@ -162,21 +162,24 @@
           // echo '^97-1^', '————————————————————————————'
           result = [];
           tokens = [];
-          parser = tools.outliner.$030_structure.as_pipeline();
+          parser = tools.Outliner.$030_dentchgs.as_pipeline();
           parser.send(probe);
           ref = parser.walk_and_stop(probe);
           for (d of ref) {
             tokens.push(d);
-            switch (d.tid) {
-              case 'nl':
-              case 'nls':
+            switch (d.$key) {
+              case 'outline:nl':
+              case 'outline:nls':
                 result.push(`${d.data.spc_count}N${d.data.nl_count}`);
                 break;
-              case 'material':
+              case 'outline:material':
                 result.push(`${d.data.spc_count}${rpr(d.data.material)}`);
                 break;
-              case 'dentchg':
+              case 'outline:dentchg':
                 result.push(`${d.data.from}>${rpr(d.data.to)}`);
+                break;
+              default:
+                result.push(rpr(d));
             }
           }
           result = result.join(',');
@@ -200,7 +203,7 @@
     ({Transformer} = require('../../../apps/moonriver'));
     ({DATOM} = require('../../../apps/datom'));
     //.........................................................................................................
-    probes_and_matchers = [['', 'null>0,0N1,0>null', null], ['\n', 'null>0,0N1,0>null', null], ['\n\n', 'null>0,0N1,0>null', null], ['helo', "null>0,0'helo',0N1,0>null", null], ['abc\ndef', "null>0,0'abc',0N1,0'def',0N1,0>null", null], ['abc\ndef\n\n', "null>0,0'abc',0N1,0'def',0N3,0>null", null], ['abc\ndef\n\n\nxyz', "null>0,0'abc',0N1,0'def',0N3,0'xyz',0N1,0>null", null], ['abc\ndef\n\n\n  xyz\n  !', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N1,2'!',2N1,2>null", null], ['abc\ndef\n\n\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N3,0>2,2'xyz',2N4,2>null", null], ['abc\ndef\n  xyz\n\n\n', "null>0,0'abc',0N1,0'def',0N1,0>2,2'xyz',2N4,2>null", null]];
+    probes_and_matchers = [['', 'null>0,0N1,0>null', null], ['\n', 'null>0,0N2,0>null', null], ['\n\n', 'null>0,0N3,0>null', null], ['helo', "null>0,0【,0'helo',0】,0N1,0>null", null], ['abc\ndef', "null>0,0【,0'abc',0N1,0'def',0】,0N1,0>null", null], ['abc\ndef\n\n', "null>0,0【,0'abc',0N1,0'def',0】,0N3,0>null", null], ['abc\ndef\n\n\nxyz', "null>0,0【,0'abc',0N1,0'def',0】,0N3,0【,0'xyz',0】,0N1,0>null", null], ['abc\ndef\n\n\n  xyz\n  !', "null>0,0【,0'abc',0N1,0'def',0】,0N3,0>2,2【,2'xyz',2N1,2'!',2】,2N1,2>null", null], ['abc\ndef\n\n\n  xyz\n\n\n', "null>0,0【,0'abc',0N1,0'def',0】,0N3,0>2,2【,2'xyz',2】,2N4,2>null", null], ['abc\ndef\n  xyz\n\n\n', "null>0,0【,0'abc',0N1,0'def',0】,0N1,0>2,2【,2'xyz',2】,2N4,2>null", null]];
 //.........................................................................................................
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
@@ -211,7 +214,7 @@
           // echo '^97-1^', '————————————————————————————'
           result = [];
           tokens = [];
-          parser = tools.outliner.$040_blocks.as_pipeline();
+          parser = tools.Outliner.$040_blocks.as_pipeline();
           parser.send(probe);
           ref = parser.walk_and_stop(probe);
           for (d of ref) {
@@ -235,11 +238,14 @@
                 break;
               case 'outline:block:stop':
                 result.push(`${d.data.spc_count}】`);
+                break;
+              default:
+                result.push(rpr(d));
             }
           }
           result = result.join(',');
           // debug '^4353^', ( ( GUY.trm.reverse ( if d.data.active then GUY.trm.green else GUY.trm.red ) rpr d.value ) for d in tokens ).join ''
-          H.norm_tabulate(`${rpr(probe)}`, tokens);
+          // H.norm_tabulate "#{rpr probe}", tokens
           // echo [ probe, result, error, ]
           return resolve(result);
         });
@@ -255,16 +261,16 @@
   if (require.main === module) {
     (() => {
       // @outline_preprocessor_instantiation()
-      // @outline_preprocessor_basic()
-      // test @outline_preprocessor_basic
+      // test @outline_preprocessor_instantiation
+      // @outline_preprocessor_lexing()
+      // test @outline_preprocessor_lexing
       // test @outline_blank_line_consolidation
       // test @outline_structure
       // @outline_blocks()
-      return test(this.outline_blocks);
+      // test @outline_blocks
+      return test(this);
     })();
   }
-
-  // test @
 
 }).call(this);
 

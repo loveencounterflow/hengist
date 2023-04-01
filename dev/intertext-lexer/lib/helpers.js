@@ -100,16 +100,20 @@
       };
       //.........................................................................................................
       return (d, send) => {
-        switch (d.tid) {
+        switch (d.$key) {
           //.....................................................................................................
-          case 'star1':
+          case 'plain:star1':
             send(stamp(d));
             if (within.one) {
               exit.one();
-              send(this.new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
+              send(new_datom('html:tag', {
+                value: '</i>'
+              }));
             } else {
               enter.one(d.x1);
-              send(this.new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
+              send(new_datom('html:tag', {
+                value: '<i>'
+              }));
             }
             break;
           default:
@@ -156,79 +160,114 @@
       };
       //.........................................................................................................
       return parse_md_stars = (d, send) => {
-        switch (d.tid) {
+        switch (d.$key) {
           //.....................................................................................................
-          case 'star1':
+          case 'plain:star1':
             send(stamp(d));
             if (within.one) {
               exit.one();
-              send(this.new_token('^æ1^', d, 'html', 'tag', 'i', '</i>'));
+              send(new_datom('html:tag', {
+                value: '</i>'
+              }));
             } else {
               enter.one(d.x1);
-              send(this.new_token('^æ2^', d, 'html', 'tag', 'i', '<i>'));
+              send(new_datom('html:tag', {
+                value: '<i>'
+              }));
             }
             break;
           //.....................................................................................................
-          case 'star2':
+          case 'plain:star2':
             send(stamp(d));
             if (within.two) {
               if (within.one) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(this.new_token('^æ3^', d, 'html', 'tag', 'i', '</i>'));
+                  send(new_datom('html:tag', {
+                    value: '</i>'
+                  }));
                   exit.two();
-                  send(this.new_token('^æ4^', d, 'html', 'tag', 'b', '</b>'));
+                  send(new_datom('html:tag', {
+                    value: '</b>'
+                  }));
                   enter.one(d.x1);
-                  send(this.new_token('^æ5^', d, 'html', 'tag', 'i', '<i>'));
+                  send(new_datom('html:tag', {
+                    value: '<i>'
+                  }));
                 } else {
                   exit.two();
-                  send(this.new_token('^æ6^', d, 'html', 'tag', 'b', '</b>'));
+                  send(new_datom('html:tag', {
+                    value: '</b>'
+                  }));
                 }
               } else {
                 exit.two();
-                send(this.new_token('^æ7^', d, 'html', 'tag', 'b', '</b>'));
+                send(new_datom('html:tag', {
+                  value: '</b>'
+                }));
               }
             } else {
               enter.two(d.x1);
-              send(this.new_token('^æ8^', d, 'html', 'tag', 'b', '<b>'));
+              send(new_datom('html:tag', {
+                value: '<b>'
+              }));
             }
             break;
           //.....................................................................................................
-          case 'star3':
+          case 'plain:star3':
             send(stamp(d));
             if (within.one) {
               if (within.two) {
                 if (start_of.one > start_of.two) {
                   exit.one();
-                  send(this.new_token('^æ9^', d, 'html', 'tag', 'i', '</i>'));
+                  send(new_datom('html:tag', {
+                    value: '</i>'
+                  }));
                   exit.two();
-                  send(this.new_token('^æ10^', d, 'html', 'tag', 'b', '</b>'));
+                  send(new_datom('html:tag', {
+                    value: '</b>'
+                  }));
                 } else {
                   exit.two();
-                  send(this.new_token('^æ11^', d, 'html', 'tag', 'b', '</b>'));
+                  send(new_datom('html:tag', {
+                    value: '</b>'
+                  }));
                   exit.one();
-                  send(this.new_token('^æ12^', d, 'html', 'tag', 'i', '</i>'));
+                  send(new_datom('html:tag', {
+                    value: '</i>'
+                  }));
                 }
               } else {
                 exit.one();
-                send(this.new_token('^æ13^', d, 'html', 'tag', 'i', '</i>'));
+                send(new_datom('html:tag', {
+                  value: '</i>'
+                }));
                 enter.two(d.x1);
-                send(this.new_token('^æ14^', d, 'html', 'tag', 'b', '<b>'));
+                send(new_datom('html:tag', {
+                  value: '<b>'
+                }));
               }
             } else {
               if (within.two) {
                 exit.two();
-                send(this.new_token('^æ15^', d, 'html', 'tag', 'b', '</b>'));
+                send(new_datom('html:tag', {
+                  value: '</b>'
+                }));
                 enter.one(d.x1);
-                send(this.new_token('^æ16^', d, 'html', 'tag', 'i', '<i>'));
+                send(new_datom('html:tag', {
+                  value: '<i>'
+                }));
               } else {
                 enter.two(d.x1);
-                send(this.new_token('^æ17^', d, 'html', 'tag', 'b', '<b>'));
+                send(new_datom('html:tag', {
+                  value: '<b>'
+                }));
                 enter.one(d.x1 + 2);
-                send(this.new_token('^æ18^', {
+                send(new_datom('html:tag', {
+                  value: '<i>',
                   x1: d.x1 + 2,
                   x2: d.x2
-                }, 'html', 'tag', 'i', '<i>'));
+                }));
               }
             }
             break;
