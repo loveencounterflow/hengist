@@ -59,9 +59,9 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "world"', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'world' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "everyone\nout there"!', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:text', value: 'everyone' }, { mk: 'dq1:nl', value: '\n' }, { mk: 'dq1:text', value: 'out there' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:text', value: '!' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "world"', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'plain:dq1', value: '"' }, { $key: 'dq1:text', value: 'world' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "everyone\nout there"!', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'plain:dq1', value: '"' }, { $key: 'dq1:text', value: 'everyone' }, { $key: 'dq1:nl', value: '\n' }, { $key: 'dq1:text', value: 'out there' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'plain:text', value: '!' }, { $key: 'plain:nl', value: '\n' } ], null ]
     ]
   #.........................................................................................................
   # for [ probe, matcher, error, ] in probes_and_matchers
@@ -69,7 +69,7 @@ H                         = require './helpers'
   #     # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
   #     result      = []
   #     for token from lexer.walk probe
-  #       result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+  #       result.push GUY.props.pick_with_fallback token, null, '$key', 'value'
   #     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
   #     H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -78,7 +78,7 @@ H                         = require './helpers'
       # H.show_lexer_as_table 'new_syntax_for_modes', lexer; process.exit 111
       result      = []
       for token from lexer.walk probe
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result # unless result_rpr is matcher
       #.....................................................................................................
@@ -112,10 +112,10 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "world"', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'world' }, { mk: 'plain:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "everyone\nout there"!', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'everyone' }, { mk: 'dq1:nl', value: '\n' }, { mk: 'dq1:text', value: 'out there' }, { mk: 'plain:dq1', value: '"' }, { mk: 'plain:text', value: '!' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ '"one""two"', [ { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'one' }, { mk: 'plain:dq1', value: '"' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'two' }, { mk: 'plain:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "world"', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'world' }, { $key: 'plain:dq1', value: '"' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "everyone\nout there"!', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'everyone' }, { $key: 'dq1:nl', value: '\n' }, { $key: 'dq1:text', value: 'out there' }, { $key: 'plain:dq1', value: '"' }, { $key: 'plain:text', value: '!' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ '"one""two"', [ { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'one' }, { $key: 'plain:dq1', value: '"' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'two' }, { $key: 'plain:dq1', value: '"' }, { $key: 'plain:nl', value: '\n' } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -126,7 +126,7 @@ H                         = require './helpers'
       tokens      = []
       for token from lexer.walk probe
         tokens.push token
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
       #.....................................................................................................
@@ -160,10 +160,10 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "world"', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'world' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ 'helo "everyone\nout there"!', [ { mk: 'plain:text', value: 'helo ' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'everyone' }, { mk: 'dq1:nl', value: '\n' }, { mk: 'dq1:text', value: 'out there' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:text', value: '!' }, { mk: 'plain:nl', value: '\n' } ], null ]
-    [ '"one""two"', [ { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'one' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'dq1:text', value: 'two' }, { mk: 'dq1:dq1', value: '"' }, { mk: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "world"', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'world' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ 'helo "everyone\nout there"!', [ { $key: 'plain:text', value: 'helo ' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'everyone' }, { $key: 'dq1:nl', value: '\n' }, { $key: 'dq1:text', value: 'out there' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'plain:text', value: '!' }, { $key: 'plain:nl', value: '\n' } ], null ]
+    [ '"one""two"', [ { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'one' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'dq1:text', value: 'two' }, { $key: 'dq1:dq1', value: '"' }, { $key: 'plain:nl', value: '\n' } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -174,7 +174,7 @@ H                         = require './helpers'
       tokens      = []
       for token from lexer.walk probe
         tokens.push token
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
       #.....................................................................................................
@@ -209,9 +209,9 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo', data: null }, { mk: 'plain:nl', value: '\n', data: null } ], null ]
-    [ 'helo "world"', [ { mk: 'plain:text', value: 'helo ', data: null }, { mk: 'dqstr:$border', value: '', data: { prv: 'plain', nxt: 'dqstr' } }, { mk: 'dqstr:dq1', value: '"', data: null }, { mk: 'dqstr:text', value: 'world', data: null }, { mk: 'dqstr:dq1', value: '"', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'dqstr', nxt: 'plain' } }, { mk: 'plain:nl', value: '\n', data: null } ], null ]
-    [ 'abc "" xyz', [ { mk: 'plain:text', value: 'abc ', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'plain', nxt: 'dqstr' } }, { mk: 'dqstr:dq2', value: '""', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'dqstr', nxt: 'plain' } }, { mk: 'plain:text', value: ' xyz', data: null }, { mk: 'plain:nl', value: '\n', data: null } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo', data: null }, { $key: 'plain:nl', value: '\n', data: null } ], null ]
+    [ 'helo "world"', [ { $key: 'plain:text', value: 'helo ', data: null }, { $key: 'dqstr:$border', value: '', data: { prv: 'plain', nxt: 'dqstr' } }, { $key: 'dqstr:dq1', value: '"', data: null }, { $key: 'dqstr:text', value: 'world', data: null }, { $key: 'dqstr:dq1', value: '"', data: null }, { $key: 'plain:$border', value: '', data: { prv: 'dqstr', nxt: 'plain' } }, { $key: 'plain:nl', value: '\n', data: null } ], null ]
+    [ 'abc "" xyz', [ { $key: 'plain:text', value: 'abc ', data: null }, { $key: 'plain:$border', value: '', data: { prv: 'plain', nxt: 'dqstr' } }, { $key: 'dqstr:dq2', value: '""', data: null }, { $key: 'plain:$border', value: '', data: { prv: 'dqstr', nxt: 'plain' } }, { $key: 'plain:text', value: ' xyz', data: null }, { $key: 'plain:nl', value: '\n', data: null } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -223,7 +223,7 @@ H                         = require './helpers'
       tokens      = []
       for token from lexer.walk probe
         tokens.push token
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'data'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value', 'data'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
       #.....................................................................................................
@@ -259,8 +259,8 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo', data: null } ], null ]
-    [ 'abc</>def<what>', [ { mk: 'plain:text', value: 'abc', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { mk: 'tag:c_lsr', value: '</>', data: null }, { mk: 'plain:$border', value: '', data: { prv: 'tag', nxt: 'plain' } }, { mk: 'plain:text', value: 'def', data: null }, { mk: 'tag:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { mk: 'tag:lpb', value: '<', data: null }, { mk: 'tag:text', value: 'what', data: null }, { mk: 'tag:rbp', value: '>', data: null } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo', data: null } ], null ]
+    [ 'abc</>def<what>', [ { $key: 'plain:text', value: 'abc', data: null }, { $key: 'plain:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { $key: 'tag:c_lsr', value: '</>', data: null }, { $key: 'plain:$border', value: '', data: { prv: 'tag', nxt: 'plain' } }, { $key: 'plain:text', value: 'def', data: null }, { $key: 'tag:$border', value: '', data: { prv: 'plain', nxt: 'tag' } }, { $key: 'tag:lpb', value: '<', data: null }, { $key: 'tag:text', value: 'what', data: null }, { $key: 'tag:rbp', value: '>', data: null } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -272,7 +272,7 @@ H                         = require './helpers'
       tokens      = []
       for token from lexer.walk probe
         tokens.push token
-        result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'data'
+        result.push GUY.props.pick_with_fallback token, null, '$key', 'value', 'data'
       result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
       #.....................................................................................................
@@ -344,10 +344,10 @@ H                         = require './helpers'
     return lexer
   #.........................................................................................................
   probes_and_matchers = [
-    [ 'helo', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
-    [ 'helo<t1>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
-    [ 'helo<t1><t2>', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:rpb', value: '>', x1: 11, x2: 12 }, { mk: 'plain:$border', value: '|', x1: 12, x2: 12 }, { mk: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
-    [ 'helo<t1><t2', [ { mk: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { mk: 'tag:$border', value: '|', x1: 4, x2: 4 }, { mk: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { mk: 'tag:text', value: 't1', x1: 5, x2: 7 }, { mk: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { mk: 'plain:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:$border', value: '|', x1: 8, x2: 8 }, { mk: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { mk: 'tag:text', value: 't2', x1: 9, x2: 11 }, { mk: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
+    [ 'helo', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'plain:nl', value: '\n', x1: 4, x2: 4 } ], null ]
+    [ 'helo<t1>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'tag:$border', value: '|', x1: 4, x2: 4 }, { $key: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:$border', value: '|', x1: 8, x2: 8 }, { $key: 'plain:nl', value: '\n', x1: 8, x2: 8 } ], null ]
+    [ 'helo<t1><t2>', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'tag:$border', value: '|', x1: 4, x2: 4 }, { $key: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:$border', value: '|', x1: 8, x2: 8 }, { $key: 'tag:$border', value: '|', x1: 8, x2: 8 }, { $key: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'tag:rpb', value: '>', x1: 11, x2: 12 }, { $key: 'plain:$border', value: '|', x1: 12, x2: 12 }, { $key: 'plain:nl', value: '\n', x1: 12, x2: 12 } ], null ]
+    [ 'helo<t1><t2', [ { $key: 'plain:text', value: 'helo', x1: 0, x2: 4 }, { $key: 'tag:$border', value: '|', x1: 4, x2: 4 }, { $key: 'tag:lpb', value: '<', x1: 4, x2: 5 }, { $key: 'tag:text', value: 't1', x1: 5, x2: 7 }, { $key: 'tag:rpb', value: '>', x1: 7, x2: 8 }, { $key: 'plain:$border', value: '|', x1: 8, x2: 8 }, { $key: 'tag:$border', value: '|', x1: 8, x2: 8 }, { $key: 'tag:lpb', value: '<', x1: 8, x2: 9 }, { $key: 'tag:text', value: 't2', x1: 9, x2: 11 }, { $key: 'tag:nl', value: '\n', x1: 11, x2: 11 } ], null ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -360,7 +360,7 @@ H                         = require './helpers'
     tokens      = []
     for token from lexer.walk probe
       tokens.push token
-      result.push GUY.props.pick_with_fallback token, null, 'mk', 'value', 'x1', 'x2'
+      result.push GUY.props.pick_with_fallback token, null, '$key', 'value', 'x1', 'x2'
     result_rpr  = ( d.value for d in result when not d.$stamped ).join ''
     echo [ probe, result, error, ]
     # H.tabulate "#{rpr probe} -> #{rpr result_rpr}", tokens
@@ -511,8 +511,14 @@ H                         = require './helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @markup_with_variable_length
   # test @auto_inserted_border_posts_exclusive
   # @singular_jumps()
-  test @singular_jumps
+  # test @singular_jumps
+  # test @new_syntax_for_in_and_exclusive_jumps_1
+  # @new_syntax_for_in_and_exclusive_jumps_2()
+  # test @new_syntax_for_in_and_exclusive_jumps_2
+
+
+
