@@ -28,6 +28,24 @@ types                     = new ( require 'intertype' ).Intertype
 
 
 #===========================================================================================================
+
+  # DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
+  # probes_and_matchers = [
+  #   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
+  #   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
+  #   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+  #   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+  #   ]
+  # #.........................................................................................................
+  # for [ probe, matcher, error, ] in probes_and_matchers
+  #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  #     d = DATOM.new_fresh_datom probe...
+  #     T.ok not Object.isFrozen d
+  #     resolve d
+  #     return null
+
+
+#===========================================================================================================
 class Datom
 
   #---------------------------------------------------------------------------------------------------------
@@ -54,23 +72,6 @@ class Datom
     return @constructor.new_datom @
 
 
-
-#===========================================================================================================
-
-  # DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
-  # probes_and_matchers = [
-  #   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
-  #   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
-  #   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-  #   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-  #   ]
-  # #.........................................................................................................
-  # for [ probe, matcher, error, ] in probes_and_matchers
-  #   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-  #     d = DATOM.new_fresh_datom probe...
-  #     T.ok not Object.isFrozen d
-  #     resolve d
-  #     return null
 
 #-----------------------------------------------------------------------------------------------------------
 @datom_as_dataclass = ( T, done ) ->
