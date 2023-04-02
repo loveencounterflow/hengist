@@ -890,7 +890,7 @@ demo_size_of = ->
     isa:      ( x ) -> @isa.object x
     $value:   'float'
     $unit:    'nonempty.text'
-    default:
+    template:
       value:    0
       unit:     null
   types.declare.fortytwo ( x ) -> x is 42
@@ -913,7 +913,7 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@create_returns_deep_copy_of_default = ( T, done ) ->
+@create_returns_deep_copy_of_template = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
@@ -921,7 +921,7 @@ demo_size_of = ->
   types.declare.frob
     $list:  'list'
     $blah:  'nonempty.text'
-    default:
+    template:
       list:     []
       blah:     null
   #.........................................................................................................
@@ -950,7 +950,7 @@ demo_size_of = ->
   #     ( x ) -> @isa.nonempty.text x.blah
   #     ]
   #   seal:     'deep'
-  #   default:
+  #   template:
   #     list:     []
   #     blah:     null
   #.........................................................................................................
@@ -958,7 +958,7 @@ demo_size_of = ->
     $list:  'list'
     $blah:  'nonempty.text'
     freeze:   'deep'
-    default:
+    template:
       list:     []
       blah:     null
   #.........................................................................................................
@@ -966,7 +966,7 @@ demo_size_of = ->
     $list:  'list'
     $blah:  'nonempty.text'
     extras:   false
-    default:
+    template:
       list:     []
       blah:     null
   #.........................................................................................................
@@ -1026,7 +1026,7 @@ demo_size_of = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@declare_NG_defaults = ( T, done ) ->
+@declare_NG_templates = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   types         = new Intertype()
@@ -1034,14 +1034,14 @@ demo_size_of = ->
   types.declare.quantity
     $value:   'float'
     $unit:    'nonempty.text'
-    default:
+    template:
       value:    0
       unit:     null
   #.........................................................................................................
   types.declare.point2d
     $x: 'float'
     $y: 'float'
-    default:
+    template:
       x:    0
       y:    0
     create: ( cfg ) -> { { x: 1, y: 1, }..., cfg..., }
@@ -1062,7 +1062,7 @@ demo_size_of = ->
   info '^868-11^', T?.eq ( types.isa.quantity            42                           ), false
   info '^868-12^', T?.eq ( types.isa.quantity            { value: 1.23, unit: '', }   ), false
   info '^868-13^', T?.eq ( types.isa.quantity            { value: 1.23, unit: 'm', }  ), true
-  info '^868-14^', T?.eq ( types.validate.quantity { types.registry.quantity.default..., { value: 44, unit: 'g', }..., } ), { value: 44, unit: 'g', }
+  info '^868-14^', T?.eq ( types.validate.quantity { types.registry.quantity.template..., { value: 44, unit: 'g', }..., } ), { value: 44, unit: 'g', }
   info '^868-15^', T?.throws /not a valid text/, -> types.validate.text 42
   # praise '^521-1^', types.isa.text ''
   # praise '^521-2^', types.validate.text ''
@@ -1073,7 +1073,7 @@ demo_size_of = ->
   # praise '^521-7^', types.validate.empty.text null
   # praise '^521-8^', types.validate.empty.text 42
   info '^868-16^', T?.throws /not a valid empty\.text/, -> types.validate.empty.text 42
-  info '^868-17^', T?.throws /not a valid quantity/, -> types.validate.quantity { types.registry.quantity.default..., { value: null, }..., }
+  info '^868-17^', T?.throws /not a valid quantity/, -> types.validate.quantity { types.registry.quantity.template..., { value: null, }..., }
   info '^868-18^', T?.eq ( types.isa.empty.text '' ), true
   info '^868-19^', T?.eq ( types.validate.empty.text '' ), ''
   info '^868-20^', T?.eq ( types.validate.nonempty.text 'x' ), 'x'
@@ -1344,7 +1344,7 @@ demo_size_of = ->
     declare.quantity
       $value: 'float'
       $unit:  'nonempty.text'
-      default:
+      template:
         value:    0
         unit:     null
     #.........................................................................................................
@@ -1386,8 +1386,8 @@ demo_size_of = ->
   whisper '#############################################'
   class Intertype
     create_type_cfg: ( cfg ) ->
-      defaults  = { extras: true, collection: false, type: null, }
-      cfg       = { defaults..., cfg..., }
+      template  = { extras: true, collection: false, type: null, }
+      cfg       = { template..., cfg..., }
       name      = cfg.type
       R         = ( ( x ) -> x ** 2 ).bind @
       GUY.props.hide R, k, v for k, v of cfg
@@ -1485,7 +1485,7 @@ demo_size_of = ->
     $value:         'float'
     $unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
   #.........................................................................................................
@@ -1493,7 +1493,7 @@ demo_size_of = ->
     $width:         'quantity'
     $height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
   #.........................................................................................................
@@ -1558,8 +1558,8 @@ demo_size_of = ->
     [ [ 't', ( x ) -> @isa.positive0.integer x                                  ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', override: false, replace: false, }, ]
     [ [ 't', { collection: false, isa: ( ( x ) -> @isa.positive0.integer x ), } ], { collection: false, create: null, extras: true, fields: null, freeze: false, isa: 'f(t:#0)', name: 't', typename: 't', override: false, replace: false, }, ]
     [ [ 'quantity', { $value: 'float', $unit: 'nonempty.text', }                ], { collection: false, create: null, extras: true, fields: { value: 'f(quantity.value:float)', unit: 'f(quantity.unit:nonempty.text)' }, freeze: false, isa: 'f(quantity:object)', name: 'quantity', typename: 'quantity', override: false, replace: false, }, ]
-    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), default: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
-      { collection: true, create: 'f(create)', default: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', override: false, replace: false, }, ]
+    [ [ 'foobar', { $foo: 'text', $bar: 'text', create: ( -> ), template: {}, extras: false, freeze: true, seal: true, collection: true, }, ( ( x ) -> x instanceof Foobar )                ], \
+      { collection: true, create: 'f(create)', template: {}, extras: false, fields: { foo: 'f(foobar.foo:text)', bar: 'f(foobar.bar:text)' }, freeze: true, isa: 'f(foobar:#0)', name: 'foobar', seal: true, typename: 'foobar', override: false, replace: false, }, ]
     ]
   #.........................................................................................................
   for [ probe, matcher, error, ] in probes_and_matchers
@@ -1583,14 +1583,14 @@ demo_size_of = ->
     $value:         'float'
     $unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
   declare.rectangle
     $width:         'quantity'
     $height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
   declare.oops      ( x ) -> throw new Error 'oops'
@@ -1661,14 +1661,14 @@ demo_size_of = ->
     $value:         'float'
     $unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
   declare.rectangle
     $width:         'quantity'
     $height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
   declare.oops      ( x ) -> throw new Error 'oops'
@@ -1717,14 +1717,14 @@ demo_size_of = ->
     $value:         'float'
     $unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
   declare.rectangle
     $width:         'quantity'
     $height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
   declare.oops      ( x ) -> throw new Error 'oops'
@@ -1882,7 +1882,7 @@ demo_size_of = ->
     types.declare.foo
       fields:
         bar:    'text'
-      default:
+      template:
         bar:    'baz'
     debug '^77-5^', try types.create.foo()                  catch e then show_error e
     debug '^77-6^', try types.create.foo {}                 catch e then show_error e
@@ -1894,7 +1894,7 @@ demo_size_of = ->
     types.declare.foo
       fields:
         bar:    'regex'
-      default:
+      template:
         bar:    /baz/
     debug '^77-9^', try types.create.foo()                  catch e then show_error e
     debug '^77-10^', try types.create.foo {}                 catch e then show_error e
@@ -1906,7 +1906,7 @@ demo_size_of = ->
     types.declare.foo
       fields:
         bar:    'text.or.regex'
-      default:
+      template:
         bar:    /baz/
     debug '^77-13^', try types.create.foo()                  catch e then show_error e
     debug '^77-14^', try types.create.foo {}                 catch e then show_error e
@@ -1992,7 +1992,7 @@ demo_size_of = ->
       value:         'float'
       unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
   declare.rectangle
@@ -2000,7 +2000,7 @@ demo_size_of = ->
       width:         'quantity'
       height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
   #.........................................................................................................
@@ -2028,7 +2028,7 @@ demo_size_of = ->
       value:         'float'
       unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
     cast: ( x ) ->
@@ -2047,7 +2047,7 @@ demo_size_of = ->
       width:         'quantity'
       height:        'quantity'
     extras:         false
-    default:
+    template:
       width:        { value: 0, unit: 'mm', }
       height:       { value: 0, unit: 'mm', }
     cast: ( width, height ) ->
@@ -2092,7 +2092,7 @@ demo_size_of = ->
       value:         'float'
       unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
     create: ( x ) ->
@@ -2124,7 +2124,7 @@ demo_size_of = ->
       value:         'float'
       unit:          'nonempty.text'
     extras:         false
-    default:
+    template:
       value:    0
       unit:     null
     create: ( x ) ->
@@ -2176,22 +2176,22 @@ demo_size_of = ->
   #.........................................................................................................
   declare.function0
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
-    default:    ->
+    template:    ->
     override:   true
   #.........................................................................................................
   declare.function1
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
-    default:    ( x ) ->
+    template:    ( x ) ->
     override:   true
   #.........................................................................................................
   declare.function2
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 2 )
-    default:    ( x, y ) ->
+    template:    ( x, y ) ->
     override:   true
   #.........................................................................................................
   declare.function3
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 3 )
-    default:    ( x, y, z ) ->
+    template:    ( x, y, z ) ->
     override:   true
   #.........................................................................................................
   T?.eq ( types.type_of ->                  ), 'function0'
@@ -2210,12 +2210,12 @@ demo_size_of = ->
   #.........................................................................................................
   types_1.declare.function0
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 0 )
-    default:    ->
+    template:    ->
     override:   true
   #.........................................................................................................
   types_1.declare.function1
     isa:        ( x ) -> ( @isa.function x ) and ( x.length is 1 )
-    default:    ( x ) ->
+    template:    ( x ) ->
     override:   true
   #.........................................................................................................
   types_2 = new Intertype types_1
@@ -2262,7 +2262,7 @@ demo_size_of = ->
   #.........................................................................................................
   declare.explanation_for_everything
     isa:        ( x ) -> x is null
-    default:    null
+    template:    null
     override:   true
   #.........................................................................................................
   declare.other_type
@@ -2279,7 +2279,7 @@ demo_size_of = ->
   declare.explanation_for_everything
     replace:    true
     isa:        ( x ) -> x is 42
-    default:    42
+    template:    42
     override:   true
   #.........................................................................................................
   T?.eq ( isa.explanation_for_everything null                 ), false
@@ -2293,7 +2293,7 @@ demo_size_of = ->
   declare.explanation_for_everything
     replace:    true
     isa:        ( x ) -> x is 42
-    default:    42
+    template:    42
     override:   false
   #.........................................................................................................
   T?.eq ( isa.explanation_for_everything 42                   ), true
@@ -2316,7 +2316,7 @@ demo_size_of = ->
   #.........................................................................................................
   declare.explanation_for_everything
     isa:        ( x ) -> x is null
-    default:    null
+    template:    null
     override:   true
   #.........................................................................................................
   declare.other_type
@@ -2339,7 +2339,7 @@ demo_size_of = ->
   #.........................................................................................................
   declare.explanation_for_everything
     isa:        ( x ) -> x is null
-    default:    null
+    template:    null
     override:   true
   #.........................................................................................................
   T?.eq ( type_of null                                        ), 'explanation_for_everything'
@@ -2389,7 +2389,7 @@ demo_size_of = ->
     fields:
       first:      'anything'
       last:       'anything'
-    default:
+    template:
       first:      misfit
       last:       misfit
     create: ( x ) ->
@@ -2427,7 +2427,7 @@ demo_size_of = ->
     fields:
       a:      'integer'
       b:      'integer'
-    default:
+    template:
       a:      0
       b:      1
   #.........................................................................................................
@@ -2507,10 +2507,47 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@can_use_either_default_or_template = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do ->
+    types             = new Intertype()
+    types.declare.quantity
+      fields:
+        q:    'float'
+        u:    'nonempty.text'
+      default:
+        q:    1
+        u:    'unit'
+    T?.eq ( types.isa.quantity null ), false
+    T?.eq ( types.isa.quantity { q: null, u: 'm', } ), false
+    T?.eq ( types.isa.quantity { q: 12, u: 'm', } ), true
+    T?.throws /type 'quantity' does not have a `template` value or a `create\(\)` method/, ->
+      T?.eq ( types.create.quantity { q: 12, u: 'm', } ), { q: 12, u: 'm', }
+  #.........................................................................................................
+  do ->
+    types             = new Intertype()
+    types.declare.quantity
+      fields:
+        q:    'float'
+        u:    'nonempty.text'
+      template:
+        q:    1
+        u:    'unit'
+    T?.eq ( types.isa.quantity null ), false
+    T?.eq ( types.isa.quantity { q: null, u: 'm', } ), false
+    T?.eq ( types.isa.quantity { q: 12, u: 'm', } ), true
+    T?.eq ( types.create.quantity { q: 12, u: 'm', } ), { q: 12, u: 'm', }
+    T?.eq ( types.create.quantity() ), { q: 1, u: 'unit', }
+  #.........................................................................................................
+  done?()
+
 
 ############################################################################################################
 unless module.parent?
   # test @is_extension_of_allows_all_values
+  # test @can_use_either_default_or_template
   test @
-
-
+  # @declare_NG_templates()
