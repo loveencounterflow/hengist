@@ -46,7 +46,7 @@ types                     = new ( require 'intertype' ).Intertype()
 
 
 #===========================================================================================================
-class Datom
+class Dataclass
 
   #---------------------------------------------------------------------------------------------------------
   @declaration: null
@@ -78,7 +78,7 @@ class Datom
 @datom_as_dataclass = ( T, done ) ->
   #.........................................................................................................
   do ->
-    d = new Datom()
+    d = new Dataclass()
     info '^12-7^', ( Object.isFrozen d )
     T?.eq ( Object.isFrozen d ), false
     try d.foo = 42 catch error then warn GUY.trm.reverse error.message
@@ -87,7 +87,7 @@ class Datom
     return null
   #.........................................................................................................
   do ->
-    class Quantity extends Datom
+    class Quantity extends Dataclass
 
       #-----------------------------------------------------------------------------------------------------
       @declaration:
@@ -106,7 +106,7 @@ class Datom
     #.......................................................................................................
     q = new Quantity()
     T?.eq ( Object.isFrozen q ), false
-    try q.foo = 42 catch error then warn '^Datom@1^', GUY.trm.reverse error.message
+    try q.foo = 42 catch error then warn '^Dataclass@1^', GUY.trm.reverse error.message
     T?.throws /.*/, -> q.foo = 42
     T?.eq ( Object.isFrozen q ), true
     ### TAINT should use method independent of `inspect` (which could be user-configured?) ###
@@ -124,7 +124,7 @@ class Datom
   #.........................................................................................................
   do ->
     #.......................................................................................................
-    class Quantity extends Datom
+    class Quantity extends Dataclass
 
       #-----------------------------------------------------------------------------------------------------
       @declaration:
@@ -153,7 +153,7 @@ class Datom
 #-----------------------------------------------------------------------------------------------------------
 @datom_dataclass_deep_freezing = ( T, done ) ->
   #.........................................................................................................
-  class Something extends Datom
+  class Something extends Dataclass
 
     #-------------------------------------------------------------------------------------------------------
     @declaration:
@@ -173,7 +173,7 @@ class Datom
     debug '^23-1^', s
     T?.eq ( Object.isFrozen s         ), true
     T?.eq ( Object.isFrozen s.values  ), true
-    try s.values.push 7 catch error then warn '^Datom@1^', GUY.trm.reverse error.message
+    try s.values.push 7 catch error then warn '^Dataclass@1^', GUY.trm.reverse error.message
     T?.throws /object is not extensible/, -> s.values.push 7
     return null
   #.........................................................................................................
@@ -187,7 +187,7 @@ class Datom
     my_types = new ( require '../../../apps/intertype' ).Intertype()
     my_types.declare.awesome_list isa: 'list.of.integer'
     #.......................................................................................................
-    class Something extends Datom
+    class Something extends Dataclass
       #-----------------------------------------------------------------------------------------------------
       @types: my_types
       @declaration:
@@ -205,7 +205,7 @@ class Datom
     my_types = new ( require '../../../apps/intertype' ).Intertype()
     my_types.declare.awesome_list isa: 'list.of.integer'
     #.......................................................................................................
-    class Something extends Datom
+    class Something extends Dataclass
       #-----------------------------------------------------------------------------------------------------
       @types: my_types
       @declaration:
