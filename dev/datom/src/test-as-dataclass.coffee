@@ -21,7 +21,7 @@ GUY                       = require 'guy'
 test                      = require '../../../apps/guy-test'
 # PATH                      = require 'path'
 # FS                        = require 'fs'
-types                     = new ( require 'intertype' ).Intertype
+types                     = new ( require 'intertype' ).Intertype()
 { isa
   equals
   validate }              = types
@@ -64,12 +64,13 @@ class Datom
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    __types = new ( require '../../../apps/intertype' ).Intertype()
+    clasz   = @constructor
+    __types = clasz.types ? new ( require '../../../apps/intertype' ).Intertype()
     GUY.props.hide @, '__types', __types
-    if ( declaration = @constructor.declaration )?
-      @__types.declare[ @constructor.name ] declaration
-      @[ k ] = v for k, v of @__types.create[ @constructor.name ] cfg
-    return @constructor.new_datom @
+    if ( declaration = clasz.declaration )?
+      @__types.declare[ clasz.name ] declaration
+      @[ k ] = v for k, v of @__types.create[ clasz.name ] cfg
+    return clasz.new_datom @
 
 
 
@@ -140,10 +141,81 @@ class Datom
       #   super cfg
       #   return undefined
     #.......................................................................................................
-    T?.eq ( q = new Quantity() ), { q: 0, u: 'unit', }
+    T?.eq ( q = new Quantity()                    ), { q: 0, u: 'unit', }
     T?.eq ( q = new Quantity { q: 0, u: 'unit', } ), { q: 0, u: 'unit', }
-    T?.eq ( q = new Quantity { q: 23, u: 'm', } ), { q: 23, u: 'm', }
+    T?.eq ( q = new Quantity { q: 23, u: 'm', }   ), { q: 23, u: 'm', }
     T?.throws /not a valid Quantity/, -> q = new Quantity { q: 23, u: '', }
+    return null
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@datom_dataclass_deep_freezing = ( T, done ) ->
+  #.........................................................................................................
+  class Something extends Datom
+
+    #-------------------------------------------------------------------------------------------------------
+    @declaration:
+      freeze:   'deep'
+      fields:
+        values:   'list.of.integer'
+      template:
+        values:   []
+  #.........................................................................................................
+  do ->
+    T?.eq ( s = new Something()                     ), { values: [], }
+    T?.eq ( s = new Something { values: [ 3, 5, ] } ), { values: [ 3, 5, ], }
+    return null
+  #.........................................................................................................
+  do ->
+    s = new Something { values: [ 3, 5, ] }
+    debug '^23-1^', s
+    T?.eq ( Object.isFrozen s         ), true
+    T?.eq ( Object.isFrozen s.values  ), true
+    try s.values.push 7 catch error then warn '^Datom@1^', GUY.trm.reverse error.message
+    T?.throws /object is not extensible/, -> s.values.push 7
+    return null
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@datom_dataclass_custom_types_instance = ( T, done ) ->
+  #.........................................................................................................
+  do ->
+    my_types = new ( require '../../../apps/intertype' ).Intertype()
+    my_types.declare.awesome_list isa: 'list.of.integer'
+    #.......................................................................................................
+    class Something extends Datom
+      #-----------------------------------------------------------------------------------------------------
+      @types: my_types
+      @declaration:
+        freeze:   'deep'
+        fields:
+          values:   'awesome_list'
+        template:
+          values:   []
+    #.......................................................................................................
+    s = new Something [ 4, 5, 6, ]
+    T?.eq ( my_types is s.__types ), true
+    return null
+  #.........................................................................................................
+  do ->
+    my_types = new ( require '../../../apps/intertype' ).Intertype()
+    my_types.declare.awesome_list isa: 'list.of.integer'
+    #.......................................................................................................
+    class Something extends Datom
+      #-----------------------------------------------------------------------------------------------------
+      @types: my_types
+      @declaration:
+        freeze:   'deep'
+        fields:
+          values:   'awesome_list'
+        template:
+          values:   []
+    #.......................................................................................................
+    T?.throws /not a valid Something/, -> new Something { values: [ 'wronk', ], }
     return null
   #.........................................................................................................
   done()
@@ -151,9 +223,10 @@ class Datom
 
 
 
+
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @datom_as_dataclass
-  test @datom_dataclass_automatic_validation
+  # test @datom_dataclass_automatic_validation
 
