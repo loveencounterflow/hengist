@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var Datom, GUY, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, types, urge, validate, warn, whisper;
+  var Dataclass, GUY, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, types, urge, validate, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -18,7 +18,7 @@
 
   ({isa, equals, validate} = types);
 
-  Datom = (function() {
+  Dataclass = (function() {
     //===========================================================================================================
 
       // DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
@@ -37,7 +37,7 @@
     //     return null
 
       //===========================================================================================================
-    class Datom {
+    class Dataclass {
       //---------------------------------------------------------------------------------------------------------
       static new_datom(x) {
         return new Proxy(x, {
@@ -78,9 +78,9 @@
     };
 
     //---------------------------------------------------------------------------------------------------------
-    Datom.declaration = null;
+    Dataclass.declaration = null;
 
-    return Datom;
+    return Dataclass;
 
   }).call(this);
 
@@ -88,7 +88,7 @@
   this.datom_as_dataclass = function(T, done) {
     (function() {      //.........................................................................................................
       var d, error;
-      d = new Datom();
+      d = new Dataclass();
       info('^12-7^', Object.isFrozen(d));
       if (T != null) {
         T.eq(Object.isFrozen(d), false);
@@ -112,7 +112,7 @@
     (function() {      //.........................................................................................................
       var Quantity, error, q;
       Quantity = (function() {
-        class Quantity extends Datom {
+        class Quantity extends Dataclass {
           //-----------------------------------------------------------------------------------------------------
           constructor(cfg) {
             // super { template..., cfg..., }
@@ -146,7 +146,7 @@
         q.foo = 42;
       } catch (error1) {
         error = error1;
-        warn('^Datom@1^', GUY.trm.reverse(error.message));
+        warn('^Dataclass@1^', GUY.trm.reverse(error.message));
       }
       if (T != null) {
         T.throws(/.*/, function() {
@@ -185,7 +185,7 @@
       var Quantity, q;
       Quantity = (function() {
         //.......................................................................................................
-        class Quantity extends Datom {};
+        class Quantity extends Dataclass {};
 
         //-----------------------------------------------------------------------------------------------------
         Quantity.declaration = {
@@ -252,7 +252,7 @@
     var Something;
     Something = (function() {
       //.........................................................................................................
-      class Something extends Datom {};
+      class Something extends Dataclass {};
 
       //-------------------------------------------------------------------------------------------------------
       Something.declaration = {
@@ -300,7 +300,7 @@
         s.values.push(7);
       } catch (error1) {
         error = error1;
-        warn('^Datom@1^', GUY.trm.reverse(error.message));
+        warn('^Dataclass@1^', GUY.trm.reverse(error.message));
       }
       if (T != null) {
         T.throws(/object is not extensible/, function() {
@@ -324,7 +324,7 @@
       });
       Something = (function() {
         //.......................................................................................................
-        class Something extends Datom {};
+        class Something extends Dataclass {};
 
         //-----------------------------------------------------------------------------------------------------
         Something.types = my_types;
@@ -357,7 +357,7 @@
       });
       Something = (function() {
         //.......................................................................................................
-        class Something extends Datom {};
+        class Something extends Dataclass {};
 
         //-----------------------------------------------------------------------------------------------------
         Something.types = my_types;
