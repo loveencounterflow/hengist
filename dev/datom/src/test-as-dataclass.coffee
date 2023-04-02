@@ -31,8 +31,7 @@ types                     = new ( require 'intertype' ).Intertype
 class Datom
 
   #---------------------------------------------------------------------------------------------------------
-  @declaration:
-    template: null
+  @declaration: null
 
   #---------------------------------------------------------------------------------------------------------
   @new_datom: ( x ) -> new Proxy x,
@@ -47,21 +46,17 @@ class Datom
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    ### TAINT naive implementation, check for validity ###
-    # debug '^12-1^', [ @constructor.declaration.template, cfg, ]
-    # debug '^12-2^', [ @, ]
-    # debug '^12-3^', [ @constructor, ]
-    # debug '^12-4^', [ new.target, ]
-    # debug '^12-5^', [ new.target.constructor, ]
-    # debug '^12-6^', [ new.target?.constructor?.declaration?.template, ]
-    debug '^12-6^', [ @constructor?.declaration?.template, ]
-    for k, v of { ( @constructor.declaration?.template ? null )..., cfg..., }
-      @[ k ] = v
+    __types = new ( require '../../../apps/intertype' ).Intertype()
+    GUY.props.hide @, '__types', __types
+    if ( declaration = @constructor.declaration )?
+      @__types.declare[ @constructor.name ] declaration
+      @[ k ] = v for k, v of @__types.create[ @constructor.name ] cfg
     return @constructor.new_datom @
 
 
-#-----------------------------------------------------------------------------------------------------------
-@datom_as_dataclass = ( T, done ) ->
+
+#===========================================================================================================
+
   # DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
   # probes_and_matchers = [
   #   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
@@ -76,6 +71,9 @@ class Datom
   #     T.ok not Object.isFrozen d
   #     resolve d
   #     return null
+
+#-----------------------------------------------------------------------------------------------------------
+@datom_as_dataclass = ( T, done ) ->
   #.........................................................................................................
   do ->
     d = new Datom()
@@ -87,31 +85,64 @@ class Datom
     return null
   #.........................................................................................................
   do ->
-    class E extends Datom
+    class Quantity extends Datom
 
       #-----------------------------------------------------------------------------------------------------
       @declaration:
+        fields:
+          q:    'float'
+          u:    'nonempty.text'
         template:
-          foo: 41
-          bar: 42
-          baz: 43
+          q:    0
+          u:    'unit'
 
       #-----------------------------------------------------------------------------------------------------
       constructor: ( cfg ) ->
         # super { template..., cfg..., }
         super cfg
         return undefined
-    e = new E()
-    T?.eq ( Object.isFrozen e ), false
-    try e.foo = 42 catch error then warn '^Datom@1^', GUY.trm.reverse error.message
-    T?.throws /.*/, -> e.foo = 42
-    T?.eq ( Object.isFrozen e ), true
+    #.......................................................................................................
+    q = new Quantity()
+    T?.eq ( Object.isFrozen q ), false
+    try q.foo = 42 catch error then warn '^Datom@1^', GUY.trm.reverse error.message
+    T?.throws /.*/, -> q.foo = 42
+    T?.eq ( Object.isFrozen q ), true
     ### TAINT should use method independent of `inspect` (which could be user-configured?) ###
-    T?.eq ( ( require 'util' ).inspect e ), 'E { foo: 41, bar: 42, baz: 43 }'
-    T?.eq e.foo, 41
-    T?.eq e.bar, 42
-    T?.eq e.baz, 43
-    T?.eq e, { foo: 41, bar: 42, baz: 43, }
+    T?.eq ( ( require 'util' ).inspect q ), "Quantity { q: 0, u: 'unit' }"
+    T?.eq q.q, 0
+    T?.eq q.u, 'unit'
+    T?.eq q, { q: 0, u: 'unit', }
+    return null
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@datom_dataclass_automatic_validation = ( T, done ) ->
+  #.........................................................................................................
+  do ->
+    #.......................................................................................................
+    class Quantity extends Datom
+
+      #-----------------------------------------------------------------------------------------------------
+      @declaration:
+        fields:
+          q:    'float'
+          u:    'nonempty.text'
+        template:
+          q:    0
+          u:    'unit'
+
+      # #-----------------------------------------------------------------------------------------------------
+      # constructor: ( cfg ) ->
+      #   # super { template..., cfg..., }
+      #   super cfg
+      #   return undefined
+    #.......................................................................................................
+    T?.eq ( q = new Quantity() ), { q: 0, u: 'unit', }
+    T?.eq ( q = new Quantity { q: 0, u: 'unit', } ), { q: 0, u: 'unit', }
+    T?.eq ( q = new Quantity { q: 23, u: 'm', } ), { q: 23, u: 'm', }
+    T?.throws /not a valid Quantity/, -> q = new Quantity { q: 23, u: '', }
     return null
   #.........................................................................................................
   done()
@@ -122,7 +153,6 @@ class Datom
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @fresh_datom_with_freeze
-  test @datom_as_dataclass
-
+  # test @datom_as_dataclass
+  test @datom_dataclass_automatic_validation
 
