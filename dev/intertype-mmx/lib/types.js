@@ -101,8 +101,8 @@
       "@isa.boolean x.extras": function(x) {
         return this.isa.boolean(x.extras); // refers to result of `type.create()`
       },
-      "if extras is false, default must be an object": function(x) {
-        return x.extras || (this.isa.object(x.default));
+      "if extras is false, template must be an object": function(x) {
+        return x.extras || (this.isa.object(x.template));
       },
       "@isa_optional.function x.create": function(x) {
         return this.isa_optional.function(x.create);
@@ -120,7 +120,7 @@
     isa: null,
     fields: null,
     collection: false,
-    /* `default` omitted on purpose */
+    /* `template` omitted on purpose */
     create: null,
     cast: null,
     // copy:             false     # refers to result of `type.create()`

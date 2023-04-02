@@ -43,19 +43,16 @@
 
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
-        var k, ref, ref1, ref2, ref3, ref4, v;
-        /* TAINT naive implementation, check for validity */
-        // debug '^12-1^', [ @constructor.declaration.template, cfg, ]
-        // debug '^12-2^', [ @, ]
-        // debug '^12-3^', [ @constructor, ]
-        // debug '^12-4^', [ new.target, ]
-        // debug '^12-5^', [ new.target.constructor, ]
-        // debug '^12-6^', [ new.target?.constructor?.declaration?.template, ]
-        debug('^12-6^', [(ref = this.constructor) != null ? (ref1 = ref.declaration) != null ? ref1.template : void 0 : void 0]);
-        ref4 = {...((ref2 = (ref3 = this.constructor.declaration) != null ? ref3.template : void 0) != null ? ref2 : null), ...cfg};
-        for (k in ref4) {
-          v = ref4[k];
-          this[k] = v;
+        var __types, declaration, k, ref, v;
+        __types = new (require('../../../apps/intertype')).Intertype();
+        GUY.props.hide(this, '__types', __types);
+        if ((declaration = this.constructor.declaration) != null) {
+          this.__types.declare[this.constructor.name](declaration);
+          ref = this.__types.create[this.constructor.name](cfg);
+          for (k in ref) {
+            v = ref[k];
+            this[k] = v;
+          }
         }
         return this.constructor.new_datom(this);
       }
@@ -63,31 +60,32 @@
     };
 
     //---------------------------------------------------------------------------------------------------------
-    Datom.declaration = {
-      template: null
-    };
+    Datom.declaration = null;
 
     return Datom;
 
   }).call(this);
 
+  //===========================================================================================================
+
+  // DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
+  // probes_and_matchers = [
+  //   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
+  //   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
+  //   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+  //   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+  //   ]
+  // #.........................................................................................................
+  // for [ probe, matcher, error, ] in probes_and_matchers
+  //   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+  //     d = DATOM.new_fresh_datom probe...
+  //     T.ok not Object.isFrozen d
+  //     resolve d
+  //     return null
+
   //-----------------------------------------------------------------------------------------------------------
   this.datom_as_dataclass = function(T, done) {
-    (function() {      // DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
-      // probes_and_matchers = [
-      //   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
-      //   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
-      //   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-      //   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-      //   ]
-      // #.........................................................................................................
-      // for [ probe, matcher, error, ] in probes_and_matchers
-      //   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      //     d = DATOM.new_fresh_datom probe...
-      //     T.ok not Object.isFrozen d
-      //     resolve d
-      //     return null
-      //.........................................................................................................
+    (function() {      //.........................................................................................................
       var d, error;
       d = new Datom();
       info('^12-7^', Object.isFrozen(d));
@@ -111,9 +109,9 @@
       return null;
     })();
     (function() {      //.........................................................................................................
-      var E, e, error;
-      E = (function() {
-        class E extends Datom {
+      var Quantity, error, q;
+      Quantity = (function() {
+        class Quantity extends Datom {
           //-----------------------------------------------------------------------------------------------------
           constructor(cfg) {
             // super { template..., cfg..., }
@@ -124,53 +122,121 @@
         };
 
         //-----------------------------------------------------------------------------------------------------
-        E.declaration = {
+        Quantity.declaration = {
+          fields: {
+            q: 'float',
+            u: 'nonempty.text'
+          },
           template: {
-            foo: 41,
-            bar: 42,
-            baz: 43
+            q: 0,
+            u: 'unit'
           }
         };
 
-        return E;
+        return Quantity;
 
       }).call(this);
-      e = new E();
+      //.......................................................................................................
+      q = new Quantity();
       if (T != null) {
-        T.eq(Object.isFrozen(e), false);
+        T.eq(Object.isFrozen(q), false);
       }
       try {
-        e.foo = 42;
+        q.foo = 42;
       } catch (error1) {
         error = error1;
         warn('^Datom@1^', GUY.trm.reverse(error.message));
       }
       if (T != null) {
         T.throws(/.*/, function() {
-          return e.foo = 42;
+          return q.foo = 42;
         });
       }
       if (T != null) {
-        T.eq(Object.isFrozen(e), true);
+        T.eq(Object.isFrozen(q), true);
       }
       /* TAINT should use method independent of `inspect` (which could be user-configured?) */
       if (T != null) {
-        T.eq((require('util')).inspect(e), 'E { foo: 41, bar: 42, baz: 43 }');
+        T.eq((require('util')).inspect(q), "Quantity { q: 0, u: 'unit' }");
       }
       if (T != null) {
-        T.eq(e.foo, 41);
+        T.eq(q.q, 0);
       }
       if (T != null) {
-        T.eq(e.bar, 42);
+        T.eq(q.u, 'unit');
       }
       if (T != null) {
-        T.eq(e.baz, 43);
+        T.eq(q, {
+          q: 0,
+          u: 'unit'
+        });
+      }
+      return null;
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.datom_dataclass_automatic_validation = function(T, done) {
+    (function() {      //.........................................................................................................
+      var Quantity, q;
+      Quantity = (function() {
+        //.......................................................................................................
+        class Quantity extends Datom {};
+
+        //-----------------------------------------------------------------------------------------------------
+        Quantity.declaration = {
+          fields: {
+            q: 'float',
+            u: 'nonempty.text'
+          },
+          template: {
+            q: 0,
+            u: 'unit'
+          }
+        };
+
+        return Quantity;
+
+      }).call(this);
+      // #-----------------------------------------------------------------------------------------------------
+      // constructor: ( cfg ) ->
+      //   # super { template..., cfg..., }
+      //   super cfg
+      //   return undefined
+      //.......................................................................................................
+      if (T != null) {
+        T.eq((q = new Quantity()), {
+          q: 0,
+          u: 'unit'
+        });
       }
       if (T != null) {
-        T.eq(e, {
-          foo: 41,
-          bar: 42,
-          baz: 43
+        T.eq((q = new Quantity({
+          q: 0,
+          u: 'unit'
+        })), {
+          q: 0,
+          u: 'unit'
+        });
+      }
+      if (T != null) {
+        T.eq((q = new Quantity({
+          q: 23,
+          u: 'm'
+        })), {
+          q: 23,
+          u: 'm'
+        });
+      }
+      if (T != null) {
+        T.throws(/not a valid Quantity/, function() {
+          return q = new Quantity({
+            q: 23,
+            u: ''
+          });
         });
       }
       return null;
@@ -184,8 +250,8 @@
   if (require.main === module) {
     (() => {
       // test @
-      // test @fresh_datom_with_freeze
-      return test(this.datom_as_dataclass);
+      // test @datom_as_dataclass
+      return test(this.datom_dataclass_automatic_validation);
     })();
   }
 

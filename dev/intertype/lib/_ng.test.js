@@ -1520,7 +1520,7 @@
       },
       $value: 'float',
       $unit: 'nonempty.text',
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -1549,7 +1549,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.create_returns_deep_copy_of_default = function(T, done) {
+  this.create_returns_deep_copy_of_template = function(T, done) {
     var Intertype, d, e, mylist, types;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
@@ -1558,7 +1558,7 @@
     types.declare.frob({
       $list: 'list',
       $blah: 'nonempty.text',
-      default: {
+      template: {
         list: [],
         blah: null
       }
@@ -1601,7 +1601,7 @@
     //     ( x ) -> @isa.nonempty.text x.blah
     //     ]
     //   seal:     'deep'
-    //   default:
+    //   template:
     //     list:     []
     //     blah:     null
     //.........................................................................................................
@@ -1609,7 +1609,7 @@
       $list: 'list',
       $blah: 'nonempty.text',
       freeze: 'deep',
-      default: {
+      template: {
         list: [],
         blah: null
       }
@@ -1619,7 +1619,7 @@
       $list: 'list',
       $blah: 'nonempty.text',
       extras: false,
-      default: {
+      template: {
         list: [],
         blah: null
       }
@@ -1711,7 +1711,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.declare_NG_defaults = function(T, done) {
+  this.declare_NG_templates = function(T, done) {
     var Intertype, types;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
@@ -1720,7 +1720,7 @@
     types.declare.quantity({
       $value: 'float',
       $unit: 'nonempty.text',
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -1729,7 +1729,7 @@
     types.declare.point2d({
       $x: 'float',
       $y: 'float',
-      default: {
+      template: {
         x: 0,
         y: 0
       },
@@ -1769,7 +1769,7 @@
       value: 1.23,
       unit: 'm'
     }), true) : void 0);
-    info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.default, ...{
+    info('^868-14^', T != null ? T.eq(types.validate.quantity({...types.registry.quantity.template, ...{
         value: 44,
         unit: 'g'
       }}), {
@@ -1791,7 +1791,7 @@
       return types.validate.empty.text(42);
     }) : void 0);
     info('^868-17^', T != null ? T.throws(/not a valid quantity/, function() {
-      return types.validate.quantity({...types.registry.quantity.default, ...{
+      return types.validate.quantity({...types.registry.quantity.template, ...{
           value: null
         }});
     }) : void 0);
@@ -2314,7 +2314,7 @@
       declare.quantity({
         $value: 'float',
         $unit: 'nonempty.text',
-        default: {
+        template: {
           value: 0,
           unit: null
         }
@@ -2370,13 +2370,13 @@
     whisper('#############################################');
     Intertype = class Intertype {
       create_type_cfg(cfg) {
-        var R, defaults, k, name, v;
-        defaults = {
+        var R, k, name, template, v;
+        template = {
           extras: true,
           collection: false,
           type: null
         };
-        cfg = {...defaults, ...cfg};
+        cfg = {...template, ...cfg};
         name = cfg.type;
         R = (function(x) {
           return x ** 2;
@@ -2582,7 +2582,7 @@
       $value: 'float',
       $unit: 'nonempty.text',
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -2592,7 +2592,7 @@
       $width: 'quantity',
       $height: 'quantity',
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -2937,7 +2937,7 @@
             $foo: 'text',
             $bar: 'text',
             create: (function() {}),
-            default: {},
+            template: {},
             extras: false,
             freeze: true,
             seal: true,
@@ -2950,7 +2950,7 @@
         {
           collection: true,
           create: 'f(create)',
-          default: {},
+          template: {},
           extras: false,
           fields: {
             foo: 'f(foobar.foo:text)',
@@ -2995,7 +2995,7 @@
       $value: 'float',
       $unit: 'nonempty.text',
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -3004,7 +3004,7 @@
       $width: 'quantity',
       $height: 'quantity',
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -3231,7 +3231,7 @@
       $value: 'float',
       $unit: 'nonempty.text',
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -3240,7 +3240,7 @@
       $width: 'quantity',
       $height: 'quantity',
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -3394,7 +3394,7 @@
       $value: 'float',
       $unit: 'nonempty.text',
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -3403,7 +3403,7 @@
       $width: 'quantity',
       $height: 'quantity',
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -3791,7 +3791,7 @@
         fields: {
           bar: 'text'
         },
-        default: {
+        template: {
           bar: 'baz'
         }
       });
@@ -3830,7 +3830,7 @@
         fields: {
           bar: 'regex'
         },
-        default: {
+        template: {
           bar: /baz/
         }
       });
@@ -3869,7 +3869,7 @@
         fields: {
           bar: 'text.or.regex'
         },
-        default: {
+        template: {
           bar: /baz/
         }
       });
@@ -4078,7 +4078,7 @@
         unit: 'nonempty.text'
       },
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       }
@@ -4089,7 +4089,7 @@
         height: 'quantity'
       },
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -4149,7 +4149,7 @@
         unit: 'nonempty.text'
       },
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       },
@@ -4184,7 +4184,7 @@
         height: 'quantity'
       },
       extras: false,
-      default: {
+      template: {
         width: {
           value: 0,
           unit: 'mm'
@@ -4311,7 +4311,7 @@
         unit: 'nonempty.text'
       },
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       },
@@ -4362,7 +4362,7 @@
         unit: 'nonempty.text'
       },
       extras: false,
-      default: {
+      template: {
         value: 0,
         unit: null
       },
@@ -4481,7 +4481,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 0);
       },
-      default: function() {},
+      template: function() {},
       override: true
     });
     //.........................................................................................................
@@ -4489,7 +4489,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 1);
       },
-      default: function(x) {},
+      template: function(x) {},
       override: true
     });
     //.........................................................................................................
@@ -4497,7 +4497,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 2);
       },
-      default: function(x, y) {},
+      template: function(x, y) {},
       override: true
     });
     //.........................................................................................................
@@ -4505,7 +4505,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 3);
       },
-      default: function(x, y, z) {},
+      template: function(x, y, z) {},
       override: true
     });
     //.........................................................................................................
@@ -4538,7 +4538,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 0);
       },
-      default: function() {},
+      template: function() {},
       override: true
     });
     //.........................................................................................................
@@ -4546,7 +4546,7 @@
       isa: function(x) {
         return (this.isa.function(x)) && (x.length === 1);
       },
-      default: function(x) {},
+      template: function(x) {},
       override: true
     });
     //.........................................................................................................
@@ -4625,7 +4625,7 @@
       isa: function(x) {
         return x === null;
       },
-      default: null,
+      template: null,
       override: true
     });
     //.........................................................................................................
@@ -4660,7 +4660,7 @@
       isa: function(x) {
         return x === 42;
       },
-      default: 42,
+      template: 42,
       override: true
     });
     //.........................................................................................................
@@ -4691,7 +4691,7 @@
       isa: function(x) {
         return x === 42;
       },
-      default: 42,
+      template: 42,
       override: false
     });
     //.........................................................................................................
@@ -4725,7 +4725,7 @@
       isa: function(x) {
         return x === null;
       },
-      default: null,
+      template: null,
       override: true
     });
     //.........................................................................................................
@@ -4774,7 +4774,7 @@
       isa: function(x) {
         return x === null;
       },
-      default: null,
+      template: null,
       override: true
     });
     //.........................................................................................................
@@ -4853,7 +4853,7 @@
         first: 'anything',
         last: 'anything'
       },
-      default: {
+      template: {
         first: misfit,
         last: misfit
       },
@@ -4914,7 +4914,7 @@
         a: 'integer',
         b: 'integer'
       },
-      default: {
+      template: {
         a: 0,
         b: 1
       }
@@ -5050,11 +5050,102 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_either_default_or_template = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (function() {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      types.declare.quantity({
+        fields: {
+          q: 'float',
+          u: 'nonempty.text'
+        },
+        default: {
+          q: 1,
+          u: 'unit'
+        }
+      });
+      if (T != null) {
+        T.eq(types.isa.quantity(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: null,
+          u: 'm'
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: 12,
+          u: 'm'
+        }), true);
+      }
+      return T != null ? T.throws(/type 'quantity' does not have a `template` value or a `create\(\)` method/, function() {
+        return T != null ? T.eq(types.create.quantity({
+          q: 12,
+          u: 'm'
+        }), {
+          q: 12,
+          u: 'm'
+        }) : void 0;
+      }) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      types.declare.quantity({
+        fields: {
+          q: 'float',
+          u: 'nonempty.text'
+        },
+        template: {
+          q: 1,
+          u: 'unit'
+        }
+      });
+      if (T != null) {
+        T.eq(types.isa.quantity(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: null,
+          u: 'm'
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: 12,
+          u: 'm'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.create.quantity({
+          q: 12,
+          u: 'm'
+        }), {
+          q: 12,
+          u: 'm'
+        });
+      }
+      return T != null ? T.eq(types.create.quantity(), {
+        q: 1,
+        u: 'unit'
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @is_extension_of_allows_all_values
+    // test @can_use_either_default_or_template
     test(this);
   }
+
+  // @declare_NG_templates()
 
 }).call(this);
 
