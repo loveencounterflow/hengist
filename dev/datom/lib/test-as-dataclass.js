@@ -20,6 +20,23 @@
 
   Datom = (function() {
     //===========================================================================================================
+
+      // DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
+    // probes_and_matchers = [
+    //   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
+    //   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
+    //   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+    //   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
+    //   ]
+    // #.........................................................................................................
+    // for [ probe, matcher, error, ] in probes_and_matchers
+    //   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+    //     d = DATOM.new_fresh_datom probe...
+    //     T.ok not Object.isFrozen d
+    //     resolve d
+    //     return null
+
+      //===========================================================================================================
     class Datom {
       //---------------------------------------------------------------------------------------------------------
       static new_datom(x) {
@@ -43,18 +60,19 @@
 
       //---------------------------------------------------------------------------------------------------------
       constructor(cfg) {
-        var __types, declaration, k, ref, v;
-        __types = new (require('../../../apps/intertype')).Intertype();
+        var __types, clasz, declaration, k, ref, ref1, v;
+        clasz = this.constructor;
+        __types = (ref = clasz.types) != null ? ref : new (require('../../../apps/intertype')).Intertype();
         GUY.props.hide(this, '__types', __types);
-        if ((declaration = this.constructor.declaration) != null) {
-          this.__types.declare[this.constructor.name](declaration);
-          ref = this.__types.create[this.constructor.name](cfg);
-          for (k in ref) {
-            v = ref[k];
+        if ((declaration = clasz.declaration) != null) {
+          this.__types.declare[clasz.name](declaration);
+          ref1 = this.__types.create[clasz.name](cfg);
+          for (k in ref1) {
+            v = ref1[k];
             this[k] = v;
           }
         }
-        return this.constructor.new_datom(this);
+        return clasz.new_datom(this);
       }
 
     };
@@ -65,23 +83,6 @@
     return Datom;
 
   }).call(this);
-
-  //===========================================================================================================
-
-  // DATOM = new ( require '../../../apps/datom' ).Datom { freeze: false, }
-  // probes_and_matchers = [
-  //   [ [ '^foo' ], { '$fresh': true, '$key': '^foo' }, null ]
-  //   [ [ '^foo', { foo: 'bar' } ], { foo: 'bar', '$fresh': true, '$key': '^foo' }, null ]
-  //   [ [ '^foo', { value: 42 } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-  //   [ [ '^foo', { value: 42 }, { '$fresh': false } ], { value: 42, '$fresh': true, '$key': '^foo' }, null ]
-  //   ]
-  // #.........................................................................................................
-  // for [ probe, matcher, error, ] in probes_and_matchers
-  //   await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-  //     d = DATOM.new_fresh_datom probe...
-  //     T.ok not Object.isFrozen d
-  //     resolve d
-  //     return null
 
   //-----------------------------------------------------------------------------------------------------------
   this.datom_as_dataclass = function(T, done) {
@@ -246,14 +247,158 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.datom_dataclass_deep_freezing = function(T, done) {
+    var Something;
+    Something = (function() {
+      //.........................................................................................................
+      class Something extends Datom {};
+
+      //-------------------------------------------------------------------------------------------------------
+      Something.declaration = {
+        freeze: 'deep',
+        fields: {
+          values: 'list.of.integer'
+        },
+        template: {
+          values: []
+        }
+      };
+
+      return Something;
+
+    }).call(this);
+    (function() {      //.........................................................................................................
+      var s;
+      if (T != null) {
+        T.eq((s = new Something()), {
+          values: []
+        });
+      }
+      if (T != null) {
+        T.eq((s = new Something({
+          values: [3, 5]
+        })), {
+          values: [3, 5]
+        });
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var error, s;
+      s = new Something({
+        values: [3, 5]
+      });
+      debug('^23-1^', s);
+      if (T != null) {
+        T.eq(Object.isFrozen(s), true);
+      }
+      if (T != null) {
+        T.eq(Object.isFrozen(s.values), true);
+      }
+      try {
+        s.values.push(7);
+      } catch (error1) {
+        error = error1;
+        warn('^Datom@1^', GUY.trm.reverse(error.message));
+      }
+      if (T != null) {
+        T.throws(/object is not extensible/, function() {
+          return s.values.push(7);
+        });
+      }
+      return null;
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.datom_dataclass_custom_types_instance = function(T, done) {
+    (function() {      //.........................................................................................................
+      var Something, my_types, s;
+      my_types = new (require('../../../apps/intertype')).Intertype();
+      my_types.declare.awesome_list({
+        isa: 'list.of.integer'
+      });
+      Something = (function() {
+        //.......................................................................................................
+        class Something extends Datom {};
+
+        //-----------------------------------------------------------------------------------------------------
+        Something.types = my_types;
+
+        Something.declaration = {
+          freeze: 'deep',
+          fields: {
+            values: 'awesome_list'
+          },
+          template: {
+            values: []
+          }
+        };
+
+        return Something;
+
+      }).call(this);
+      //.......................................................................................................
+      s = new Something([4, 5, 6]);
+      if (T != null) {
+        T.eq(my_types === s.__types, true);
+      }
+      return null;
+    })();
+    (function() {      //.........................................................................................................
+      var Something, my_types;
+      my_types = new (require('../../../apps/intertype')).Intertype();
+      my_types.declare.awesome_list({
+        isa: 'list.of.integer'
+      });
+      Something = (function() {
+        //.......................................................................................................
+        class Something extends Datom {};
+
+        //-----------------------------------------------------------------------------------------------------
+        Something.types = my_types;
+
+        Something.declaration = {
+          freeze: 'deep',
+          fields: {
+            values: 'awesome_list'
+          },
+          template: {
+            values: []
+          }
+        };
+
+        return Something;
+
+      }).call(this);
+      //.......................................................................................................
+      if (T != null) {
+        T.throws(/not a valid Something/, function() {
+          return new Something({
+            values: ['wronk']
+          });
+        });
+      }
+      return null;
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @datom_as_dataclass
-      return test(this.datom_dataclass_automatic_validation);
+      return test(this);
     })();
   }
+
+  // test @datom_as_dataclass
+// test @datom_dataclass_automatic_validation
 
 }).call(this);
 
