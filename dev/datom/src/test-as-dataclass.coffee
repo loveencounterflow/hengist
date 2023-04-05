@@ -346,30 +346,6 @@ types                     = new ( require 'intertype' ).Intertype()
     T?.eq s, { mode: 'mymode', name: 'p', id: 'mymode:p', }
     T?.eq ( 'Something' in Object.keys my_types.registry ), true
     return null
-  # #.........................................................................................................
-  # do ->
-  #   my_types = new ( require '../../../apps/intertype' ).Intertype()
-  #   #.......................................................................................................
-  #   class Something extends Dataclass
-  #     #-----------------------------------------------------------------------------------------------------
-  #     @types: my_types
-  #     @declaration:
-  #       fields:
-  #         mode:   'nonempty.text'
-  #         name:   'nonempty.text'
-  #         id:     'nonempty.text'
-  #       template:
-  #         mode:   null
-  #         name:   null
-  #         id:     null
-  #       create: ( x ) ->
-  #         return x unless @isa.object x
-  #         R = { x..., id: "#{x.mode}:#{x.name}", }
-  #         return R
-  #   #.......................................................................................................
-  #   Something.register()
-  #   T?.eq ( 'Something' in Object.keys my_types.registry ), true
-  #   return null
   #.........................................................................................................
   done?()
   return null
