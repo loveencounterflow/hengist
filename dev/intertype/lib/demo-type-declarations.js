@@ -1,85 +1,88 @@
 (function() {
   'use strict';
-  var declare, isa, log, types,
-    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
+  var Attributor, GUY, Isa, debug, help, info, rpr, split, urge, warn;
 
-  types = new (require('../../../apps/intertype')).Intertype();
+  //===========================================================================================================
+  GUY = require('guy');
 
-  ({isa, declare} = types);
+  ({debug, info, warn, urge, help} = GUY.trm.get_loggers('INTERTYPE'));
 
-  log = console.log;
+  ({rpr} = GUY.trm);
 
-  declare('xy_quantity', {
-    test: [
-      function(x) {
-        return this.isa.object(x);
-      },
-      function(x) {
-        return this.isa.float(x.value);
-      },
-      function(x) {
-        return this.isa.nonempty.text(x.unit);
+  split = function(source) {
+    return source.split(/[\s_]+/u);
+  };
+
+  Attributor = (function() {
+    var clasz;
+
+    //===========================================================================================================
+    class Attributor extends Function {
+      static create_proxy(x) {
+        return new Proxy(x, {
+          get: function(target, key, receiver) {
+            urge('^98-1^', {key});
+            urge('^98-2^', target);
+            return function(...P) {
+              return target(key, ...P);
+            };
+          }
+        });
       }
-    ]
-  });
 
-  log('^1-1^', isa.xy_quantity(null));
-
-  log('^1-1^', isa.xy_quantity(42));
-
-  log('^1-1^', isa.xy_quantity({
-    value: 42,
-    unit: 'm'
-  }));
-
-  /* Simplest forms: either define by a single string (creating a type alias) or a single function (whose
-  processed source code will serve as a name to identify the rule): */
-  types.declare.string('text'); // now `string` is another word for `text`
-
-  types.declare.div3int(function(x) {
-    return modulo(x, 3) === 0;
-  });
-
-  //...........................................................................................................
-  types.declare.div3int({
-    groups: 'number',
-    all: [
-      'integer',
-      {
-        name: 'divisible by 3',
-        test: (function(x) {
-          return modulo(x,
-      3) === 0;
-        })
+      //---------------------------------------------------------------------------------------------------------
+      constructor() {
+        super('...P', 'return this._me.do(...P)');
+        this._me = this.bind(this);
+        return clasz.create_proxy(this._me);
       }
-    ]
-  });
 
-  //...........................................................................................................
-  types.declare.Type_cfg_groups_element({
-    all: [
-      'nonempty.text',
-      {
-        not_match: /[\s,]/
+      //---------------------------------------------------------------------------------------------------------
+      do(...P) {
+        info('^98-3^', P, split(P[0]));
+        return 123;
       }
-    ]
-  });
 
-  types.declare.Type_cfg_groups({
-    any: ['nonempty.text', 'list_of.Type_cfg_groups_element']
-  });
+    };
 
-  //...........................................................................................................
-  types.declare.Type_cfg_constructor_cfg({
-    all: {
-      self: 'object',
-      '.name': 'nonempty.text',
-      '.test': {
-        any: {'function': 'function', 'list_of.function': 'list_of.function'}
-      },
-      '.groups': 'Type_cfg_groups'
-    }
-  });
+    //---------------------------------------------------------------------------------------------------------
+    clasz = Attributor;
+
+    return Attributor;
+
+  }).call(this);
+
+  Isa = (function() {
+    var isa;
+
+    //===========================================================================================================
+    class Isa extends Attributor {};
+
+    //---------------------------------------------------------------------------------------------------------
+    Isa.prototype.do = isa = function(...P) {
+      var name;
+      [name, ...P] = P;
+      help('^98-4^', P, split(name));
+      return 789;
+    };
+
+    return Isa;
+
+  }).call(this);
+
+  //===========================================================================================================
+  if (module === require.main) {
+    (() => {
+      var isa;
+      debug('^98-5^', isa = new Isa());
+      info('^98-6^', isa);
+      debug('^98-7^', isa('float', 42));
+      debug('^98-8^', isa.float(42));
+      debug('^98-9^', isa.float_or_text(42));
+      debug('^98-10^', isa.float___or_text(42));
+      return debug('^98-11^', isa('float   or text', 42));
+    })();
+  }
 
 }).call(this);
 
