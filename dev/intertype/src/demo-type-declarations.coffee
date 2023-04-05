@@ -1,41 +1,65 @@
 
 'use strict'
 
-types       = new ( require '../../../apps/intertype' ).Intertype()
-{ isa
-  declare } = types
-log         = console.log
-
-declare 'xy_quantity', test: [
-  ( x ) -> @isa.object          x
-  ( x ) -> @isa.float           x.value
-  ( x ) -> @isa.nonempty.text   x.unit
-  ]
-
-log '^1-1^', isa.xy_quantity null
-log '^1-1^', isa.xy_quantity 42
-log '^1-1^', isa.xy_quantity { value: 42, unit: 'm', }
 
 
-### Simplest forms: either define by a single string (creating a type alias) or a single function (whose
-processed source code will serve as a name to identify the rule): ###
-types.declare.string 'text'                 # now `string` is another word for `text`
-types.declare.div3int ( x ) -> x %% 3 is 0
-#...........................................................................................................
-types.declare.div3int
-  groups:   'number'
-  all: [
-    'integer'
-    { name: 'divisible by 3', test: ( ( x ) -> x %% 3 is 0 ), } ]
-#...........................................................................................................
-types.declare.Type_cfg_groups_element all: [ 'nonempty.text', { not_match: /[\s,]/, }, ]
-types.declare.Type_cfg_groups         any: [ 'nonempty.text', 'list_of.Type_cfg_groups_element', ]
-#...........................................................................................................
-types.declare.Type_cfg_constructor_cfg
-  all: {
-    self:         'object'
-    '.name':      'nonempty.text'
-    '.test':      any:  { 'function', 'list_of.function', }
-    '.groups':    'Type_cfg_groups'
-    }
+#===========================================================================================================
+GUY                       = require 'guy'
+{ debug
+  info
+  warn
+  urge
+  help }                  = GUY.trm.get_loggers 'INTERTYPE'
+{ rpr }                   = GUY.trm
+
+split = ( source ) -> source.split /[\s_]+/u
+
+
+#===========================================================================================================
+class Attributor extends Function
+
+  #---------------------------------------------------------------------------------------------------------
+  clasz = @
+  @create_proxy: ( x ) -> new Proxy x,
+    get: ( target, key, receiver ) ->
+      urge '^98-1^', { key, }
+      urge '^98-2^', target
+      return ( P... ) -> target key, P...
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ->
+    super '...P', 'return this._me.do(...P)'
+    @_me        = @bind @
+    return clasz.create_proxy @_me
+
+  #---------------------------------------------------------------------------------------------------------
+  do: ( P... ) ->
+    info '^98-3^', P, split P[ 0 ]
+    return 123
+
+
+#===========================================================================================================
+class Isa extends Attributor
+
+  #---------------------------------------------------------------------------------------------------------
+  do: isa = ( P... ) ->
+    [ name, P..., ] = P
+    help '^98-4^', P, split name
+    return 789
+
+#===========================================================================================================
+if module is require.main then do =>
+  debug '^98-5^', isa = new Isa()
+  info '^98-6^', isa
+  debug '^98-7^', isa 'float', 42
+  debug '^98-8^', isa.float 42
+  debug '^98-9^', isa.float_or_text 42
+  debug '^98-10^', isa.float___or_text 42
+  debug '^98-11^', isa 'float   or text', 42
+
+
+
+
+
+
 
