@@ -45,42 +45,16 @@ types                     = new ( require 'intertype' ).Intertype()
   #     return null
 
 
-#===========================================================================================================
-class Dataclass
-
-  #---------------------------------------------------------------------------------------------------------
-  @declaration: null
-
-  #---------------------------------------------------------------------------------------------------------
-  @new_datom: ( x ) -> new Proxy x,
-    #.......................................................................................................
-    get: ( target, key, receiver ) ->
-      Object.freeze target unless Object.isFrozen target
-      return Reflect.get target, key, receiver
-    #.......................................................................................................
-    set: ( target, key, value, receiver ) ->
-      Object.freeze target unless Object.isFrozen target
-      throw new TypeError "Cannot assign to read only property #{rpr key} of object #{rpr target}"
-
-  #---------------------------------------------------------------------------------------------------------
-  constructor: ( cfg ) ->
-    clasz   = @constructor
-    __types = clasz.types ? new ( require '../../../apps/intertype' ).Intertype()
-    GUY.props.hide @, '__types', __types
-    if ( declaration = clasz.declaration )?
-      @__types.declare[ clasz.name ] declaration
-      @[ k ] = v for k, v of @__types.create[ clasz.name ] cfg
-    return clasz.new_datom @
-
 
 
 #-----------------------------------------------------------------------------------------------------------
 @datom_as_dataclass = ( T, done ) ->
+  { Dataclass } = require '../../../apps/datom'
   #.........................................................................................................
   do ->
     d = new Dataclass()
     info '^12-7^', ( Object.isFrozen d )
-    T?.eq ( Object.isFrozen d ), false
+    T?.eq ( Object.isFrozen d ), true # used to be false
     try d.foo = 42 catch error then warn GUY.trm.reverse error.message
     T?.eq ( Object.isFrozen d ), true
     T?.throws /.*/, -> d.foo = 42
