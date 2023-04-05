@@ -2544,10 +2544,115 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@can_use_freeze_true_false_deep_shallow = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    types.declare.frob
+      freeze:   'deep'
+      fields:
+        list:  'list'
+        blah:  'text'
+      template:
+        list:     []
+        blah:     null
+    #.......................................................................................................
+    mylist        = [ 1, 2, 3, ]
+    d             = types.create.frob { list: mylist, blah: 'blub', }
+    T?.ok ( d.list isnt mylist )
+    T?.ok ( not Object.isFrozen mylist )
+    T?.ok ( Object.isFrozen d.list )
+    try d.blah = 'gaga' catch error then warn '^88-1^', rvr error.message
+    T?.throws /Cannot assign to read only property/, -> d.blah = 'gaga'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    types.declare.frob
+      freeze:   true
+      fields:
+        list:  'list'
+        blah:  'text'
+      template:
+        list:     []
+        blah:     null
+    #.......................................................................................................
+    mylist        = [ 1, 2, 3, ]
+    d             = types.create.frob { list: mylist, blah: 'blub', }
+    T?.ok ( d.list is mylist )
+    T?.ok ( not Object.isFrozen mylist )
+    T?.ok ( not Object.isFrozen d.list )
+    try d.blah = 'gaga' catch error then warn '^88-1^', rvr error.message
+    T?.throws /Cannot assign to read only property/, -> d.blah = 'gaga'
+    d.list.push 'changed'
+    T?.eq d, { list: [ 1, 2, 3, 'changed', ], blah: 'blub', }
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    types.declare.frob
+      freeze:   'shallow'
+      fields:
+        list:  'list'
+        blah:  'text'
+      template:
+        list:     []
+        blah:     null
+    #.......................................................................................................
+    mylist        = [ 1, 2, 3, ]
+    d             = types.create.frob { list: mylist, blah: 'blub', }
+    T?.ok ( d.list is mylist )
+    T?.ok ( not Object.isFrozen mylist )
+    T?.ok ( not Object.isFrozen d.list )
+    try d.blah = 'gaga' catch error then warn '^88-1^', rvr error.message
+    T?.throws /Cannot assign to read only property/, -> d.blah = 'gaga'
+    d.list.push 'changed'
+    T?.eq d, { list: [ 1, 2, 3, 'changed', ], blah: 'blub', }
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    types.declare.frob
+      freeze:   false
+      fields:
+        list:  'list'
+        blah:  'text'
+      template:
+        list:     []
+        blah:     null
+    #.......................................................................................................
+    mylist        = [ 1, 2, 3, ]
+    d             = types.create.frob { list: mylist, blah: 'blub', }
+    T?.ok ( d.list is mylist )
+    T?.ok ( not Object.isFrozen mylist )
+    T?.ok ( not Object.isFrozen d.list )
+    d.blah = 'gaga'
+    d.list.push 'changed'
+    T?.eq d, { list: [ 1, 2, 3, 'changed', ], blah: 'gaga', }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@knowntype_metatype = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  T?.eq ( types.isa.knowntype null      ), false
+  T?.eq ( types.isa.knowntype true      ), false
+  T?.eq ( types.isa.knowntype ''        ), false
+  T?.eq ( types.isa.knowntype 42        ), false
+  T?.eq ( types.isa.knowntype 'integer' ), true
+  T?.eq ( types.isa.knowntype 'foobar'  ), false
+  types.declare.foobar 'optional.positive0.integer'
+  T?.eq ( types.isa.knowntype 'foobar'  ), true
+  #.........................................................................................................
+  done?()
 
 ############################################################################################################
 unless module.parent?
   # test @is_extension_of_allows_all_values
   # test @can_use_either_default_or_template
   test @
+  # test @can_use_freeze_true_false_deep_shallow
+  # test @knowntype_metatype
   # @declare_NG_templates()
