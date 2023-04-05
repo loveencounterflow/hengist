@@ -5138,6 +5138,212 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_freeze_true_false_deep_shallow = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var d, error, mylist, types;
+      types = new Intertype();
+      types.declare.frob({
+        freeze: 'deep',
+        fields: {
+          list: 'list',
+          blah: 'text'
+        },
+        template: {
+          list: [],
+          blah: null
+        }
+      });
+      //.......................................................................................................
+      mylist = [1, 2, 3];
+      d = types.create.frob({
+        list: mylist,
+        blah: 'blub'
+      });
+      if (T != null) {
+        T.ok(d.list !== mylist);
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(mylist));
+      }
+      if (T != null) {
+        T.ok(Object.isFrozen(d.list));
+      }
+      try {
+        d.blah = 'gaga';
+      } catch (error1) {
+        error = error1;
+        warn('^88-1^', rvr(error.message));
+      }
+      return T != null ? T.throws(/Cannot assign to read only property/, function() {
+        return d.blah = 'gaga';
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, error, mylist, types;
+      types = new Intertype();
+      types.declare.frob({
+        freeze: true,
+        fields: {
+          list: 'list',
+          blah: 'text'
+        },
+        template: {
+          list: [],
+          blah: null
+        }
+      });
+      //.......................................................................................................
+      mylist = [1, 2, 3];
+      d = types.create.frob({
+        list: mylist,
+        blah: 'blub'
+      });
+      if (T != null) {
+        T.ok(d.list === mylist);
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(mylist));
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(d.list));
+      }
+      try {
+        d.blah = 'gaga';
+      } catch (error1) {
+        error = error1;
+        warn('^88-1^', rvr(error.message));
+      }
+      if (T != null) {
+        T.throws(/Cannot assign to read only property/, function() {
+          return d.blah = 'gaga';
+        });
+      }
+      d.list.push('changed');
+      return T != null ? T.eq(d, {
+        list: [1, 2, 3, 'changed'],
+        blah: 'blub'
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, error, mylist, types;
+      types = new Intertype();
+      types.declare.frob({
+        freeze: 'shallow',
+        fields: {
+          list: 'list',
+          blah: 'text'
+        },
+        template: {
+          list: [],
+          blah: null
+        }
+      });
+      //.......................................................................................................
+      mylist = [1, 2, 3];
+      d = types.create.frob({
+        list: mylist,
+        blah: 'blub'
+      });
+      if (T != null) {
+        T.ok(d.list === mylist);
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(mylist));
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(d.list));
+      }
+      try {
+        d.blah = 'gaga';
+      } catch (error1) {
+        error = error1;
+        warn('^88-1^', rvr(error.message));
+      }
+      if (T != null) {
+        T.throws(/Cannot assign to read only property/, function() {
+          return d.blah = 'gaga';
+        });
+      }
+      d.list.push('changed');
+      return T != null ? T.eq(d, {
+        list: [1, 2, 3, 'changed'],
+        blah: 'blub'
+      }) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var d, mylist, types;
+      types = new Intertype();
+      types.declare.frob({
+        freeze: false,
+        fields: {
+          list: 'list',
+          blah: 'text'
+        },
+        template: {
+          list: [],
+          blah: null
+        }
+      });
+      //.......................................................................................................
+      mylist = [1, 2, 3];
+      d = types.create.frob({
+        list: mylist,
+        blah: 'blub'
+      });
+      if (T != null) {
+        T.ok(d.list === mylist);
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(mylist));
+      }
+      if (T != null) {
+        T.ok(!Object.isFrozen(d.list));
+      }
+      d.blah = 'gaga';
+      d.list.push('changed');
+      return T != null ? T.eq(d, {
+        list: [1, 2, 3, 'changed'],
+        blah: 'gaga'
+      }) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.knowntype_metatype = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    if (T != null) {
+      T.eq(types.isa.knowntype(null), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype(true), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype(''), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype(42), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype('integer'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype('foobar'), false);
+    }
+    types.declare.foobar('optional.positive0.integer');
+    if (T != null) {
+      T.eq(types.isa.knowntype('foobar'), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @is_extension_of_allows_all_values
@@ -5145,7 +5351,9 @@
     test(this);
   }
 
-  // @declare_NG_templates()
+  // test @can_use_freeze_true_false_deep_shallow
+// test @knowntype_metatype
+// @declare_NG_templates()
 
 }).call(this);
 

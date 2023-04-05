@@ -32,7 +32,9 @@
   //===========================================================================================================
   // INTERNAL TYPES
   //-----------------------------------------------------------------------------------------------------------
-  // @types.declare 'deep_boolean', ( x ) -> x in [ 'deep', false, true, ]
+  this.types.declare('deep_boolean', function(x) {
+    return x === 'deep' || x === false || x === true;
+  });
 
   // #-----------------------------------------------------------------------------------------------------------
   // @types.declare 'Type_cfg_constructor_cfg', tests:
@@ -75,7 +77,6 @@
       // "@isa.deep_boolean x.copy":                       ( x ) -> @isa.boolean x.copy        # refers to result of `type.create()`
       // "@isa.boolean x.seal":                            ( x ) -> @isa.boolean x.seal        # refers to result of `type.create()`
       // "@isa.boolean x.oneshot":                         ( x ) -> @isa.boolean x.oneshot        # refers to result of `type.create()`
-      // "@isa.deep_boolean x.freeze":                     ( x ) -> @isa.deep_boolean x.freeze   # refers to result of `type.create()`
       //.........................................................................................................
       "@isa.object x": function(x) {
         return this.isa.object(x);
@@ -101,14 +102,17 @@
       "@isa.boolean x.extras": function(x) {
         return this.isa.boolean(x.extras); // refers to result of `type.create()`
       },
-      "if extras is false, template must be an object": function(x) {
-        return x.extras || (this.isa.object(x.template));
+      "if extras is false, default must be an object": function(x) {
+        return x.extras || (this.isa.object(x.default));
       },
       "@isa_optional.function x.create": function(x) {
         return this.isa_optional.function(x.create);
       },
       "@isa_optional.function x.cast": function(x) {
         return this.isa_optional.function(x.cast);
+      },
+      "@isa.deep_boolean x.freeze": function(x) {
+        return this.isa.deep_boolean(x.freeze); // refers to result of `type.create()`
       }
     }
   });
@@ -120,7 +124,7 @@
     isa: null,
     fields: null,
     collection: false,
-    /* `template` omitted on purpose */
+    /* `default` omitted on purpose */
     create: null,
     cast: null,
     // copy:             false     # refers to result of `type.create()`
