@@ -8,7 +8,7 @@
 
   rpr = CND.rpr;
 
-  badge = 'DJEHUTI/TESTS';
+  badge = 'INTERTALK/TESTS';
 
   debug = CND.get_logger('debug', badge);
 
@@ -34,7 +34,7 @@
   //   { DATOM }                 = require '../../../apps/datom'
   //   { new_datom
   //     select }                = DATOM
-  // { Djehuti }               = require '../../../apps/djehuti'
+  // { Djehuti }               = require '../../../apps/intertalk'
   //   #.........................................................................................................
   //   probes_and_matchers = [
   //     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -48,13 +48,13 @@
   //   return null
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DJEHUTI: public API shape"] = function(T, done) {
+  this["INTERTALK: public API shape"] = function(T, done) {
     var DATOM, Djehuti, XE, isa, k, known_keys, new_datom, select, type_of, types, validate;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
     types = DATOM.types;
     ({isa, validate, type_of} = types);
-    ({Djehuti} = require('../../../apps/djehuti'));
+    ({Djehuti} = require('../../../apps/intertalk'));
     //.........................................................................................................
     XE = new Djehuti();
     T.ok(isa.asyncfunction(XE.emit));
@@ -84,11 +84,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DJEHUTI: emit equivalently accepts key, value or datom"] = async function(T, done) {
+  this["INTERTALK: emit equivalently accepts key, value or datom"] = async function(T, done) {
     var DATOM, Djehuti, XE, count, error, new_datom, pattern, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/djehuti'));
+    ({Djehuti} = require('../../../apps/intertalk'));
     //.........................................................................................................
     count = 0;
     XE = new Djehuti();
@@ -129,11 +129,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DJEHUTI: throws when more than one contractor is added for given event key"] = function(T, done) {
+  this["INTERTALK: throws when more than one contractor is added for given event key"] = function(T, done) {
     var DATOM, Djehuti, XE, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/djehuti'));
+    ({Djehuti} = require('../../../apps/intertalk'));
     XE = new Djehuti();
     //.........................................................................................................
     XE.contract('^mykey', function(d) {});
@@ -146,11 +146,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DJEHUTI: can listen to events that have no specific listener"] = async function(T, done) {
+  this["INTERTALK: can listen to events that have no specific listener"] = async function(T, done) {
     var DATOM, Djehuti, XE, keys, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/djehuti'));
+    ({Djehuti} = require('../../../apps/intertalk'));
     XE = new Djehuti();
     //.........................................................................................................
     keys = {
@@ -188,11 +188,11 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this["DJEHUTI: delegation"] = async function(T, done) {
+  this["INTERTALK: delegation"] = async function(T, done) {
     var DATOM, Djehuti, XE, keys, new_datom, select;
     ({DATOM} = require('../../../apps/datom'));
     ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/djehuti'));
+    ({Djehuti} = require('../../../apps/intertalk'));
     XE = new Djehuti();
     //.........................................................................................................
     keys = {
@@ -243,8 +243,8 @@
   }
 
   // test @[ "public API shape" ]
-// test @[ "DJEHUTI: can listen to events that have no specific listener" ]
-// test @[ "DJEHUTI: delegation" ]
+// test @[ "INTERTALK: can listen to events that have no specific listener" ]
+// test @[ "INTERTALK: delegation" ]
 // test @[ "can listen to events that have no specific listener 2" ]
 // test @[ "emit equivalently accepts key, value or datom" ]
 

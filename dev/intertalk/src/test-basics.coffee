@@ -6,7 +6,7 @@
 ############################################################################################################
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'DJEHUTI/TESTS'
+badge                     = 'INTERTALK/TESTS'
 debug                     = CND.get_logger 'debug',     badge
 warn                      = CND.get_logger 'warn',      badge
 info                      = CND.get_logger 'info',      badge
@@ -23,7 +23,7 @@ jr                        = JSON.stringify
 #   { DATOM }                 = require '../../../apps/datom'
 #   { new_datom
 #     select }                = DATOM
-  # { Djehuti }               = require '../../../apps/djehuti'
+  # { Djehuti }               = require '../../../apps/intertalk'
 #   #.........................................................................................................
 #   probes_and_matchers = [
 #     [['^foo', { time: 1500000, value: "msg#1", }],{"time":1500000,"value":"msg#1","$key":"^foo"},null]
@@ -37,7 +37,7 @@ jr                        = JSON.stringify
 #   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DJEHUTI: public API shape" ] = ( T, done ) ->
+@[ "INTERTALK: public API shape" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
@@ -45,7 +45,7 @@ jr                        = JSON.stringify
   { isa
     validate
     type_of }               = types
-  { Djehuti }               = require '../../../apps/djehuti'
+  { Djehuti }               = require '../../../apps/intertalk'
   #.........................................................................................................
   XE = new Djehuti()
   T.ok isa.asyncfunction  XE.emit
@@ -65,11 +65,11 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DJEHUTI: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
+@[ "INTERTALK: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
-  { Djehuti }               = require '../../../apps/djehuti'
+  { Djehuti }               = require '../../../apps/intertalk'
   #.........................................................................................................
   count = 0
   XE    = new Djehuti()
@@ -95,11 +95,11 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DJEHUTI: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
+@[ "INTERTALK: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
-  { Djehuti }               = require '../../../apps/djehuti'
+  { Djehuti }               = require '../../../apps/intertalk'
   XE                        = new Djehuti()
   #.........................................................................................................
   XE.contract '^mykey', ( d ) ->
@@ -109,11 +109,11 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DJEHUTI: can listen to events that have no specific listener" ] = ( T, done ) ->
+@[ "INTERTALK: can listen to events that have no specific listener" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
-  { Djehuti }               = require '../../../apps/djehuti'
+  { Djehuti }               = require '../../../apps/intertalk'
   XE                        = new Djehuti()
   #.........................................................................................................
   keys =
@@ -139,11 +139,11 @@ jr                        = JSON.stringify
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "DJEHUTI: delegation" ] = ( T, done ) ->
+@[ "INTERTALK: delegation" ] = ( T, done ) ->
   { DATOM }                 = require '../../../apps/datom'
   { new_datom
     select }                = DATOM
-  { Djehuti }               = require '../../../apps/djehuti'
+  { Djehuti }               = require '../../../apps/intertalk'
   XE                        = new Djehuti()
   #.........................................................................................................
   keys = { listen: [], all: [], contract: [] }
@@ -165,8 +165,8 @@ jr                        = JSON.stringify
 if require.main is module then do =>
   test @
   # test @[ "public API shape" ]
-  # test @[ "DJEHUTI: can listen to events that have no specific listener" ]
-  # test @[ "DJEHUTI: delegation" ]
+  # test @[ "INTERTALK: can listen to events that have no specific listener" ]
+  # test @[ "INTERTALK: delegation" ]
   # test @[ "can listen to events that have no specific listener 2" ]
   # test @[ "emit equivalently accepts key, value or datom" ]
 
