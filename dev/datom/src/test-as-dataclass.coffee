@@ -354,84 +354,55 @@ types                     = new ( require 'intertype' ).Intertype()
 @datom_dataclass_with_instance_methods = ( T, done ) ->
   { Dataclass } = require '../../../apps/datom'
   #.........................................................................................................
-  base_types = new ( require '../../../apps/intertype' ).Intertype()
-  base_types.declare.ilx_codeunit_idx 'positive0.integer'
-  base_types.declare.ilx_line_number  'positive1.integer'
-  base_types.declare.ilx_token_value  'text'
-  base_types.declare.ilx_token_key ( x ) ->
-    return false unless @isa.text x
-    return ( x.indexOf ':' ) isnt -1
-  #.......................................................................................................
-  class Token extends Dataclass
-    clasz = @
-    @types: base_types
-    @declaration:
-      fields:
-        $key:   'ilx_token_key'
-        lnr1:   'ilx_line_number'
-        x1:     'ilx_codeunit_idx'
-        lnr2:   'ilx_line_number'
-        x2:     'ilx_codeunit_idx'
-        value:  'ilx_token_value'
-      template:
-        $key:   null
-        lnr1:   1
-        x1:     0
-        lnr2:   null
-        x2:     null
-        value:  ''
-      create: ( x ) ->
-        # debug '^create@108-5^', clasz
-        return x if x? and not @isa.object x
-        R       = { @registry.Token.template..., x..., }
-        R.lnr2 ?= R.lnr1
-        R.x2   ?= R.x1
-        if @isa.text R.$key ### NOTE safeguard against `$key` missing/wrong in user-supplied value ###
-          g       = ( R.$key.match /^(?<mode>[^:]+):(?<lxid>.+)$/ ).groups
-          R.mode  = g.mode
-          R.lxid  = g.lxid
-        return R
-    set_mode: ( mode ) ->
-      @__types.create[ @constructor.name ] { @..., $key: "#{mode}:#{@lxid}", }
-  # base_types.declare Token
-  new Token { $key: 'foo:bar', }
-  info '^93-1^', { base_types.registry.integer..., }
-  info '^93-2^', { base_types.registry.Token..., }
+  get_types_and_class = ->
+    base_types = new ( require '../../../apps/intertype' ).Intertype()
+    base_types.declare.ilx_codeunit_idx 'positive0.integer'
+    base_types.declare.ilx_line_number  'positive1.integer'
+    base_types.declare.ilx_token_value  'text'
+    base_types.declare.ilx_token_key ( x ) ->
+      return false unless @isa.text x
+      return ( x.indexOf ':' ) isnt -1
+    #.......................................................................................................
+    class Token extends Dataclass
+      clasz = @
+      @types: base_types
+      @declaration:
+        fields:
+          $key:   'ilx_token_key'
+          lnr1:   'ilx_line_number'
+          x1:     'ilx_codeunit_idx'
+          lnr2:   'ilx_line_number'
+          x2:     'ilx_codeunit_idx'
+          value:  'ilx_token_value'
+        template:
+          $key:   null
+          lnr1:   1
+          x1:     0
+          lnr2:   null
+          x2:     null
+          value:  ''
+        create: ( x ) ->
+          return x if x? and not @isa.object x
+          R       = { clasz.declaration.template..., x..., }
+          R.lnr2 ?= R.lnr1
+          R.x2   ?= R.x1
+          if @isa.text R.$key ### NOTE safeguard against `$key` missing/wrong in user-supplied value ###
+            g       = ( R.$key.match /^(?<mode>[^:]+):(?<lxid>.+)$/ ).groups
+            R.mode  = g.mode
+            R.lxid  = g.lxid
+          return R
+      set_mode: ( mode ) ->
+        new clasz { @..., $key: "#{mode}:#{@lxid}", }
+    return { base_types, Token, }
   #.........................................................................................................
   do ->
+    { base_types
+      Token     } = get_types_and_class()
     d = new Token { $key: 'plain:p:start', lnr1: 123, }
-    debug '^93-3^', d
-    info '^93-4^', GUY.trm.truth d.set_mode?
-    # e = d.set_mode 'tag'
-    # debug '^93-5^', e
-    return null
-  #.........................................................................................................
-  do ->
-    d = base_types.create.Token { $key: 'plain:p:start', lnr1: 123, }
-    debug '^93-6^', d
-    info '^93-7^', GUY.trm.truth d.set_mode?
-    # e = d.set_mode 'tag'
-    # debug '^93-8^', e
-    return null
-  #.........................................................................................................
-  do ->
-    d = base_types.create.Token { $key: 'plain:p:start', lnr1: 123, }
-    debug '^93-6^', d
-    info '^93-7^', GUY.trm.truth d.set_mode?
-    e = new Token d
-    info '^93-7^', GUY.trm.truth e.set_mode?
-    # e = d.set_mode 'tag'
-    # debug '^93-8^', e
-    return null
-  #.........................................................................................................
-  do ->
-    d = base_types._create_no_validation { Token.declaration..., cfg: { $key: 'plain:p:start', lnr1: 123, }, }
-    debug '^93-6^', d
-    # info '^93-7^', GUY.trm.truth d.set_mode?
-    # e = new Token d
-    # info '^93-7^', GUY.trm.truth e.set_mode?
-    # e = d.set_mode 'tag'
-    # debug '^93-8^', e
+    # info '^93-4^', GUY.trm.truth d.set_mode?
+    e = d.set_mode 'tag'
+    urge '^93-3^', d
+    urge '^93-5^', e
     return null
   #.........................................................................................................
   done?()
@@ -444,10 +415,10 @@ types                     = new ( require 'intertype' ).Intertype()
 if require.main is module then do =>
   # test @
   # test @datom_dataclass_method_to_trigger_declaration
-  @datom_dataclass_with_instance_methods()
+  # @datom_dataclass_with_instance_methods()
   # test @datom_dataclass_with_instance_methods
   # test @datom_as_dataclass
   # test @datom_dataclass_automatic_validation
   # @datom_dataclass_deep_freezing()
-  # test @datom_dataclass_deep_freezing
+  test @datom_dataclass_deep_freezing
   # test @datom_dataclass_computed_properties
