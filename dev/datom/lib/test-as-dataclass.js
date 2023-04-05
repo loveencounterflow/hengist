@@ -664,138 +664,93 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.datom_dataclass_with_instance_methods = function(T, done) {
-    var Dataclass, Token, base_types;
+    var Dataclass, get_types_and_class;
     ({Dataclass} = require('../../../apps/datom'));
     //.........................................................................................................
-    base_types = new (require('../../../apps/intertype')).Intertype();
-    base_types.declare.ilx_codeunit_idx('positive0.integer');
-    base_types.declare.ilx_line_number('positive1.integer');
-    base_types.declare.ilx_token_value('text');
-    base_types.declare.ilx_token_key(function(x) {
-      if (!this.isa.text(x)) {
-        return false;
-      }
-      return (x.indexOf(':')) !== -1;
-    });
-    Token = (function() {
-      var clasz;
-
-      //.......................................................................................................
-      class Token extends Dataclass {
-        set_mode(mode) {
-          return this.__types.create[this.constructor.name]({
-            ...this,
-            $key: `${mode}:${this.lxid}`
-          });
+    get_types_and_class = function() {
+      var Token, base_types;
+      base_types = new (require('../../../apps/intertype')).Intertype();
+      base_types.declare.ilx_codeunit_idx('positive0.integer');
+      base_types.declare.ilx_line_number('positive1.integer');
+      base_types.declare.ilx_token_value('text');
+      base_types.declare.ilx_token_key(function(x) {
+        if (!this.isa.text(x)) {
+          return false;
         }
+        return (x.indexOf(':')) !== -1;
+      });
+      Token = (function() {
+        var clasz;
 
-      };
-
-      clasz = Token;
-
-      Token.types = base_types;
-
-      Token.declaration = {
-        fields: {
-          $key: 'ilx_token_key',
-          lnr1: 'ilx_line_number',
-          x1: 'ilx_codeunit_idx',
-          lnr2: 'ilx_line_number',
-          x2: 'ilx_codeunit_idx',
-          value: 'ilx_token_value'
-        },
-        template: {
-          $key: null,
-          lnr1: 1,
-          x1: 0,
-          lnr2: null,
-          x2: null,
-          value: ''
-        },
-        create: function(x) {
-          var R, g/* NOTE safeguard against `$key` missing/wrong in user-supplied value */;
-          if ((x != null) && !this.isa.object(x)) {
-            // debug '^create@108-5^', clasz
-            return x;
+        //.......................................................................................................
+        class Token extends Dataclass {
+          set_mode(mode) {
+            return new clasz({
+              ...this,
+              $key: `${mode}:${this.lxid}`
+            });
           }
-          R = {...this.registry.Token.template, ...x};
-          if (R.lnr2 == null) {
-            R.lnr2 = R.lnr1;
-          }
-          if (R.x2 == null) {
-            R.x2 = R.x1;
-          }
-          if (this.isa.text(R.$key)) {
-            g = (R.$key.match(/^(?<mode>[^:]+):(?<lxid>.+)$/)).groups;
-            R.mode = g.mode;
-            R.lxid = g.lxid;
-          }
-          return R;
-        }
-      };
 
-      return Token;
+        };
 
-    }).call(this);
-    // base_types.declare Token
-    new Token({
-      $key: 'foo:bar'
-    });
-    info('^93-1^', {...base_types.registry.integer});
-    info('^93-2^', {...base_types.registry.Token});
+        clasz = Token;
+
+        Token.types = base_types;
+
+        Token.declaration = {
+          fields: {
+            $key: 'ilx_token_key',
+            lnr1: 'ilx_line_number',
+            x1: 'ilx_codeunit_idx',
+            lnr2: 'ilx_line_number',
+            x2: 'ilx_codeunit_idx',
+            value: 'ilx_token_value'
+          },
+          template: {
+            $key: null,
+            lnr1: 1,
+            x1: 0,
+            lnr2: null,
+            x2: null,
+            value: ''
+          },
+          create: function(x) {
+            var R, g/* NOTE safeguard against `$key` missing/wrong in user-supplied value */;
+            if ((x != null) && !this.isa.object(x)) {
+              return x;
+            }
+            R = {...clasz.declaration.template, ...x};
+            if (R.lnr2 == null) {
+              R.lnr2 = R.lnr1;
+            }
+            if (R.x2 == null) {
+              R.x2 = R.x1;
+            }
+            if (this.isa.text(R.$key)) {
+              g = (R.$key.match(/^(?<mode>[^:]+):(?<lxid>.+)$/)).groups;
+              R.mode = g.mode;
+              R.lxid = g.lxid;
+            }
+            return R;
+          }
+        };
+
+        return Token;
+
+      }).call(this);
+      return {base_types, Token};
+    };
     (function() {      //.........................................................................................................
-      var d;
+      var Token, base_types, d, e;
+      ({base_types, Token} = get_types_and_class());
       d = new Token({
         $key: 'plain:p:start',
         lnr1: 123
       });
-      debug('^93-3^', d);
-      info('^93-4^', GUY.trm.truth(d.set_mode != null));
-      // e = d.set_mode 'tag'
-      // debug '^93-5^', e
-      return null;
-    })();
-    (function() {      //.........................................................................................................
-      var d;
-      d = base_types.create.Token({
-        $key: 'plain:p:start',
-        lnr1: 123
-      });
-      debug('^93-6^', d);
-      info('^93-7^', GUY.trm.truth(d.set_mode != null));
-      // e = d.set_mode 'tag'
-      // debug '^93-8^', e
-      return null;
-    })();
-    (function() {      //.........................................................................................................
-      var d, e;
-      d = base_types.create.Token({
-        $key: 'plain:p:start',
-        lnr1: 123
-      });
-      debug('^93-6^', d);
-      info('^93-7^', GUY.trm.truth(d.set_mode != null));
-      e = new Token(d);
-      info('^93-7^', GUY.trm.truth(e.set_mode != null));
-      // e = d.set_mode 'tag'
-      // debug '^93-8^', e
-      return null;
-    })();
-    (function() {      //.........................................................................................................
-      var d;
-      d = base_types._create_no_validation({
-        ...Token.declaration,
-        cfg: {
-          $key: 'plain:p:start',
-          lnr1: 123
-        }
-      });
-      debug('^93-6^', d);
-      // info '^93-7^', GUY.trm.truth d.set_mode?
-      // e = new Token d
-      // info '^93-7^', GUY.trm.truth e.set_mode?
-      // e = d.set_mode 'tag'
-      // debug '^93-8^', e
+      // info '^93-4^', GUY.trm.truth d.set_mode?
+      e = d.set_mode('tag');
+      urge('^93-3^', d);
+      urge('^93-5^', e);
       return null;
     })();
     if (typeof done === "function") {
@@ -809,16 +764,16 @@
     (() => {
       // test @
       // test @datom_dataclass_method_to_trigger_declaration
-      return this.datom_dataclass_with_instance_methods();
+      // @datom_dataclass_with_instance_methods()
+      // test @datom_dataclass_with_instance_methods
+      // test @datom_as_dataclass
+      // test @datom_dataclass_automatic_validation
+      // @datom_dataclass_deep_freezing()
+      return test(this.datom_dataclass_deep_freezing);
     })();
   }
 
-  // test @datom_dataclass_with_instance_methods
-// test @datom_as_dataclass
-// test @datom_dataclass_automatic_validation
-// @datom_dataclass_deep_freezing()
-// test @datom_dataclass_deep_freezing
-// test @datom_dataclass_computed_properties
+  // test @datom_dataclass_computed_properties
 
 }).call(this);
 
