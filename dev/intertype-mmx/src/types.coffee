@@ -30,7 +30,7 @@ idf                         = ( x ) -> x ### IDentity Function ###
 #===========================================================================================================
 # INTERNAL TYPES
 #-----------------------------------------------------------------------------------------------------------
-# @types.declare 'deep_boolean', ( x ) -> x in [ 'deep', false, true, ]
+@types.declare 'deep_boolean', ( x ) -> x in [ 'deep', false, true, ]
 
 # #-----------------------------------------------------------------------------------------------------------
 # @types.declare 'Type_cfg_constructor_cfg', tests:
@@ -72,7 +72,6 @@ idf                         = ( x ) -> x ### IDentity Function ###
   # "@isa.deep_boolean x.copy":                       ( x ) -> @isa.boolean x.copy        # refers to result of `type.create()`
   # "@isa.boolean x.seal":                            ( x ) -> @isa.boolean x.seal        # refers to result of `type.create()`
   # "@isa.boolean x.oneshot":                         ( x ) -> @isa.boolean x.oneshot        # refers to result of `type.create()`
-  # "@isa.deep_boolean x.freeze":                     ( x ) -> @isa.deep_boolean x.freeze   # refers to result of `type.create()`
   #.........................................................................................................
   "@isa.object x":                                  ( x ) -> @isa.object x
   "@isa.nonempty_text x.name":                      ( x ) -> @isa.nonempty_text x.name
@@ -86,6 +85,7 @@ idf                         = ( x ) -> x ### IDentity Function ###
   "if extras is false, default must be an object":  ( x ) -> ( x.extras ) or ( @isa.object x.default )
   "@isa_optional.function x.create":                ( x ) -> @isa_optional.function x.create
   "@isa_optional.function x.cast":                  ( x ) -> @isa_optional.function x.cast
+  "@isa.deep_boolean x.freeze":                     ( x ) -> @isa.deep_boolean x.freeze   # refers to result of `type.create()`
 #...........................................................................................................
 @defaults.intertype_declare_dsc =
   name:             null
