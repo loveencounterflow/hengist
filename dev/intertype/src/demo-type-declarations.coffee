@@ -186,9 +186,11 @@ if module is require.main then do =>
   debug '^98-12^', isa.float___or_text 42;      info '^98-13^', [ isa.__cache.keys()..., ]
   debug '^98-14^', isa 'float   or text', 42;   info '^98-15^', [ isa.__cache.keys()..., ]
   debug '^98-16^', isa.__cache.get 'float_or_text'
-  debug '^98-17^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float_or_text' )
-  debug '^98-18^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float   or text' )
-  debug '^98-18^', ( isa.__cache.get 'float_or_text' ).name is 'float_or_text'
+  debug '^98-17^', isa.float_or_text
+  debug '^98-18^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float_or_text' )
+  debug '^98-19^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float   or text' )
+  debug '^98-20^', ( isa.__cache.get 'float_or_text' ).name is 'float_or_text'
+  debug '^98-21^', ( isa.__cache.get 'float_or_text' ) is isa.float_or_text
 
 
 
