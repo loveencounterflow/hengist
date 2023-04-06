@@ -142,6 +142,8 @@ class Analyzing_attributor extends Attributor
     @__cache.set accessor, handler
     return null
 
+  #---------------------------------------------------------------------------------------------------------
+  __nameit: ( name, f ) -> Object.defineProperty f, 'name', { value: name, }; f
 
 #===========================================================================================================
 class Isa extends Analyzing_attributor
