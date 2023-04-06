@@ -166,12 +166,17 @@ if module is require.main then do =>
   try debug '^98-3^', ( new Attributor() ).__do() catch e then warn GUY.trm.reverse e.message
   # info '^98-4^', isa
   debug '^98-5^', isa 'float', 42
-  debug '^98-8^', isa.float 42
-  debug '^98-9^', isa.float NaN
-  debug '^98-10^', isa.float '22'
-  # debug '^98-7^', isa.float_or_text 42
-  debug '^98-11^', isa.float___or_text 42
-  debug '^98-12^', isa 'float   or text', 42
+  debug '^98-6^', isa.float 42
+  debug '^98-7^', isa.float NaN
+  debug '^98-8^', isa.float '22'
+  info '^98-9^', [ isa.__cache.keys()..., ]
+  debug '^98-10^', isa.float_or_text 42;         info '^98-11^', [ isa.__cache.keys()..., ]
+  debug '^98-12^', isa.float___or_text 42;      info '^98-13^', [ isa.__cache.keys()..., ]
+  debug '^98-14^', isa 'float   or text', 42;   info '^98-15^', [ isa.__cache.keys()..., ]
+  debug '^98-16^', isa.__cache.get 'float_or_text'
+  debug '^98-17^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float_or_text' )
+  debug '^98-18^', ( isa.__cache.get 'float___or_text' ) is ( isa.__cache.get 'float   or text' )
+  debug '^98-18^', ( isa.__cache.get 'float_or_text' ).name is 'float_or_text'
 
 
 
