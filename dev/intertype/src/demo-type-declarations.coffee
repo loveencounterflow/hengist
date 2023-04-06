@@ -20,8 +20,10 @@ GUY                       = require 'guy'
 * **Accessor**: the key used as first argument to access an attributor as in `atr.acc()`, sometimes symbolized as `acc`
 * **Phrase**: list of 'words'/keys resulting from splitting the accessor by whitespace and underscores. This allows
   to build complex accessors like `isa.text_or_integer 42` (phrase: `[ 'text', 'or', 'integer', ]`)
-* **Details**: arguments used in a attributor after the accessor. In `atr.foo_bar 3, 4, 5`, `foo_bar` is the accessor key,
+* **Details**: arguments used in a attributor after the accessor. Ex.: In `atr.foo_bar 3, 4, 5`, `foo_bar` is the accessor key,
   `[ 'foo', 'bar', ]` is the accessor phrase, and `3, 4, 5` are the accessor details.
+* **NCC**, *Normalized Accessor*: the `phrase` equivalent of an accessor, the words being joined with single
+  `_` underscores. Ex.: All of `empty_text`, `empty text`, `empty_____text` are normalized to `empty_text`.
 
 # Analyzing Attributor
 
@@ -30,6 +32,14 @@ class Aa extends Analyzing_attributor
 aa = new Aa
 resolution = aa
 
+## To Do
+
+* **[–]** docs
+* **[–]** find a good name
+
+## Is Done
+
+* **[+]** name generated functions using the NCC
 
 ###
 
