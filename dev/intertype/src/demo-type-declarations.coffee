@@ -165,6 +165,7 @@ class Isa extends Analyzing_attributor
     undefined:  ( x ) -> x is undefined
     boolean:    ( x ) -> ( x is true ) or ( x is false )
     float:      ( x ) -> Number.isFinite x
+    symbol:     ( x ) -> ( typeof x ) is 'symbol'
 
   #---------------------------------------------------------------------------------------------------------
   __create_handler: ( phrase ) ->
