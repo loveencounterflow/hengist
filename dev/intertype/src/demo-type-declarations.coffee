@@ -79,7 +79,7 @@ class Attributor extends Function
   @create_proxy: ( x ) -> new Proxy x,
     get: ( target, accessor, receiver ) ->
       # info '^98-1^', rpr accessor
-      ### TAINT consider to use symbols instead of underscore-prefixed strings ###
+      return target[ accessor ] if ( typeof accessor ) is 'symbol'
       return target[ accessor ] if accessor is 'constructor'
       return target[ accessor ] if accessor.startsWith? and accessor.startsWith '__'
       return ( P... ) -> target accessor, P...
