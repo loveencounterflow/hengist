@@ -77,11 +77,42 @@ get_isa_class = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_longest_first_matching = ( T, done ) ->
+  vocabulary  = [ 'of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
+  #-----------------------------------------------------------------------------------------------------------
+  sort_vocabulary = ( vocabulary ) -> [ vocabulary..., ].sort ( a, b ) ->
+    return +1 if a.length < b.length
+    return -1 if a.length > b.length
+    return  0
+  #-----------------------------------------------------------------------------------------------------------
+  re_from_vocabulary = ( vocabulary ) ->
+    vocabulary      = sort_vocabulary vocabulary
+    words_pattern   = ( "(?:#{GUY.str.escape_for_regex term})" for term in vocabulary ).join '|'
+    return new RegExp "(?<=^|\\s+)#{words_pattern}(?=$|\\s+)", 'ug'
+  #-----------------------------------------------------------------------------------------------------------
+  analyze_ncc = ( vocabulary_re, ncc ) -> ( d for [ d, ] from probe.matchAll vocabulary_re )
+  # info '^95-1^', vocabulary
+  probes_and_matchers = [
+    [ 'list of integer' ]
+    [ 'empty list of integer' ]
+    [ 'nonempty integer list' ]
+    [ 'empty list of integer or list of text' ]
+    [ 'nonempty list of integer or list of text' ]
+    [ 'integer' ]
+    ]
+  vocabulary_re = re_from_vocabulary vocabulary
+  for [ probe, matcher, error, ] in probes_and_matchers
+    result  = analyze_ncc vocabulary_re, probe
+    info '^23423^', ( rpr probe ), result
+  #.........................................................................................................
+  done?()
+
 #===========================================================================================================
 if module is require.main then do =>
   # @ivk_isa()
-  test @ivk_isa
-
+  # test @ivk_isa
+  @demo_longest_first_matching()
 
 
 
