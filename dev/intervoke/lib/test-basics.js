@@ -134,6 +134,7 @@
     sort_vocabulary = function(vocabulary) {
       return [...vocabulary].sort(function(a, b) {
         if (a.length < b.length) {
+          /* TAINT in edge cases, sorting can be off when code units != code points */
           return +1;
         }
         if (a.length > b.length) {
@@ -169,12 +170,12 @@
       return results;
     };
     // info '^95-1^', vocabulary
-    probes_and_matchers = [['list of integer'], ['empty list of integer'], ['nonempty integer list'], ['empty list of integer or list of text'], ['nonempty list of integer or list of text'], ['integer']];
+    probes_and_matchers = [['list of integer', ['list of', 'integer']], ['empty list of integer', ['empty list of', 'integer']], ['nonempty integer list', ['nonempty', 'integer', 'list']], ['empty list of integer or list of text', ['empty list of', 'integer', 'or', 'list of']], ['nonempty list of integer or list of text', ['nonempty', 'list of', 'integer', 'or', 'list of']], ['integer', ['integer']]];
     vocabulary_re = re_from_vocabulary(vocabulary);
     for (i = 0, len = probes_and_matchers.length; i < len; i++) {
       [probe, matcher, error] = probes_and_matchers[i];
       result = analyze_ncc(vocabulary_re, probe);
-      info('^23423^', rpr(probe), result);
+      info('^23423^', [probe, result]);
     }
     return typeof done === "function" ? done() : void 0;
   };
