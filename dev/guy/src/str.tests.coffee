@@ -62,11 +62,40 @@ types                     = new ( require 'intertype' ).Intertype
   return done?()
 
 
+#-----------------------------------------------------------------------------------------------------------
+@guy_str_pluralize = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY     = require H.guy_path
+  probes_and_matchers = [
+    [ '',               '',                     ]
+    [ 'a',              'as',                   ]
+    [ 'y',              'ys',                   ]
+    [ 'aye',            'ayes',                 ]
+    [ 'why',            'whies',                ]
+    [ 'leaf',           'leafs',                ]
+    [ 'potato',         'potatos',              ]
+    [ 'fix',            'fixes',                ]
+    [ 'bun',            'buns',                 ]
+    [ 'regex',          'regexes',              ]
+    [ 'regexes',        'regexeses',            ]
+    [ 'property',       'properties',           ]
+    [ 'PROPERTY',       'PROPERTIES',           ]
+    [ 'propertY',       'propertIES',           ]
+    ]
+  #.........................................................................................................
+  for [ probe, matcher, error, ] in probes_and_matchers
+    await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+      result = GUY.str.pluralize probe
+      resolve result
+  #.........................................................................................................
+  return done?()
+
 
 ############################################################################################################
 if require.main is module then do =>
   # @guy_str_escape_for_regex()
-  test @
+  # test @
+  test @guy_str_pluralize
 
 
 
