@@ -98,11 +98,32 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.guy_str_pluralize = async function(T, done) {
+    var GUY, error, i, len, matcher, probe, probes_and_matchers;
+    // T?.halt_on_error()
+    GUY = require(H.guy_path);
+    probes_and_matchers = [['', ''], ['a', 'as'], ['y', 'ys'], ['aye', 'ayes'], ['why', 'whies'], ['leaf', 'leafs'], ['potato', 'potatos'], ['fix', 'fixes'], ['bun', 'buns'], ['regex', 'regexes'], ['regexes', 'regexeses'], ['property', 'properties'], ['PROPERTY', 'PROPERTIES'], ['propertY', 'propertIES']];
+//.........................................................................................................
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      await T.perform(probe, matcher, error, function() {
+        return new Promise(function(resolve, reject) {
+          var result;
+          result = GUY.str.pluralize(probe);
+          return resolve(result);
+        });
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // @guy_str_escape_for_regex()
-      return test(this);
+      // test @
+      return test(this.guy_str_pluralize);
     })();
   }
 

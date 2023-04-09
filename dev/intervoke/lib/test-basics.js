@@ -72,8 +72,8 @@
     try {
       // debug '^98-2^', isa.__cache
       debug('^98-3^', (new IVK.Attributor()).__do());
-    } catch (error) {
-      e = error;
+    } catch (error1) {
+      e = error1;
       warn(GUY.trm.reverse(e.message));
     }
     if (T != null) {
@@ -126,11 +126,65 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_longest_first_matching = function(T, done) {
+    var analyze_ncc, error, i, len, matcher, probe, probes_and_matchers, re_from_vocabulary, result, sort_vocabulary, vocabulary, vocabulary_re;
+    vocabulary = ['of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer'];
+    //-----------------------------------------------------------------------------------------------------------
+    sort_vocabulary = function(vocabulary) {
+      return [...vocabulary].sort(function(a, b) {
+        if (a.length < b.length) {
+          return +1;
+        }
+        if (a.length > b.length) {
+          return -1;
+        }
+        return 0;
+      });
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    re_from_vocabulary = function(vocabulary) {
+      var term, words_pattern;
+      vocabulary = sort_vocabulary(vocabulary);
+      words_pattern = ((function() {
+        var i, len, results;
+        results = [];
+        for (i = 0, len = vocabulary.length; i < len; i++) {
+          term = vocabulary[i];
+          results.push(`(?:${GUY.str.escape_for_regex(term)})`);
+        }
+        return results;
+      })()).join('|');
+      return new RegExp(`(?<=^|\\s+)${words_pattern}(?=$|\\s+)`, 'ug');
+    };
+    //-----------------------------------------------------------------------------------------------------------
+    analyze_ncc = function(vocabulary_re, ncc) {
+      var d, ref, results, y;
+      ref = probe.matchAll(vocabulary_re);
+      results = [];
+      for (y of ref) {
+        [d] = y;
+        results.push(d);
+      }
+      return results;
+    };
+    // info '^95-1^', vocabulary
+    probes_and_matchers = [['list of integer'], ['empty list of integer'], ['nonempty integer list'], ['empty list of integer or list of text'], ['nonempty list of integer or list of text'], ['integer']];
+    vocabulary_re = re_from_vocabulary(vocabulary);
+    for (i = 0, len = probes_and_matchers.length; i < len; i++) {
+      [probe, matcher, error] = probes_and_matchers[i];
+      result = analyze_ncc(vocabulary_re, probe);
+      info('^23423^', rpr(probe), result);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //===========================================================================================================
   if (module === require.main) {
     (() => {
       // @ivk_isa()
-      return test(this.ivk_isa);
+      // test @ivk_isa
+      return this.demo_longest_first_matching();
     })();
   }
 
