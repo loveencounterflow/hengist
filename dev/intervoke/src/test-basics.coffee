@@ -82,6 +82,7 @@ get_isa_class = ->
   vocabulary  = [ 'of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
   #-----------------------------------------------------------------------------------------------------------
   sort_vocabulary = ( vocabulary ) -> [ vocabulary..., ].sort ( a, b ) ->
+    ### TAINT in edge cases, sorting can be off when code units != code points ###
     return +1 if a.length < b.length
     return -1 if a.length > b.length
     return  0
