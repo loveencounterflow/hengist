@@ -95,17 +95,17 @@ get_isa_class = ->
   analyze_ncc = ( vocabulary_re, ncc ) -> ( d for [ d, ] from probe.matchAll vocabulary_re )
   # info '^95-1^', vocabulary
   probes_and_matchers = [
-    [ 'list of integer' ]
-    [ 'empty list of integer' ]
-    [ 'nonempty integer list' ]
-    [ 'empty list of integer or list of text' ]
-    [ 'nonempty list of integer or list of text' ]
-    [ 'integer' ]
+    [ 'list of integer', [ 'list of', 'integer' ] ]
+    [ 'empty list of integer', [ 'empty list of', 'integer' ] ]
+    [ 'nonempty integer list', [ 'nonempty', 'integer', 'list' ] ]
+    [ 'empty list of integer or list of text', [ 'empty list of', 'integer', 'or', 'list of' ] ]
+    [ 'nonempty list of integer or list of text', [ 'nonempty', 'list of', 'integer', 'or', 'list of' ] ]
+    [ 'integer', [ 'integer' ] ]
     ]
   vocabulary_re = re_from_vocabulary vocabulary
   for [ probe, matcher, error, ] in probes_and_matchers
     result  = analyze_ncc vocabulary_re, probe
-    info '^23423^', ( rpr probe ), result
+    info '^23423^', [ probe, result, ]
   #.........................................................................................................
   done?()
 
