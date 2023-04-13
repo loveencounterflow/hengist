@@ -22,40 +22,37 @@
   get_isa_class = function() {
     var IVK, Isa;
     IVK = require('../../../apps/intervoke');
-    Isa = (function() {
-      //===========================================================================================================
-      class Isa extends IVK.Analyzing_attributor {
-        //---------------------------------------------------------------------------------------------------------
-        __create_handler(phrase) {
-          return function(details) {
-            return 'Yo';
-          };
-        }
+    //===========================================================================================================
+    Isa = class Isa extends IVK.Word_prompter {
+      //---------------------------------------------------------------------------------------------------------
+      null(x) {
+        return x === null;
+      }
 
-      };
+      undefined(x) {
+        return x === void 0;
+      }
+
+      boolean(x) {
+        return (x === true) || (x === false);
+      }
+
+      float(x) {
+        return Number.isFinite(x);
+      }
+
+      symbol(x) {
+        return (typeof x) === 'symbol';
+      }
 
       //---------------------------------------------------------------------------------------------------------
-      Isa.__cache = new Map(Object.entries({
-        null: function(x) {
-          return x === null;
-        },
-        undefined: function(x) {
-          return x === void 0;
-        },
-        boolean: function(x) {
-          return (x === true) || (x === false);
-        },
-        float: function(x) {
-          return Number.isFinite(x);
-        },
-        symbol: function(x) {
-          return (typeof x) === 'symbol';
-        }
-      }));
+      __create_handler(phrase) {
+        return function(details) {
+          return 'Yo';
+        };
+      }
 
-      return Isa;
-
-    }).call(this);
+    };
     //===========================================================================================================
     return Isa;
   };
@@ -64,21 +61,21 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.ivk_isa = function(T, done) {
-    var IVK, Isa, e, isa;
+    var IVK, Isa, e, isa, k;
     IVK = require('../../../apps/intervoke');
     Isa = get_isa_class();
     //.........................................................................................................
     isa = new Isa();
     try {
       // debug '^98-2^', isa.__cache
-      debug('^98-3^', (new IVK.Attributor()).__do());
+      debug('^98-3^', (new IVK.Prompter()).__do());
     } catch (error1) {
       e = error1;
       warn(GUY.trm.reverse(e.message));
     }
     if (T != null) {
       T.throws(/not allowed to call method '__do' of abstract base class/, function() {
-        return (new IVK.Attributor()).__do();
+        return (new IVK.Prompter()).__do();
       });
     }
     if (T != null) {
@@ -93,36 +90,27 @@
     if (T != null) {
       T.eq(isa.float('22'), false);
     }
-    // info '^98-9^', [ isa.__cache.keys()..., ]
     if (T != null) {
-      T.eq([...isa.__cache.keys()], ['null', 'undefined', 'boolean', 'float', 'symbol']);
-    }
-    isa.float___or_text(42);
-    if (T != null) {
-      T.eq([...isa.__cache.keys()], ['null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text']);
-    }
-    isa.float_or_text(42);
-    if (T != null) {
-      T.eq([...isa.__cache.keys()], ['null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text']);
-    }
-    isa('float   or text', 42);
-    if (T != null) {
-      T.eq([...isa.__cache.keys()], ['null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text', 'float   or text']);
-    }
-    // debug '^98-16^', isa.__cache.get 'float_or_text'
-    // debug '^98-17^', isa.float_or_text
-    if (T != null) {
-      T.eq((isa.__cache.get('float___or_text')) === (isa.__cache.get('float_or_text')), true);
+      T.eq(isa.boolean('22'), false);
     }
     if (T != null) {
-      T.eq((isa.__cache.get('float___or_text')) === (isa.__cache.get('float   or text')), true);
+      T.eq(isa.boolean(true), true);
     }
     if (T != null) {
-      T.eq((isa.__cache.get('float_or_text')).name === 'float_or_text', true);
+      T.eq(isa('boolean', true), true);
     }
     if (T != null) {
-      T.eq((isa.__cache.get('float_or_text')) === isa.float_or_text, false);
+      T.eq(isa.xxx('22'), false);
     }
+    debug('^99-1^', isa);
+    debug('^99-4^', (function() {
+      var results;
+      results = [];
+      for (k in isa) {
+        results.push(k);
+      }
+      return results;
+    })());
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -184,10 +172,11 @@
   if (module === require.main) {
     (() => {
       // @ivk_isa()
-      // test @ivk_isa
-      return this.demo_longest_first_matching();
+      return test(this);
     })();
   }
+
+  // @demo_longest_first_matching()
 
 }).call(this);
 

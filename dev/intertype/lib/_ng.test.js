@@ -5344,6 +5344,33 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.maps_and_sets = function(T, done) {
+    var Intertype, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    types = new Intertype();
+    if (T != null) {
+      T.eq(types.isa.knowntype('map'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.knowntype('set'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.set(new Set()), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.set(new Map()), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.map(new Set()), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.map(new Map()), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (module.parent == null) {
     // test @is_extension_of_allows_all_values
