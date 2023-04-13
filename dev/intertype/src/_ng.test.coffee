@@ -2648,6 +2648,20 @@ demo_size_of = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@maps_and_sets = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype     } = require '../../../apps/intertype'
+  types             = new Intertype()
+  T?.eq ( types.isa.knowntype 'map'     ), true
+  T?.eq ( types.isa.knowntype 'set'     ), true
+  T?.eq ( types.isa.set new Set()       ), true
+  T?.eq ( types.isa.set new Map()       ), false
+  T?.eq ( types.isa.map new Set()       ), false
+  T?.eq ( types.isa.map new Map()       ), true
+  #.........................................................................................................
+  done?()
+
 ############################################################################################################
 unless module.parent?
   # test @is_extension_of_allows_all_values
