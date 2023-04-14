@@ -120,8 +120,51 @@ get_isa2_class = ->
   T?.eq ( isa2.integer    42          ), true
   #.........................................................................................................
   done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@ivk_methods_are_properly_named = ( T, done ) ->
+  #.........................................................................................................
+  do ->
+    T?.ok get_isa_class()   is get_isa_class()
+    T?.ok get_isa2_class()  is get_isa2_class()
+    Isa   = get_isa_class()
+    Isa2  = get_isa2_class()
+    isa2  = new Isa2()
+    isa   = new Isa()
+    T?.ok Isa.declare.float is isa.float
+  return done?()
+  #.........................................................................................................
+  do ->
+    Isa   = get_isa_class()
+    isa   = new Isa()
+    isa.__declare 'anything', ( x ) -> true
+    T?.eq isa.null.name,        'null'
+    T?.eq isa.undefined.name,   'undefined'
+    T?.eq isa.boolean.name,     'boolean'
+    T?.eq isa.float.name,       'float'
+    T?.eq isa.symbol.name,      'symbol'
+    T?.eq isa.integer.name,     'integer'
+    T?.eq isa.anything.name,    'anything'
+  #.........................................................................................................
+  do ->
+    Isa   = get_isa_class()
+    Isa2  = get_isa2_class()
+    isa2  = new Isa2()
+    T?.ok Isa.declare.float is isa2.float
+    isa2.__declare 'anything', ( x ) -> true
+    T?.eq isa2.null.name,       'null'
+    T?.eq isa2.undefined.name,  'undefined'
+    T?.eq isa2.boolean.name,    'boolean'
+    T?.eq isa2.float.name,      'float'
+    T?.eq isa2.symbol.name,     'symbol'
+    T?.eq isa2.integer.name,    'integer'
+    T?.eq isa2.anything.name,   'anything'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_longest_first_matching = ( T, done ) ->
-  vocabulary  = [ 'of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
+  vocabulary  = [ 'of', 'or', 'empty', 'text', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
   #-----------------------------------------------------------------------------------------------------------
   sort_vocabulary = ( vocabulary ) -> [ vocabulary..., ].sort ( a, b ) ->
     ### TAINT in edge cases, sorting can be off when code units != code points ###
@@ -154,7 +197,11 @@ get_isa2_class = ->
 #===========================================================================================================
 if module is require.main then do =>
   # @ivk_isa()
+  # test @ivk_declarations_are_inherited
   test @
+  # test @ivk_methods_are_properly_named
+  # @ivk_isa()
+  # test @ivk_disallowed_to_redeclare
   # @demo_longest_first_matching()
 
 
