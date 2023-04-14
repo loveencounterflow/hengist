@@ -80,6 +80,16 @@ get_isa_class = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@ivk_disallowed_to_redeclare = ( T, done ) ->
+  IVK = require '../../../apps/intervoke'
+  Isa = get_isa_class()
+  isa = new Isa()
+  try debug '^98-3^', isa.__declare 'float', ( -> ) catch e then warn GUY.trm.reverse e.message
+  T?.throws /property 'float' already declared/, -> isa.__declare 'float', ( -> )
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_longest_first_matching = ( T, done ) ->
   vocabulary  = [ 'of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
   #-----------------------------------------------------------------------------------------------------------
