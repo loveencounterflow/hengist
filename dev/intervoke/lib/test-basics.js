@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, echo, get_isa_class, help, info, inspect, log, plain, praise, rpr, test, urge, warn, whisper;
+  var GUY, Isa, Isa2, alert, debug, echo, get_isa2_class, get_isa_class, help, info, inspect, log, plain, praise, rpr, test, type_of, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -12,6 +12,14 @@
   //...........................................................................................................
   test = require('../../../apps/guy-test');
 
+  types = new (require('../../../apps/intertype')).Intertype();
+
+  ({type_of} = types);
+
+  Isa = null;
+
+  Isa2 = null;
+
   // probes_and_matchers = [
   //   ]
   // #.........................................................................................................
@@ -20,55 +28,85 @@
 
   //===========================================================================================================
   get_isa_class = function() {
-    var IVK, Isa;
+    var IVK;
+    if (Isa != null) {
+      return Isa;
+    }
     IVK = require('../../../apps/intervoke');
-    //===========================================================================================================
-    Isa = class Isa extends IVK.Word_prompter {
-      //---------------------------------------------------------------------------------------------------------
-      null(x) {
-        return x === null;
-      }
+    Isa = (function() {
+      //===========================================================================================================
+      class Isa extends IVK.Word_prompter {
+        //---------------------------------------------------------------------------------------------------------
+        __create_handler(phrase) {
+          return function(details) {
+            return 'Yo';
+          };
+        }
 
-      undefined(x) {
-        return x === void 0;
-      }
-
-      boolean(x) {
-        return (x === true) || (x === false);
-      }
-
-      float(x) {
-        return Number.isFinite(x);
-      }
-
-      symbol(x) {
-        return (typeof x) === 'symbol';
-      }
+      };
 
       //---------------------------------------------------------------------------------------------------------
-      __create_handler(phrase) {
-        return function(details) {
-          return 'Yo';
-        };
-      }
+      Isa.declare = {
+        null: function(x) {
+          return x === null;
+        },
+        undefined: function(x) {
+          return x === void 0;
+        },
+        boolean: function(x) {
+          return (x === true) || (x === false);
+        },
+        float: function(x) {
+          return Number.isFinite(x);
+        },
+        symbol: function(x) {
+          return (typeof x) === 'symbol';
+        }
+      };
 
-    };
+      return Isa;
+
+    }).call(this);
     //===========================================================================================================
     return Isa;
+  };
+
+  //===========================================================================================================
+  get_isa2_class = function() {
+    if (Isa2 != null) {
+      return Isa2;
+    }
+    Isa = get_isa_class();
+    Isa2 = (function() {
+      //===========================================================================================================
+      class Isa2 extends Isa {};
+
+      //---------------------------------------------------------------------------------------------------------
+      Isa2.declare = {
+        integer: function(x) {
+          return (this.float(x)) && Number.isInteger(x);
+        }
+      };
+
+      return Isa2;
+
+    }).call(this);
+    //===========================================================================================================
+    return Isa2;
   };
 
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
   this.ivk_isa = function(T, done) {
-    var IVK, Isa, e, isa, k;
+    var IVK, e, isa;
     IVK = require('../../../apps/intervoke');
     Isa = get_isa_class();
     //.........................................................................................................
     isa = new Isa();
     try {
-      // debug '^98-2^', isa.__cache
-      debug('^98-3^', (new IVK.Prompter()).__do());
+      // debug '^98-1^', isa.__cache
+      debug('^98-2^', (new IVK.Prompter()).__do());
     } catch (error1) {
       e = error1;
       warn(GUY.trm.reverse(e.message));
@@ -102,21 +140,24 @@
     if (T != null) {
       T.eq(isa.xxx('22'), false);
     }
-    debug('^99-1^', isa);
-    debug('^99-4^', (function() {
-      var results;
-      results = [];
-      for (k in isa) {
-        results.push(k);
-      }
-      return results;
-    })());
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.ivk_accessors_are_registered_in_set = function(T, done) {
+    var IVK, isa;
+    IVK = require('../../../apps/intervoke');
+    Isa = get_isa_class();
+    isa = new Isa();
+    if (T != null) {
+      T.eq([...isa.__accessors], ['null', 'undefined', 'boolean', 'float', 'symbol']);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.ivk_disallowed_to_redeclare = function(T, done) {
-    var IVK, Isa, e, isa;
+    var IVK, e, isa;
     IVK = require('../../../apps/intervoke');
     Isa = get_isa_class();
     isa = new Isa();
@@ -135,9 +176,131 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.ivk_declarations_are_inherited = function(T, done) {
+    var isa2;
+    Isa2 = get_isa2_class();
+    isa2 = new Isa2();
+    if (T != null) {
+      T.eq(type_of(isa2.null), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(isa2.undefined), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(isa2.boolean), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(isa2.float), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(isa2.symbol), 'function');
+    }
+    if (T != null) {
+      T.eq(type_of(isa2.integer), 'function');
+    }
+    if (T != null) {
+      T.eq(isa2.null(null), true);
+    }
+    if (T != null) {
+      T.eq(isa2.undefined(void 0), true);
+    }
+    if (T != null) {
+      T.eq(isa2.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(isa2.float(42.1), true);
+    }
+    if (T != null) {
+      T.eq(isa2.symbol(Symbol('x')), true);
+    }
+    if (T != null) {
+      T.eq(isa2.integer(42), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.ivk_methods_are_properly_named = function(T, done) {
+    (function() {      //.........................................................................................................
+      var isa, isa2;
+      if (T != null) {
+        T.ok(get_isa_class() === get_isa_class());
+      }
+      if (T != null) {
+        T.ok(get_isa2_class() === get_isa2_class());
+      }
+      Isa = get_isa_class();
+      Isa2 = get_isa2_class();
+      isa2 = new Isa2();
+      isa = new Isa();
+      return T != null ? T.ok(Isa.declare.float === isa.float) : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+    (function() {      //.........................................................................................................
+      var isa;
+      Isa = get_isa_class();
+      isa = new Isa();
+      isa.__declare('anything', function(x) {
+        return true;
+      });
+      if (T != null) {
+        T.eq(isa.null.name, 'null');
+      }
+      if (T != null) {
+        T.eq(isa.undefined.name, 'undefined');
+      }
+      if (T != null) {
+        T.eq(isa.boolean.name, 'boolean');
+      }
+      if (T != null) {
+        T.eq(isa.float.name, 'float');
+      }
+      if (T != null) {
+        T.eq(isa.symbol.name, 'symbol');
+      }
+      if (T != null) {
+        T.eq(isa.integer.name, 'integer');
+      }
+      return T != null ? T.eq(isa.anything.name, 'anything') : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var isa2;
+      Isa = get_isa_class();
+      Isa2 = get_isa2_class();
+      isa2 = new Isa2();
+      if (T != null) {
+        T.ok(Isa.declare.float === isa2.float);
+      }
+      isa2.__declare('anything', function(x) {
+        return true;
+      });
+      if (T != null) {
+        T.eq(isa2.null.name, 'null');
+      }
+      if (T != null) {
+        T.eq(isa2.undefined.name, 'undefined');
+      }
+      if (T != null) {
+        T.eq(isa2.boolean.name, 'boolean');
+      }
+      if (T != null) {
+        T.eq(isa2.float.name, 'float');
+      }
+      if (T != null) {
+        T.eq(isa2.symbol.name, 'symbol');
+      }
+      if (T != null) {
+        T.eq(isa2.integer.name, 'integer');
+      }
+      return T != null ? T.eq(isa2.anything.name, 'anything') : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_longest_first_matching = function(T, done) {
     var analyze_ncc, error, i, len, matcher, probe, probes_and_matchers, re_from_vocabulary, result, sort_vocabulary, vocabulary, vocabulary_re;
-    vocabulary = ['of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer'];
+    vocabulary = ['of', 'or', 'empty', 'text', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer'];
     //-----------------------------------------------------------------------------------------------------------
     sort_vocabulary = function(vocabulary) {
       return [...vocabulary].sort(function(a, b) {
@@ -192,11 +355,15 @@
   if (module === require.main) {
     (() => {
       // @ivk_isa()
+      // test @ivk_declarations_are_inherited
       return test(this);
     })();
   }
 
-  // @demo_longest_first_matching()
+  // test @ivk_methods_are_properly_named
+// @ivk_isa()
+// test @ivk_disallowed_to_redeclare
+// @demo_longest_first_matching()
 
 }).call(this);
 
