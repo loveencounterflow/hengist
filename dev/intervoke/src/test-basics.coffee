@@ -19,6 +19,8 @@ GUY                       = require 'guy'
   log     }               = GUY.trm
 #...........................................................................................................
 test                      = require '../../../apps/guy-test'
+types                     = new ( require '../../../apps/intertype' ).Intertype
+{ type_of }               = types
 
   # probes_and_matchers = [
   #   ]
