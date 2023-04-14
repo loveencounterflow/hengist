@@ -115,6 +115,26 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.ivk_disallowed_to_redeclare = function(T, done) {
+    var IVK, Isa, e, isa;
+    IVK = require('../../../apps/intervoke');
+    Isa = get_isa_class();
+    isa = new Isa();
+    try {
+      debug('^98-3^', isa.__declare('float', (function() {})));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    if (T != null) {
+      T.throws(/property 'float' already declared/, function() {
+        return isa.__declare('float', (function() {}));
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.demo_longest_first_matching = function(T, done) {
     var analyze_ncc, error, i, len, matcher, probe, probes_and_matchers, re_from_vocabulary, result, sort_vocabulary, vocabulary, vocabulary_re;
     vocabulary = ['of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer'];
