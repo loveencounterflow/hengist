@@ -69,8 +69,8 @@ get_isa2_class = ->
   Isa = get_isa_class()
   #.........................................................................................................
   isa = new Isa()
-  # debug '^98-2^', isa.__cache
-  try debug '^98-3^', ( new IVK.Prompter() ).__do() catch e then warn GUY.trm.reverse e.message
+  # debug '^98-1^', isa.__cache
+  try debug '^98-2^', ( new IVK.Prompter() ).__do() catch e then warn GUY.trm.reverse e.message
   T?.throws /not allowed to call method '__do' of abstract base class/, -> ( new IVK.Prompter() ).__do()
   T?.eq ( isa 'float', 42       ), true
   T?.eq ( isa.float 42          ), true
@@ -80,16 +80,15 @@ get_isa2_class = ->
   T?.eq ( isa.boolean true      ), true
   T?.eq ( isa 'boolean', true   ), true
   T?.eq ( isa.xxx '22'        ), false
-  debug '^99-1^', isa
-  debug '^99-4^', ( k for k of isa )
-  # T?.eq [ isa.__cache.keys()..., ], [ 'null', 'undefined', 'boolean', 'float', 'symbol' ]
-  # isa.float___or_text 42;     T?.eq [ isa.__cache.keys()..., ], [ 'null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text' ]
-  # isa.float_or_text 42;       T?.eq [ isa.__cache.keys()..., ], [ 'null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text' ]
-  # isa 'float   or text', 42;  T?.eq [ isa.__cache.keys()..., ], [ 'null', 'undefined', 'boolean', 'float', 'symbol', 'float_or_text', 'float___or_text', 'float   or text' ]
-  # T?.eq ( ( isa.__cache.get 'float___or_text' )     is ( isa.__cache.get 'float_or_text' )    ), true
-  # T?.eq ( ( isa.__cache.get 'float___or_text' )     is ( isa.__cache.get 'float   or text' )  ), true
-  # T?.eq ( ( isa.__cache.get 'float_or_text' ).name  is 'float_or_text'                        ), true
-  # T?.eq ( ( isa.__cache.get 'float_or_text' )       is isa.float_or_text                      ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@ivk_accessors_are_registered_in_set = ( T, done ) ->
+  IVK = require '../../../apps/intervoke'
+  Isa = get_isa_class()
+  isa = new Isa()
+  T?.eq [ isa.__accessors..., ], [ 'null', 'undefined', 'boolean', 'float', 'symbol', ]
   #.........................................................................................................
   done?()
 
