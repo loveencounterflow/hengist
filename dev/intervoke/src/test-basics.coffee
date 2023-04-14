@@ -103,6 +103,23 @@ get_isa2_class = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@ivk_declarations_are_inherited = ( T, done ) ->
+  Isa2  = get_isa2_class()
+  isa2  = new Isa2()
+  T?.eq ( type_of isa2.null       ), 'function'
+  T?.eq ( type_of isa2.undefined  ), 'function'
+  T?.eq ( type_of isa2.boolean    ), 'function'
+  T?.eq ( type_of isa2.float      ), 'function'
+  T?.eq ( type_of isa2.symbol     ), 'function'
+  T?.eq ( type_of isa2.integer    ), 'function'
+  T?.eq ( isa2.null       null        ), true
+  T?.eq ( isa2.undefined  undefined   ), true
+  T?.eq ( isa2.boolean    true        ), true
+  T?.eq ( isa2.float      42.1        ), true
+  T?.eq ( isa2.symbol     Symbol 'x'  ), true
+  T?.eq ( isa2.integer    42          ), true
+  #.........................................................................................................
+  done?()
 @demo_longest_first_matching = ( T, done ) ->
   vocabulary  = [ 'of', 'or', 'empty', 'nonempty', 'list', 'empty list', 'empty list of', 'integer', 'list of', 'of integer', ]
   #-----------------------------------------------------------------------------------------------------------
