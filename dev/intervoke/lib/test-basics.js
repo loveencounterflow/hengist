@@ -409,7 +409,7 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
-      _entry_from_word(phrase, word, role = null) {
+      _get_vocabulary_entry(phrase, word, role = null) {
         var R, phrase_txt;
         if ((R = vocabulary[word]) == null) {
           phrase_txt = phrase.join('_');
@@ -423,8 +423,32 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
+      _get_adjectives(phrase) {
+        /* NOTE not entirely correct, must look for 'of' */
+        var R, adjective, i, idx, len, phrase_txt;
+        R = [];
+        for (idx = i = 0, len = phrase.length; i < len; idx = ++i) {
+          adjective = phrase[idx];
+          if (idx >= phrase.length - 1) {
+            break;
+          }
+          if (adjective === 'optional') {
+            if (idx !== 0) {
+              phrase_txt = phrase.join('_');
+              throw new Error(`expected 'optional' to occur as first word in phrase, got ${rpr(phrase_txt)}`);
+            }
+            R.optional = true;
+            continue;
+          }
+          this._get_vocabulary_entry(phrase, adjective, 'adjective');
+          R.push(adjective);
+          return R;
+        }
+      }
+
+      //---------------------------------------------------------------------------------------------------------
       parse(sentence) {
-        var R, adjective, adjective_entry, adjectives, alternative, alternatives, i, idx, len, noun, noun_entry, phrase, phrase_txt, ref, words;
+        var R, adjectives, alternative, alternatives, noun, noun_entry, phrase, ref, words;
         words = sentence.split('_');
         alternatives = [];
         R = {
@@ -435,27 +459,9 @@
         for (phrase of ref) {
           //.....................................................................................................
           noun = phrase.at(-1);
-          noun_entry = this._entry_from_word(phrase, noun, 'noun');
+          noun_entry = this._get_vocabulary_entry(phrase, noun, 'noun');
           //.....................................................................................................
-          /* NOTE not entirely correct, must look for 'of' */
-          adjectives = [];
-          for (idx = i = 0, len = phrase.length; i < len; idx = ++i) {
-            adjective = phrase[idx];
-            if (idx >= phrase.length - 1) {
-              break;
-            }
-            if (adjective === 'optional') {
-              if (idx !== 0) {
-                phrase_txt = phrase.join('_');
-                throw new Error(`expected 'optional' to occur as first word in phrase, got ${rpr(phrase_txt)}`);
-              }
-              R.optional = true;
-              continue;
-            }
-            adjective_entry = this._entry_from_word(phrase, adjective, 'adjective');
-            adjectives.push(adjective);
-          }
-          //.....................................................................................................
+          adjectives = this._get_adjectives(phrase);
           alternative = {noun, adjectives};
           alternatives.push(alternative);
         }
