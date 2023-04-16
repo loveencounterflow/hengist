@@ -225,7 +225,7 @@ get_isa2_class = ->
         yield phrase
       return null
     #---------------------------------------------------------------------------------------------------------
-    _entry_from_word: ( phrase, word, role = null ) ->
+    _get_vocabulary_entry: ( phrase, word, role = null ) ->
       unless ( R = vocabulary[ word ] )?
         phrase_txt = phrase.join '_'
         throw new Error "word #{rpr word} in phrase #{rpr phrase_txt} is unknown"
@@ -234,6 +234,21 @@ get_isa2_class = ->
         throw new Error "expected word #{rpr word} in phrase #{rpr phrase_txt} to have role #{rpr role} but is declared to be #{rpr R.role}"
       return R
     #---------------------------------------------------------------------------------------------------------
+    _get_adjectives: ( phrase ) ->
+      ### NOTE not entirely correct, must look for 'of' ###
+      R = []
+      for adjective, idx in phrase
+        break if idx >= phrase.length - 1
+        if adjective is 'optional'
+          unless idx is 0
+            phrase_txt = phrase.join '_'
+            throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
+          R.optional = true
+          continue
+        @_get_vocabulary_entry phrase, adjective, 'adjective'
+        R.push adjective
+        return R
+    #---------------------------------------------------------------------------------------------------------
     parse: ( sentence ) ->
       words         = sentence.split '_'
       alternatives  = []
@@ -241,21 +256,9 @@ get_isa2_class = ->
       for phrase from @walk_alternative_phrases words
         #.....................................................................................................
         noun        = phrase.at -1
-        noun_entry  = @_entry_from_word phrase, noun, 'noun'
+        noun_entry  = @_get_vocabulary_entry phrase, noun, 'noun'
         #.....................................................................................................
-        ### NOTE not entirely correct, must look for 'of' ###
-        adjectives  = []
-        for adjective, idx in phrase
-          break if idx >= phrase.length - 1
-          if adjective is 'optional'
-            unless idx is 0
-              phrase_txt = phrase.join '_'
-              throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
-            R.optional = true
-            continue
-          adjective_entry = @_entry_from_word phrase, adjective, 'adjective'
-          adjectives.push adjective
-        #.....................................................................................................
+        adjectives  = @_get_adjectives phrase
         alternative = { noun, adjectives, }
         alternatives.push alternative
       return R
