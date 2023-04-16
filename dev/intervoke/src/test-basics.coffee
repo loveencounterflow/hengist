@@ -194,13 +194,75 @@ get_isa2_class = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@demo_walk_phrase_structure = ( T, done ) ->
+  vocabulary  =
+    of:       { role: 'of',         }
+    or:       { role: 'or',         }
+    optional: { role: 'optional',   }
+    #.......................................................................................................
+    empty:    { role: 'adjective',  }
+    nonempty: { role: 'adjective',  }
+    positive: { role: 'adjective',  }
+    negative: { role: 'adjective',  }
+    #.......................................................................................................
+    text:     { role: 'noun', adjectives: [ 'empty', 'nonempty',      ], }
+    list:     { role: 'noun', adjectives: [ 'empty', 'nonempty',      ], }
+    integer:  { role: 'noun', adjectives: [ 'positive', 'negative',   ], }
+  #.........................................................................................................
+  class Prompt_parser
+    #---------------------------------------------------------------------------------------------------------
+    _walk_alternative_clauses: ( sentence ) ->
+      ### assuming no empty strings ###
+      phrase    = []
+      for word in sentence
+        if word is 'or'
+          yield phrase
+          phrase = []
+          continue
+        phrase.push word
+      yield phrase
+      return null
+    #---------------------------------------------------------------------------------------------------------
+    walk_alternative_clauses: ( sentence ) ->
+      for phrase from @_walk_alternative_clauses sentence
+        sentence_txt = sentence.join ' '
+        throw new Error "empty alternative clause in sentence #{rpr sentence_txt}" if phrase.length is 0
+        yield phrase
+      return null
+    #---------------------------------------------------------------------------------------------------------
+    _find_all: ( list, value ) ->
+      ### TAINT comments to https://stackoverflow.com/a/20798567/7568091 suggest for-loop may be faster ###
+      R   = []
+      idx = -1
+      R.push idx while ( idx = list.indexOf value, idx + 1 ) > -1
+      return R
+  #.........................................................................................................
+  pp = new Prompt_parser()
+  lf = ( it ) -> [ it..., ]
+  # debug '^23423^', lf pp.walk_alternative_clauses "".split '_'
+  # debug '^23423^', lf pp.walk_alternative_clauses "_or_".split '_'
+  try debug '^23423^', lf pp.walk_alternative_clauses "or".split '_'                                    catch e then warn GUY.trm.reverse e.message
+  try debug '^23423^', lf pp.walk_alternative_clauses "or_positive_integer_or_nonempty_text".split '_'  catch e then warn GUY.trm.reverse e.message
+  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer_or_nonempty_text_or".split '_'  catch e then warn GUY.trm.reverse e.message
+  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer".split '_'                      catch e then warn GUY.trm.reverse e.message
+  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer_or_nonempty_text".split '_'     catch e then warn GUY.trm.reverse e.message
+  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'a'
+  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'
+  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'
+  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'
+  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'
+  #.........................................................................................................
+  done?()
+
 #===========================================================================================================
 if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
-  test @
+  # test @
+  @demo_walk_phrase_structure()
   # test @ivk_methods_are_properly_named
-  # @ivk_isa()
+  # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
   # @demo_longest_first_matching()
 
