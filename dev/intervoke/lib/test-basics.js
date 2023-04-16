@@ -96,24 +96,30 @@
     Isa = get_isa_class();
     //.........................................................................................................
     isa = new Isa();
+    // debug '^98-1^', isa.__cache
+    if (T != null) {
+      T.eq(isa.float(42), true);
+    }
+    if (T != null) {
+      T.eq(isa.float(0/0), false);
+    }
+    if (T != null) {
+      T.eq(isa.float('22'), false);
+    }
+    if (T != null) {
+      T.eq(isa.boolean('22'), false);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(true), true);
+    }
     try {
-      // # debug '^98-1^', isa.__cache
-      // try debug '^98-2^', ( new IVK.Prompter() ).__do() catch e then warn GUY.trm.reverse e.message
-      // T?.throws /not allowed to call method '__do' of abstract base class/, -> ( new IVK.Prompter() ).__do()
-      // T?.eq ( isa 'float', 42       ), true
-      // T?.eq ( isa.float 42          ), true
-      // T?.eq ( isa.float NaN         ), false
-      // T?.eq ( isa.float '22'        ), false
-      // T?.eq ( isa.boolean '22'      ), false
-      // T?.eq ( isa.boolean true      ), true
-      // T?.eq ( isa 'boolean', true   ), true
       debug('^98-2^', isa.xxx(42));
     } catch (error1) {
       e = error1;
       warn(GUY.trm.reverse(e.message));
     }
     if (T != null) {
-      T.throws(/xxx/, function() {
+      T.throws(/property 'xxx' is unknown/, function() {
         return isa.xxx(42);
       });
     }
@@ -458,14 +464,14 @@
   //===========================================================================================================
   if (module === require.main) {
     (() => {
-      // @ivk_isa()
+      this.ivk_isa();
       // test @ivk_declarations_are_inherited
-      // test @
-      return this.demo_walk_phrase_structure();
+      return test(this);
     })();
   }
 
-  // test @ivk_methods_are_properly_named
+  // @demo_walk_phrase_structure()
+// test @ivk_methods_are_properly_named
 // test @ivk_isa
 // test @ivk_disallowed_to_redeclare
 // @demo_longest_first_matching()
