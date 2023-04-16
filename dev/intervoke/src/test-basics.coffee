@@ -206,7 +206,7 @@ get_isa2_class = ->
   #.........................................................................................................
   class Prompt_parser
     #---------------------------------------------------------------------------------------------------------
-    _walk_alternative_clauses: ( sentence ) ->
+    _walk_alternative_phrases: ( sentence ) ->
       ### assuming no empty strings ###
       phrase    = []
       for word in sentence
@@ -218,12 +218,41 @@ get_isa2_class = ->
       yield phrase
       return null
     #---------------------------------------------------------------------------------------------------------
-    walk_alternative_clauses: ( sentence ) ->
-      for phrase from @_walk_alternative_clauses sentence
-        sentence_txt = sentence.join ' '
-        throw new Error "empty alternative clause in sentence #{rpr sentence_txt}" if phrase.length is 0
+    walk_alternative_phrases: ( words ) ->
+      for phrase from @_walk_alternative_phrases words
+        sentence = words.join ' '
+        throw new Error "empty alternative clause in sentence #{rpr sentence}" if phrase.length is 0
         yield phrase
       return null
+    #---------------------------------------------------------------------------------------------------------
+    parse: ( sentence ) ->
+      words         = sentence.split '_'
+      alternatives  = []
+      R             = { alternatives, optional: false, }
+      for phrase from @walk_alternative_phrases words
+        #.....................................................................................................
+        noun  = phrase.at -1
+        unless ( entry = vocabulary[ noun ] )?
+          phrase_txt = phrase.join '_'
+          throw new Error "word #{rpr noun} in phrase #{rpr phrase_txt} is unknown"
+        unless entry.role is 'noun'
+          phrase_txt = phrase.join '_'
+          throw new Error "expected word #{rpr noun} in phrase #{rpr phrase_txt} to have role 'noun' but is declared to be #{rpr entry.role}"
+        #.....................................................................................................
+        adjectives  = []
+        for adjective, idx in phrase
+          break if idx >= phrase.length - 1
+          if adjective is 'optional'
+            unless idx is 0
+              phrase_txt = phrase.join '_'
+              throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
+            R.optional = true
+            continue
+          adjectives.push adjective
+        #.....................................................................................................
+        alternative = { noun, adjectives, }
+        alternatives.push alternative
+      return R
     #---------------------------------------------------------------------------------------------------------
     _find_all: ( list, value ) ->
       ### TAINT comments to https://stackoverflow.com/a/20798567/7568091 suggest for-loop may be faster ###
@@ -233,14 +262,18 @@ get_isa2_class = ->
       return R
   #.........................................................................................................
   pp = new Prompt_parser()
-  lf = ( it ) -> [ it..., ]
-  # debug '^23423^', lf pp.walk_alternative_clauses "".split '_'
-  # debug '^23423^', lf pp.walk_alternative_clauses "_or_".split '_'
-  try debug '^23423^', lf pp.walk_alternative_clauses "or".split '_'                                    catch e then warn GUY.trm.reverse e.message
-  try debug '^23423^', lf pp.walk_alternative_clauses "or_positive_integer_or_nonempty_text".split '_'  catch e then warn GUY.trm.reverse e.message
-  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer_or_nonempty_text_or".split '_'  catch e then warn GUY.trm.reverse e.message
-  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer".split '_'                      catch e then warn GUY.trm.reverse e.message
-  try debug '^23423^', lf pp.walk_alternative_clauses "positive_integer_or_nonempty_text".split '_'     catch e then warn GUY.trm.reverse e.message
+  sp = ( sentence ) -> sentence.split '_'
+  lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
+  # debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
+  # debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
+  lf -> pp.walk_alternative_phrases sp "or"
+  lf -> pp.walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
+  lf -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
+  lf -> pp.walk_alternative_phrases sp "positive_integer"
+  lf -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text"
+  lf -> [ pp.parse "positive_integer_or_positive_nonempty" ]
+  lf -> [ pp.parse "positive_integer_or_nonempty_text" ]
+  lf -> [ pp.parse "positive_integer_or_optional_nonempty_text" ]
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'a'
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'
