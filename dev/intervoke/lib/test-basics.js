@@ -35,15 +35,7 @@
     IVK = require('../../../apps/intervoke');
     Isa = (function() {
       //===========================================================================================================
-      class Isa extends IVK.Word_prompter {
-        //---------------------------------------------------------------------------------------------------------
-        __create_handler(phrase) {
-          return function(details) {
-            return 'Yo';
-          };
-        }
-
-      };
+      class Isa extends IVK.Word_prompter {};
 
       //---------------------------------------------------------------------------------------------------------
       Isa.declare = {
@@ -105,40 +97,25 @@
     //.........................................................................................................
     isa = new Isa();
     try {
-      // debug '^98-1^', isa.__cache
-      debug('^98-2^', (new IVK.Prompter()).__do());
+      // # debug '^98-1^', isa.__cache
+      // try debug '^98-2^', ( new IVK.Prompter() ).__do() catch e then warn GUY.trm.reverse e.message
+      // T?.throws /not allowed to call method '__do' of abstract base class/, -> ( new IVK.Prompter() ).__do()
+      // T?.eq ( isa 'float', 42       ), true
+      // T?.eq ( isa.float 42          ), true
+      // T?.eq ( isa.float NaN         ), false
+      // T?.eq ( isa.float '22'        ), false
+      // T?.eq ( isa.boolean '22'      ), false
+      // T?.eq ( isa.boolean true      ), true
+      // T?.eq ( isa 'boolean', true   ), true
+      debug('^98-2^', isa.xxx(42));
     } catch (error1) {
       e = error1;
       warn(GUY.trm.reverse(e.message));
     }
     if (T != null) {
-      T.throws(/not allowed to call method '__do' of abstract base class/, function() {
-        return (new IVK.Prompter()).__do();
+      T.throws(/xxx/, function() {
+        return isa.xxx(42);
       });
-    }
-    if (T != null) {
-      T.eq(isa('float', 42), true);
-    }
-    if (T != null) {
-      T.eq(isa.float(42), true);
-    }
-    if (T != null) {
-      T.eq(isa.float(0/0), false);
-    }
-    if (T != null) {
-      T.eq(isa.float('22'), false);
-    }
-    if (T != null) {
-      T.eq(isa.boolean('22'), false);
-    }
-    if (T != null) {
-      T.eq(isa.boolean(true), true);
-    }
-    if (T != null) {
-      T.eq(isa('boolean', true), true);
-    }
-    if (T != null) {
-      T.eq(isa.xxx('22'), false);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -351,17 +328,145 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo_walk_phrase_structure = function(T, done) {
+    var Prompt_parser, e, lf, pp, vocabulary;
+    vocabulary = {
+      of: {
+        role: 'of'
+      },
+      or: {
+        role: 'or'
+      },
+      optional: {
+        role: 'optional'
+      },
+      //.......................................................................................................
+      empty: {
+        role: 'adjective'
+      },
+      nonempty: {
+        role: 'adjective'
+      },
+      positive: {
+        role: 'adjective'
+      },
+      negative: {
+        role: 'adjective'
+      },
+      //.......................................................................................................
+      text: {
+        role: 'noun',
+        adjectives: ['empty', 'nonempty']
+      },
+      list: {
+        role: 'noun',
+        adjectives: ['empty', 'nonempty']
+      },
+      integer: {
+        role: 'noun',
+        adjectives: ['positive', 'negative']
+      }
+    };
+    //.........................................................................................................
+    Prompt_parser = class Prompt_parser {
+      //---------------------------------------------------------------------------------------------------------
+      * _walk_alternative_clauses(sentence) {
+        /* assuming no empty strings */
+        var i, len, phrase, word;
+        phrase = [];
+        for (i = 0, len = sentence.length; i < len; i++) {
+          word = sentence[i];
+          if (word === 'or') {
+            yield phrase;
+            phrase = [];
+            continue;
+          }
+          phrase.push(word);
+        }
+        yield phrase;
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      * walk_alternative_clauses(sentence) {
+        var phrase, ref, sentence_txt;
+        ref = this._walk_alternative_clauses(sentence);
+        for (phrase of ref) {
+          sentence_txt = sentence.join(' ');
+          if (phrase.length === 0) {
+            throw new Error(`empty alternative clause in sentence ${rpr(sentence_txt)}`);
+          }
+          yield phrase;
+        }
+        return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      _find_all(list, value) {
+        /* TAINT comments to https://stackoverflow.com/a/20798567/7568091 suggest for-loop may be faster */
+        var R, idx;
+        R = [];
+        idx = -1;
+        while ((idx = list.indexOf(value, idx + 1)) > -1) {
+          R.push(idx);
+        }
+        return R;
+      }
+
+    };
+    //.........................................................................................................
+    pp = new Prompt_parser();
+    lf = function(it) {
+      return [...it];
+    };
+    try {
+      // debug '^23423^', lf pp.walk_alternative_clauses "".split '_'
+      // debug '^23423^', lf pp.walk_alternative_clauses "_or_".split '_'
+      debug('^23423^', lf(pp.walk_alternative_clauses("or".split('_'))));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    try {
+      debug('^23423^', lf(pp.walk_alternative_clauses("or_positive_integer_or_nonempty_text".split('_'))));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    try {
+      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer_or_nonempty_text_or".split('_'))));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    try {
+      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer".split('_'))));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    try {
+      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer_or_nonempty_text".split('_'))));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //===========================================================================================================
   if (module === require.main) {
     (() => {
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
-      return test(this);
+      // test @
+      return this.demo_walk_phrase_structure();
     })();
   }
 
   // test @ivk_methods_are_properly_named
-// @ivk_isa()
+// test @ivk_isa
 // test @ivk_disallowed_to_redeclare
 // @demo_longest_first_matching()
 
