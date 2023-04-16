@@ -409,8 +409,22 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
+      _entry_from_word(phrase, word, role = null) {
+        var R, phrase_txt;
+        if ((R = vocabulary[word]) == null) {
+          phrase_txt = phrase.join('_');
+          throw new Error(`word ${rpr(word)} in phrase ${rpr(phrase_txt)} is unknown`);
+        }
+        if ((role != null) && R.role !== role) {
+          phrase_txt = phrase.join('_');
+          throw new Error(`expected word ${rpr(word)} in phrase ${rpr(phrase_txt)} to have role ${rpr(role)} but is declared to be ${rpr(R.role)}`);
+        }
+        return R;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
       parse(sentence) {
-        var R, adjective, adjectives, alternative, alternatives, entry, i, idx, len, noun, phrase, phrase_txt, ref, words;
+        var R, adjective, adjective_entry, adjectives, alternative, alternatives, i, idx, len, noun, noun_entry, phrase, phrase_txt, ref, words;
         words = sentence.split('_');
         alternatives = [];
         R = {
@@ -421,15 +435,9 @@
         for (phrase of ref) {
           //.....................................................................................................
           noun = phrase.at(-1);
-          if ((entry = vocabulary[noun]) == null) {
-            phrase_txt = phrase.join('_');
-            throw new Error(`word ${rpr(noun)} in phrase ${rpr(phrase_txt)} is unknown`);
-          }
-          if (entry.role !== 'noun') {
-            phrase_txt = phrase.join('_');
-            throw new Error(`expected word ${rpr(noun)} in phrase ${rpr(phrase_txt)} to have role 'noun' but is declared to be ${rpr(entry.role)}`);
-          }
+          noun_entry = this._entry_from_word(phrase, noun, 'noun');
           //.....................................................................................................
+          /* NOTE not entirely correct, must look for 'of' */
           adjectives = [];
           for (idx = i = 0, len = phrase.length; i < len; idx = ++i) {
             adjective = phrase[idx];
@@ -444,6 +452,7 @@
               R.optional = true;
               continue;
             }
+            adjective_entry = this._entry_from_word(phrase, adjective, 'adjective');
             adjectives.push(adjective);
           }
           //.....................................................................................................
@@ -505,6 +514,24 @@
     });
     lf(function() {
       return [pp.parse("positive_integer_or_optional_nonempty_text")];
+    });
+    lf(function() {
+      return [pp.parse("positive_integer_or_nonempty_optional_text")];
+    });
+    lf(function() {
+      return [pp.parse("combobulate_integer")];
+    });
+    lf(function() {
+      return [pp.parse("list")];
+    });
+    lf(function() {
+      return [pp.parse("list_of")];
+    });
+    lf(function() {
+      return [pp.parse("list_of_integer")];
+    });
+    lf(function() {
+      return [pp.parse("list_of_integers")];
     });
     return typeof done === "function" ? done() : void 0;
   };
