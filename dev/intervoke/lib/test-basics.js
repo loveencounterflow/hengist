@@ -423,7 +423,7 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
-      _get_adjectives(phrase) {
+      _get_adjectives(ast, phrase) {
         /* NOTE not entirely correct, must look for 'of' */
         var R, adjective, i, idx, len, phrase_txt;
         R = [];
@@ -437,7 +437,7 @@
               phrase_txt = phrase.join('_');
               throw new Error(`expected 'optional' to occur as first word in phrase, got ${rpr(phrase_txt)}`);
             }
-            R.optional = true;
+            ast.optional = true;
             continue;
           }
           this._get_vocabulary_entry(phrase, adjective, 'adjective');
@@ -461,7 +461,7 @@
           noun = phrase.at(-1);
           noun_entry = this._get_vocabulary_entry(phrase, noun, 'noun');
           //.....................................................................................................
-          adjectives = this._get_adjectives(phrase);
+          adjectives = this._get_adjectives(R, phrase);
           alternative = {noun, adjectives};
           alternatives.push(alternative);
         }
