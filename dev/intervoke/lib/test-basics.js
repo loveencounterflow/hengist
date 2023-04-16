@@ -336,7 +336,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_walk_phrase_structure = function(T, done) {
-    var Prompt_parser, e, lf, pp, vocabulary;
+    var Prompt_parser, lf, pp, sp, vocabulary;
     vocabulary = {
       of: {
         role: 'of'
@@ -377,7 +377,7 @@
     //.........................................................................................................
     Prompt_parser = class Prompt_parser {
       //---------------------------------------------------------------------------------------------------------
-      * _walk_alternative_clauses(sentence) {
+      * _walk_alternative_phrases(sentence) {
         /* assuming no empty strings */
         var i, len, phrase, word;
         phrase = [];
@@ -395,17 +395,62 @@
       }
 
       //---------------------------------------------------------------------------------------------------------
-      * walk_alternative_clauses(sentence) {
-        var phrase, ref, sentence_txt;
-        ref = this._walk_alternative_clauses(sentence);
+      * walk_alternative_phrases(words) {
+        var phrase, ref, sentence;
+        ref = this._walk_alternative_phrases(words);
         for (phrase of ref) {
-          sentence_txt = sentence.join(' ');
+          sentence = words.join(' ');
           if (phrase.length === 0) {
-            throw new Error(`empty alternative clause in sentence ${rpr(sentence_txt)}`);
+            throw new Error(`empty alternative clause in sentence ${rpr(sentence)}`);
           }
           yield phrase;
         }
         return null;
+      }
+
+      //---------------------------------------------------------------------------------------------------------
+      parse(sentence) {
+        var R, adjective, adjectives, alternative, alternatives, entry, i, idx, len, noun, phrase, phrase_txt, ref, words;
+        words = sentence.split('_');
+        alternatives = [];
+        R = {
+          alternatives,
+          optional: false
+        };
+        ref = this.walk_alternative_phrases(words);
+        for (phrase of ref) {
+          //.....................................................................................................
+          noun = phrase.at(-1);
+          if ((entry = vocabulary[noun]) == null) {
+            phrase_txt = phrase.join('_');
+            throw new Error(`word ${rpr(noun)} in phrase ${rpr(phrase_txt)} is unknown`);
+          }
+          if (entry.role !== 'noun') {
+            phrase_txt = phrase.join('_');
+            throw new Error(`expected word ${rpr(noun)} in phrase ${rpr(phrase_txt)} to have role 'noun' but is declared to be ${rpr(entry.role)}`);
+          }
+          //.....................................................................................................
+          adjectives = [];
+          for (idx = i = 0, len = phrase.length; i < len; idx = ++i) {
+            adjective = phrase[idx];
+            if (idx >= phrase.length - 1) {
+              break;
+            }
+            if (adjective === 'optional') {
+              if (idx !== 0) {
+                phrase_txt = phrase.join('_');
+                throw new Error(`expected 'optional' to occur as first word in phrase, got ${rpr(phrase_txt)}`);
+              }
+              R.optional = true;
+              continue;
+            }
+            adjectives.push(adjective);
+          }
+          //.....................................................................................................
+          alternative = {noun, adjectives};
+          alternatives.push(alternative);
+        }
+        return R;
       }
 
       //---------------------------------------------------------------------------------------------------------
@@ -423,41 +468,44 @@
     };
     //.........................................................................................................
     pp = new Prompt_parser();
-    lf = function(it) {
-      return [...it];
+    sp = function(sentence) {
+      return sentence.split('_');
     };
-    try {
-      // debug '^23423^', lf pp.walk_alternative_clauses "".split '_'
-      // debug '^23423^', lf pp.walk_alternative_clauses "_or_".split '_'
-      debug('^23423^', lf(pp.walk_alternative_clauses("or".split('_'))));
-    } catch (error1) {
-      e = error1;
-      warn(GUY.trm.reverse(e.message));
-    }
-    try {
-      debug('^23423^', lf(pp.walk_alternative_clauses("or_positive_integer_or_nonempty_text".split('_'))));
-    } catch (error1) {
-      e = error1;
-      warn(GUY.trm.reverse(e.message));
-    }
-    try {
-      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer_or_nonempty_text_or".split('_'))));
-    } catch (error1) {
-      e = error1;
-      warn(GUY.trm.reverse(e.message));
-    }
-    try {
-      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer".split('_'))));
-    } catch (error1) {
-      e = error1;
-      warn(GUY.trm.reverse(e.message));
-    }
-    try {
-      debug('^23423^', lf(pp.walk_alternative_clauses("positive_integer_or_nonempty_text".split('_'))));
-    } catch (error1) {
-      e = error1;
-      warn(GUY.trm.reverse(e.message));
-    }
+    lf = function(fn) {
+      var e;
+      try {
+        return info('^99-1^', [...fn()]);
+      } catch (error1) {
+        e = error1;
+        return warn(GUY.trm.reverse(e.message));
+      }
+    };
+    // debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
+    // debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
+    lf(function() {
+      return pp.walk_alternative_phrases(sp("or"));
+    });
+    lf(function() {
+      return pp.walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
+    });
+    lf(function() {
+      return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
+    });
+    lf(function() {
+      return pp.walk_alternative_phrases(sp("positive_integer"));
+    });
+    lf(function() {
+      return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
+    });
+    lf(function() {
+      return [pp.parse("positive_integer_or_positive_nonempty")];
+    });
+    lf(function() {
+      return [pp.parse("positive_integer_or_nonempty_text")];
+    });
+    lf(function() {
+      return [pp.parse("positive_integer_or_optional_nonempty_text")];
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
