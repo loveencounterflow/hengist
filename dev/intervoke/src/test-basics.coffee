@@ -234,7 +234,7 @@ get_isa2_class = ->
         throw new Error "expected word #{rpr word} in phrase #{rpr phrase_txt} to have role #{rpr role} but is declared to be #{rpr R.role}"
       return R
     #---------------------------------------------------------------------------------------------------------
-    _get_adjectives: ( phrase ) ->
+    _get_adjectives: ( ast, phrase ) ->
       ### NOTE not entirely correct, must look for 'of' ###
       R = []
       for adjective, idx in phrase
@@ -243,7 +243,7 @@ get_isa2_class = ->
           unless idx is 0
             phrase_txt = phrase.join '_'
             throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
-          R.optional = true
+          ast.optional = true
           continue
         @_get_vocabulary_entry phrase, adjective, 'adjective'
         R.push adjective
@@ -258,7 +258,7 @@ get_isa2_class = ->
         noun        = phrase.at -1
         noun_entry  = @_get_vocabulary_entry phrase, noun, 'noun'
         #.....................................................................................................
-        adjectives  = @_get_adjectives phrase
+        adjectives  = @_get_adjectives R, phrase
         alternative = { noun, adjectives, }
         alternatives.push alternative
       return R
