@@ -43,9 +43,6 @@ get_isa_class = ->
       boolean:    ( x ) -> ( x is true ) or ( x is false )
       float:      ( x ) -> Number.isFinite x
       symbol:     ( x ) -> ( typeof x ) is 'symbol'
-    #---------------------------------------------------------------------------------------------------------
-    __create_handler: ( phrase ) ->
-      return ( details ) -> 'Yo'
   #===========================================================================================================
   return Isa
 
@@ -70,16 +67,13 @@ get_isa2_class = ->
   #.........................................................................................................
   isa = new Isa()
   # debug '^98-1^', isa.__cache
-  try debug '^98-2^', ( new IVK.Prompter() ).__do() catch e then warn GUY.trm.reverse e.message
-  T?.throws /not allowed to call method '__do' of abstract base class/, -> ( new IVK.Prompter() ).__do()
-  T?.eq ( isa 'float', 42       ), true
   T?.eq ( isa.float 42          ), true
   T?.eq ( isa.float NaN         ), false
   T?.eq ( isa.float '22'        ), false
   T?.eq ( isa.boolean '22'      ), false
   T?.eq ( isa.boolean true      ), true
-  T?.eq ( isa 'boolean', true   ), true
-  T?.eq ( isa.xxx '22'        ), false
+  try debug '^98-2^', isa.xxx 42 catch e then warn GUY.trm.reverse e.message
+  T?.throws /property 'xxx' is unknown/, -> isa.xxx 42
   #.........................................................................................................
   done?()
 
@@ -257,10 +251,10 @@ get_isa2_class = ->
 
 #===========================================================================================================
 if module is require.main then do =>
-  # @ivk_isa()
+  @ivk_isa()
   # test @ivk_declarations_are_inherited
-  # test @
-  @demo_walk_phrase_structure()
+  test @
+  # @demo_walk_phrase_structure()
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
