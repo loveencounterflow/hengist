@@ -225,20 +225,25 @@ get_isa2_class = ->
         yield phrase
       return null
     #---------------------------------------------------------------------------------------------------------
+    _entry_from_word: ( phrase, word, role = null ) ->
+      unless ( R = vocabulary[ word ] )?
+        phrase_txt = phrase.join '_'
+        throw new Error "word #{rpr word} in phrase #{rpr phrase_txt} is unknown"
+      if role? and R.role isnt role
+        phrase_txt = phrase.join '_'
+        throw new Error "expected word #{rpr word} in phrase #{rpr phrase_txt} to have role #{rpr role} but is declared to be #{rpr R.role}"
+      return R
+    #---------------------------------------------------------------------------------------------------------
     parse: ( sentence ) ->
       words         = sentence.split '_'
       alternatives  = []
       R             = { alternatives, optional: false, }
       for phrase from @walk_alternative_phrases words
         #.....................................................................................................
-        noun  = phrase.at -1
-        unless ( entry = vocabulary[ noun ] )?
-          phrase_txt = phrase.join '_'
-          throw new Error "word #{rpr noun} in phrase #{rpr phrase_txt} is unknown"
-        unless entry.role is 'noun'
-          phrase_txt = phrase.join '_'
-          throw new Error "expected word #{rpr noun} in phrase #{rpr phrase_txt} to have role 'noun' but is declared to be #{rpr entry.role}"
+        noun        = phrase.at -1
+        noun_entry  = @_entry_from_word phrase, noun, 'noun'
         #.....................................................................................................
+        ### NOTE not entirely correct, must look for 'of' ###
         adjectives  = []
         for adjective, idx in phrase
           break if idx >= phrase.length - 1
@@ -248,6 +253,7 @@ get_isa2_class = ->
               throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
             R.optional = true
             continue
+          adjective_entry = @_entry_from_word phrase, adjective, 'adjective'
           adjectives.push adjective
         #.....................................................................................................
         alternative = { noun, adjectives, }
@@ -274,6 +280,12 @@ get_isa2_class = ->
   lf -> [ pp.parse "positive_integer_or_positive_nonempty" ]
   lf -> [ pp.parse "positive_integer_or_nonempty_text" ]
   lf -> [ pp.parse "positive_integer_or_optional_nonempty_text" ]
+  lf -> [ pp.parse "positive_integer_or_nonempty_optional_text" ]
+  lf -> [ pp.parse "combobulate_integer" ]
+  lf -> [ pp.parse "list" ]
+  lf -> [ pp.parse "list_of" ]
+  lf -> [ pp.parse "list_of_integer" ]
+  lf -> [ pp.parse "list_of_integers" ]
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'a'
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'
   # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'
