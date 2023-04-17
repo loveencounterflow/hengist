@@ -336,7 +336,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_walk_phrase_structure = function(T, done) {
-    var Phrase_parser, expand, lf, pp, sp;
+    var Phrase_parser, d, expand, lf, pp, ref, sp;
     ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
     pp = new Phrase_parser();
@@ -355,37 +355,37 @@
     expand = function(fn) {
       return [...fn()];
     };
-    // debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
-    // debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
+    // debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
+    // debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp.walk_alternative_phrases(sp("or"));
+          return pp._walk_alternative_phrases(sp("or"));
         });
       });
     }
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp.walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
+          return pp._walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
         });
       });
     }
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
+          return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
         });
       });
     }
     if (T != null) {
       T.eq(expand(function() {
-        return pp.walk_alternative_phrases(sp("positive_integer"));
+        return pp._walk_alternative_phrases(sp("positive_integer"));
       }), [['positive', 'integer']]);
     }
     if (T != null) {
       T.eq(expand(function() {
-        return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
+        return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
       }), [['positive', 'integer'], ['nonempty', 'text']]);
     }
     if (T != null) {
@@ -486,17 +486,6 @@
       T.eq(pp._find_all(['nonempty', 'list', 'of', 'list', 'of', 'text'], 'of'), [2, 4]);
     }
     if (T != null) {
-      T.eq(pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']), {
-        phrase: ['nonempty', 'list'],
-        elements: {
-          phrase: ['list'],
-          elements: {
-            phrase: ['text']
-          }
-        }
-      });
-    }
-    if (T != null) {
       T.eq(pp._find_all(['a', 'b', 'c', 'd'], 'b'), [1]);
     }
     if (T != null) {
@@ -509,12 +498,22 @@
       T.eq(pp._find_all(['a', 'b', 'c', 'd', 'c'], 'c'), [2, 4]);
     }
     //.........................................................................................................
-    echo('^99-8^', expand(function() {
-      return [pp.parse("list_of_integer")];
-    }));
-    echo('^99-9^', expand(function() {
-      return [pp.parse("list_of_integers")];
-    }));
+    if (T != null) {
+      T.eq(pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']), {
+        phrase: ['nonempty', 'list'],
+        elements: {
+          phrase: ['list'],
+          elements: {
+            phrase: ['text']
+          }
+        }
+      });
+    }
+    help('^99-1^', pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']));
+    ref = pp._walk_element_clauses(['nonempty', 'list', 'of', 'nonempty', 'list', 'of', 'nonempty', 'text']);
+    for (d of ref) {
+      info('^99-1^', d);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
