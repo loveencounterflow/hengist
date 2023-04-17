@@ -336,7 +336,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_walk_phrase_structure = function(T, done) {
-    var Phrase_parser, d, expand, lf, pp, ref, sp;
+    var Phrase_parser, expand, lf, pp, sp;
     ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
     pp = new Phrase_parser();
@@ -510,9 +510,30 @@
       });
     }
     help('^99-1^', pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']));
-    ref = pp._walk_element_clauses(['nonempty', 'list', 'of', 'nonempty', 'list', 'of', 'nonempty', 'text']);
-    for (d of ref) {
-      info('^99-1^', d);
+    if (T != null) {
+      T.eq(expand(function() {
+        return pp._walk_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']);
+      }), [
+        {
+          phrase: ['nonempty',
+        'list'],
+          elements: {
+            phrase: ['list'],
+            elements: {
+              phrase: ['text']
+            }
+          }
+        },
+        {
+          phrase: ['list'],
+          elements: {
+            phrase: ['text']
+          }
+        },
+        {
+          phrase: ['text']
+        }
+      ]);
     }
     return typeof done === "function" ? done() : void 0;
   };
