@@ -190,119 +190,45 @@ get_isa2_class = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_walk_phrase_structure = ( T, done ) ->
-  vocabulary  =
-    of:       { role: 'of',         }
-    or:       { role: 'or',         }
-    optional: { role: 'optional',   }
-    #.......................................................................................................
-    empty:    { role: 'adjective',  }
-    nonempty: { role: 'adjective',  }
-    positive: { role: 'adjective',  }
-    negative: { role: 'adjective',  }
-    #.......................................................................................................
-    text:     { role: 'noun', adjectives: [ 'empty', 'nonempty',      ], }
-    list:     { role: 'noun', adjectives: [ 'empty', 'nonempty',      ], }
-    integer:  { role: 'noun', adjectives: [ 'positive', 'negative',   ], }
+  { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
   #.........................................................................................................
-  class Prompt_parser
-    #---------------------------------------------------------------------------------------------------------
-    _walk_alternative_phrases: ( sentence ) ->
-      ### assuming no empty strings ###
-      phrase    = []
-      for word in sentence
-        if word is 'or'
-          yield phrase
-          phrase = []
-          continue
-        phrase.push word
-      yield phrase
-      return null
-    #---------------------------------------------------------------------------------------------------------
-    walk_alternative_phrases: ( words ) ->
-      for phrase from @_walk_alternative_phrases words
-        sentence = words.join ' '
-        throw new Error "empty alternative clause in sentence #{rpr sentence}" if phrase.length is 0
-        yield phrase
-      return null
-    #---------------------------------------------------------------------------------------------------------
-    _get_vocabulary_entry: ( phrase, word, role = null ) ->
-      unless ( R = vocabulary[ word ] )?
-        phrase_txt = phrase.join '_'
-        throw new Error "word #{rpr word} in phrase #{rpr phrase_txt} is unknown"
-      if role? and R.role isnt role
-        phrase_txt = phrase.join '_'
-        throw new Error "expected word #{rpr word} in phrase #{rpr phrase_txt} to have role #{rpr role} but is declared to be #{rpr R.role}"
-      return R
-    #---------------------------------------------------------------------------------------------------------
-    _get_adjectives: ( ast, phrase ) ->
-      ### NOTE not entirely correct, must look for 'of' ###
-      R = []
-      for adjective, idx in phrase
-        break if idx >= phrase.length - 1
-        if adjective is 'optional'
-          unless idx is 0
-            phrase_txt = phrase.join '_'
-            throw new Error "expected 'optional' to occur as first word in phrase, got #{rpr phrase_txt}"
-          ast.optional = true
-          continue
-        @_get_vocabulary_entry phrase, adjective, 'adjective'
-        R.push adjective
-        return R
-    #---------------------------------------------------------------------------------------------------------
-    parse: ( sentence ) ->
-      words         = sentence.split '_'
-      alternatives  = []
-      R             = { alternatives, optional: false, }
-      for phrase from @walk_alternative_phrases words
-        #.....................................................................................................
-        noun        = phrase.at -1
-        noun_entry  = @_get_vocabulary_entry phrase, noun, 'noun'
-        #.....................................................................................................
-        adjectives  = @_get_adjectives R, phrase
-        alternative = { noun, adjectives, }
-        alternatives.push alternative
-      return R
-    #---------------------------------------------------------------------------------------------------------
-    _find_all: ( list, value ) ->
-      ### TAINT comments to https://stackoverflow.com/a/20798567/7568091 suggest for-loop may be faster ###
-      R   = []
-      idx = -1
-      R.push idx while ( idx = list.indexOf value, idx + 1 ) > -1
-      return R
-  #.........................................................................................................
-  pp = new Prompt_parser()
+  pp = new Phrase_parser()
   sp = ( sentence ) -> sentence.split '_'
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
+  expand = ( fn ) -> [ fn()..., ]
   # debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
   # debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
-  lf -> pp.walk_alternative_phrases sp "or"
-  lf -> pp.walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
-  lf -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
-  lf -> pp.walk_alternative_phrases sp "positive_integer"
-  lf -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text"
-  lf -> [ pp.parse "positive_integer_or_positive_nonempty" ]
-  lf -> [ pp.parse "positive_integer_or_nonempty_text" ]
-  lf -> [ pp.parse "positive_integer_or_optional_nonempty_text" ]
-  lf -> [ pp.parse "positive_integer_or_nonempty_optional_text" ]
-  lf -> [ pp.parse "combobulate_integer" ]
-  lf -> [ pp.parse "list" ]
-  lf -> [ pp.parse "list_of" ]
-  lf -> [ pp.parse "list_of_integer" ]
-  lf -> [ pp.parse "list_of_integers" ]
-  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'a'
-  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'
-  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'
-  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'
-  # debug '^23423^', pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'
+  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "or"
+  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
+  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
+  T?.eq ( expand -> pp.walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
+  T?.eq ( expand -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
+  T?.throws /expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, -> expand -> [ pp.parse "positive_integer_or_positive_nonempty" ]
+  T?.throws /word 'combobulate' in phrase 'combobulate_integer' is unknown/, -> expand -> [ pp.parse "combobulate_integer" ]
+  T?.throws /expected word 'of' in phrase 'list_of' to have role 'noun'/, -> expand -> [ pp.parse "list_of" ]
+  T?.eq ( expand -> [ pp.parse "positive_integer_or_nonempty_text" ]          ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false } ]
+  T?.eq ( expand -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true } ]
+  T?.eq ( expand -> [ pp.parse "positive_integer_or_nonempty_optional_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false } ]
+  T?.eq ( expand -> [ pp.parse "list" ]                                       ), [ { alternatives: [ { noun: 'list', adjectives: undefined } ], optional: false } ]
+  #.........................................................................................................
+  T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
+  T?.eq ( pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]  ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
+  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
+  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
+  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
+  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
+  #.........................................................................................................
+  echo '^99-8^', expand -> [ pp.parse "list_of_integer" ]
+  echo '^99-9^', expand -> [ pp.parse "list_of_integers" ]
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 if module is require.main then do =>
-  @ivk_isa()
+  # @ivk_isa()
   # test @ivk_declarations_are_inherited
-  test @
-  # @demo_walk_phrase_structure()
+  # test @
+  test @demo_walk_phrase_structure
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
