@@ -196,13 +196,13 @@ get_isa2_class = ->
   sp = ( sentence ) -> sentence.split '_'
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
   expand = ( fn ) -> [ fn()..., ]
-  # debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
-  # debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
-  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "or"
-  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
-  T?.throws /empty alternative clause/, -> expand -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
-  T?.eq ( expand -> pp.walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
-  T?.eq ( expand -> pp.walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
+  # debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
+  # debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or"
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
+  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
+  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
   T?.throws /expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, -> expand -> [ pp.parse "positive_integer_or_positive_nonempty" ]
   T?.throws /word 'combobulate' in phrase 'combobulate_integer' is unknown/, -> expand -> [ pp.parse "combobulate_integer" ]
   T?.throws /expected word 'of' in phrase 'list_of' to have role 'noun'/, -> expand -> [ pp.parse "list_of" ]
