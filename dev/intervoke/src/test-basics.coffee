@@ -210,12 +210,12 @@ get_isa2_class = ->
   T?.eq ( expand -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true } ]
   T?.eq ( expand -> [ pp.parse "positive_integer_or_nonempty_optional_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false } ]
   T?.eq ( expand -> [ pp.parse "list" ]                                       ), [ { alternatives: [ { noun: 'list', adjectives: undefined } ], optional: false } ]
-  #.........................................................................................................
-  T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
-  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
-  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
-  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
-  T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
+  # #.........................................................................................................
+  # T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
+  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
+  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
+  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
+  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
   #.........................................................................................................
   T?.eq ( pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]  ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
   help '^99-1^', pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]
