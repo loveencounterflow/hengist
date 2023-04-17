@@ -212,14 +212,18 @@ get_isa2_class = ->
   T?.eq ( expand -> [ pp.parse "list" ]                                       ), [ { alternatives: [ { noun: 'list', adjectives: undefined } ], optional: false } ]
   #.........................................................................................................
   T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
-  T?.eq ( pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]  ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
   T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
   T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
   T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
   T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
   #.........................................................................................................
-  echo '^99-8^', expand -> [ pp.parse "list_of_integer" ]
-  echo '^99-9^', expand -> [ pp.parse "list_of_integers" ]
+  T?.eq ( pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]  ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
+  help '^99-1^', pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]
+  T?.eq ( expand -> pp._walk_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ] ), [ { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }, { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } }, { phrase: [ 'text' ] } ]
+  # for d from pp._walk_element_clauses [ 'nonempty', 'list', 'of', 'nonempty', 'list', 'of', 'nonempty', 'text', ]
+  #   info '^99-1^', d
+  # echo '^99-8^', expand -> [ pp.parse "list_of_integer" ]
+  # echo '^99-9^', expand -> [ pp.parse "list_of_integers" ]
   #.........................................................................................................
   done?()
 
