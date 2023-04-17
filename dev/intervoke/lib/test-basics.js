@@ -336,153 +336,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.demo_walk_phrase_structure = function(T, done) {
-    var Prompt_parser, lf, pp, sp, vocabulary;
-    vocabulary = {
-      of: {
-        role: 'of'
-      },
-      or: {
-        role: 'or'
-      },
-      optional: {
-        role: 'optional'
-      },
-      //.......................................................................................................
-      empty: {
-        role: 'adjective'
-      },
-      nonempty: {
-        role: 'adjective'
-      },
-      positive: {
-        role: 'adjective'
-      },
-      negative: {
-        role: 'adjective'
-      },
-      //.......................................................................................................
-      text: {
-        role: 'noun',
-        adjectives: ['empty', 'nonempty']
-      },
-      list: {
-        role: 'noun',
-        adjectives: ['empty', 'nonempty']
-      },
-      integer: {
-        role: 'noun',
-        adjectives: ['positive', 'negative']
-      }
-    };
+    var Phrase_parser, expand, lf, pp, sp;
+    ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
-    Prompt_parser = class Prompt_parser {
-      //---------------------------------------------------------------------------------------------------------
-      * _walk_alternative_phrases(sentence) {
-        /* assuming no empty strings */
-        var i, len, phrase, word;
-        phrase = [];
-        for (i = 0, len = sentence.length; i < len; i++) {
-          word = sentence[i];
-          if (word === 'or') {
-            yield phrase;
-            phrase = [];
-            continue;
-          }
-          phrase.push(word);
-        }
-        yield phrase;
-        return null;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      * walk_alternative_phrases(words) {
-        var phrase, ref, sentence;
-        ref = this._walk_alternative_phrases(words);
-        for (phrase of ref) {
-          sentence = words.join(' ');
-          if (phrase.length === 0) {
-            throw new Error(`empty alternative clause in sentence ${rpr(sentence)}`);
-          }
-          yield phrase;
-        }
-        return null;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      _get_vocabulary_entry(phrase, word, role = null) {
-        var R, phrase_txt;
-        if ((R = vocabulary[word]) == null) {
-          phrase_txt = phrase.join('_');
-          throw new Error(`word ${rpr(word)} in phrase ${rpr(phrase_txt)} is unknown`);
-        }
-        if ((role != null) && R.role !== role) {
-          phrase_txt = phrase.join('_');
-          throw new Error(`expected word ${rpr(word)} in phrase ${rpr(phrase_txt)} to have role ${rpr(role)} but is declared to be ${rpr(R.role)}`);
-        }
-        return R;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      _get_adjectives(ast, phrase) {
-        /* NOTE not entirely correct, must look for 'of' */
-        var R, adjective, i, idx, len, phrase_txt;
-        R = [];
-        for (idx = i = 0, len = phrase.length; i < len; idx = ++i) {
-          adjective = phrase[idx];
-          if (idx >= phrase.length - 1) {
-            break;
-          }
-          if (adjective === 'optional') {
-            if (idx !== 0) {
-              phrase_txt = phrase.join('_');
-              throw new Error(`expected 'optional' to occur as first word in phrase, got ${rpr(phrase_txt)}`);
-            }
-            ast.optional = true;
-            continue;
-          }
-          this._get_vocabulary_entry(phrase, adjective, 'adjective');
-          R.push(adjective);
-          return R;
-        }
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      parse(sentence) {
-        var R, adjectives, alternative, alternatives, noun, noun_entry, phrase, ref, words;
-        words = sentence.split('_');
-        alternatives = [];
-        R = {
-          alternatives,
-          optional: false
-        };
-        ref = this.walk_alternative_phrases(words);
-        for (phrase of ref) {
-          //.....................................................................................................
-          noun = phrase.at(-1);
-          noun_entry = this._get_vocabulary_entry(phrase, noun, 'noun');
-          //.....................................................................................................
-          adjectives = this._get_adjectives(R, phrase);
-          alternative = {noun, adjectives};
-          alternatives.push(alternative);
-        }
-        return R;
-      }
-
-      //---------------------------------------------------------------------------------------------------------
-      _find_all(list, value) {
-        /* TAINT comments to https://stackoverflow.com/a/20798567/7568091 suggest for-loop may be faster */
-        var R, idx;
-        R = [];
-        idx = -1;
-        while ((idx = list.indexOf(value, idx + 1)) > -1) {
-          R.push(idx);
-        }
-        return R;
-      }
-
-    };
-    //.........................................................................................................
-    pp = new Prompt_parser();
+    pp = new Phrase_parser();
     sp = function(sentence) {
       return sentence.split('_');
     };
@@ -495,64 +352,183 @@
         return warn(GUY.trm.reverse(e.message));
       }
     };
+    expand = function(fn) {
+      return [...fn()];
+    };
     // debug '^23423^', lf pp.walk_alternative_phrases "".split '_'
     // debug '^23423^', lf pp.walk_alternative_phrases "_or_".split '_'
-    lf(function() {
-      return pp.walk_alternative_phrases(sp("or"));
-    });
-    lf(function() {
-      return pp.walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
-    });
-    lf(function() {
-      return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
-    });
-    lf(function() {
-      return pp.walk_alternative_phrases(sp("positive_integer"));
-    });
-    lf(function() {
-      return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
-    });
-    lf(function() {
-      return [pp.parse("positive_integer_or_positive_nonempty")];
-    });
-    lf(function() {
-      return [pp.parse("positive_integer_or_nonempty_text")];
-    });
-    lf(function() {
-      return [pp.parse("positive_integer_or_optional_nonempty_text")];
-    });
-    lf(function() {
-      return [pp.parse("positive_integer_or_nonempty_optional_text")];
-    });
-    lf(function() {
-      return [pp.parse("combobulate_integer")];
-    });
-    lf(function() {
-      return [pp.parse("list")];
-    });
-    lf(function() {
-      return [pp.parse("list_of")];
-    });
-    lf(function() {
+    if (T != null) {
+      T.throws(/empty alternative clause/, function() {
+        return expand(function() {
+          return pp.walk_alternative_phrases(sp("or"));
+        });
+      });
+    }
+    if (T != null) {
+      T.throws(/empty alternative clause/, function() {
+        return expand(function() {
+          return pp.walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
+        });
+      });
+    }
+    if (T != null) {
+      T.throws(/empty alternative clause/, function() {
+        return expand(function() {
+          return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
+        });
+      });
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return pp.walk_alternative_phrases(sp("positive_integer"));
+      }), [['positive', 'integer']]);
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return pp.walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
+      }), [['positive', 'integer'], ['nonempty', 'text']]);
+    }
+    if (T != null) {
+      T.throws(/expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, function() {
+        return expand(function() {
+          return [pp.parse("positive_integer_or_positive_nonempty")];
+        });
+      });
+    }
+    if (T != null) {
+      T.throws(/word 'combobulate' in phrase 'combobulate_integer' is unknown/, function() {
+        return expand(function() {
+          return [pp.parse("combobulate_integer")];
+        });
+      });
+    }
+    if (T != null) {
+      T.throws(/expected word 'of' in phrase 'list_of' to have role 'noun'/, function() {
+        return expand(function() {
+          return [pp.parse("list_of")];
+        });
+      });
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return [pp.parse("positive_integer_or_nonempty_text")];
+      }), [
+        {
+          alternatives: [
+            {
+              noun: 'integer',
+              adjectives: ['positive']
+            },
+            {
+              noun: 'text',
+              adjectives: ['nonempty']
+            }
+          ],
+          optional: false
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return [pp.parse("positive_integer_or_optional_nonempty_text")];
+      }), [
+        {
+          alternatives: [
+            {
+              noun: 'integer',
+              adjectives: ['positive']
+            },
+            {
+              noun: 'text',
+              adjectives: ['nonempty']
+            }
+          ],
+          optional: true
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return [pp.parse("positive_integer_or_nonempty_optional_text")];
+      }), [
+        {
+          alternatives: [
+            {
+              noun: 'integer',
+              adjectives: ['positive']
+            },
+            {
+              noun: 'text',
+              adjectives: ['nonempty']
+            }
+          ],
+          optional: false
+        }
+      ]);
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return [pp.parse("list")];
+      }), [
+        {
+          alternatives: [
+            {
+              noun: 'list',
+              adjectives: void 0
+            }
+          ],
+          optional: false
+        }
+      ]);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(pp._find_all(['nonempty', 'list', 'of', 'list', 'of', 'text'], 'of'), [2, 4]);
+    }
+    if (T != null) {
+      T.eq(pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']), {
+        phrase: ['nonempty', 'list'],
+        elements: {
+          phrase: ['list'],
+          elements: {
+            phrase: ['text']
+          }
+        }
+      });
+    }
+    if (T != null) {
+      T.eq(pp._find_all(['a', 'b', 'c', 'd'], 'b'), [1]);
+    }
+    if (T != null) {
+      T.eq(pp._find_all(['a', 'b', 'c', 'd'], 'd'), [3]);
+    }
+    if (T != null) {
+      T.eq(pp._find_all(['a', 'b', 'c', 'd'], 'e'), []);
+    }
+    if (T != null) {
+      T.eq(pp._find_all(['a', 'b', 'c', 'd', 'c'], 'c'), [2, 4]);
+    }
+    //.........................................................................................................
+    echo('^99-8^', expand(function() {
       return [pp.parse("list_of_integer")];
-    });
-    lf(function() {
+    }));
+    echo('^99-9^', expand(function() {
       return [pp.parse("list_of_integers")];
-    });
+    }));
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
   if (module === require.main) {
     (() => {
-      this.ivk_isa();
+      // @ivk_isa()
       // test @ivk_declarations_are_inherited
-      return test(this);
+      // test @
+      return test(this.demo_walk_phrase_structure);
     })();
   }
 
-  // @demo_walk_phrase_structure()
-// test @ivk_methods_are_properly_named
+  // test @ivk_methods_are_properly_named
 // test @ivk_isa
 // test @ivk_disallowed_to_redeclare
 // @demo_longest_first_matching()
