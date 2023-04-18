@@ -189,7 +189,7 @@ get_isa2_class = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@ivk_walk_phrase_structure = ( T, done ) ->
+@ivk_phrase_parser_basics = ( T, done ) ->
   { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
   #.........................................................................................................
   pp = new Phrase_parser()
@@ -223,13 +223,14 @@ get_isa2_class = ->
   #.........................................................................................................
   done?()
 
+
 #===========================================================================================================
 if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
   # test @
-  # @ivk_walk_phrase_structure()
-  test @ivk_walk_phrase_structure
+  # @ivk_phrase_parser_basics()
+  test @ivk_phrase_parser_basics
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
