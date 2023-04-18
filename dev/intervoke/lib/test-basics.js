@@ -335,7 +335,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.ivk_walk_phrase_structure = function(T, done) {
+  this.ivk_phrase_parser_basics = function(T, done) {
     var Phrase_parser, expand, lf, pick_1st, pp, sp;
     ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
@@ -462,6 +462,105 @@
     }
     //.........................................................................................................
     if (T != null) {
+      T.eq(pp.parse("positive_integer_or_nonempty_text"), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: false
+      });
+    }
+    if (T != null) {
+      T.eq(pp.parse("positive_integer_or_optional_nonempty_text"), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: true
+      });
+    }
+    if (T != null) {
+      T.eq(pp.parse("optional_positive_integer_or_nonempty_text"), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: true
+      });
+    }
+    if (T != null) {
+      T.eq(pp.parse("list"), {
+        alternatives: [
+          {
+            noun: 'list',
+            adjectives: []
+          }
+        ],
+        optional: false
+      });
+    }
+    if (T != null) {
+      T.eq(pp.parse("list_or_text"), {
+        alternatives: [
+          {
+            noun: 'list',
+            adjectives: []
+          },
+          {
+            noun: 'text',
+            adjectives: []
+          }
+        ],
+        optional: false
+      });
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.ivk_phrase_parser_element_types = function(T, done) {
+    var Phrase_parser, expand, lf, pick_1st, pp, sp;
+    ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
+    //.........................................................................................................
+    pp = new Phrase_parser();
+    sp = function(sentence) {
+      return sentence.split('_');
+    };
+    lf = function(fn) {
+      var e;
+      try {
+        return info('^99-1^', [...fn()]);
+      } catch (error1) {
+        e = error1;
+        return warn(GUY.trm.reverse(e.message));
+      }
+    };
+    expand = function(fn) {
+      return [...fn()];
+    };
+    pick_1st = function(fn) {
+      return [...fn()][0];
+    };
+    //.........................................................................................................
+    if (T != null) {
       T.eq(pick_1st(function() {
         return [pp.parse("positive_integer_or_nonempty_text")];
       }), {
@@ -551,8 +650,8 @@
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
       // test @
-      // @ivk_walk_phrase_structure()
-      return test(this.ivk_walk_phrase_structure);
+      // @ivk_phrase_parser_basics()
+      return test(this.ivk_phrase_parser_basics);
     })();
   }
 
