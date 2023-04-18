@@ -335,8 +335,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.demo_walk_phrase_structure = function(T, done) {
-    var Phrase_parser, expand, lf, pp, sp;
+  this.ivk_walk_phrase_structure = function(T, done) {
+    var Phrase_parser, expand, lf, pick_1st, pp, sp;
     ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
     pp = new Phrase_parser();
@@ -354,6 +354,9 @@
     };
     expand = function(fn) {
       return [...fn()];
+    };
+    pick_1st = function(fn) {
+      return [...fn()][0];
     };
     // debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
     // debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
@@ -379,16 +382,6 @@
       });
     }
     if (T != null) {
-      T.eq(expand(function() {
-        return pp._walk_alternative_phrases(sp("positive_integer"));
-      }), [['positive', 'integer']]);
-    }
-    if (T != null) {
-      T.eq(expand(function() {
-        return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
-      }), [['positive', 'integer'], ['nonempty', 'text']]);
-    }
-    if (T != null) {
       T.throws(/expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, function() {
         return expand(function() {
           return [pp.parse("positive_integer_or_positive_nonempty")];
@@ -403,93 +396,35 @@
       });
     }
     if (T != null) {
-      T.throws(/expected word 'of' in phrase 'list_of' to have role 'noun'/, function() {
+      T.throws(/unexpected empty alternative phrase/, function() {
         return expand(function() {
           return [pp.parse("list_of")];
         });
       });
     }
     if (T != null) {
-      T.eq(expand(function() {
-        return [pp.parse("positive_integer_or_nonempty_text")];
-      }), [
-        {
-          alternatives: [
-            {
-              noun: 'integer',
-              adjectives: ['positive']
-            },
-            {
-              noun: 'text',
-              adjectives: ['nonempty']
-            }
-          ],
-          optional: false
-        }
-      ]);
+      T.throws(/wrong use of 'or' in element clause/, function() {
+        return pp._find_element_clauses(sp('nonempty_list_of_text_or_integer'));
+      });
     }
     if (T != null) {
-      T.eq(expand(function() {
-        return [pp.parse("positive_integer_or_optional_nonempty_text")];
-      }), [
-        {
-          alternatives: [
-            {
-              noun: 'integer',
-              adjectives: ['positive']
-            },
-            {
-              noun: 'text',
-              adjectives: ['nonempty']
-            }
-          ],
-          optional: true
-        }
-      ]);
+      T.throws(/expected 'optional' to occur as first word in phrase/, function() {
+        return pp.parse("positive_integer_or_nonempty_optional_text");
+      });
     }
-    if (T != null) {
-      T.eq(expand(function() {
-        return [pp.parse("positive_integer_or_nonempty_optional_text")];
-      }), [
-        {
-          alternatives: [
-            {
-              noun: 'integer',
-              adjectives: ['positive']
-            },
-            {
-              noun: 'text',
-              adjectives: ['nonempty']
-            }
-          ],
-          optional: false
-        }
-      ]);
-    }
-    if (T != null) {
-      T.eq(expand(function() {
-        return [pp.parse("list")];
-      }), [
-        {
-          alternatives: [
-            {
-              noun: 'list',
-              adjectives: void 0
-            }
-          ],
-          optional: false
-        }
-      ]);
-    }
-    // #.........................................................................................................
-    // T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
-    // T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
-    // T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
-    // T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
-    // T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
     //.........................................................................................................
     if (T != null) {
-      T.eq(pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']), {
+      T.eq(expand(function() {
+        return pp._walk_alternative_phrases(sp("positive_integer"));
+      }), [['positive', 'integer']]);
+    }
+    if (T != null) {
+      T.eq(expand(function() {
+        return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
+      }), [['positive', 'integer'], ['nonempty', 'text']]);
+    }
+    if (T != null) {
+      T.eq(pp._find_element_clauses(sp('nonempty_list_of_list_of_text')), {
         phrase: ['nonempty', 'list'],
         elements: {
           phrase: ['list'],
@@ -499,10 +434,10 @@
         }
       });
     }
-    help('^99-1^', pp._find_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']));
+    help('^99-1^', pp._find_element_clauses(sp('nonempty_list_of_list_of_text')));
     if (T != null) {
       T.eq(expand(function() {
-        return pp._walk_element_clauses(['nonempty', 'list', 'of', 'list', 'of', 'text']);
+        return pp._walk_element_clauses(sp('nonempty_list_of_list_of_text'));
       }), [
         {
           phrase: ['nonempty',
@@ -525,6 +460,88 @@
         }
       ]);
     }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(pick_1st(function() {
+        return [pp.parse("positive_integer_or_nonempty_text")];
+      }), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: false
+      });
+    }
+    if (T != null) {
+      T.eq(pick_1st(function() {
+        return [pp.parse("positive_integer_or_optional_nonempty_text")];
+      }), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: true
+      });
+    }
+    if (T != null) {
+      T.eq(pick_1st(function() {
+        return [pp.parse("optional_positive_integer_or_nonempty_text")];
+      }), {
+        alternatives: [
+          {
+            noun: 'integer',
+            adjectives: ['positive']
+          },
+          {
+            noun: 'text',
+            adjectives: ['nonempty']
+          }
+        ],
+        optional: true
+      });
+    }
+    if (T != null) {
+      T.eq(pick_1st(function() {
+        return [pp.parse("list")];
+      }), {
+        alternatives: [
+          {
+            noun: 'list',
+            adjectives: []
+          }
+        ],
+        optional: false
+      });
+    }
+    if (T != null) {
+      T.eq(pick_1st(function() {
+        return [pp.parse("list_or_text")];
+      }), {
+        alternatives: [
+          {
+            noun: 'list',
+            adjectives: []
+          },
+          {
+            noun: 'text',
+            adjectives: []
+          }
+        ],
+        optional: false
+      });
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -534,7 +551,8 @@
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
       // test @
-      return test(this.demo_walk_phrase_structure);
+      // @ivk_walk_phrase_structure()
+      return test(this.ivk_walk_phrase_structure);
     })();
   }
 
