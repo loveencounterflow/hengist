@@ -214,6 +214,14 @@ get_isa2_class = ->
   help '^99-1^', ( pp._find_element_clauses   sp 'nonempty_list_of_list_of_text' )
   T?.eq ( expand -> pp._walk_element_clauses  sp 'nonempty_list_of_list_of_text' ), [ { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }, { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } }, { phrase: [ 'text' ] } ]
   #.........................................................................................................
+  T?.eq ( pp.parse "positive_integer_or_nonempty_text"           ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false }
+  T?.eq ( pp.parse "positive_integer_or_optional_nonempty_text"  ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
+  T?.eq ( pp.parse "optional_positive_integer_or_nonempty_text"  ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
+  T?.eq ( pp.parse "list"                                        ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
+  T?.eq ( pp.parse "list_or_text"                                ), { alternatives: [ { noun: 'list', adjectives: [] }, { noun: 'text', adjectives: [] } ], optional: false }
+  # T?.eq ( pick_1st -> [ pp.parse "list_of_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
+  #.........................................................................................................
+  done?()
   T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_nonempty_text" ]          ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false }
   T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
   T?.eq ( pick_1st -> [ pp.parse "optional_positive_integer_or_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
