@@ -189,41 +189,37 @@ get_isa2_class = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@demo_walk_phrase_structure = ( T, done ) ->
+@ivk_walk_phrase_structure = ( T, done ) ->
   { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
   #.........................................................................................................
   pp = new Phrase_parser()
   sp = ( sentence ) -> sentence.split '_'
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
   expand = ( fn ) -> [ fn()..., ]
+  pick_1st = ( fn ) -> [ fn()..., ][ 0 ]
   # debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
   # debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
   T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or"
   T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
   T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
-  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
-  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
   T?.throws /expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, -> expand -> [ pp.parse "positive_integer_or_positive_nonempty" ]
   T?.throws /word 'combobulate' in phrase 'combobulate_integer' is unknown/, -> expand -> [ pp.parse "combobulate_integer" ]
-  T?.throws /expected word 'of' in phrase 'list_of' to have role 'noun'/, -> expand -> [ pp.parse "list_of" ]
-  T?.eq ( expand -> [ pp.parse "positive_integer_or_nonempty_text" ]          ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false } ]
-  T?.eq ( expand -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true } ]
-  T?.eq ( expand -> [ pp.parse "positive_integer_or_nonempty_optional_text" ] ), [ { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false } ]
-  T?.eq ( expand -> [ pp.parse "list" ]                                       ), [ { alternatives: [ { noun: 'list', adjectives: undefined } ], optional: false } ]
-  # #.........................................................................................................
-  # T?.eq ( pp._find_all [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ], 'of'        ), [ 2, 4 ]
-  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'b'                                     ), [ 1 ]
-  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'd'                                     ), [ 3 ]
-  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', ], 'e'                                     ), []
-  # T?.eq ( pp._find_all [ 'a', 'b', 'c', 'd', 'c', ], 'c'                                ), [ 2, 4 ]
+  T?.throws /unexpected empty alternative phrase/, -> expand -> [ pp.parse "list_of" ]
+  T?.throws /wrong use of 'or' in element clause/, -> ( pp._find_element_clauses   sp 'nonempty_list_of_text_or_integer' )
+  T?.throws /expected 'optional' to occur as first word in phrase/, -> pp.parse "positive_integer_or_nonempty_optional_text"
   #.........................................................................................................
-  T?.eq ( pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]  ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
-  help '^99-1^', pp._find_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ]
-  T?.eq ( expand -> pp._walk_element_clauses [ 'nonempty', 'list', 'of', 'list', 'of', 'text', ] ), [ { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }, { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } }, { phrase: [ 'text' ] } ]
-  # for d from pp._walk_element_clauses [ 'nonempty', 'list', 'of', 'nonempty', 'list', 'of', 'nonempty', 'text', ]
-  #   info '^99-1^', d
-  # echo '^99-8^', expand -> [ pp.parse "list_of_integer" ]
-  # echo '^99-9^', expand -> [ pp.parse "list_of_integers" ]
+  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
+  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
+  T?.eq ( pp._find_element_clauses            sp 'nonempty_list_of_list_of_text' ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
+  help '^99-1^', ( pp._find_element_clauses   sp 'nonempty_list_of_list_of_text' )
+  T?.eq ( expand -> pp._walk_element_clauses  sp 'nonempty_list_of_list_of_text' ), [ { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }, { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } }, { phrase: [ 'text' ] } ]
+  #.........................................................................................................
+  T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_nonempty_text" ]          ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false }
+  T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
+  T?.eq ( pick_1st -> [ pp.parse "optional_positive_integer_or_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
+  T?.eq ( pick_1st -> [ pp.parse "list" ]                                       ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
+  T?.eq ( pick_1st -> [ pp.parse "list_or_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [] }, { noun: 'text', adjectives: [] } ], optional: false }
+  # T?.eq ( pick_1st -> [ pp.parse "list_of_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
   #.........................................................................................................
   done?()
 
@@ -232,7 +228,8 @@ if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
   # test @
-  test @demo_walk_phrase_structure
+  # @ivk_walk_phrase_structure()
+  test @ivk_walk_phrase_structure
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
