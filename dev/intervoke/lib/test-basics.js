@@ -510,8 +510,7 @@
       T.eq(pp.parse("list"), {
         alternatives: [
           {
-            noun: 'list',
-            adjectives: []
+            noun: 'list'
           }
         ],
         optional: false
@@ -521,12 +520,10 @@
       T.eq(pp.parse("list_or_text"), {
         alternatives: [
           {
-            noun: 'list',
-            adjectives: []
+            noun: 'list'
           },
           {
-            noun: 'text',
-            adjectives: []
+            noun: 'text'
           }
         ],
         optional: false
@@ -560,82 +557,15 @@
       return [...fn()][0];
     };
     //.........................................................................................................
+    // T?.eq ( pp.parse "list_or_text" ), { alternatives: [ { noun: 'list', }, { noun: 'text', } ], optional: false }
     if (T != null) {
-      T.eq(pick_1st(function() {
-        return [pp.parse("positive_integer_or_nonempty_text")];
-      }), {
-        alternatives: [
-          {
-            noun: 'integer',
-            adjectives: ['positive']
-          },
-          {
-            noun: 'text',
-            adjectives: ['nonempty']
-          }
-        ],
-        optional: false
-      });
-    }
-    if (T != null) {
-      T.eq(pick_1st(function() {
-        return [pp.parse("positive_integer_or_optional_nonempty_text")];
-      }), {
-        alternatives: [
-          {
-            noun: 'integer',
-            adjectives: ['positive']
-          },
-          {
-            noun: 'text',
-            adjectives: ['nonempty']
-          }
-        ],
-        optional: true
-      });
-    }
-    if (T != null) {
-      T.eq(pick_1st(function() {
-        return [pp.parse("optional_positive_integer_or_nonempty_text")];
-      }), {
-        alternatives: [
-          {
-            noun: 'integer',
-            adjectives: ['positive']
-          },
-          {
-            noun: 'text',
-            adjectives: ['nonempty']
-          }
-        ],
-        optional: true
-      });
-    }
-    if (T != null) {
-      T.eq(pick_1st(function() {
-        return [pp.parse("list")];
-      }), {
+      T.eq(pp.parse("list_of_text"), {
         alternatives: [
           {
             noun: 'list',
-            adjectives: []
-          }
-        ],
-        optional: false
-      });
-    }
-    if (T != null) {
-      T.eq(pick_1st(function() {
-        return [pp.parse("list_or_text")];
-      }), {
-        alternatives: [
-          {
-            noun: 'list',
-            adjectives: []
-          },
-          {
-            noun: 'text',
-            adjectives: []
+            elements: {
+              noun: 'text'
+            }
           }
         ],
         optional: false
@@ -651,7 +581,8 @@
       // test @ivk_declarations_are_inherited
       // test @
       // @ivk_phrase_parser_basics()
-      return test(this.ivk_phrase_parser_basics);
+      // test @ivk_phrase_parser_basics
+      return test(this.ivk_phrase_parser_element_types);
     })();
   }
 
