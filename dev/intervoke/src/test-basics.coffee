@@ -217,17 +217,24 @@ get_isa2_class = ->
   T?.eq ( pp.parse "positive_integer_or_nonempty_text"           ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false }
   T?.eq ( pp.parse "positive_integer_or_optional_nonempty_text"  ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
   T?.eq ( pp.parse "optional_positive_integer_or_nonempty_text"  ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
-  T?.eq ( pp.parse "list"                                        ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
-  T?.eq ( pp.parse "list_or_text"                                ), { alternatives: [ { noun: 'list', adjectives: [] }, { noun: 'text', adjectives: [] } ], optional: false }
-  # T?.eq ( pick_1st -> [ pp.parse "list_of_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
+  T?.eq ( pp.parse "list"                                        ), { alternatives: [ { noun: 'list', } ], optional: false }
+  T?.eq ( pp.parse "list_or_text"                                ), { alternatives: [ { noun: 'list', }, { noun: 'text', } ], optional: false }
+  # T?.eq ( pick_1st -> [ pp.parse "list_of_text" ]                               ), { alternatives: [ { noun: 'list', } ], optional: false }
   #.........................................................................................................
   done?()
-  T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_nonempty_text" ]          ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: false }
-  T?.eq ( pick_1st -> [ pp.parse "positive_integer_or_optional_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
-  T?.eq ( pick_1st -> [ pp.parse "optional_positive_integer_or_nonempty_text" ] ), { alternatives: [ { noun: 'integer', adjectives: [ 'positive' ] }, { noun: 'text', adjectives: [ 'nonempty' ] } ], optional: true }
-  T?.eq ( pick_1st -> [ pp.parse "list" ]                                       ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
-  T?.eq ( pick_1st -> [ pp.parse "list_or_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [] }, { noun: 'text', adjectives: [] } ], optional: false }
-  # T?.eq ( pick_1st -> [ pp.parse "list_of_text" ]                               ), { alternatives: [ { noun: 'list', adjectives: [], } ], optional: false }
+
+#-----------------------------------------------------------------------------------------------------------
+@ivk_phrase_parser_element_types = ( T, done ) ->
+  { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
+  #.........................................................................................................
+  pp = new Phrase_parser()
+  sp = ( sentence ) -> sentence.split '_'
+  lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
+  expand = ( fn ) -> [ fn()..., ]
+  pick_1st = ( fn ) -> [ fn()..., ][ 0 ]
+  #.........................................................................................................
+  # T?.eq ( pp.parse "list_or_text" ), { alternatives: [ { noun: 'list', }, { noun: 'text', } ], optional: false }
+  T?.eq ( pp.parse "list_of_text" ), { alternatives: [ { noun: 'list', elements: { noun: 'text', } } ], optional: false }
   #.........................................................................................................
   done?()
 
@@ -238,7 +245,8 @@ if module is require.main then do =>
   # test @ivk_declarations_are_inherited
   # test @
   # @ivk_phrase_parser_basics()
-  test @ivk_phrase_parser_basics
+  # test @ivk_phrase_parser_basics
+  test @ivk_phrase_parser_element_types
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
