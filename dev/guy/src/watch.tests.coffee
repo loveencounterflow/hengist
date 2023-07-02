@@ -116,7 +116,7 @@ demo_GUY_reporting_watcher = ( T, done ) ->
     FS.rmdirSync new_folder_path
     after 0.25, =>
       debug "stopping watcher"
-      await watcher._watcher.close()
+      await watcher.stop()
       debug "removing #{folder_path}"
       rm?()
       resolve()
