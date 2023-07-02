@@ -43,7 +43,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@token_creation_with_dataclass = ( T, done ) ->
+@__token_creation_with_dataclass = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex } = require '../../../apps/intertext-lexer'
   lexer = new Interlex()
