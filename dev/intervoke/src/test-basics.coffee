@@ -197,19 +197,19 @@ get_isa2_class = ->
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
   expand = ( fn ) -> [ fn()..., ]
   pick_1st = ( fn ) -> [ fn()..., ][ 0 ]
-  # debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
-  # debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or"
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "or_positive_integer_or_nonempty_text"
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text_or"
+  # debug '^23423^', lf pp._walk_disjuncts "".split '_'
+  # debug '^23423^', lf pp._walk_disjuncts "_or_".split '_'
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or"
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or_positive_integer_or_nonempty_text"
+  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "positive_integer_or_nonempty_text_or"
   T?.throws /expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, -> expand -> [ pp.parse "positive_integer_or_positive_nonempty" ]
   T?.throws /word 'combobulate' in phrase 'combobulate_integer' is unknown/, -> expand -> [ pp.parse "combobulate_integer" ]
   T?.throws /unexpected empty alternative phrase/, -> expand -> [ pp.parse "list_of" ]
   T?.throws /wrong use of 'or' in element clause/, -> ( pp._find_element_clauses   sp 'nonempty_list_of_text_or_integer' )
   T?.throws /expected 'optional' to occur as first word in phrase/, -> pp.parse "positive_integer_or_nonempty_optional_text"
   #.........................................................................................................
-  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
-  T?.eq ( expand -> pp._walk_alternative_phrases sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
+  T?.eq ( expand -> pp._walk_disjuncts sp "positive_integer"                   ), [ [ 'positive', 'integer' ] ]
+  T?.eq ( expand -> pp._walk_disjuncts sp "positive_integer_or_nonempty_text"  ), [ [ 'positive', 'integer' ], [ 'nonempty', 'text' ] ]
   T?.eq ( pp._find_element_clauses            sp 'nonempty_list_of_list_of_text' ), { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }
   help '^99-1^', ( pp._find_element_clauses   sp 'nonempty_list_of_list_of_text' )
   T?.eq ( expand -> pp._walk_element_clauses  sp 'nonempty_list_of_list_of_text' ), [ { phrase: [ 'nonempty', 'list' ], elements: { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } } }, { phrase: [ 'list' ], elements: { phrase: [ 'text' ] } }, { phrase: [ 'text' ] } ]
