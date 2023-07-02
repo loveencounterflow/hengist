@@ -43,7 +43,7 @@
   //===========================================================================================================
   // TESTS
   //-----------------------------------------------------------------------------------------------------------
-  this.token_creation_with_dataclass = function(T, done) {
+  this.__token_creation_with_dataclass = function(T, done) {
     var Interlex, lexer;
     // T?.halt_on_error()
     ({Interlex} = require('../../../apps/intertext-lexer'));

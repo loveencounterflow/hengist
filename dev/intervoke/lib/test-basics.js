@@ -358,26 +358,26 @@
     pick_1st = function(fn) {
       return [...fn()][0];
     };
-    // debug '^23423^', lf pp._walk_alternative_phrases "".split '_'
-    // debug '^23423^', lf pp._walk_alternative_phrases "_or_".split '_'
+    // debug '^23423^', lf pp._walk_disjuncts "".split '_'
+    // debug '^23423^', lf pp._walk_disjuncts "_or_".split '_'
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp._walk_alternative_phrases(sp("or"));
+          return pp._walk_disjuncts(sp("or"));
         });
       });
     }
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp._walk_alternative_phrases(sp("or_positive_integer_or_nonempty_text"));
+          return pp._walk_disjuncts(sp("or_positive_integer_or_nonempty_text"));
         });
       });
     }
     if (T != null) {
       T.throws(/empty alternative clause/, function() {
         return expand(function() {
-          return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text_or"));
+          return pp._walk_disjuncts(sp("positive_integer_or_nonempty_text_or"));
         });
       });
     }
@@ -415,12 +415,12 @@
     //.........................................................................................................
     if (T != null) {
       T.eq(expand(function() {
-        return pp._walk_alternative_phrases(sp("positive_integer"));
+        return pp._walk_disjuncts(sp("positive_integer"));
       }), [['positive', 'integer']]);
     }
     if (T != null) {
       T.eq(expand(function() {
-        return pp._walk_alternative_phrases(sp("positive_integer_or_nonempty_text"));
+        return pp._walk_disjuncts(sp("positive_integer_or_nonempty_text"));
       }), [['positive', 'integer'], ['nonempty', 'text']]);
     }
     if (T != null) {
@@ -579,17 +579,23 @@
     (() => {
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
-      // test @
-      // @ivk_phrase_parser_basics()
-      // test @ivk_phrase_parser_basics
-      return test(this.ivk_phrase_parser_element_types);
+      return test(this);
     })();
   }
 
-  // test @ivk_methods_are_properly_named
+  // @ivk_phrase_parser_basics()
+// test @ivk_phrase_parser_basics
+// test @ivk_phrase_parser_element_types
+// test @ivk_methods_are_properly_named
 // test @ivk_isa
 // test @ivk_disallowed_to_redeclare
 // @demo_longest_first_matching()
+
+  // for formula in [ 'a || b && c      ', 'a || ( b && c )  ', '( a || b ) && c  ', ]
+//   for a in [ false, true, ]
+//     for b in [ false, true, ]
+//       for c in [ false, true, ]
+//         echo formula, a, b, c, GUY.trm.truth eval formula
 
 }).call(this);
 

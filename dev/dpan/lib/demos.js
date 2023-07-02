@@ -34,7 +34,7 @@
 
   ({lets, freeze} = require('letsfreezethat'));
 
-  ({Dba} = require('icql-dba'));
+  ({Dba} = require('../../../apps/icql-dba'));
 
   def = Object.defineProperty;
 
