@@ -243,16 +243,20 @@ get_isa2_class = ->
 if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
-  # test @
+  test @
   # @ivk_phrase_parser_basics()
   # test @ivk_phrase_parser_basics
-  test @ivk_phrase_parser_element_types
+  # test @ivk_phrase_parser_element_types
   # test @ivk_methods_are_properly_named
   # test @ivk_isa
   # test @ivk_disallowed_to_redeclare
   # @demo_longest_first_matching()
 
-
+  # for formula in [ 'a || b && c      ', 'a || ( b && c )  ', '( a || b ) && c  ', ]
+  #   for a in [ false, true, ]
+  #     for b in [ false, true, ]
+  #       for c in [ false, true, ]
+  #         echo formula, a, b, c, GUY.trm.truth eval formula
 
 
 
