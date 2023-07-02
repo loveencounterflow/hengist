@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@ef-carbon/deep-freeze':
     specifier: ^1.0.1
@@ -316,6 +320,9 @@ dependencies:
   npm-logical-tree:
     specifier: ^1.2.1
     version: 1.2.1
+  nsfw:
+    specifier: ^2.2.4
+    version: 2.2.4
   number-format.js:
     specifier: ^2.0.9
     version: 2.0.9
@@ -385,6 +392,9 @@ dependencies:
   rustybuzz-wasm:
     specifier: 4.6.0
     version: 4.6.0
+  sane:
+    specifier: ^5.0.1
+    version: 5.0.1
   semver:
     specifier: ^7.3.5
     version: 7.3.7
@@ -734,6 +744,15 @@ packages:
 
   /@chevrotain/utils@9.1.0:
     resolution: {integrity: sha512-llLJZ8OAlZrjGlBvamm6Zdo/HmGAcCLq5gx7cSwUX8No+n/8ip+oaC4x33IdZIif8+Rh5dQUIZXmfbSghiOmNQ==}
+    dev: false
+
+  /@cnakazawa/watch@1.0.4:
+    resolution: {integrity: sha512-v9kIhKwjeZThiWrLmj0y17CWoyddASLj9O2yvbZkbvw/N3rWOYy9zkV66ursAoVr0mV15bL8g0c4QZUE6cdDoQ==}
+    engines: {node: '>=0.1.95'}
+    hasBin: true
+    dependencies:
+      exec-sh: 0.3.6
+      minimist: 1.2.6
     dev: false
 
   /@ef-carbon/deep-freeze@1.0.1:
@@ -1361,6 +1380,12 @@ packages:
       picocolors: 1.0.0
     dev: false
 
+  /bser@2.1.1:
+    resolution: {integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==}
+    dependencies:
+      node-int64: 0.4.0
+    dev: false
+
   /btoa@1.2.1:
     resolution: {integrity: sha512-SB4/MIGlsiVkMcHmT+pSmIPoNDoHg+7cMzmt3Uxt628MTz2487DKSqK/fuhFBrkuqrYv5UCEnACpF4dTFNKc/g==}
     engines: {node: '>= 0.4.0'}
@@ -1469,6 +1494,13 @@ packages:
       svg-pathdata: 6.0.3
     dev: false
     optional: true
+
+  /capture-exit@2.0.0:
+    resolution: {integrity: sha512-PiT/hQmTonHhl/HFGN+Lx3JJUznrVYJ3+AQsnthneZbvW7x+f08Tk7yLJTLEOUvBTbduLeeBkxEaYXUOUrRq6g==}
+    engines: {node: 6.* || 8.* || >= 10.*}
+    dependencies:
+      rsvp: 4.8.5
+    dev: false
 
   /chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -2439,6 +2471,10 @@ packages:
       through: 2.3.8
     dev: false
 
+  /exec-sh@0.3.6:
+    resolution: {integrity: sha512-nQn+hI3yp+oD0huYhKwvYI32+JFeq+XkNcD1GAo3Y/MjxsfVGmrrzrnzjWiNY6f+pUCP440fThsFh5gZrRAU/w==}
+    dev: false
+
   /exec-sh@0.4.0:
     resolution: {integrity: sha512-BgAFra+J+hK/wquyWchMiqgaxSv1ec2c+//DRSePlF3NLx/tBOmkIkJEc1hWrX4Yis3tzxgv1+FiFs/mmucs/g==}
     dev: false
@@ -2467,6 +2503,21 @@ packages:
       npm-run-path: 3.1.0
       onetime: 5.1.2
       p-finally: 2.0.1
+      signal-exit: 3.0.7
+      strip-final-newline: 2.0.0
+    dev: false
+
+  /execa@4.1.0:
+    resolution: {integrity: sha512-j5W0//W7f8UxAn8hXVnwG8tLwdiUy4FJLcSupCg6maBYZDpyBvTApK7KyuI4bKj8KOh1r2YH+6ucuYtJv1bTZA==}
+    engines: {node: '>=10'}
+    dependencies:
+      cross-spawn: 7.0.3
+      get-stream: 5.2.0
+      human-signals: 1.1.1
+      is-stream: 2.0.1
+      merge-stream: 2.0.0
+      npm-run-path: 4.0.1
+      onetime: 5.1.2
       signal-exit: 3.0.7
       strip-final-newline: 2.0.0
     dev: false
@@ -2522,6 +2573,12 @@ packages:
     resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}
     dependencies:
       reusify: 1.0.4
+    dev: false
+
+  /fb-watchman@2.0.2:
+    resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
+    dependencies:
+      bser: 2.1.1
     dev: false
 
   /fflate@0.4.8:
@@ -3079,6 +3136,11 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /human-signals@1.1.1:
+    resolution: {integrity: sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==}
+    engines: {node: '>=8.12.0'}
     dev: false
 
   /hyphenopoly@4.12.0:
@@ -3940,6 +4002,12 @@ packages:
       semver: 6.3.0
     dev: false
 
+  /makeerror@1.0.12:
+    resolution: {integrity: sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==}
+    dependencies:
+      tmpl: 1.0.5
+    dev: false
+
   /map-obj@1.0.1:
     resolution: {integrity: sha512-7N/q3lyZ+LVCp7PzuxrJr4KMbBE2hW7BT7YNia330OFxIf4d3r5zVpicP2650l7CPN6RM9zOJRl3NGpqSiw3Eg==}
     engines: {node: '>=0.10.0'}
@@ -4232,6 +4300,10 @@ packages:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
     dev: false
 
+  /node-addon-api@5.1.0:
+    resolution: {integrity: sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==}
+    dev: false
+
   /node-ansiparser@2.2.0:
     resolution: {integrity: sha512-5D+0skchbFkV2LLeYoNqX108Mo8qgBHdgWNcDfdUgC4xsb9gcvZ4m8Rl9uTRm0p01+UG2tp6Sjns07slzQHF3A==}
     dev: false
@@ -4256,6 +4328,10 @@ packages:
       app-root-path: 2.2.1
       astring: 1.8.3
       callsite: 1.0.0
+    dev: false
+
+  /node-int64@0.4.0:
+    resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
     dev: false
 
   /node-notifier@10.0.1:
@@ -4323,6 +4399,13 @@ packages:
 
   /npm-run-path@3.1.0:
     resolution: {integrity: sha512-Dbl4A/VfiVGLgQv29URL9xshU8XDY1GeLy+fsaZ1AA8JDSfjvr5P5+pzRbWqRSBxk6/DW7MIh8lTM/PaGnP2kg==}
+    engines: {node: '>=8'}
+    dependencies:
+      path-key: 3.1.1
+    dev: false
+
+  /npm-run-path@4.0.1:
+    resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
     engines: {node: '>=8'}
     dependencies:
       path-key: 3.1.1
@@ -4413,6 +4496,14 @@ packages:
       console-control-strings: 1.1.0
       gauge: 3.0.2
       set-blocking: 2.0.0
+    dev: false
+
+  /nsfw@2.2.4:
+    resolution: {integrity: sha512-sTRNa7VYAiy5ARP8etIBfkIfxU0METW40UinDnv0epQMe1pzj285HdXKRKkdrV3rRzMNcuNZn2foTNszV0x+OA==}
+    engines: {node: '>=10.16.0'}
+    requiresBuild: true
+    dependencies:
+      node-addon-api: 5.1.0
     dev: false
 
   /nth-check@2.1.1:
@@ -5204,6 +5295,11 @@ packages:
       glob: 7.2.0
     dev: false
 
+  /rsvp@4.8.5:
+    resolution: {integrity: sha512-nfMOlASu9OnRJo1mbEk2cz0D56a1MBNrJ7orjRZQG10XDyuvwksKbuXNp6qa+kbn839HwjwhBzhFmdsaEAfauA==}
+    engines: {node: 6.* || >= 7.*}
+    dev: false
+
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
@@ -5224,6 +5320,22 @@ packages:
 
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+    dev: false
+
+  /sane@5.0.1:
+    resolution: {integrity: sha512-9/0CYoRz0MKKf04OMCO3Qk3RQl1PAwWAhPSQSym4ULiLpTZnrY1JoZU0IEikHu8kdk2HvKT/VwQMq/xFZ8kh1Q==}
+    engines: {node: 10.* || >= 12.*}
+    hasBin: true
+    dependencies:
+      '@cnakazawa/watch': 1.0.4
+      anymatch: 3.1.2
+      capture-exit: 2.0.0
+      exec-sh: 0.3.6
+      execa: 4.1.0
+      fb-watchman: 2.0.2
+      micromatch: 4.0.5
+      minimist: 1.2.6
+      walker: 1.0.8
     dev: false
 
   /sax@1.2.4:
@@ -5790,6 +5902,10 @@ packages:
       rimraf: 3.0.2
     dev: false
 
+  /tmpl@1.0.5:
+    resolution: {integrity: sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==}
+    dev: false
+
   /to-fast-properties@2.0.0:
     resolution: {integrity: sha1-3F5pjL0HkmW8c+A3doGk5Og/YW4=}
     engines: {node: '>=4'}
@@ -6059,6 +6175,12 @@ packages:
       xml-name-validator: 4.0.0
     dev: false
 
+  /walker@1.0.8:
+    resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
+    dependencies:
+      makeerror: 1.0.12
+    dev: false
+
   /wcsize@1.0.0:
     resolution: {integrity: sha1-qKLhXmqKdHkdulgPaaV9J+hQ6h4=}
     dev: false
@@ -6319,7 +6441,6 @@ packages:
   file:../intershop:
     resolution: {directory: ../intershop, type: directory}
     name: intershop
-    version: 0.6.0
     dependencies:
       cnd: 9.2.1
       coffeescript: 2.7.0
@@ -6349,7 +6470,6 @@ packages:
   file:../intershop-intertext:
     resolution: {directory: ../intershop-intertext, type: directory}
     name: intershop-intertext
-    version: 0.1.2
     dependencies:
       cnd: 9.2.3
       intershop-lazy: 0.1.2
