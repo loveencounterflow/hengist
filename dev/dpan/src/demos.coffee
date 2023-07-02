@@ -24,7 +24,7 @@ types                     = new ( require 'intertype' ).Intertype
 SQL                       = String.raw
 { lets
   freeze }                = require 'letsfreezethat'
-{ Dba, }                  = require 'icql-dba'
+{ Dba, }                  = require '../../../apps/icql-dba'
 def                       = Object.defineProperty
 glob                      = require 'glob'
 PATH                      = require 'path'
