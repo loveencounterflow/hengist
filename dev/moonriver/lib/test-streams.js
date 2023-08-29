@@ -39,9 +39,9 @@
     };
     //.......................................................................................................
     matcher = (() => {
-      var count, line, ref;
+      var _matcher, count, line, ref;
       count = 0;
-      matcher = [];
+      _matcher = [];
       ref = GUY.fs.walk_lines(path);
       for (line of ref) {
         count++;
@@ -49,9 +49,9 @@
           continue;
         }
         info(count, rpr(line));
-        matcher.push(line);
+        _matcher.push(line);
       }
-      return matcher;
+      return _matcher;
     })();
     //.......................................................................................................
     result = (await (async() => {
@@ -250,8 +250,9 @@
     (() => {
       // @window_transform()
       // await @can_use_readstream_as_source()
-      this.can_use_writestream_as_target_1();
-      return test(this.can_use_writestream_as_target_1);
+      // @can_use_writestream_as_target_1()
+      // test @can_use_writestream_as_target_1
+      return this.can_use_readstream_as_source();
     })();
   }
 
