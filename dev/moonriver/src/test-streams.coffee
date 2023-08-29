@@ -43,14 +43,14 @@ H                         = require '../../../lib/helpers'
   get_source            = -> FS.createReadStream path #, { encoding: 'utf-8', }
   #.......................................................................................................
   matcher = do =>
-    count   = 0
-    matcher = []
+    count     = 0
+    _matcher  = []
     for line from GUY.fs.walk_lines path
       count++
       continue if count > 5
       info count, rpr line
-      matcher.push line
-    return matcher
+      _matcher.push line
+    return _matcher
   #.......................................................................................................
   result = await do =>
     p = new Async_pipeline()
