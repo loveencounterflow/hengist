@@ -198,8 +198,8 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.time_datatypes = async function(T, done) {
-    var WGUY, delta_ms, stamp_f_matcher, stamp_f_result;
+  this.time_datatypes = function(T, done) {
+    var WGUY;
     WGUY = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
@@ -232,14 +232,6 @@
     if (T != null) {
       T.eq(WGUY.time.monostamp_s2(45678, 123), ['0000000045678.000', '123']);
     }
-    stamp_f_matcher = Date.now();
-    delta_ms = 500;
-    await GUY.async.sleep(delta_ms / 1000);
-    stamp_f_result = WGUY.time.monostamp_f2()[0];
-    debug('^223^', {stamp_f_matcher, stamp_f_result});
-    if (T != null) {
-      T.ok((stamp_f_matcher - delta_ms * 2 < stamp_f_result && stamp_f_result < stamp_f_matcher + delta_ms * 2));
-    }
     if (typeof done === "function") {
       done();
     }
@@ -255,7 +247,10 @@
     debug('^2342^', ts_s_1 = WGUY.time.stamp_s(ts_f));
     debug('^2342^', ts_s_2 = WGUY.time.stamp_s());
     if (T != null) {
-      T.eq((ts_f.toFixed(3)) === ts_s_1);
+      T.eq(ts_f.toFixed(3), ts_s_1);
+    }
+    if (T != null) {
+      T.ok(ts_s_2 > ts_s_1); // Note: comparing digit strings should be OK
     }
     if (typeof done === "function") {
       done();
@@ -264,14 +259,49 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.time_monostamp = function(T, done) {
-    var WGUY, ts_f;
+  this.time_monostamp = async function(T, done) {
+    var WGUY, delta_ms, stamp_f_matcher, stamp_f_result;
     WGUY = require('../../../apps/webguy');
     //.........................................................................................................
-    debug('^2342^', ts_f = WGUY.time.monostamp_f2());
-    debug('^2342^', ts_f = WGUY.time.monostamp_s2());
-    debug('^2342^', ts_f = WGUY.time.monostamp_s1());
-    debug('^2342^', ts_f = WGUY.time.monostamp_s1(':'));
+    stamp_f_matcher = performance.timeOrigin + performance.now();
+    delta_ms = 500;
+    await GUY.async.sleep(delta_ms / 1000);
+    stamp_f_result = WGUY.time.monostamp_f2()[0];
+    // debug '^223^', { stamp_f_matcher, stamp_f_result, }
+    if (T != null) {
+      T.ok((stamp_f_matcher - delta_ms * 2 < stamp_f_result && stamp_f_result < stamp_f_matcher + delta_ms * 2));
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.time_configurability = function(T, done) {
+    var WGUY, time;
+    WGUY = require('../../../apps/webguy');
+    time = new WGUY.time.Time({
+      counter_joiner: '-',
+      ms_padder: '_',
+      count_digits: 2
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(time.stamp_s(0), '____________0.000');
+    }
+    if (T != null) {
+      T.eq(time.monostamp_s1(45678), '________45678.000-00');
+    }
+    if (T != null) {
+      T.eq(time.monostamp_s1(45678, 123), '________45678.000-123');
+    }
+    if (T != null) {
+      T.eq(time.monostamp_s2(45678), ['________45678.000', '00']);
+    }
+    if (T != null) {
+      T.eq(time.monostamp_s2(45678, 123), ['________45678.000', '123']);
+    }
     if (typeof done === "function") {
       done();
     }
@@ -281,13 +311,14 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      // test @
-      // test @time_exports
-      // @time_stamp()
-      // @time_monostamp()
-      return test(this.time_datatypes);
+      return test(this);
     })();
   }
+
+  // test @time_exports
+// @time_stamp()
+// @time_monostamp()
+// test @time_datatypes
 
 }).call(this);
 
