@@ -152,12 +152,6 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WGUY.time.monostamp_s1 45678, 123 ), '0000000045678.000:123'
   T?.eq ( WGUY.time.monostamp_s2 45678      ), [ '0000000045678.000', '000', ]
   T?.eq ( WGUY.time.monostamp_s2 45678, 123 ), [ '0000000045678.000', '123', ]
-  stamp_f_matcher = Date.now()
-  delta_ms        = 500
-  await GUY.async.sleep delta_ms / 1000
-  stamp_f_result  = WGUY.time.monostamp_f2()[ 0 ]
-  debug '^223^', { stamp_f_matcher, stamp_f_result, }
-  T?.ok stamp_f_matcher - delta_ms * 2 < stamp_f_result < stamp_f_matcher + delta_ms * 2
   #.........................................................................................................
   done?()
   return null
@@ -169,7 +163,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   debug '^2342^', ts_f    = WGUY.time.stamp_f()
   debug '^2342^', ts_s_1  = WGUY.time.stamp_s ts_f
   debug '^2342^', ts_s_2  = WGUY.time.stamp_s()
-  T?.eq ( ts_f.toFixed 3 ) is ts_s_1
+  T?.eq ( ts_f.toFixed 3 ), ts_s_1
+  T?.ok ts_s_2 > ts_s_1 # Note: comparing digit strings should be OK
   #.........................................................................................................
   done?()
   return null
@@ -178,23 +173,38 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 @time_monostamp = ( T, done ) ->
   WGUY = require '../../../apps/webguy'
   #.........................................................................................................
-  debug '^2342^', ts_f    = WGUY.time.monostamp_f2()
-  debug '^2342^', ts_f    = WGUY.time.monostamp_s2()
-  debug '^2342^', ts_f    = WGUY.time.monostamp_s1()
-  debug '^2342^', ts_f    = WGUY.time.monostamp_s1 ':'
+  stamp_f_matcher = performance.timeOrigin + performance.now()
+  delta_ms        = 500
+  await GUY.async.sleep delta_ms / 1000
+  stamp_f_result  = WGUY.time.monostamp_f2()[ 0 ]
+  # debug '^223^', { stamp_f_matcher, stamp_f_result, }
+  T?.ok stamp_f_matcher - delta_ms * 2 < stamp_f_result < stamp_f_matcher + delta_ms * 2
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@time_configurability = ( T, done ) ->
+  WGUY  = require '../../../apps/webguy'
+  time  = new WGUY.time.Time { counter_joiner: '-', ms_padder: '_', count_digits: 2, }
+  #.........................................................................................................
+  T?.eq ( time.stamp_s 0               ), '____________0.000'
+  T?.eq ( time.monostamp_s1 45678      ), '________45678.000-00'
+  T?.eq ( time.monostamp_s1 45678, 123 ), '________45678.000-123'
+  T?.eq ( time.monostamp_s2 45678      ), [ '________45678.000', '00', ]
+  T?.eq ( time.monostamp_s2 45678, 123 ), [ '________45678.000', '123', ]
   #.........................................................................................................
   done?()
   return null
 
 
-
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # test @time_exports
   # @time_stamp()
   # @time_monostamp()
-  test @time_datatypes
+  # test @time_datatypes
 
 
 
