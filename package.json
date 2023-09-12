@@ -85,6 +85,7 @@
     "intertext-splitlines": "1.2.1",
     "intertype": "7.7.1",
     "intertype-legacy": "^7.7.1",
+    "intertype-newest": "npm:intertype@0.119.1",
     "jake": "^10.8.2",
     "javascript-state-machine": "^3.1.0",
     "jfee": "0.1.4",
