@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/labels.coffee"
+  ],
+  "names": [],
+  "mappings": "AAEA;EAAA;AAAA,MAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;EACA,CAAA,CAAE,GAAF,CAAA,GAAU,OAAV;;EAEA,KAAS,0BAAT;IACE;IACA,KAAS,0BAAT;MACE,IAAe,CAAA,KAAK,CAApB;QAAA,UAAA;;MACA,GAAA,CAAI,CAAJ,EAAO,CAAP;IAFF;EAFF;AAHA",
+  "sourcesContent": [
+    "\n\n'use strict'\n{ log } = console\n\nfor i in [ 1 .. 3 ]\n  `foo:`\n  for j in [ 1 .. 3 ]\n    `break foo` if i is j\n    log i, j\n\n"
+  ]
+}
