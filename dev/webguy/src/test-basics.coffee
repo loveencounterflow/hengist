@@ -140,29 +140,30 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @time_datatypes = ( T, done ) ->
-  WGUY = require '../../../apps/webguy'
+  WGUY  = require '../../../apps/webguy'
+  time  = new WGUY.time.Time { format: 'milliseconds', }
   #.........................................................................................................
-  T?.ok isa.float           WGUY.time.stamp_f()
-  T?.ok isa.nonempty.text   WGUY.time.stamp_s 0
-  T?.ok isa.nonempty.text   WGUY.time.stamp_s()
-  T?.ok isa.list.of.float   WGUY.time.monostamp_f2()
-  T?.eq WGUY.time.monostamp_f2().length, 2
-  T?.eq ( WGUY.time.stamp_s 0               ), '0000000000000.000'
-  T?.eq ( WGUY.time.monostamp_s1 45678      ), '0000000045678.000:000'
-  T?.eq ( WGUY.time.monostamp_s1 45678, 123 ), '0000000045678.000:123'
-  T?.eq ( WGUY.time.monostamp_s2 45678      ), [ '0000000045678.000', '000', ]
-  T?.eq ( WGUY.time.monostamp_s2 45678, 123 ), [ '0000000045678.000', '123', ]
+  T?.ok isa.float           time.stamp_f()
+  T?.ok isa.nonempty.text   time.stamp_s 0
+  T?.ok isa.nonempty.text   time.stamp_s()
+  T?.ok isa.list.of.float   time.monostamp_f2()
+  T?.eq time.monostamp_f2().length, 2
+  T?.eq ( time.stamp_s 0               ), '0000000000000.000'
+  T?.eq ( time.monostamp_s1 45678      ), '0000000045678.000:000'
+  T?.eq ( time.monostamp_s1 45678, 123 ), '0000000045678.000:123'
+  T?.eq ( time.monostamp_s2 45678      ), [ '0000000045678.000', '000', ]
+  T?.eq ( time.monostamp_s2 45678, 123 ), [ '0000000045678.000', '123', ]
   #.........................................................................................................
   done?()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @time_stamp = ( T, done ) ->
-  WGUY = require '../../../apps/webguy'
+  WGUY  = require '../../../apps/webguy'
   #.........................................................................................................
-  debug '^2342^', ts_f    = WGUY.time.stamp_f()
-  debug '^2342^', ts_s_1  = WGUY.time.stamp_s ts_f
-  debug '^2342^', ts_s_2  = WGUY.time.stamp_s()
+  ts_f    = WGUY.time.stamp_f()
+  ts_s_1  = WGUY.time.stamp_s ts_f
+  ts_s_2  = WGUY.time.stamp_s()
   T?.eq ( ts_f.toFixed 3 ), ts_s_1
   T?.ok ts_s_2 > ts_s_1 # Note: comparing digit strings should be OK
   #.........................................................................................................
@@ -186,13 +187,66 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 @time_configurability = ( T, done ) ->
   WGUY  = require '../../../apps/webguy'
-  time  = new WGUY.time.Time { counter_joiner: '-', ms_padder: '_', count_digits: 2, }
   #.........................................................................................................
-  T?.eq ( time.stamp_s 0               ), '____________0.000'
-  T?.eq ( time.monostamp_s1 45678      ), '________45678.000-00'
-  T?.eq ( time.monostamp_s1 45678, 123 ), '________45678.000-123'
-  T?.eq ( time.monostamp_s2 45678      ), [ '________45678.000', '00', ]
-  T?.eq ( time.monostamp_s2 45678, 123 ), [ '________45678.000', '123', ]
+  do =>
+    time  = new WGUY.time.Time { format: 'milliseconds', counter_joiner: '-', ms_padder: '_', count_digits: 2, }
+    T?.eq ( time.stamp_s 0               ), '____________0.000'
+    T?.eq ( time.monostamp_s1 456.789      ), '__________456.789-00'
+    T?.eq ( time.monostamp_s1 456.789, 123 ), '__________456.789-123'
+    T?.eq ( time.monostamp_s2 456.789      ), [ '__________456.789', '00', ]
+    T?.eq ( time.monostamp_s2 456.789, 123 ), [ '__________456.789', '123', ]
+  #.........................................................................................................
+  do =>
+    time  = new WGUY.time.Time { format: 'milliseconds', }
+    T?.eq ( time.stamp_s 0               ), '0000000000000.000'
+    T?.eq ( time.monostamp_s1 456.789      ), '0000000000456.789:000'
+    T?.eq ( time.monostamp_s1 456.789, 123 ), '0000000000456.789:123'
+    T?.eq ( time.monostamp_s2 456.789      ), [ '0000000000456.789', '000', ]
+    T?.eq ( time.monostamp_s2 456.789, 123 ), [ '0000000000456.789', '123', ]
+  #.........................................................................................................
+  do =>
+    time  = new WGUY.time.Time { format: 'iso', }
+    T?.eq ( time.stamp_s 0               ), '0000000000000.000'
+    T?.eq ( time.monostamp_s1 456.789      ), '1970-01-01T00:00:00.456789Z:000'
+    T?.eq ( time.monostamp_s1 456.789, 123 ), '1970-01-01T00:00:00.456789Z:123'
+    T?.eq ( time.monostamp_s2 456.789      ), [ '1970-01-01T00:00:00.456789Z', '000' ]
+    T?.eq ( time.monostamp_s2 456.789, 123 ), [ '1970-01-01T00:00:00.456789Z', '123' ]
+  #.........................................................................................................
+  do =>
+    time  = new WGUY.time.Time { format: 'YYYY MM DD HH:mm:ss.µ [Z]', }
+    T?.eq ( time.stamp_s 0               ), '0000000000000.000'
+    T?.eq ( time.stamp        456.789      ), '1970 01 01 00:00:00.456789 Z:000'
+    T?.eq ( time.stamp        456.789, 123 ), '1970 01 01 00:00:00.456789 Z:123'
+    T?.eq ( time.monostamp_s2 456.789      ), [ '1970 01 01 00:00:00.456789 Z', '000' ]
+    T?.eq ( time.monostamp_s2 456.789, 123 ), [ '1970 01 01 00:00:00.456789 Z', '123' ]
+  #.........................................................................................................
+  do =>
+    time  = new WGUY.time.Time { format: 'YYYYMMDDHHmmssµ', }
+    T?.eq ( time.stamp_s 0               ), '0000000000000.000'
+    T?.eq ( time.stamp        456.789      ), '19700101000000456789:000'
+    T?.eq ( time.stamp        456.789, 123 ), '19700101000000456789:123'
+    T?.eq ( time.monostamp_s2 456.789      ), [ '19700101000000456789', '000' ]
+    T?.eq ( time.monostamp_s2 456.789, 123 ), [ '19700101000000456789', '123' ]
+    debug '^34347^', time.stamp()
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@time_default = ( T, done ) ->
+  WGUY  = require '../../../apps/webguy'
+  T?.eq ( WGUY.time.stamp 1234567890123 ), '2009-02-13T23:31:30.123000Z:000'
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo = ( T, done ) ->
+  WGUY  = require '../../../apps/webguy'
+  #.........................................................................................................
+  # stamps = ( WGUY.time.monostamp_s1() for _ in [ 1 .. 10e6 ] )
+  # stamps = ( stamp for stamp in stamps when /[1-9]$/.test stamp )
+  # debug '^2342-4^', stamp for stamp in stamps
   #.........................................................................................................
   done?()
   return null
