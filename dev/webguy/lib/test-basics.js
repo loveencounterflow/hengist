@@ -199,38 +199,41 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.time_datatypes = function(T, done) {
-    var WGUY;
+    var WGUY, time;
     WGUY = require('../../../apps/webguy');
+    time = new WGUY.time.Time({
+      format: 'milliseconds'
+    });
     //.........................................................................................................
     if (T != null) {
-      T.ok(isa.float(WGUY.time.stamp_f()));
+      T.ok(isa.float(time.stamp_f()));
     }
     if (T != null) {
-      T.ok(isa.nonempty.text(WGUY.time.stamp_s(0)));
+      T.ok(isa.nonempty.text(time.stamp_s(0)));
     }
     if (T != null) {
-      T.ok(isa.nonempty.text(WGUY.time.stamp_s()));
+      T.ok(isa.nonempty.text(time.stamp_s()));
     }
     if (T != null) {
-      T.ok(isa.list.of.float(WGUY.time.monostamp_f2()));
+      T.ok(isa.list.of.float(time.monostamp_f2()));
     }
     if (T != null) {
-      T.eq(WGUY.time.monostamp_f2().length, 2);
+      T.eq(time.monostamp_f2().length, 2);
     }
     if (T != null) {
-      T.eq(WGUY.time.stamp_s(0), '0000000000000.000');
+      T.eq(time.stamp_s(0), '0000000000000.000');
     }
     if (T != null) {
-      T.eq(WGUY.time.monostamp_s1(45678), '0000000045678.000:000');
+      T.eq(time.monostamp_s1(45678), '0000000045678.000:000');
     }
     if (T != null) {
-      T.eq(WGUY.time.monostamp_s1(45678, 123), '0000000045678.000:123');
+      T.eq(time.monostamp_s1(45678, 123), '0000000045678.000:123');
     }
     if (T != null) {
-      T.eq(WGUY.time.monostamp_s2(45678), ['0000000045678.000', '000']);
+      T.eq(time.monostamp_s2(45678), ['0000000045678.000', '000']);
     }
     if (T != null) {
-      T.eq(WGUY.time.monostamp_s2(45678, 123), ['0000000045678.000', '123']);
+      T.eq(time.monostamp_s2(45678, 123), ['0000000045678.000', '123']);
     }
     if (typeof done === "function") {
       done();
@@ -243,9 +246,9 @@
     var WGUY, ts_f, ts_s_1, ts_s_2;
     WGUY = require('../../../apps/webguy');
     //.........................................................................................................
-    debug('^2342^', ts_f = WGUY.time.stamp_f());
-    debug('^2342^', ts_s_1 = WGUY.time.stamp_s(ts_f));
-    debug('^2342^', ts_s_2 = WGUY.time.stamp_s());
+    ts_f = WGUY.time.stamp_f();
+    ts_s_1 = WGUY.time.stamp_s(ts_f);
+    ts_s_2 = WGUY.time.stamp_s();
     if (T != null) {
       T.eq(ts_f.toFixed(3), ts_s_1);
     }
@@ -279,29 +282,132 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.time_configurability = function(T, done) {
-    var WGUY, time;
+    var WGUY;
     WGUY = require('../../../apps/webguy');
-    time = new WGUY.time.Time({
-      counter_joiner: '-',
-      ms_padder: '_',
-      count_digits: 2
-    });
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(time.stamp_s(0), '____________0.000');
+    (() => {      //.........................................................................................................
+      var time;
+      time = new WGUY.time.Time({
+        format: 'milliseconds',
+        counter_joiner: '-',
+        ms_padder: '_',
+        count_digits: 2
+      });
+      if (T != null) {
+        T.eq(time.stamp_s(0), '____________0.000');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789), '__________456.789-00');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789, 123), '__________456.789-123');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789), ['__________456.789', '00']);
+      }
+      return T != null ? T.eq(time.monostamp_s2(456.789, 123), ['__________456.789', '123']) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var time;
+      time = new WGUY.time.Time({
+        format: 'milliseconds'
+      });
+      if (T != null) {
+        T.eq(time.stamp_s(0), '0000000000000.000');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789), '0000000000456.789:000');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789, 123), '0000000000456.789:123');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789), ['0000000000456.789', '000']);
+      }
+      return T != null ? T.eq(time.monostamp_s2(456.789, 123), ['0000000000456.789', '123']) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var time;
+      time = new WGUY.time.Time({
+        format: 'iso'
+      });
+      if (T != null) {
+        T.eq(time.stamp_s(0), '0000000000000.000');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789), '1970-01-01T00:00:00.456789Z:000');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s1(456.789, 123), '1970-01-01T00:00:00.456789Z:123');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789), ['1970-01-01T00:00:00.456789Z', '000']);
+      }
+      return T != null ? T.eq(time.monostamp_s2(456.789, 123), ['1970-01-01T00:00:00.456789Z', '123']) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var time;
+      time = new WGUY.time.Time({
+        format: 'YYYY MM DD HH:mm:ss.µ [Z]'
+      });
+      if (T != null) {
+        T.eq(time.stamp_s(0), '0000000000000.000');
+      }
+      if (T != null) {
+        T.eq(time.stamp(456.789), '1970 01 01 00:00:00.456789 Z:000');
+      }
+      if (T != null) {
+        T.eq(time.stamp(456.789, 123), '1970 01 01 00:00:00.456789 Z:123');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789), ['1970 01 01 00:00:00.456789 Z', '000']);
+      }
+      return T != null ? T.eq(time.monostamp_s2(456.789, 123), ['1970 01 01 00:00:00.456789 Z', '123']) : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var time;
+      time = new WGUY.time.Time({
+        format: 'YYYYMMDDHHmmssµ'
+      });
+      if (T != null) {
+        T.eq(time.stamp_s(0), '0000000000000.000');
+      }
+      if (T != null) {
+        T.eq(time.stamp(456.789), '19700101000000456789:000');
+      }
+      if (T != null) {
+        T.eq(time.stamp(456.789, 123), '19700101000000456789:123');
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789), ['19700101000000456789', '000']);
+      }
+      if (T != null) {
+        T.eq(time.monostamp_s2(456.789, 123), ['19700101000000456789', '123']);
+      }
+      return debug('^34347^', time.stamp());
+    })();
+    if (typeof done === "function") {
+      done();
     }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.time_default = function(T, done) {
+    var WGUY;
+    WGUY = require('../../../apps/webguy');
     if (T != null) {
-      T.eq(time.monostamp_s1(45678), '________45678.000-00');
+      T.eq(WGUY.time.stamp(1234567890123), '2009-02-13T23:31:30.123000Z:000');
     }
-    if (T != null) {
-      T.eq(time.monostamp_s1(45678, 123), '________45678.000-123');
+    if (typeof done === "function") {
+      done();
     }
-    if (T != null) {
-      T.eq(time.monostamp_s2(45678), ['________45678.000', '00']);
-    }
-    if (T != null) {
-      T.eq(time.monostamp_s2(45678, 123), ['________45678.000', '123']);
-    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.demo = function(T, done) {
+    var WGUY;
+    WGUY = require('../../../apps/webguy');
     if (typeof done === "function") {
       done();
     }
