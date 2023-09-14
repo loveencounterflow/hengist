@@ -42,28 +42,30 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 #   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@intersock_connect = ( T, done ) ->
+@intersock_connect = ( T, done ) -> new Promise ( resolve, reject ) =>
   { WebSocket } = require '../../../apps/intersock/node_modules/ws'
+  { Intersock } = require '../../../apps/intersock'
+  intersock = new Intersock { port: 9876, }
+  debug '^34242^', intersock.cfg
   #.........................................................................................................
-  # const ws = new WebSocket('ws://www.host.com/path');
-
-  # ws.on('error', console.error);
-
-  # ws.on('open', function open() {
-  #   ws.send('something');
-  # });
-
-  # ws.on('message', function message(data) {
-  #   console.log('received: %s', data);
+  ws = new WebSocket intersock.cfg.url
+  ws.on 'error', ( error ) =>
+    throw error
+  ws.on 'open', =>
+    help "opened connection"
+    ws.send JSON.stringify 'something'
+  ws.on 'message', ( data ) =>
+    info "received", rpr data
   #.........................................................................................................
-  done()
+  done?()
 
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  await @intersock_connect()
   # test @time_exports
   # @time_stamp()
   # @time_monostamp()
