@@ -43,19 +43,26 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @intersock_connect = ( T, done ) -> new Promise ( resolve, reject ) =>
-  { WebSocket } = require '../../../apps/intersock/node_modules/ws'
-  { Intersock } = require '../../../apps/intersock'
-  intersock = new Intersock { port: 9876, }
-  debug '^34242^', intersock.cfg
-  #.........................................................................................................
-  ws = new WebSocket intersock.cfg.url
-  ws.on 'error', ( error ) =>
-    throw error
-  ws.on 'open', =>
-    help "opened connection"
-    ws.send JSON.stringify 'something'
-  ws.on 'message', ( data ) =>
-    info "received", rpr data
+  { WebSocket         } = require '../../../apps/intersock/node_modules/ws'
+  { Intersock_server
+    Intersock_client  } = require '../../../apps/intersock'
+  cfg     = { port: 9876, }
+  server  = new Intersock_server cfg
+  debug '^34242^', server.cfg
+  client  = new Intersock_client cfg
+  server.start()
+  client.start()
+  # server.send "message from server"
+  # client.send "message from client"
+  # #.........................................................................................................
+  # ws = new WebSocket server.cfg.url
+  # ws.on 'error', ( error ) =>
+  #   throw error
+  # ws.on 'open', =>
+  #   help "opened connection"
+  #   ws.send JSON.stringify 'something'
+  # ws.on 'message', ( data ) =>
+  #   info "received", rpr data
   #.........................................................................................................
   done?()
 
