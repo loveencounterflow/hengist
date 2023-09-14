@@ -38,27 +38,35 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.intersock_connect = function(T, done) {
-    var WebSocket;
-    ({WebSocket} = require('../../../apps/intersock/node_modules/ws'));
-    //.........................................................................................................
-    // const ws = new WebSocket('ws://www.host.com/path');
-
-    // ws.on('error', console.error);
-
-    // ws.on('open', function open() {
-    //   ws.send('something');
-    // });
-
-    // ws.on('message', function message(data) {
-    //   console.log('received: %s', data);
-    //.........................................................................................................
-    return done();
+    return new Promise((resolve, reject) => {
+      var Intersock, WebSocket, intersock, ws;
+      ({WebSocket} = require('../../../apps/intersock/node_modules/ws'));
+      ({Intersock} = require('../../../apps/intersock'));
+      intersock = new Intersock({
+        port: 9876
+      });
+      debug('^34242^', intersock.cfg);
+      //.........................................................................................................
+      ws = new WebSocket(intersock.cfg.url);
+      ws.on('error', (error) => {
+        throw error;
+      });
+      ws.on('open', () => {
+        help("opened connection");
+        return ws.send(JSON.stringify('something'));
+      });
+      ws.on('message', (data) => {
+        return info("received", rpr(data));
+      });
+      return typeof done === "function" ? done() : void 0;
+    });
   };
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
-      return test(this);
+    (async() => {
+      // test @
+      return (await this.intersock_connect());
     })();
   }
 
