@@ -39,25 +39,17 @@
   //-----------------------------------------------------------------------------------------------------------
   this.intersock_connect = function(T, done) {
     return new Promise((resolve, reject) => {
-      var Intersock, WebSocket, intersock, ws;
+      var Intersock_client, Intersock_server, WebSocket, cfg, client, server;
       ({WebSocket} = require('../../../apps/intersock/node_modules/ws'));
-      ({Intersock} = require('../../../apps/intersock'));
-      intersock = new Intersock({
+      ({Intersock_server, Intersock_client} = require('../../../apps/intersock'));
+      cfg = {
         port: 9876
-      });
-      debug('^34242^', intersock.cfg);
-      //.........................................................................................................
-      ws = new WebSocket(intersock.cfg.url);
-      ws.on('error', (error) => {
-        throw error;
-      });
-      ws.on('open', () => {
-        help("opened connection");
-        return ws.send(JSON.stringify('something'));
-      });
-      ws.on('message', (data) => {
-        return info("received", rpr(data));
-      });
+      };
+      server = new Intersock_server(cfg);
+      debug('^34242^', server.cfg);
+      client = new Intersock_client(cfg);
+      server.start();
+      client.start();
       return typeof done === "function" ? done() : void 0;
     });
   };
