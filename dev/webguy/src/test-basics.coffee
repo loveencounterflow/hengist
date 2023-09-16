@@ -251,6 +251,15 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   done?()
   return null
 
+#===========================================================================================================
+@environment_node = ( T, done ) ->
+  WGUY  = require '../../../apps/webguy'
+  T?.eq ( WGUY.environment ), {
+    browser: false, nodejs: true, webworker: false, jsdom: false, deno: false, name: 'nodejs', }
+  #.........................................................................................................
+  done?()
+  return null
+
 
 ############################################################################################################
 if require.main is module then do =>

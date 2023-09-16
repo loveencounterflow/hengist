@@ -48,12 +48,11 @@ types                     = new ( require 'intertype-newest' ).Intertype()
     Intersock_client  } = require '../../../apps/intersock'
   cfg     = { port: 9876, }
   server  = new Intersock_server cfg
-  debug '^34242^', server.cfg
   client  = new Intersock_client cfg
-  server.start()
-  client.start()
-  # server.send "message from server"
-  # client.send "message from client"
+  debug '^34242^', server.cfg
+  await client.connect()
+  server.send 'info', "greetings from server"
+  client.send 'info', "greetings from client"
   # #.........................................................................................................
   # ws = new WebSocket server.cfg.url
   # ws.on 'error', ( error ) =>
