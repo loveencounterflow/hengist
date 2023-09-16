@@ -414,6 +414,26 @@
     return null;
   };
 
+  //===========================================================================================================
+  this.environment_node = function(T, done) {
+    var WGUY;
+    WGUY = require('../../../apps/webguy');
+    if (T != null) {
+      T.eq(WGUY.environment, {
+        browser: false,
+        nodejs: true,
+        webworker: false,
+        jsdom: false,
+        deno: false,
+        name: 'nodejs'
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {

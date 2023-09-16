@@ -38,7 +38,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.intersock_connect = function(T, done) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
       var Intersock_client, Intersock_server, WebSocket, cfg, client, server;
       ({WebSocket} = require('../../../apps/intersock/node_modules/ws'));
       ({Intersock_server, Intersock_client} = require('../../../apps/intersock'));
@@ -46,10 +46,11 @@
         port: 9876
       };
       server = new Intersock_server(cfg);
-      debug('^34242^', server.cfg);
       client = new Intersock_client(cfg);
-      server.start();
-      client.start();
+      debug('^34242^', server.cfg);
+      await client.connect();
+      server.send('info', "greetings from server");
+      client.send('info', "greetings from client");
       return typeof done === "function" ? done() : void 0;
     });
   };
