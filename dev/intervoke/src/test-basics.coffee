@@ -248,12 +248,67 @@ get_isa2_class = ->
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@ivk_word_prompter = ( T, done ) ->
+  { Word_prompter } = require '../../../apps/intervoke'
+  #.........................................................................................................
+  class My_proto_word_prompter extends Word_prompter
+    @declare:
+      baz: ( P... ) -> help '^My_word_prompter.declare.bar', P
+  #.........................................................................................................
+  class My_word_prompter extends My_proto_word_prompter
+    @declare:
+      bar: ( P... ) -> help '^My_word_prompter.declare.bar', P
+  #.........................................................................................................
+  prompter = new My_word_prompter()
+  debug '^ivk_word_prompter@1^', prompter
+  # debug '^ivk_word_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
+  debug '^ivk_word_prompter@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_word_prompter@4^', P
+  try prompter.__declare 'baz', ( -> ) catch e then warn GUY.trm.reverse e.message
+  # debug '^ivk_word_prompter@5^', prompter.baz
+  # debug '^ivk_word_prompter@6^', prompter.bar
+  # debug '^ivk_word_prompter@7^', prompter.foo
+  debug '^ivk_word_prompter@8^', prompter.baz 101, 102
+  debug '^ivk_word_prompter@9^', prompter.bar 3, 4, 5
+  debug '^ivk_word_prompter@10^', prompter.foo 1, 2, 3
+  try prompter.no_such_method() catch e then warn GUY.trm.reverse e.message
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@ivk_phrase_prompter = ( T, done ) ->
+  { Phrase_prompter } = require '../../../apps/intervoke'
+  #.........................................................................................................
+  class My_proto_phrase_prompter extends Phrase_prompter
+    @declare:
+      baz: ( P... ) -> help '^My_phrase_prompter.declare.bar', P
+  #.........................................................................................................
+  class My_phrase_prompter extends My_proto_phrase_prompter
+    @declare:
+      bar: ( P... ) -> help '^My_phrase_prompter.declare.bar', P
+  #.........................................................................................................
+  prompter = new My_phrase_prompter()
+  debug '^ivk_phrase_prompter@1^', prompter
+  # debug '^ivk_phrase_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
+  debug '^ivk_phrase_prompter@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_phrase_prompter@4^', P
+  # debug '^ivk_phrase_prompter@5^', prompter.baz
+  # debug '^ivk_phrase_prompter@6^', prompter.bar
+  # debug '^ivk_phrase_prompter@7^', prompter.foo
+  debug '^ivk_phrase_prompter@8^', prompter.baz 101, 102
+  debug '^ivk_phrase_prompter@9^', prompter.bar 3, 4, 5
+  debug '^ivk_phrase_prompter@10^', prompter.foo 1, 2, 3
+  try prompter.no_such_method() catch e then warn GUY.trm.reverse e.message
+  #.........................................................................................................
+  done?()
+
 
 #===========================================================================================================
 if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
-  test @
+  # test @
+  @ivk_word_prompter()
+  @ivk_phrase_prompter()
   # test @ivk_phrase_parser_basics
   # test @ivk_phrase_parser_element_types
   # test @ivk_methods_are_properly_named
