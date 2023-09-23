@@ -618,12 +618,112 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.ivk_phrase_prompter = function(T, done) {
-    var Phrase_prompter, pp;
-    ({Phrase_prompter} = require('../../../apps/intervoke'));
+  this.ivk_word_prompter = function(T, done) {
+    var My_proto_word_prompter, My_word_prompter, Word_prompter, e, prompter;
+    ({Word_prompter} = require('../../../apps/intervoke'));
+    My_proto_word_prompter = (function() {
+      //.........................................................................................................
+      class My_proto_word_prompter extends Word_prompter {};
+
+      My_proto_word_prompter.declare = {
+        baz: function(...P) {
+          return help('^My_word_prompter.declare.bar', P);
+        }
+      };
+
+      return My_proto_word_prompter;
+
+    }).call(this);
+    My_word_prompter = (function() {
+      //.........................................................................................................
+      class My_word_prompter extends My_proto_word_prompter {};
+
+      My_word_prompter.declare = {
+        bar: function(...P) {
+          return help('^My_word_prompter.declare.bar', P);
+        }
+      };
+
+      return My_word_prompter;
+
+    }).call(this);
     //.........................................................................................................
-    pp = new Phrase_prompter();
-    debug('^3423^', pp);
+    prompter = new My_word_prompter();
+    debug('^ivk_word_prompter@1^', prompter);
+    // debug '^ivk_word_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
+    debug('^ivk_word_prompter@3^', prompter.__declare('foo', function(...P) {
+      return urge('^ivk_word_prompter@4^', P);
+    }));
+    try {
+      prompter.__declare('baz', (function() {}));
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    // debug '^ivk_word_prompter@5^', prompter.baz
+    // debug '^ivk_word_prompter@6^', prompter.bar
+    // debug '^ivk_word_prompter@7^', prompter.foo
+    debug('^ivk_word_prompter@8^', prompter.baz(101, 102));
+    debug('^ivk_word_prompter@9^', prompter.bar(3, 4, 5));
+    debug('^ivk_word_prompter@10^', prompter.foo(1, 2, 3));
+    try {
+      prompter.no_such_method();
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.ivk_phrase_prompter = function(T, done) {
+    var My_phrase_prompter, My_proto_phrase_prompter, Phrase_prompter, e, prompter;
+    ({Phrase_prompter} = require('../../../apps/intervoke'));
+    My_proto_phrase_prompter = (function() {
+      //.........................................................................................................
+      class My_proto_phrase_prompter extends Phrase_prompter {};
+
+      My_proto_phrase_prompter.declare = {
+        baz: function(...P) {
+          return help('^My_phrase_prompter.declare.bar', P);
+        }
+      };
+
+      return My_proto_phrase_prompter;
+
+    }).call(this);
+    My_phrase_prompter = (function() {
+      //.........................................................................................................
+      class My_phrase_prompter extends My_proto_phrase_prompter {};
+
+      My_phrase_prompter.declare = {
+        bar: function(...P) {
+          return help('^My_phrase_prompter.declare.bar', P);
+        }
+      };
+
+      return My_phrase_prompter;
+
+    }).call(this);
+    //.........................................................................................................
+    prompter = new My_phrase_prompter();
+    debug('^ivk_phrase_prompter@1^', prompter);
+    // debug '^ivk_phrase_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
+    debug('^ivk_phrase_prompter@3^', prompter.__declare('foo', function(...P) {
+      return urge('^ivk_phrase_prompter@4^', P);
+    }));
+    // debug '^ivk_phrase_prompter@5^', prompter.baz
+    // debug '^ivk_phrase_prompter@6^', prompter.bar
+    // debug '^ivk_phrase_prompter@7^', prompter.foo
+    debug('^ivk_phrase_prompter@8^', prompter.baz(101, 102));
+    debug('^ivk_phrase_prompter@9^', prompter.bar(3, 4, 5));
+    debug('^ivk_phrase_prompter@10^', prompter.foo(1, 2, 3));
+    try {
+      prompter.no_such_method();
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -633,6 +733,7 @@
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
       // test @
+      this.ivk_word_prompter();
       return this.ivk_phrase_prompter();
     })();
   }
