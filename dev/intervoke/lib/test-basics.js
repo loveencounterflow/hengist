@@ -617,12 +617,23 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.ivk_phrase_prompter = function(T, done) {
+    var Phrase_prompter, pp;
+    ({Phrase_prompter} = require('../../../apps/intervoke'));
+    //.........................................................................................................
+    pp = new Phrase_prompter();
+    debug('^3423^', pp);
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //===========================================================================================================
   if (module === require.main) {
     (() => {
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
-      return test(this);
+      // test @
+      return this.ivk_phrase_prompter();
     })();
   }
 
