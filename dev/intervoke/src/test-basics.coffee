@@ -199,12 +199,12 @@ get_isa2_class = ->
   pick_1st = ( fn ) -> [ fn()..., ][ 0 ]
   # debug '^23423^', lf pp._walk_disjuncts "".split '_'
   # debug '^23423^', lf pp._walk_disjuncts "_or_".split '_'
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or"
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or_positive_integer_or_nonempty_text"
-  T?.throws /empty alternative clause/, -> expand -> pp._walk_disjuncts sp "positive_integer_or_nonempty_text_or"
+  T?.throws /unexpected empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or"
+  T?.throws /unexpected empty alternative clause/, -> expand -> pp._walk_disjuncts sp "or_positive_integer_or_nonempty_text"
+  T?.throws /unexpected empty alternative clause/, -> expand -> pp._walk_disjuncts sp "positive_integer_or_nonempty_text_or"
   T?.throws /expected word 'nonempty' in phrase 'positive_nonempty' to have role 'noun'/, -> expand -> [ pp.parse "positive_integer_or_positive_nonempty" ]
-  T?.throws /word 'combobulate' in phrase 'combobulate_integer' is unknown/, -> expand -> [ pp.parse "combobulate_integer" ]
-  T?.throws /unexpected empty alternative phrase/, -> expand -> [ pp.parse "list_of" ]
+  T?.throws /word 'combobulate' is unknown in 'combobulate_integer'/, -> expand -> [ pp.parse "combobulate_integer" ]
+  T?.throws /unexpected empty alternative clause/, -> expand -> [ pp.parse "list_of" ]
   T?.throws /wrong use of 'or' in element clause/, -> ( pp._find_element_clauses   sp 'nonempty_list_of_text_or_integer' )
   T?.throws /expected 'optional' to occur as first word in phrase/, -> pp.parse "positive_integer_or_nonempty_optional_text"
   #.........................................................................................................
@@ -235,6 +235,16 @@ get_isa2_class = ->
   #.........................................................................................................
   # T?.eq ( pp.parse "list_or_text" ), { alternatives: [ { noun: 'list', }, { noun: 'text', } ], optional: false }
   T?.eq ( pp.parse "list_of_text" ), { alternatives: [ { noun: 'list', elements: { noun: 'text', } } ], optional: false }
+  T?.eq ( pp.parse "list_of_empty_text" ), { alternatives: [ { noun: 'list', elements: { noun: 'text', adjectives: [ 'empty', ], }, }, ], optional: false }
+  T?.throws /nested containers not allowed in 'list_of_list_of_text'/, -> pp.parse "list_of_list_of_text"
+  # debug '^409-1^', ( pp.parse "set_or_list_of_text" )
+  # debug '^409-2^', ( pp.parse "set_or_list_of_text_or_integer" )
+  # debug '^409-3^', ( pp.parse "list_of_text_or_integer" )
+  # debug '^409-4^', ( pp.parse "list_of_text_or_set" )
+  T?.throws /alternatives not allowed with containers in 'set_or_list_of_text'/,            -> ( pp.parse "set_or_list_of_text" )
+  T?.throws /alternatives not allowed with containers in 'set_or_list_of_text_or_integer'/, -> ( pp.parse "set_or_list_of_text_or_integer" )
+  T?.throws /alternatives not allowed with containers in 'list_of_text_or_integer'/,        -> ( pp.parse "list_of_text_or_integer" )
+  T?.throws /alternatives not allowed with containers in 'list_of_text_or_set'/,            -> ( pp.parse "list_of_text_or_set" )
   #.........................................................................................................
   done?()
 
@@ -244,7 +254,6 @@ if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
   test @
-  # @ivk_phrase_parser_basics()
   # test @ivk_phrase_parser_basics
   # test @ivk_phrase_parser_element_types
   # test @ivk_methods_are_properly_named
