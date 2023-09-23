@@ -51,8 +51,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   client  = new Intersock_client cfg
   debug '^34242^', server.cfg
   await client.connect()
-  server.send 'info', "greetings from server"
-  client.send 'info', "greetings from client"
+  # help '^342-1^',       server.send 'info', "greetings from server"
+  info '^342-2^', await client.send 'info', "greetings from client"
   # #.........................................................................................................
   # ws = new WebSocket server.cfg.url
   # ws.on 'error', ( error ) =>
