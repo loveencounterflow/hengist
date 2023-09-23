@@ -361,21 +361,21 @@
     // debug '^23423^', lf pp._walk_disjuncts "".split '_'
     // debug '^23423^', lf pp._walk_disjuncts "_or_".split '_'
     if (T != null) {
-      T.throws(/empty alternative clause/, function() {
+      T.throws(/unexpected empty alternative clause/, function() {
         return expand(function() {
           return pp._walk_disjuncts(sp("or"));
         });
       });
     }
     if (T != null) {
-      T.throws(/empty alternative clause/, function() {
+      T.throws(/unexpected empty alternative clause/, function() {
         return expand(function() {
           return pp._walk_disjuncts(sp("or_positive_integer_or_nonempty_text"));
         });
       });
     }
     if (T != null) {
-      T.throws(/empty alternative clause/, function() {
+      T.throws(/unexpected empty alternative clause/, function() {
         return expand(function() {
           return pp._walk_disjuncts(sp("positive_integer_or_nonempty_text_or"));
         });
@@ -389,14 +389,14 @@
       });
     }
     if (T != null) {
-      T.throws(/word 'combobulate' in phrase 'combobulate_integer' is unknown/, function() {
+      T.throws(/word 'combobulate' is unknown in 'combobulate_integer'/, function() {
         return expand(function() {
           return [pp.parse("combobulate_integer")];
         });
       });
     }
     if (T != null) {
-      T.throws(/unexpected empty alternative phrase/, function() {
+      T.throws(/unexpected empty alternative clause/, function() {
         return expand(function() {
           return [pp.parse("list_of")];
         });
@@ -571,6 +571,49 @@
         optional: false
       });
     }
+    if (T != null) {
+      T.eq(pp.parse("list_of_empty_text"), {
+        alternatives: [
+          {
+            noun: 'list',
+            elements: {
+              noun: 'text',
+              adjectives: ['empty']
+            }
+          }
+        ],
+        optional: false
+      });
+    }
+    if (T != null) {
+      T.throws(/nested containers not allowed in 'list_of_list_of_text'/, function() {
+        return pp.parse("list_of_list_of_text");
+      });
+    }
+    // debug '^409-1^', ( pp.parse "set_or_list_of_text" )
+    // debug '^409-2^', ( pp.parse "set_or_list_of_text_or_integer" )
+    // debug '^409-3^', ( pp.parse "list_of_text_or_integer" )
+    // debug '^409-4^', ( pp.parse "list_of_text_or_set" )
+    if (T != null) {
+      T.throws(/alternatives not allowed with containers in 'set_or_list_of_text'/, function() {
+        return pp.parse("set_or_list_of_text");
+      });
+    }
+    if (T != null) {
+      T.throws(/alternatives not allowed with containers in 'set_or_list_of_text_or_integer'/, function() {
+        return pp.parse("set_or_list_of_text_or_integer");
+      });
+    }
+    if (T != null) {
+      T.throws(/alternatives not allowed with containers in 'list_of_text_or_integer'/, function() {
+        return pp.parse("list_of_text_or_integer");
+      });
+    }
+    if (T != null) {
+      T.throws(/alternatives not allowed with containers in 'list_of_text_or_set'/, function() {
+        return pp.parse("list_of_text_or_set");
+      });
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -583,8 +626,7 @@
     })();
   }
 
-  // @ivk_phrase_parser_basics()
-// test @ivk_phrase_parser_basics
+  // test @ivk_phrase_parser_basics
 // test @ivk_phrase_parser_element_types
 // test @ivk_methods_are_properly_named
 // test @ivk_isa
