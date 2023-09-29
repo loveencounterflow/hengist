@@ -35,7 +35,7 @@ get_isa_class = ->
   return Isa if Isa?
   IVK = require '../../../apps/intervoke'
   #===========================================================================================================
-  class Isa extends IVK.Word_prompter
+  class Isa extends IVK.Intervoke
     #---------------------------------------------------------------------------------------------------------
     @declare:
       null:       ( x ) -> x is null
@@ -190,9 +190,11 @@ get_isa2_class = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @ivk_phrase_parser_basics = ( T, done ) ->
-  { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
+  { Phrase_parser
+    sample_vocabulary } = require '../../../apps/intervoke/lib/phrase-parser'
   #.........................................................................................................
   pp = new Phrase_parser()
+  pp.set_vocabulary sample_vocabulary
   sp = ( sentence ) -> sentence.split '_'
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
   expand = ( fn ) -> [ fn()..., ]
@@ -225,9 +227,11 @@ get_isa2_class = ->
 
 #-----------------------------------------------------------------------------------------------------------
 @ivk_phrase_parser_element_types = ( T, done ) ->
-  { Phrase_parser } = require '../../../apps/intervoke/lib/phrase-parser'
+  { Phrase_parser
+    sample_vocabulary } = require '../../../apps/intervoke/lib/phrase-parser'
   #.........................................................................................................
   pp = new Phrase_parser()
+  pp.set_vocabulary sample_vocabulary
   sp = ( sentence ) -> sentence.split '_'
   lf = ( fn ) -> try info '^99-1^', [ fn()..., ] catch e then warn GUY.trm.reverse e.message
   expand = ( fn ) -> [ fn()..., ]
@@ -249,55 +253,59 @@ get_isa2_class = ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@ivk_word_prompter = ( T, done ) ->
-  { Word_prompter } = require '../../../apps/intervoke'
+@ivk_intervoke = ( T, done ) ->
+  { Intervoke } = require '../../../apps/intervoke'
   #.........................................................................................................
-  class My_proto_word_prompter extends Word_prompter
+  class My_proto_intervoke extends Intervoke
     @declare:
-      baz: ( P... ) -> help '^My_word_prompter.declare.bar', P
+      baz: ( P... ) -> help '^My_intervoke.declare.bar', P
   #.........................................................................................................
-  class My_word_prompter extends My_proto_word_prompter
+  class My_intervoke extends My_proto_intervoke
     @declare:
-      bar: ( P... ) -> help '^My_word_prompter.declare.bar', P
+      bar: ( P... ) -> help '^My_intervoke.declare.bar', P
   #.........................................................................................................
-  prompter = new My_word_prompter()
-  debug '^ivk_word_prompter@1^', prompter
-  # debug '^ivk_word_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
-  debug '^ivk_word_prompter@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_word_prompter@4^', P
+  prompter = new My_intervoke()
+  debug '^ivk_intervoke@1^', prompter
+  # debug '^ivk_intervoke@2^', [ prompter.__walk_prototype_chain()..., ]
+  debug '^ivk_intervoke@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_intervoke@4^', P
   try prompter.__declare 'baz', ( -> ) catch e then warn GUY.trm.reverse e.message
-  # debug '^ivk_word_prompter@5^', prompter.baz
-  # debug '^ivk_word_prompter@6^', prompter.bar
-  # debug '^ivk_word_prompter@7^', prompter.foo
-  debug '^ivk_word_prompter@8^', prompter.baz 101, 102
-  debug '^ivk_word_prompter@9^', prompter.bar 3, 4, 5
-  debug '^ivk_word_prompter@10^', prompter.foo 1, 2, 3
+  # debug '^ivk_intervoke@5^', prompter.baz
+  # debug '^ivk_intervoke@6^', prompter.bar
+  # debug '^ivk_intervoke@7^', prompter.foo
+  debug '^ivk_intervoke@8^', prompter.baz 101, 102
+  debug '^ivk_intervoke@9^', prompter.bar 3, 4, 5
+  debug '^ivk_intervoke@10^', prompter.foo 1, 2, 3
   try prompter.no_such_method() catch e then warn GUY.trm.reverse e.message
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@ivk_phrase_prompter = ( T, done ) ->
-  { Phrase_prompter } = require '../../../apps/intervoke'
+@ivk_intervoke_phraser = ( T, done ) ->
+  { Intervoke_phraser } = require '../../../apps/intervoke'
   #.........................................................................................................
-  class My_proto_phrase_prompter extends Phrase_prompter
+  class My_proto_intervoke_phraser extends Intervoke_phraser
     @declare:
-      baz: ( P... ) -> help '^My_phrase_prompter.declare.bar', P
+      baz: ( P... ) -> help '^My_intervoke_phraser.declare.bar', P
   #.........................................................................................................
-  class My_phrase_prompter extends My_proto_phrase_prompter
+  class My_intervoke_phraser extends My_proto_intervoke_phraser
     @declare:
-      bar: ( P... ) -> help '^My_phrase_prompter.declare.bar', P
+      bar: ( P... ) -> help '^My_intervoke_phraser.declare.bar', P
   #.........................................................................................................
-  prompter = new My_phrase_prompter()
-  debug '^ivk_phrase_prompter@1^', prompter
-  # debug '^ivk_phrase_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
-  debug '^ivk_phrase_prompter@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_phrase_prompter@4^', P
-  # debug '^ivk_phrase_prompter@5^', prompter.baz
-  # debug '^ivk_phrase_prompter@6^', prompter.bar
-  # debug '^ivk_phrase_prompter@7^', prompter.foo
-  debug '^ivk_phrase_prompter@8^', prompter.baz 101, 102
-  debug '^ivk_phrase_prompter@9^', prompter.bar 3, 4, 5
-  debug '^ivk_phrase_prompter@10^', prompter.foo 1, 2, 3
-  try prompter.no_such_method() catch e then warn GUY.trm.reverse e.message
+  prompter = new My_intervoke_phraser()
+  debug '^ivk_intervoke_phraser@1^', prompter
+  # debug '^ivk_intervoke_phraser@2^', [ prompter.__walk_prototype_chain()..., ]
+  debug '^ivk_intervoke_phraser@3^', prompter.__declare 'foo', ( P... ) -> urge '^ivk_intervoke_phraser@4^', P
+  # debug '^ivk_intervoke_phraser@5^', prompter.baz
+  # debug '^ivk_intervoke_phraser@6^', prompter.bar
+  # debug '^ivk_intervoke_phraser@7^', prompter.foo
+  debug '^ivk_intervoke_phraser@8^', prompter.baz 101, 102
+  debug '^ivk_intervoke_phraser@9^', prompter.bar 3, 4, 5
+  debug '^ivk_intervoke_phraser@10^', prompter.foo 1, 2, 3
+  # debug '^ivk_intervoke_phraser@10^', prompter.integer
+  # debug '^ivk_intervoke_phraser@10^', prompter.integer_or_text 3
+  try prompter.integer           catch e then warn GUY.trm.reverse e.message
+  try prompter.integer_or_text 3 catch e then warn GUY.trm.reverse e.message
+  try prompter.no_such_method()  catch e then warn GUY.trm.reverse e.message
   #.........................................................................................................
   done?()
 
@@ -306,9 +314,9 @@ get_isa2_class = ->
 if module is require.main then do =>
   # @ivk_isa()
   # test @ivk_declarations_are_inherited
-  # test @
-  @ivk_word_prompter()
-  @ivk_phrase_prompter()
+  test @
+  # @ivk_intervoke()
+  # @ivk_intervoke_phraser()
   # test @ivk_phrase_parser_basics
   # test @ivk_phrase_parser_element_types
   # test @ivk_methods_are_properly_named
