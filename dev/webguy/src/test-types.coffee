@@ -55,8 +55,6 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.list           undefined ), false
   T?.eq ( WG.types.isa.set            undefined ), false
   T?.eq ( WG.types.isa.map            undefined ), false
-  T?.eq ( WG.types.isa.iterable       undefined ), false
-  T?.eq ( WG.types.isa.container      undefined ), false
   T?.eq ( WG.types.isa.numeric        undefined ), false
   T?.eq ( WG.types.isa.float          undefined ), false
   T?.eq ( WG.types.isa.bigint         undefined ), false
@@ -106,10 +104,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.set            ( '123' ) ), false
   T?.eq ( WG.types.isa.set            ( new Set '123' ) ), true
   T?.eq ( WG.types.isa.map            ( new Map() ) ), true
-  T?.eq ( WG.types.isa.iterable       ( '' ) ), true
-  T?.eq ( WG.types.isa.iterable       ( [] ) ), true
-  T?.eq ( WG.types.isa.iterable       ( {} ) ), false
-  # T?.eq ( WG.types.isa.container      ( null ) ), true
+  # T?.eq ( WG.types.isa.sized          ( null ) ), false
+
   # T?.eq ( WG.types.isa.numeric        ( null ) ), true
   # T?.eq ( WG.types.isa.float          ( null ) ), true
   # T?.eq ( WG.types.isa.bigint         ( null ) ), true
@@ -161,10 +157,6 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.optional_set            ( undefined  ) ), true
   T?.eq ( WG.types.isa.optional_map            ( null       ) ), true
   T?.eq ( WG.types.isa.optional_map            ( undefined  ) ), true
-  T?.eq ( WG.types.isa.optional_iterable       ( null       ) ), true
-  T?.eq ( WG.types.isa.optional_iterable       ( undefined  ) ), true
-  T?.eq ( WG.types.isa.optional_container      ( null       ) ), true
-  T?.eq ( WG.types.isa.optional_container      ( undefined  ) ), true
   T?.eq ( WG.types.isa.optional_numeric        ( null       ) ), true
   T?.eq ( WG.types.isa.optional_numeric        ( undefined  ) ), true
   T?.eq ( WG.types.isa.optional_float          ( null       ) ), true
@@ -200,6 +192,39 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   return null
 
   # T?.eq ( WG.types.isa.optional_jsidentifier          ( 'xxx' ) ), true
+
+#-----------------------------------------------------------------------------------------------------------
+@types_maps_and_sets = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  T?.eq ( WG.types.isa.set new Set()       ), true
+  T?.eq ( WG.types.isa.set new Map()       ), false
+  T?.eq ( WG.types.isa.map new Set()       ), false
+  T?.eq ( WG.types.isa.map new Map()       ), true
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@types_iterables_and_containers = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  # T?.eq ( WG.types.isa.iterable       undefined ), false
+  # T?.eq ( WG.types.isa.container      undefined ), false
+  # T?.eq ( WG.types.isa.iterable       ( '' ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( [] ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( {} ) ), false
+  # T?.eq ( WG.types.isa.container      ( [] ) ), true
+  # T?.eq ( WG.types.isa.container      ( '' ) ), false
+  # T?.eq ( WG.types.isa.container      ( {} ) ), false
+  # T?.eq ( WG.types.isa.container      ( new Set() ) ), true
+  # T?.eq ( WG.types.isa.container      ( new Map() ) ), true
+  # T?.eq ( WG.types.isa.optional_iterable       ( null       ) ), true
+  # T?.eq ( WG.types.isa.optional_iterable       ( undefined  ) ), true
+  # T?.eq ( WG.types.isa.optional_container      ( null       ) ), true
+  # T?.eq ( WG.types.isa.optional_container      ( undefined  ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( null ) ), false
+  # T?.eq ( WG.types.isa.iterable       ( 'abc' ) ), true
+  #.........................................................................................................
+  done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @[ "_forbidden to overwrite declarations" ] = ( T, done ) ->
@@ -2773,20 +2798,6 @@ demo_size_of = ->
   T?.eq ( types.isa.knowntype 'foobar'  ), false
   types.declare.foobar 'optional.positive0.integer'
   T?.eq ( types.isa.knowntype 'foobar'  ), true
-  #.........................................................................................................
-  done?()
-
-#-----------------------------------------------------------------------------------------------------------
-@___x__maps_and_sets = ( T, done ) ->
-  # T?.halt_on_error()
-  { Intertype     } = require '../../../apps/intertype'
-  types             = new Intertype()
-  T?.eq ( types.isa.knowntype 'map'     ), true
-  T?.eq ( types.isa.knowntype 'set'     ), true
-  T?.eq ( types.isa.set new Set()       ), true
-  T?.eq ( types.isa.set new Map()       ), false
-  T?.eq ( types.isa.map new Set()       ), false
-  T?.eq ( types.isa.map new Map()       ), true
   #.........................................................................................................
   done?()
 
