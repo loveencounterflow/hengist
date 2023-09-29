@@ -35,7 +35,7 @@
     IVK = require('../../../apps/intervoke');
     Isa = (function() {
       //===========================================================================================================
-      class Isa extends IVK.Word_prompter {};
+      class Isa extends IVK.Intervoke {};
 
       //---------------------------------------------------------------------------------------------------------
       Isa.declare = {
@@ -336,10 +336,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.ivk_phrase_parser_basics = function(T, done) {
-    var Phrase_parser, expand, lf, pick_1st, pp, sp;
-    ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
+    var Phrase_parser, expand, lf, pick_1st, pp, sample_vocabulary, sp;
+    ({Phrase_parser, sample_vocabulary} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
     pp = new Phrase_parser();
+    pp.set_vocabulary(sample_vocabulary);
     sp = function(sentence) {
       return sentence.split('_');
     };
@@ -534,10 +535,11 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.ivk_phrase_parser_element_types = function(T, done) {
-    var Phrase_parser, expand, lf, pick_1st, pp, sp;
-    ({Phrase_parser} = require('../../../apps/intervoke/lib/phrase-parser'));
+    var Phrase_parser, expand, lf, pick_1st, pp, sample_vocabulary, sp;
+    ({Phrase_parser, sample_vocabulary} = require('../../../apps/intervoke/lib/phrase-parser'));
     //.........................................................................................................
     pp = new Phrase_parser();
+    pp.set_vocabulary(sample_vocabulary);
     sp = function(sentence) {
       return sentence.split('_');
     };
@@ -618,41 +620,41 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.ivk_word_prompter = function(T, done) {
-    var My_proto_word_prompter, My_word_prompter, Word_prompter, e, prompter;
-    ({Word_prompter} = require('../../../apps/intervoke'));
-    My_proto_word_prompter = (function() {
+  this.ivk_intervoke = function(T, done) {
+    var Intervoke, My_intervoke, My_proto_intervoke, e, prompter;
+    ({Intervoke} = require('../../../apps/intervoke'));
+    My_proto_intervoke = (function() {
       //.........................................................................................................
-      class My_proto_word_prompter extends Word_prompter {};
+      class My_proto_intervoke extends Intervoke {};
 
-      My_proto_word_prompter.declare = {
+      My_proto_intervoke.declare = {
         baz: function(...P) {
-          return help('^My_word_prompter.declare.bar', P);
+          return help('^My_intervoke.declare.bar', P);
         }
       };
 
-      return My_proto_word_prompter;
+      return My_proto_intervoke;
 
     }).call(this);
-    My_word_prompter = (function() {
+    My_intervoke = (function() {
       //.........................................................................................................
-      class My_word_prompter extends My_proto_word_prompter {};
+      class My_intervoke extends My_proto_intervoke {};
 
-      My_word_prompter.declare = {
+      My_intervoke.declare = {
         bar: function(...P) {
-          return help('^My_word_prompter.declare.bar', P);
+          return help('^My_intervoke.declare.bar', P);
         }
       };
 
-      return My_word_prompter;
+      return My_intervoke;
 
     }).call(this);
     //.........................................................................................................
-    prompter = new My_word_prompter();
-    debug('^ivk_word_prompter@1^', prompter);
-    // debug '^ivk_word_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
-    debug('^ivk_word_prompter@3^', prompter.__declare('foo', function(...P) {
-      return urge('^ivk_word_prompter@4^', P);
+    prompter = new My_intervoke();
+    debug('^ivk_intervoke@1^', prompter);
+    // debug '^ivk_intervoke@2^', [ prompter.__walk_prototype_chain()..., ]
+    debug('^ivk_intervoke@3^', prompter.__declare('foo', function(...P) {
+      return urge('^ivk_intervoke@4^', P);
     }));
     try {
       prompter.__declare('baz', (function() {}));
@@ -660,12 +662,12 @@
       e = error1;
       warn(GUY.trm.reverse(e.message));
     }
-    // debug '^ivk_word_prompter@5^', prompter.baz
-    // debug '^ivk_word_prompter@6^', prompter.bar
-    // debug '^ivk_word_prompter@7^', prompter.foo
-    debug('^ivk_word_prompter@8^', prompter.baz(101, 102));
-    debug('^ivk_word_prompter@9^', prompter.bar(3, 4, 5));
-    debug('^ivk_word_prompter@10^', prompter.foo(1, 2, 3));
+    // debug '^ivk_intervoke@5^', prompter.baz
+    // debug '^ivk_intervoke@6^', prompter.bar
+    // debug '^ivk_intervoke@7^', prompter.foo
+    debug('^ivk_intervoke@8^', prompter.baz(101, 102));
+    debug('^ivk_intervoke@9^', prompter.bar(3, 4, 5));
+    debug('^ivk_intervoke@10^', prompter.foo(1, 2, 3));
     try {
       prompter.no_such_method();
     } catch (error1) {
@@ -676,48 +678,62 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.ivk_phrase_prompter = function(T, done) {
-    var My_phrase_prompter, My_proto_phrase_prompter, Phrase_prompter, e, prompter;
-    ({Phrase_prompter} = require('../../../apps/intervoke'));
-    My_proto_phrase_prompter = (function() {
+  this.ivk_intervoke_phraser = function(T, done) {
+    var Intervoke_phraser, My_intervoke_phraser, My_proto_intervoke_phraser, e, prompter;
+    ({Intervoke_phraser} = require('../../../apps/intervoke'));
+    My_proto_intervoke_phraser = (function() {
       //.........................................................................................................
-      class My_proto_phrase_prompter extends Phrase_prompter {};
+      class My_proto_intervoke_phraser extends Intervoke_phraser {};
 
-      My_proto_phrase_prompter.declare = {
+      My_proto_intervoke_phraser.declare = {
         baz: function(...P) {
-          return help('^My_phrase_prompter.declare.bar', P);
+          return help('^My_intervoke_phraser.declare.bar', P);
         }
       };
 
-      return My_proto_phrase_prompter;
+      return My_proto_intervoke_phraser;
 
     }).call(this);
-    My_phrase_prompter = (function() {
+    My_intervoke_phraser = (function() {
       //.........................................................................................................
-      class My_phrase_prompter extends My_proto_phrase_prompter {};
+      class My_intervoke_phraser extends My_proto_intervoke_phraser {};
 
-      My_phrase_prompter.declare = {
+      My_intervoke_phraser.declare = {
         bar: function(...P) {
-          return help('^My_phrase_prompter.declare.bar', P);
+          return help('^My_intervoke_phraser.declare.bar', P);
         }
       };
 
-      return My_phrase_prompter;
+      return My_intervoke_phraser;
 
     }).call(this);
     //.........................................................................................................
-    prompter = new My_phrase_prompter();
-    debug('^ivk_phrase_prompter@1^', prompter);
-    // debug '^ivk_phrase_prompter@2^', [ prompter.__walk_prototype_chain()..., ]
-    debug('^ivk_phrase_prompter@3^', prompter.__declare('foo', function(...P) {
-      return urge('^ivk_phrase_prompter@4^', P);
+    prompter = new My_intervoke_phraser();
+    debug('^ivk_intervoke_phraser@1^', prompter);
+    // debug '^ivk_intervoke_phraser@2^', [ prompter.__walk_prototype_chain()..., ]
+    debug('^ivk_intervoke_phraser@3^', prompter.__declare('foo', function(...P) {
+      return urge('^ivk_intervoke_phraser@4^', P);
     }));
-    // debug '^ivk_phrase_prompter@5^', prompter.baz
-    // debug '^ivk_phrase_prompter@6^', prompter.bar
-    // debug '^ivk_phrase_prompter@7^', prompter.foo
-    debug('^ivk_phrase_prompter@8^', prompter.baz(101, 102));
-    debug('^ivk_phrase_prompter@9^', prompter.bar(3, 4, 5));
-    debug('^ivk_phrase_prompter@10^', prompter.foo(1, 2, 3));
+    // debug '^ivk_intervoke_phraser@5^', prompter.baz
+    // debug '^ivk_intervoke_phraser@6^', prompter.bar
+    // debug '^ivk_intervoke_phraser@7^', prompter.foo
+    debug('^ivk_intervoke_phraser@8^', prompter.baz(101, 102));
+    debug('^ivk_intervoke_phraser@9^', prompter.bar(3, 4, 5));
+    debug('^ivk_intervoke_phraser@10^', prompter.foo(1, 2, 3));
+    try {
+      // debug '^ivk_intervoke_phraser@10^', prompter.integer
+      // debug '^ivk_intervoke_phraser@10^', prompter.integer_or_text 3
+      prompter.integer;
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
+    try {
+      prompter.integer_or_text(3);
+    } catch (error1) {
+      e = error1;
+      warn(GUY.trm.reverse(e.message));
+    }
     try {
       prompter.no_such_method();
     } catch (error1) {
@@ -732,13 +748,13 @@
     (() => {
       // @ivk_isa()
       // test @ivk_declarations_are_inherited
-      // test @
-      this.ivk_word_prompter();
-      return this.ivk_phrase_prompter();
+      return test(this);
     })();
   }
 
-  // test @ivk_phrase_parser_basics
+  // @ivk_intervoke()
+// @ivk_intervoke_phraser()
+// test @ivk_phrase_parser_basics
 // test @ivk_phrase_parser_element_types
 // test @ivk_methods_are_properly_named
 // test @ivk_isa
