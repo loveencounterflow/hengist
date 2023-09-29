@@ -33,17 +33,45 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.list                           []            ), true
   T?.eq ( WG.types.isa.object                         {}            ), true
   T?.eq ( WG.types.isa.object                         []            ), false
-  # T?.eq ( WG.types.isa.optional', 'null',             null          ), true
-  # T?.eq ( WG.types.isa.optional', 'null',             undefined     ), true
-  # T?.eq ( WG.types.isa.optional', 'empty', 'array',   []            ), true
-  # T?.eq ( WG.types.isa.optional', 'empty', 'array',   null          ), true
-  # T?.eq ( WG.types.isa.optional', 'empty', 'array',   42            ), false
-  # T?.eq ( WG.types.isa.optional', 'empty', 'array',   [ 42, ]       ), false
   #.........................................................................................................
-  # T?.throws /'optional' cannot be a hedge in declarations/, => types.declare 'optional', 'integer', isa: ->
-  # for type, declaration of types._types
-  #   debug '^34234^', type, declaration
-  # H.tabulate 'types._types', ( -> yield type for _, type of types._types )()
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@types_isa_2 = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  T?.eq ( WG.types.isa.null           undefined ), false
+  T?.eq ( WG.types.isa.undefined      undefined ), true
+  T?.eq ( WG.types.isa.anything       undefined ), true
+  T?.eq ( WG.types.isa.something      undefined ), false
+  T?.eq ( WG.types.isa.nothing        undefined ), true
+  T?.eq ( WG.types.isa.text           undefined ), false
+  T?.eq ( WG.types.isa.codepoint      undefined ), false
+  T?.eq ( WG.types.isa.codepointid    undefined ), false
+  T?.eq ( WG.types.isa.regex          undefined ), false
+  T?.eq ( WG.types.isa.buffer         undefined ), false
+  T?.eq ( WG.types.isa.jsidentifier   undefined ), false
+  T?.eq ( WG.types.isa.list           undefined ), false
+  T?.eq ( WG.types.isa.set            undefined ), false
+  T?.eq ( WG.types.isa.map            undefined ), false
+  T?.eq ( WG.types.isa.iterable       undefined ), false
+  T?.eq ( WG.types.isa.container      undefined ), false
+  T?.eq ( WG.types.isa.numeric        undefined ), false
+  T?.eq ( WG.types.isa.float          undefined ), false
+  T?.eq ( WG.types.isa.bigint         undefined ), false
+  T?.eq ( WG.types.isa.integer        undefined ), false
+  T?.eq ( WG.types.isa.cardinal       undefined ), false
+  T?.eq ( WG.types.isa.zero           undefined ), false
+  T?.eq ( WG.types.isa.nan            undefined ), false
+  T?.eq ( WG.types.isa.even           undefined ), false
+  T?.eq ( WG.types.isa.odd            undefined ), false
+  T?.eq ( WG.types.isa.boolean        undefined ), false
+  T?.eq ( WG.types.isa.object         undefined ), false
+  T?.eq ( WG.types.isa.function       undefined ), false
+  T?.eq ( WG.types.isa.asyncfunction  undefined ), false
+  T?.eq ( WG.types.isa.symbol         undefined ), false
+  T?.eq ( WG.types.isa.class          undefined ), false
   #.........................................................................................................
   done?()
   return null
