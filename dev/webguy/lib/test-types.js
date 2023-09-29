@@ -45,6 +45,110 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.types_isa_2 = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.isa.null(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.undefined(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.anything(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.something(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.nothing(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.text(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepoint(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.regex(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.buffer(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.jsidentifier(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.list(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.set(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.map(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.iterable(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.container(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.numeric(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.float(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.bigint(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.integer(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.cardinal(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.zero(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.nan(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.even(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.odd(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.boolean(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.object(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.function(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.asyncfunction(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.symbol(void 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class(void 0), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this["_forbidden to overwrite declarations"] = function(T, done) {
     var WG;
     WG = require('../../../apps/webguy');
