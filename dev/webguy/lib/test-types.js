@@ -92,12 +92,6 @@
       T.eq(WG.types.isa.map(void 0), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.iterable(void 0), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.container(void 0), false);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.numeric(void 0), false);
     }
     if (T != null) {
@@ -231,15 +225,6 @@
     if (T != null) {
       T.eq(WG.types.isa.map(new Map()), true);
     }
-    if (T != null) {
-      T.eq(WG.types.isa.iterable(''), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.iterable([]), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.iterable({}), false);
-    }
     if (typeof done === "function") {
       done();
     }
@@ -334,18 +319,6 @@
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_map(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_iterable(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_iterable(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_container(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_container(void 0), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_numeric(null), true);
@@ -444,6 +417,32 @@
   };
 
   // T?.eq ( WG.types.isa.optional_jsidentifier          ( 'xxx' ) ), true
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_maps_and_sets = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    if (T != null) {
+      T.eq(WG.types.isa.set(new Set()), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.set(new Map()), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.map(new Set()), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.map(new Map()), true);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_iterables_and_containers = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this["_forbidden to overwrite declarations"] = function(T, done) {
@@ -5676,33 +5675,6 @@
     types.declare.foobar('optional.positive0.integer');
     if (T != null) {
       T.eq(types.isa.knowntype('foobar'), true);
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.___x__maps_and_sets = function(T, done) {
-    var Intertype;
-    // T?.halt_on_error()
-    ({Intertype} = require('../../../apps/intertype'));
-    types = new Intertype();
-    if (T != null) {
-      T.eq(types.isa.knowntype('map'), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.knowntype('set'), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.set(new Set()), true);
-    }
-    if (T != null) {
-      T.eq(types.isa.set(new Map()), false);
-    }
-    if (T != null) {
-      T.eq(types.isa.map(new Set()), false);
-    }
-    if (T != null) {
-      T.eq(types.isa.map(new Map()), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
