@@ -149,6 +149,303 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.types_isa_2 = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.isa.null(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.undefined(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.anything(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.something(1), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.nothing(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.text(''), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.text('eiuowe'), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepoint('x'), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepoint('\u{20000}'), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepoint(0x20000), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(0x1ffff), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(0x20000), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(67), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(-67), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(67.89), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.regex(/123/y), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.regex('/123/y'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.buffer('987'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.buffer(Buffer.from('987')), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.jsidentifier(''), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.jsidentifier('null'), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.list('123'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.list(['123']), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.set('123'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.set(new Set('123')), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.map(new Map()), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.iterable(''), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.iterable([]), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.iterable({}), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_isa_3 = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.isa.optional_null(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_null(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_undefined(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_undefined(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_anything(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_anything(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_something(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_something(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_nothing(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_nothing(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_text(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_text(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_codepoint(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_codepoint(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_codepointid(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_codepointid(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_regex(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_regex(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_buffer(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_buffer(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_jsidentifier(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_jsidentifier(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_list(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_list(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_set(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_set(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_map(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_map(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_iterable(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_iterable(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_container(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_container(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_numeric(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_numeric(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_float(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_float(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_bigint(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_bigint(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_integer(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_integer(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_nan(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_nan(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_object(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_object(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_function(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_function(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_asyncfunction(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_asyncfunction(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_symbol(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_symbol(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_class(null), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_class(void 0), true);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  // T?.eq ( WG.types.isa.optional_jsidentifier          ( 'xxx' ) ), true
+
+  //-----------------------------------------------------------------------------------------------------------
   this["_forbidden to overwrite declarations"] = function(T, done) {
     var WG;
     WG = require('../../../apps/webguy');
