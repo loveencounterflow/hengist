@@ -734,9 +734,8 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_get_miller_device_name = function(T, done) {
-    var WG;
+    var C, WG;
     WG = require('../../../apps/webguy');
-    debug('^3435^', WG.types.types);
     //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.types.get_miller_device_name(void 0), 'Undefined');
@@ -750,18 +749,107 @@
     if (T != null) {
       T.eq(WG.types.types.get_miller_device_name(0/0), 'Number');
     }
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name(Promise), 'Function');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name((C = class C {})), 'Function');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_get_carter_device_name = function(T, done) {
+    var C, WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(void 0), 'other');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(null), 'other');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(4), 'other');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(0/0), 'other');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(Promise), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name(Buffer), 'fn'); // surprise!
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name((C = class C {})), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name((C = class C extends Object {})), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name((function() {})), 'fn');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name((function() {}), '[object Function]'), 'fn');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_carter_device_name((function() {}), 'Function'), 'fn');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_get_type_signature = function(T, done) {
+    var C, WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(void 0), 'undefined/Undefined/0/other/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(null), 'object/Null/0/other/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(4), 'number/Number/Number/other/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(0/0), 'number/Number/Number/other/N');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(Promise), 'function/Function/Function/class/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature(Buffer), 'function/Function/Function/fn/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature((C = class C {})), 'function/Function/Function/class/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature((C = class C extends Object {})), 'function/Function/Function/class/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature((function() {})), 'function/Function/Function/fn/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature((function() {}), '[object Function]'), 'function/Function/Function/fn/0');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_type_signature((function() {}), 'Function'), 'function/Function/Function/fn/0');
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //###########################################################################################################
   if (require.main === module) {
-    await (() => {
-      // await test @
-      return test(this.types_get_miller_device_name);
+    await (async() => {
+      return (await test(this));
     })();
   }
 
-  // test @types_isa_6
+  // test @types_get_miller_device_name
+// test @types_get_carter_device_name
+// test @types_isa_6
 
 }).call(this);
 
