@@ -380,6 +380,39 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@types_type_of = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  help '^types_type_of@1  ', ( WG.types.types.type_of undefined                     ), 'undefined'
+  help '^types_type_of@2  ', ( WG.types.types.type_of null                          ), 'null'
+  help '^types_type_of@3  ', ( WG.types.types.type_of 4                             ), 'float'
+  help '^types_type_of@4  ', ( WG.types.types.type_of 4.5                           ), 'float'
+  help '^types_type_of@5  ', ( WG.types.types.type_of NaN                           ), 'nan'
+  help '^types_type_of@6  ', ( WG.types.types.type_of Promise                       ), 'class'
+  help '^types_type_of@7  ', ( WG.types.types.type_of Buffer                        ), 'buffer'
+  help '^types_type_of@8  ', ( WG.types.types.type_of ( class C )                   ), 'class'
+  help '^types_type_of@9  ', ( WG.types.types.type_of ( class C extends Object )    ), 'class'
+  help '^types_type_of@10 ', ( WG.types.types.type_of ( -> )                        ), 'function'
+  help '^types_type_of@10 ', ( WG.types.types.type_of new ArrayBuffer()             ), 'ArrayBuffer'
+  #.........................................................................................................
+  T?.eq ( WG.types.types.type_of undefined                      ), 'undefined'
+  T?.eq ( WG.types.types.type_of null                           ), 'null'
+  T?.eq ( WG.types.types.type_of 4                              ), 'float'
+  T?.eq ( WG.types.types.type_of 4.5                            ), 'float'
+  T?.eq ( WG.types.types.type_of Infinity                       ), 'infinity'
+  T?.eq ( WG.types.types.type_of NaN                            ), 'nan'
+  T?.eq ( WG.types.types.type_of Promise                        ), 'class'
+  T?.eq ( WG.types.types.type_of Buffer                         ), 'function'
+  T?.eq ( WG.types.types.type_of Buffer.from 'x'                ), 'buffer'
+  T?.eq ( WG.types.types.type_of ( class C )                    ), 'class'
+  T?.eq ( WG.types.types.type_of ( class C extends Object )     ), 'class'
+  T?.eq ( WG.types.types.type_of ( -> )                         ), 'function'
+  T?.eq ( WG.types.types.type_of new ArrayBuffer()              ), 'arraybuffer'
+  #.........................................................................................................
+  done?()
+
+
 
 
 ############################################################################################################
