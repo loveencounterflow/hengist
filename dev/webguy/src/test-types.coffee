@@ -334,27 +334,49 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 @types_get_miller_device_name = ( T, done ) ->
   WG              = require '../../../apps/webguy'
-  debug '^3435^', WG.types.types
   #.........................................................................................................
-  T?.eq ( WG.types.types.get_miller_device_name undefined ), 'Undefined'
-  T?.eq ( WG.types.types.get_miller_device_name null ), 'Null'
-  T?.eq ( WG.types.types.get_miller_device_name 4 ), 'Number'
-  T?.eq ( WG.types.types.get_miller_device_name NaN ), 'Number'
-  # T?.eq ( WG.types.isa.container      undefined ), false
-  # T?.eq ( WG.types.isa.iterable       ( '' ) ), true
-  # T?.eq ( WG.types.isa.iterable       ( [] ) ), true
-  # T?.eq ( WG.types.isa.iterable       ( {} ) ), false
-  # T?.eq ( WG.types.isa.container      ( [] ) ), true
-  # T?.eq ( WG.types.isa.container      ( '' ) ), false
-  # T?.eq ( WG.types.isa.container      ( {} ) ), false
-  # T?.eq ( WG.types.isa.container      ( new Set() ) ), true
-  # T?.eq ( WG.types.isa.container      ( new Map() ) ), true
-  # T?.eq ( WG.types.isa.optional_iterable       ( null       ) ), true
-  # T?.eq ( WG.types.isa.optional_iterable       ( undefined  ) ), true
-  # T?.eq ( WG.types.isa.optional_container      ( null       ) ), true
-  # T?.eq ( WG.types.isa.optional_container      ( undefined  ) ), true
-  # T?.eq ( WG.types.isa.iterable       ( null ) ), false
-  # T?.eq ( WG.types.isa.iterable       ( 'abc' ) ), true
+  T?.eq ( WG.types.types.get_miller_device_name undefined                     ), 'Undefined'
+  T?.eq ( WG.types.types.get_miller_device_name null                          ), 'Null'
+  T?.eq ( WG.types.types.get_miller_device_name 4                             ), 'Number'
+  T?.eq ( WG.types.types.get_miller_device_name NaN                           ), 'Number'
+  T?.eq ( WG.types.types.get_miller_device_name Promise                       ), 'Function'
+  T?.eq ( WG.types.types.get_miller_device_name ( class C )                   ), 'Function'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@types_get_carter_device_name = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  T?.eq ( WG.types.types.get_carter_device_name undefined                     ), 'other'
+  T?.eq ( WG.types.types.get_carter_device_name null                          ), 'other'
+  T?.eq ( WG.types.types.get_carter_device_name 4                             ), 'other'
+  T?.eq ( WG.types.types.get_carter_device_name NaN                           ), 'other'
+  T?.eq ( WG.types.types.get_carter_device_name Promise                       ), 'class'
+  T?.eq ( WG.types.types.get_carter_device_name Buffer                        ), 'fn' # surprise!
+  T?.eq ( WG.types.types.get_carter_device_name ( class C )                   ), 'class'
+  T?.eq ( WG.types.types.get_carter_device_name ( class C extends Object )    ), 'class'
+  T?.eq ( WG.types.types.get_carter_device_name ( -> )                        ), 'fn'
+  T?.eq ( WG.types.types.get_carter_device_name ( -> ), '[object Function]'   ), 'fn'
+  T?.eq ( WG.types.types.get_carter_device_name ( -> ), 'Function'            ), 'fn'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@types_get_type_signature = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  T?.eq ( WG.types.types.get_type_signature undefined                     ), 'undefined/Undefined/0/other/0'
+  T?.eq ( WG.types.types.get_type_signature null                          ), 'object/Null/0/other/0'
+  T?.eq ( WG.types.types.get_type_signature 4                             ), 'number/Number/Number/other/0'
+  T?.eq ( WG.types.types.get_type_signature NaN                           ), 'number/Number/Number/other/N'
+  T?.eq ( WG.types.types.get_type_signature Promise                       ), 'function/Function/Function/class/0'
+  T?.eq ( WG.types.types.get_type_signature Buffer                        ), 'function/Function/Function/fn/0'
+  T?.eq ( WG.types.types.get_type_signature ( class C )                   ), 'function/Function/Function/class/0'
+  T?.eq ( WG.types.types.get_type_signature ( class C extends Object )    ), 'function/Function/Function/class/0'
+  T?.eq ( WG.types.types.get_type_signature ( -> )                        ), 'function/Function/Function/fn/0'
+  T?.eq ( WG.types.types.get_type_signature ( -> ), '[object Function]'   ), 'function/Function/Function/fn/0'
+  T?.eq ( WG.types.types.get_type_signature ( -> ), 'Function'            ), 'function/Function/Function/fn/0'
   #.........................................................................................................
   done?()
 
@@ -362,8 +384,9 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 ############################################################################################################
 if require.main is module then await do =>
-  # await test @
-  test @types_get_miller_device_name
+  await test @
+  # test @types_get_miller_device_name
+  # test @types_get_carter_device_name
   # test @types_isa_6
 
 
