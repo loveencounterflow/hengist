@@ -1,4 +1,4 @@
-(function() {
+(async function() {
   'use strict';
   var GUY, alert, debug, echo, help, info, inspect, isa, jr, log, plain, praise, rpr, test, types, urge, warn, whisper;
 
@@ -144,7 +144,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_isa_3 = function(T, done) {
-    var WG;
+    var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
@@ -175,55 +175,72 @@
       T.eq(WG.types.isa.codepoint('\u{20000}'), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.codepoint(0x20000), false);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.codepointid(0x1ffff), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.codepointid(0x20000), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.codepointid(67), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.codepointid(-67), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.codepointid(67.89), false);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.regex(/123/y), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.regex('/123/y'), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.buffer('987'), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.buffer(Buffer.from('987')), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.jsidentifier(''), false);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.jsidentifier('null'), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.list('123'), false);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.list(['123']), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.set('123'), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.set(new Set('123')), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.map(new Map()), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.numeric(4), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.numeric(4n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.float(4), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.float(4.5), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.bigint(5n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.bigint(BigInt('123')), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.integer(123456789), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.cardinal(123456789), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.zero(0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.zero(0n), true);
+    }
+    // T?.eq ( WG.types.isa.nan            ( null                ) ), true
+    // T?.eq ( WG.types.isa.even           ( null                ) ), true
+    // T?.eq ( WG.types.isa.odd            ( null                ) ), true
+    // T?.eq ( WG.types.isa.boolean        ( null                ) ), true
+    // T?.eq ( WG.types.isa.object         ( null                ) ), true
+    // T?.eq ( WG.types.isa.function       ( null                ) ), true
+    // T?.eq ( WG.types.isa.asyncfunction  ( null                ) ), true
+    // T?.eq ( WG.types.isa.symbol         ( null                ) ), true
+    if (T != null) {
+      T.eq(WG.types.isa.class(Promise), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class((C = class C {})), true);
     }
     if (typeof done === "function") {
       done();
@@ -233,7 +250,57 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_isa_4 = function(T, done) {
-    var WG;
+    var C, WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.isa.codepoint(0x20000), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(0x20000), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(-67), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.codepointid(67.89), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.regex('/123/y'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.buffer('987'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.jsidentifier(''), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.list('123'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.set('123'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class(Buffer), false); // surprise!
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class(null), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class(new Promise(function(a, b) {})), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.class(new (C = class C {})()), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_isa_5 = function(T, done) {
+    var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
@@ -483,11 +550,37 @@
       T.eq(WG.types.isa.optional_cardinal(void 0), true);
     }
     if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(1), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(-1), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_cardinal(1n), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
       T.eq(WG.types.isa.optional_zero(null), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_zero(void 0), true);
     }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(-0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(0n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_zero(4), false);
+    }
+    //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.isa.optional_nan(null), true);
     }
@@ -495,11 +588,34 @@
       T.eq(WG.types.isa.optional_nan(void 0), true);
     }
     if (T != null) {
+      T.eq(WG.types.isa.optional_nan(0/0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_nan(0 / 0), true);
+    }
+    //.........................................................................................................
+    if (T != null) {
       T.eq(WG.types.isa.optional_even(null), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_even(void 0), true);
     }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(4), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(4n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(4.5), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(5), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_even(5n), false);
+    }
+    //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.isa.optional_odd(null), true);
     }
@@ -507,17 +623,53 @@
       T.eq(WG.types.isa.optional_odd(void 0), true);
     }
     if (T != null) {
+      T.eq(WG.types.isa.optional_odd(5), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(5n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(5.5), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(4), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_odd(4n), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
       T.eq(WG.types.isa.optional_boolean(null), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_boolean(void 0), true);
     }
     if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(false), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(1), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_boolean(0), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
       T.eq(WG.types.isa.optional_object(null), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_object(void 0), true);
     }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_object({}), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_object([]), false);
+    }
+    //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.isa.optional_function(null), true);
     }
@@ -541,6 +693,12 @@
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_class(void 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_class(Promise), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.optional_class((C = class C {})), true);
     }
     if (typeof done === "function") {
       done();
@@ -576,12 +734,12 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    (() => {
-      return test(this);
+    await (async() => {
+      return (await test(this));
     })();
   }
 
-  // test @types_isa_4
+  // test @types_isa_6
 
 }).call(this);
 
