@@ -840,6 +840,65 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_type_of = function(T, done) {
+    var C, WG;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    help('^types_type_of@1  ', WG.types.types.type_of(void 0), 'undefined');
+    help('^types_type_of@2  ', WG.types.types.type_of(null), 'null');
+    help('^types_type_of@3  ', WG.types.types.type_of(4), 'float');
+    help('^types_type_of@4  ', WG.types.types.type_of(4.5), 'float');
+    help('^types_type_of@5  ', WG.types.types.type_of(0/0), 'nan');
+    help('^types_type_of@6  ', WG.types.types.type_of(Promise), 'class');
+    help('^types_type_of@7  ', WG.types.types.type_of(Buffer), 'buffer');
+    help('^types_type_of@8  ', WG.types.types.type_of((C = class C {})), 'class');
+    help('^types_type_of@9  ', WG.types.types.type_of((C = class C extends Object {})), 'class');
+    help('^types_type_of@10 ', WG.types.types.type_of((function() {})), 'function');
+    help('^types_type_of@10 ', WG.types.types.type_of(new ArrayBuffer()), 'ArrayBuffer');
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.types.type_of(void 0), 'undefined');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(null), 'null');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(4), 'float');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(4.5), 'float');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(2e308), 'infinity');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(0/0), 'nan');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(Promise), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(Buffer), 'function');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(Buffer.from('x')), 'buffer');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of((C = class C {})), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of((C = class C extends Object {})), 'class');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of((function() {})), 'function');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.type_of(new ArrayBuffer()), 'arraybuffer');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (async() => {
