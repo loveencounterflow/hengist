@@ -732,10 +732,32 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_get_miller_device_name = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    debug('^3435^', WG.types.types);
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name(void 0), 'Undefined');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name(null), 'Null');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name(4), 'Number');
+    }
+    if (T != null) {
+      T.eq(WG.types.types.get_miller_device_name(0/0), 'Number');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    await (async() => {
-      return (await test(this));
+    await (() => {
+      // await test @
+      return test(this.types_get_miller_device_name);
     })();
   }
 
