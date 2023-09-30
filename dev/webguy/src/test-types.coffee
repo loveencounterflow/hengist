@@ -331,11 +331,39 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@types_get_miller_device_name = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  debug '^3435^', WG.types.types
+  #.........................................................................................................
+  T?.eq ( WG.types.types.get_miller_device_name undefined ), 'Undefined'
+  T?.eq ( WG.types.types.get_miller_device_name null ), 'Null'
+  T?.eq ( WG.types.types.get_miller_device_name 4 ), 'Number'
+  T?.eq ( WG.types.types.get_miller_device_name NaN ), 'Number'
+  # T?.eq ( WG.types.isa.container      undefined ), false
+  # T?.eq ( WG.types.isa.iterable       ( '' ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( [] ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( {} ) ), false
+  # T?.eq ( WG.types.isa.container      ( [] ) ), true
+  # T?.eq ( WG.types.isa.container      ( '' ) ), false
+  # T?.eq ( WG.types.isa.container      ( {} ) ), false
+  # T?.eq ( WG.types.isa.container      ( new Set() ) ), true
+  # T?.eq ( WG.types.isa.container      ( new Map() ) ), true
+  # T?.eq ( WG.types.isa.optional_iterable       ( null       ) ), true
+  # T?.eq ( WG.types.isa.optional_iterable       ( undefined  ) ), true
+  # T?.eq ( WG.types.isa.optional_container      ( null       ) ), true
+  # T?.eq ( WG.types.isa.optional_container      ( undefined  ) ), true
+  # T?.eq ( WG.types.isa.iterable       ( null ) ), false
+  # T?.eq ( WG.types.isa.iterable       ( 'abc' ) ), true
+  #.........................................................................................................
+  done?()
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
+  # await test @
+  test @types_get_miller_device_name
   # test @types_isa_6
 
 
