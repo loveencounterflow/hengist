@@ -182,18 +182,45 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   #.........................................................................................................
   T?.eq ( WG.types.isa.optional_list           ( null       ) ), true
   T?.eq ( WG.types.isa.optional_list           ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_list           ( []         ) ), true
+  T?.eq ( WG.types.isa.optional_list           ( 4          ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_set            ( null       ) ), true
   T?.eq ( WG.types.isa.optional_set            ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_set            ( new Set()  ) ), true
+  T?.eq ( WG.types.isa.optional_set            ( 4          ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_map            ( null       ) ), true
   T?.eq ( WG.types.isa.optional_map            ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_map            ( new Map()  ) ), true
+  T?.eq ( WG.types.isa.optional_map            ( 4          ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_numeric        ( null       ) ), true
   T?.eq ( WG.types.isa.optional_numeric        ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_numeric        ( 4          ) ), true
+  T?.eq ( WG.types.isa.optional_numeric        ( 4n         ) ), true
+  T?.eq ( WG.types.isa.optional_numeric        ( {}         ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_float          ( null       ) ), true
   T?.eq ( WG.types.isa.optional_float          ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_float          ( 4          ) ), true
+  T?.eq ( WG.types.isa.optional_float          ( 4.5        ) ), true
+  T?.eq ( WG.types.isa.optional_float          ( Infinity   ) ), false
+  T?.eq ( WG.types.isa.optional_float          ( 4n         ) ), false
+  T?.eq ( WG.types.isa.optional_float          ( true       ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_bigint         ( null       ) ), true
   T?.eq ( WG.types.isa.optional_bigint         ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_bigint         ( 4n         ) ), true
+  T?.eq ( WG.types.isa.optional_bigint         ( 4          ) ), false
+  T?.eq ( WG.types.isa.optional_bigint         ( Infinity   ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_integer        ( null       ) ), true
   T?.eq ( WG.types.isa.optional_integer        ( undefined  ) ), true
+  T?.eq ( WG.types.isa.optional_integer        ( 4          ) ), true
+  T?.eq ( WG.types.isa.optional_integer        ( 4.5        ) ), false
+  T?.eq ( WG.types.isa.optional_integer        ( 4n         ) ), false
+  #.........................................................................................................
   T?.eq ( WG.types.isa.optional_cardinal       ( null       ) ), true
   T?.eq ( WG.types.isa.optional_cardinal       ( undefined  ) ), true
   T?.eq ( WG.types.isa.optional_zero           ( null       ) ), true
@@ -258,8 +285,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
-  test @types_isa_4
+  test @
+  # test @types_isa_4
 
 
 
