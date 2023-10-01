@@ -254,20 +254,20 @@
     WG = require('../../../apps/webguy');
     types = new WG.types.Types();
     //.........................................................................................................
-    debug('^types_isa_4@1^', types.isa.codepoint(0x20000));
-    debug('^types_isa_4@1^', types.isa.codepointid(0x20000));
-    debug('^types_isa_4@1^', types.isa.codepointid(-67));
-    debug('^types_isa_4@1^', types.isa.codepointid(67.89));
-    debug('^types_isa_4@1^', WG.types.isa.codepointid(67.89));
-    debug('^types_isa_4@1^', WG.types.isa.regex('/123/y'));
-    debug('^types_isa_4@1^', WG.types.isa.buffer('987'));
-    debug('^types_isa_4@1^', WG.types.isa.jsidentifier(''));
-    debug('^types_isa_4@1^', WG.types.isa.list('123'));
-    debug('^types_isa_4@1^', WG.types.isa.set('123'));
-    debug('^types_isa_4@1^', WG.types.isa.class(Buffer));
-    debug('^types_isa_4@1^', WG.types.isa.class(null));
-    debug('^types_isa_4@1^', WG.types.isa.class(new Promise(function(a, b) {})));
-    debug('^types_isa_4@1^', WG.types.isa.class(new (C = class C {})()));
+    // debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
+    // debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
+    // debug '^types_isa_4@1^', ( types.isa.codepointid    ( -67                       ) )
+    // debug '^types_isa_4@1^', ( types.isa.codepointid    ( 67.89                     ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.codepointid    ( 67.89                     ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.regex          ( '/123/y'                  ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.buffer         ( '987'                     ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.jsidentifier   ( ''                        ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.list           ( '123'                     ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.set            ( '123'                     ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.class          ( Buffer                    ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.class          ( null                      ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.class          ( new Promise ( a, b ) ->   ) )
+    // debug '^types_isa_4@1^', ( WG.types.isa.class          ( new ( class C )()         ) )
     //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.isa.codepoint(0x20000), false);
@@ -861,17 +861,17 @@
     var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
-    help('^types_type_of@1  ', WG.types.type_of(void 0), 'undefined');
-    help('^types_type_of@2  ', WG.types.type_of(null), 'null');
-    help('^types_type_of@3  ', WG.types.type_of(4), 'float');
-    help('^types_type_of@4  ', WG.types.type_of(4.5), 'float');
-    help('^types_type_of@5  ', WG.types.type_of(0/0), 'nan');
-    help('^types_type_of@6  ', WG.types.type_of(Promise), 'class');
-    help('^types_type_of@7  ', WG.types.type_of(Buffer), 'buffer');
-    help('^types_type_of@8  ', WG.types.type_of((C = class C {})), 'class');
-    help('^types_type_of@9  ', WG.types.type_of((C = class C extends Object {})), 'class');
-    help('^types_type_of@10 ', WG.types.type_of((function() {})), 'function');
-    help('^types_type_of@10 ', WG.types.type_of(new ArrayBuffer()), 'ArrayBuffer');
+    // help '^types_type_of@1  ', ( WG.types.type_of undefined                     ), 'undefined'
+    // help '^types_type_of@2  ', ( WG.types.type_of null                          ), 'null'
+    // help '^types_type_of@3  ', ( WG.types.type_of 4                             ), 'float'
+    // help '^types_type_of@4  ', ( WG.types.type_of 4.5                           ), 'float'
+    // help '^types_type_of@5  ', ( WG.types.type_of NaN                           ), 'nan'
+    // help '^types_type_of@6  ', ( WG.types.type_of Promise                       ), 'class'
+    // help '^types_type_of@7  ', ( WG.types.type_of Buffer                        ), 'buffer'
+    // help '^types_type_of@8  ', ( WG.types.type_of ( class C )                   ), 'class'
+    // help '^types_type_of@9  ', ( WG.types.type_of ( class C extends Object )    ), 'class'
+    // help '^types_type_of@10 ', ( WG.types.type_of ( -> )                        ), 'function'
+    // help '^types_type_of@10 ', ( WG.types.type_of new ArrayBuffer()             ), 'ArrayBuffer'
     //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.type_of(void 0), 'undefined');
@@ -926,8 +926,8 @@
       }
 
       id(x) {
-        debug('^id@1^', this.constructor.name);
-        debug('^id@2^', this.isa.constructor.name);
+        // debug '^id@1^', @constructor.name
+        // debug '^id@2^', @isa.constructor.name
         return (this.isa.text(x)) && (x.length > 0);
       }
 
@@ -953,8 +953,8 @@
     };
     //.........................................................................................................
     types = new Types();
-    info('^demo@1^', types.constructor.name);
-    info('^demo@2^', types.isa.constructor.name);
+    // info '^demo@1^', types.constructor.name
+    // info '^demo@2^', types.isa.constructor.name
     //.........................................................................................................
     if (T != null) {
       T.eq(proto === Object.getPrototypeOf(types.isa), true);
@@ -983,12 +983,12 @@
   //###########################################################################################################
   if (require.main === module) {
     await (async() => {
-      // await test @
-      return (await test(this.types_isa_2));
+      return (await test(this));
     })();
   }
 
-  // @types_demo_method_object_construction()
+  // await test @types_isa_2
+// @types_demo_method_object_construction()
 // test @types_demo_method_object_construction
 // test @types_get_miller_device_name
 // test @types_get_carter_device_name
