@@ -124,20 +124,20 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   WG              = require '../../../apps/webguy'
   types = new WG.types.Types()
   #.........................................................................................................
-  debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
-  debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
-  debug '^types_isa_4@1^', ( types.isa.codepointid    ( -67                       ) )
-  debug '^types_isa_4@1^', ( types.isa.codepointid    ( 67.89                     ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.codepointid    ( 67.89                     ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.regex          ( '/123/y'                  ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.buffer         ( '987'                     ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.jsidentifier   ( ''                        ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.list           ( '123'                     ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.set            ( '123'                     ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.class          ( Buffer                    ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.class          ( null                      ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.class          ( new Promise ( a, b ) ->   ) )
-  debug '^types_isa_4@1^', ( WG.types.isa.class          ( new ( class C )()         ) )
+  # debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
+  # debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
+  # debug '^types_isa_4@1^', ( types.isa.codepointid    ( -67                       ) )
+  # debug '^types_isa_4@1^', ( types.isa.codepointid    ( 67.89                     ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.codepointid    ( 67.89                     ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.regex          ( '/123/y'                  ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.buffer         ( '987'                     ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.jsidentifier   ( ''                        ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.list           ( '123'                     ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.set            ( '123'                     ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.class          ( Buffer                    ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.class          ( null                      ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.class          ( new Promise ( a, b ) ->   ) )
+  # debug '^types_isa_4@1^', ( WG.types.isa.class          ( new ( class C )()         ) )
   #.........................................................................................................
   T?.eq ( WG.types.isa.codepoint      ( 0x20000                   ) ), false
   T?.eq ( WG.types.isa.codepointid    ( 0x20000                   ) ), false
@@ -400,17 +400,17 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 @types_type_of = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   #.........................................................................................................
-  help '^types_type_of@1  ', ( WG.types.type_of undefined                     ), 'undefined'
-  help '^types_type_of@2  ', ( WG.types.type_of null                          ), 'null'
-  help '^types_type_of@3  ', ( WG.types.type_of 4                             ), 'float'
-  help '^types_type_of@4  ', ( WG.types.type_of 4.5                           ), 'float'
-  help '^types_type_of@5  ', ( WG.types.type_of NaN                           ), 'nan'
-  help '^types_type_of@6  ', ( WG.types.type_of Promise                       ), 'class'
-  help '^types_type_of@7  ', ( WG.types.type_of Buffer                        ), 'buffer'
-  help '^types_type_of@8  ', ( WG.types.type_of ( class C )                   ), 'class'
-  help '^types_type_of@9  ', ( WG.types.type_of ( class C extends Object )    ), 'class'
-  help '^types_type_of@10 ', ( WG.types.type_of ( -> )                        ), 'function'
-  help '^types_type_of@10 ', ( WG.types.type_of new ArrayBuffer()             ), 'ArrayBuffer'
+  # help '^types_type_of@1  ', ( WG.types.type_of undefined                     ), 'undefined'
+  # help '^types_type_of@2  ', ( WG.types.type_of null                          ), 'null'
+  # help '^types_type_of@3  ', ( WG.types.type_of 4                             ), 'float'
+  # help '^types_type_of@4  ', ( WG.types.type_of 4.5                           ), 'float'
+  # help '^types_type_of@5  ', ( WG.types.type_of NaN                           ), 'nan'
+  # help '^types_type_of@6  ', ( WG.types.type_of Promise                       ), 'class'
+  # help '^types_type_of@7  ', ( WG.types.type_of Buffer                        ), 'buffer'
+  # help '^types_type_of@8  ', ( WG.types.type_of ( class C )                   ), 'class'
+  # help '^types_type_of@9  ', ( WG.types.type_of ( class C extends Object )    ), 'class'
+  # help '^types_type_of@10 ', ( WG.types.type_of ( -> )                        ), 'function'
+  # help '^types_type_of@10 ', ( WG.types.type_of new ArrayBuffer()             ), 'ArrayBuffer'
   #.........................................................................................................
   T?.eq ( WG.types.type_of undefined                      ), 'undefined'
   T?.eq ( WG.types.type_of null                           ), 'null'
@@ -435,8 +435,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   class Isa
     text: ( x ) -> ( typeof x ) is 'string'
     id:   ( x ) ->
-      debug '^id@1^', @constructor.name
-      debug '^id@2^', @isa.constructor.name
+      # debug '^id@1^', @constructor.name
+      # debug '^id@2^', @isa.constructor.name
       ( @isa.text x ) and ( x.length > 0 )
   #.........................................................................................................
   proto =
@@ -451,8 +451,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
       return undefined
   #.........................................................................................................
   types = new Types()
-  info '^demo@1^', types.constructor.name
-  info '^demo@2^', types.isa.constructor.name
+  # info '^demo@1^', types.constructor.name
+  # info '^demo@2^', types.isa.constructor.name
   #.........................................................................................................
   T?.eq ( proto is Object.getPrototypeOf types.isa  ), true
   T?.eq ( types.isa.iam                             ), 'proto'
@@ -469,8 +469,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 ############################################################################################################
 if require.main is module then await do =>
-  # await test @
-  await test @types_isa_2
+  await test @
+  # await test @types_isa_2
   # @types_demo_method_object_construction()
   # test @types_demo_method_object_construction
   # test @types_get_miller_device_name
