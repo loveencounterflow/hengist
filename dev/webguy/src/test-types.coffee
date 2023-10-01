@@ -412,12 +412,54 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@types_demo_method_object_construction = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  class Isa
+    text: ( x ) -> ( typeof x ) is 'string'
+    id:   ( x ) -> ( @isa.text x ) and ( x.length > 0 )
+  #.........................................................................................................
+  proto =
+    iam: 'proto'
+  #.........................................................................................................
+  class Types
+    constructor: ->
+      @isa = Object.create proto
+      for type in WG.props.public_keys Isa::
+        help '^Types::constructor@1^', { type, }
+        isa_method    = Isa::[ type ]
+        proto[ type ] = isa_method.bind @
+      return undefined
+  #.........................................................................................................
+  types = new Types()
+  info '^demo@1^', types
+  info '^demo@2^', proto is Object.getPrototypeOf types.isa
+  info '^demo@3^', rpr types.isa.iam
+  info '^demo@4^', types.isa.text '4'
+  info '^demo@5^', types.isa.text 4
+  info '^demo@6^', types.isa.id ''
+  info '^demo@7^', types.isa.id '4'
+  info '^demo@8^', types.isa.id 4
+  #.........................................................................................................
+  T?.eq ( proto is Object.getPrototypeOf types.isa  ), true
+  T?.eq ( types.isa.iam                             ), 'proto'
+  T?.eq ( types.isa.text '4'                        ), true
+  T?.eq ( types.isa.text 4                          ), false
+  T?.eq ( types.isa.id ''                           ), false
+  T?.eq ( types.isa.id '4'                          ), true
+  T?.eq ( types.isa.id 4                            ), false
+  #.........................................................................................................
+  done?()
+
 
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
+  # await test @
+  @types_demo_method_object_construction()
+  test @types_demo_method_object_construction
   # test @types_get_miller_device_name
   # test @types_get_carter_device_name
   # test @types_isa_6
