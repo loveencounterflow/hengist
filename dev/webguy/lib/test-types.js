@@ -899,10 +899,82 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_demo_method_object_construction = function(T, done) {
+    var Isa, Types, WG, proto;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    Isa = class Isa {
+      text(x) {
+        return (typeof x) === 'string';
+      }
+
+      id(x) {
+        return (this.isa.text(x)) && (x.length > 0);
+      }
+
+    };
+    //.........................................................................................................
+    proto = {
+      iam: 'proto'
+    };
+    //.........................................................................................................
+    Types = class Types {
+      constructor() {
+        var i, isa_method, len, ref, type;
+        this.isa = Object.create(proto);
+        ref = WG.props.public_keys(Isa.prototype);
+        for (i = 0, len = ref.length; i < len; i++) {
+          type = ref[i];
+          help('^Types::constructor@1^', {type});
+          isa_method = Isa.prototype[type];
+          proto[type] = isa_method.bind(this);
+        }
+        return void 0;
+      }
+
+    };
+    //.........................................................................................................
+    types = new Types();
+    info('^demo@1^', types);
+    info('^demo@2^', proto === Object.getPrototypeOf(types.isa));
+    info('^demo@3^', rpr(types.isa.iam));
+    info('^demo@4^', types.isa.text('4'));
+    info('^demo@5^', types.isa.text(4));
+    info('^demo@6^', types.isa.id(''));
+    info('^demo@7^', types.isa.id('4'));
+    info('^demo@8^', types.isa.id(4));
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(proto === Object.getPrototypeOf(types.isa), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.iam, 'proto');
+    }
+    if (T != null) {
+      T.eq(types.isa.text('4'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.text(4), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.id(''), false);
+    }
+    if (T != null) {
+      T.eq(types.isa.id('4'), true);
+    }
+    if (T != null) {
+      T.eq(types.isa.id(4), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    await (async() => {
-      return (await test(this));
+    await (() => {
+      // await test @
+      this.types_demo_method_object_construction();
+      return test(this.types_demo_method_object_construction);
     })();
   }
 
