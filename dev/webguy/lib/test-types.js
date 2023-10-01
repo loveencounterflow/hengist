@@ -252,6 +252,22 @@
   this.types_isa_4 = function(T, done) {
     var C, WG;
     WG = require('../../../apps/webguy');
+    types = new WG.types.Types();
+    //.........................................................................................................
+    debug('^types_isa_4@1^', types.isa.codepoint(0x20000));
+    debug('^types_isa_4@1^', types.isa.codepointid(0x20000));
+    debug('^types_isa_4@1^', types.isa.codepointid(-67));
+    debug('^types_isa_4@1^', types.isa.codepointid(67.89));
+    debug('^types_isa_4@1^', WG.types.isa.codepointid(67.89));
+    debug('^types_isa_4@1^', WG.types.isa.regex('/123/y'));
+    debug('^types_isa_4@1^', WG.types.isa.buffer('987'));
+    debug('^types_isa_4@1^', WG.types.isa.jsidentifier(''));
+    debug('^types_isa_4@1^', WG.types.isa.list('123'));
+    debug('^types_isa_4@1^', WG.types.isa.set('123'));
+    debug('^types_isa_4@1^', WG.types.isa.class(Buffer));
+    debug('^types_isa_4@1^', WG.types.isa.class(null));
+    debug('^types_isa_4@1^', WG.types.isa.class(new Promise(function(a, b) {})));
+    debug('^types_isa_4@1^', WG.types.isa.class(new (C = class C {})()));
     //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.isa.codepoint(0x20000), false);
@@ -738,22 +754,22 @@
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name(void 0), 'Undefined');
+      T.eq(WG.types.get_miller_device_name(void 0), 'Undefined');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name(null), 'Null');
+      T.eq(WG.types.get_miller_device_name(null), 'Null');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name(4), 'Number');
+      T.eq(WG.types.get_miller_device_name(4), 'Number');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name(0/0), 'Number');
+      T.eq(WG.types.get_miller_device_name(0/0), 'Number');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name(Promise), 'Function');
+      T.eq(WG.types.get_miller_device_name(Promise), 'Function');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_miller_device_name((C = class C {})), 'Function');
+      T.eq(WG.types.get_miller_device_name((C = class C {})), 'Function');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -764,37 +780,37 @@
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(void 0), 'other');
+      T.eq(WG.types.get_carter_device_name(void 0), 'other');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(null), 'other');
+      T.eq(WG.types.get_carter_device_name(null), 'other');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(4), 'other');
+      T.eq(WG.types.get_carter_device_name(4), 'other');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(0/0), 'other');
+      T.eq(WG.types.get_carter_device_name(0/0), 'other');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(Promise), 'class');
+      T.eq(WG.types.get_carter_device_name(Promise), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name(Buffer), 'fn'); // surprise!
+      T.eq(WG.types.get_carter_device_name(Buffer), 'fn'); // surprise!
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name((C = class C {})), 'class');
+      T.eq(WG.types.get_carter_device_name((C = class C {})), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name((C = class C extends Object {})), 'class');
+      T.eq(WG.types.get_carter_device_name((C = class C extends Object {})), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name((function() {})), 'fn');
+      T.eq(WG.types.get_carter_device_name((function() {})), 'fn');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name((function() {}), '[object Function]'), 'fn');
+      T.eq(WG.types.get_carter_device_name((function() {}), '[object Function]'), 'fn');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_carter_device_name((function() {}), 'Function'), 'fn');
+      T.eq(WG.types.get_carter_device_name((function() {}), 'Function'), 'fn');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -805,37 +821,37 @@
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(void 0), 'undefined/Undefined/0/other/0');
+      T.eq(WG.types.get_type_signature(void 0), 'undefined/Undefined/0/other/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(null), 'object/Null/0/other/0');
+      T.eq(WG.types.get_type_signature(null), 'object/Null/0/other/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(4), 'number/Number/Number/other/0');
+      T.eq(WG.types.get_type_signature(4), 'number/Number/Number/other/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(0/0), 'number/Number/Number/other/N');
+      T.eq(WG.types.get_type_signature(0/0), 'number/Number/Number/other/N');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(Promise), 'function/Function/Function/class/0');
+      T.eq(WG.types.get_type_signature(Promise), 'function/Function/Function/class/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature(Buffer), 'function/Function/Function/fn/0');
+      T.eq(WG.types.get_type_signature(Buffer), 'function/Function/Function/fn/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature((C = class C {})), 'function/Function/Function/class/0');
+      T.eq(WG.types.get_type_signature((C = class C {})), 'function/Function/Function/class/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature((C = class C extends Object {})), 'function/Function/Function/class/0');
+      T.eq(WG.types.get_type_signature((C = class C extends Object {})), 'function/Function/Function/class/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature((function() {})), 'function/Function/Function/fn/0');
+      T.eq(WG.types.get_type_signature((function() {})), 'function/Function/Function/fn/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature((function() {}), '[object Function]'), 'function/Function/Function/fn/0');
+      T.eq(WG.types.get_type_signature((function() {}), '[object Function]'), 'function/Function/Function/fn/0');
     }
     if (T != null) {
-      T.eq(WG.types.types.get_type_signature((function() {}), 'Function'), 'function/Function/Function/fn/0');
+      T.eq(WG.types.get_type_signature((function() {}), 'Function'), 'function/Function/Function/fn/0');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -845,56 +861,56 @@
     var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
-    help('^types_type_of@1  ', WG.types.types.type_of(void 0), 'undefined');
-    help('^types_type_of@2  ', WG.types.types.type_of(null), 'null');
-    help('^types_type_of@3  ', WG.types.types.type_of(4), 'float');
-    help('^types_type_of@4  ', WG.types.types.type_of(4.5), 'float');
-    help('^types_type_of@5  ', WG.types.types.type_of(0/0), 'nan');
-    help('^types_type_of@6  ', WG.types.types.type_of(Promise), 'class');
-    help('^types_type_of@7  ', WG.types.types.type_of(Buffer), 'buffer');
-    help('^types_type_of@8  ', WG.types.types.type_of((C = class C {})), 'class');
-    help('^types_type_of@9  ', WG.types.types.type_of((C = class C extends Object {})), 'class');
-    help('^types_type_of@10 ', WG.types.types.type_of((function() {})), 'function');
-    help('^types_type_of@10 ', WG.types.types.type_of(new ArrayBuffer()), 'ArrayBuffer');
+    help('^types_type_of@1  ', WG.types.type_of(void 0), 'undefined');
+    help('^types_type_of@2  ', WG.types.type_of(null), 'null');
+    help('^types_type_of@3  ', WG.types.type_of(4), 'float');
+    help('^types_type_of@4  ', WG.types.type_of(4.5), 'float');
+    help('^types_type_of@5  ', WG.types.type_of(0/0), 'nan');
+    help('^types_type_of@6  ', WG.types.type_of(Promise), 'class');
+    help('^types_type_of@7  ', WG.types.type_of(Buffer), 'buffer');
+    help('^types_type_of@8  ', WG.types.type_of((C = class C {})), 'class');
+    help('^types_type_of@9  ', WG.types.type_of((C = class C extends Object {})), 'class');
+    help('^types_type_of@10 ', WG.types.type_of((function() {})), 'function');
+    help('^types_type_of@10 ', WG.types.type_of(new ArrayBuffer()), 'ArrayBuffer');
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.types.type_of(void 0), 'undefined');
+      T.eq(WG.types.type_of(void 0), 'undefined');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(null), 'null');
+      T.eq(WG.types.type_of(null), 'null');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(4), 'float');
+      T.eq(WG.types.type_of(4), 'float');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(4.5), 'float');
+      T.eq(WG.types.type_of(4.5), 'float');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(2e308), 'infinity');
+      T.eq(WG.types.type_of(2e308), 'infinity');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(0/0), 'nan');
+      T.eq(WG.types.type_of(0/0), 'nan');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(Promise), 'class');
+      T.eq(WG.types.type_of(Promise), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(Buffer), 'function');
+      T.eq(WG.types.type_of(Buffer), 'function');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(Buffer.from('x')), 'buffer');
+      T.eq(WG.types.type_of(Buffer.from('x')), 'buffer');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of((C = class C {})), 'class');
+      T.eq(WG.types.type_of((C = class C {})), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of((C = class C extends Object {})), 'class');
+      T.eq(WG.types.type_of((C = class C extends Object {})), 'class');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of((function() {})), 'function');
+      T.eq(WG.types.type_of((function() {})), 'function');
     }
     if (T != null) {
-      T.eq(WG.types.types.type_of(new ArrayBuffer()), 'arraybuffer');
+      T.eq(WG.types.type_of(new ArrayBuffer()), 'arraybuffer');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -910,6 +926,8 @@
       }
 
       id(x) {
+        debug('^id@1^', this.constructor.name);
+        debug('^id@2^', this.isa.constructor.name);
         return (this.isa.text(x)) && (x.length > 0);
       }
 
@@ -926,7 +944,6 @@
         ref = WG.props.public_keys(Isa.prototype);
         for (i = 0, len = ref.length; i < len; i++) {
           type = ref[i];
-          help('^Types::constructor@1^', {type});
           isa_method = Isa.prototype[type];
           proto[type] = isa_method.bind(this);
         }
@@ -936,14 +953,8 @@
     };
     //.........................................................................................................
     types = new Types();
-    info('^demo@1^', types);
-    info('^demo@2^', proto === Object.getPrototypeOf(types.isa));
-    info('^demo@3^', rpr(types.isa.iam));
-    info('^demo@4^', types.isa.text('4'));
-    info('^demo@5^', types.isa.text(4));
-    info('^demo@6^', types.isa.id(''));
-    info('^demo@7^', types.isa.id('4'));
-    info('^demo@8^', types.isa.id(4));
+    info('^demo@1^', types.constructor.name);
+    info('^demo@2^', types.isa.constructor.name);
     //.........................................................................................................
     if (T != null) {
       T.eq(proto === Object.getPrototypeOf(types.isa), true);
@@ -971,16 +982,18 @@
 
   //###########################################################################################################
   if (require.main === module) {
-    await (() => {
+    await (async() => {
       // await test @
-      this.types_demo_method_object_construction();
-      return test(this.types_demo_method_object_construction);
+      return (await test(this.types_isa_2));
     })();
   }
 
-  // test @types_get_miller_device_name
+  // @types_demo_method_object_construction()
+// test @types_demo_method_object_construction
+// test @types_get_miller_device_name
 // test @types_get_carter_device_name
-// test @types_isa_6
+// @types_isa_4()
+// test @types_isa_4
 
 }).call(this);
 
