@@ -228,14 +228,44 @@
     if (T != null) {
       T.eq(WG.types.isa.zero(0n), true);
     }
-    // T?.eq ( WG.types.isa.nan            ( null                ) ), true
-    // T?.eq ( WG.types.isa.even           ( null                ) ), true
-    // T?.eq ( WG.types.isa.odd            ( null                ) ), true
-    // T?.eq ( WG.types.isa.boolean        ( null                ) ), true
-    // T?.eq ( WG.types.isa.object         ( null                ) ), true
-    // T?.eq ( WG.types.isa.function       ( null                ) ), true
-    // T?.eq ( WG.types.isa.asyncfunction  ( null                ) ), true
-    // T?.eq ( WG.types.isa.symbol         ( null                ) ), true
+    if (T != null) {
+      T.eq(WG.types.isa.nan(0 / 0), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.even(4), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.even(4n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.odd(5), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.odd(5n), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.boolean(false), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.object({}), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.function((function() {})), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.asyncfunction((async function() {
+        return (await 4);
+      })), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.symbol(Symbol('x')), true);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.symbol(Symbol.for('x')), true);
+    }
     if (T != null) {
       T.eq(WG.types.isa.class(Promise), true);
     }
@@ -307,6 +337,36 @@
     }
     if (T != null) {
       T.eq(WG.types.isa.class(new (C = class C {})()), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.numeric('4'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.numeric(true), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.float('4.5'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.bigint('4'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.integer('4'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.cardinal('4'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.zero('0'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.nan(1 / 0), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.even('4'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.odd('5'), false);
     }
     if (typeof done === "function") {
       done();
@@ -980,10 +1040,45 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_validate_1 = function(T, done) {
+    var WG, e;
+    WG = require('../../../apps/webguy');
+    types = new WG.types.Types();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.validate.integer(1234), true);
+    }
+    if (T != null) {
+      T.eq(types.validate.jsidentifier('xxx'), true);
+    }
+    try {
+      types.validate.jsidentifier(4);
+    } catch (error) {
+      e = error;
+      warn(GUY.trm.reverse(e.message));
+    }
+    if (T != null) {
+      T.throws(/expected a jsidentifier got a float/, function() {
+        return types.validate.jsidentifier(4);
+      });
+    }
+    if (T != null) {
+      T.throws(/expected a jsidentifier got a null/, function() {
+        return types.validate.jsidentifier(null);
+      });
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (async() => {
-      return (await test(this));
+      // await test @
+      return (await test(this.types_validate_1));
     })();
   }
 
