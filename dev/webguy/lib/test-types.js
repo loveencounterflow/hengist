@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, alert, debug, echo, help, info, inspect, isa, jr, log, plain, praise, rpr, test, types, urge, warn, whisper;
+  var GUY, alert, debug, echo, help, info, inspect, isa, jr, log, plain, praise, rpr, show_error_message_and_test, test, types, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('guy');
@@ -1041,8 +1041,23 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  show_error_message_and_test = function(T, matcher, fn) {
+    var e;
+    try {
+      fn();
+    } catch (error) {
+      e = error;
+      warn(GUY.trm.reverse(e.message));
+    }
+    if (T != null) {
+      T.throws(matcher, fn);
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.types_validate_1 = function(T, done) {
-    var WG, e;
+    var WG;
     WG = require('../../../apps/webguy');
     types = new WG.types.Types();
     //.........................................................................................................
@@ -1052,22 +1067,27 @@
     if (T != null) {
       T.eq(types.validate.jsidentifier('xxx'), true);
     }
-    try {
-      types.validate.jsidentifier(4);
-    } catch (error) {
-      e = error;
-      warn(GUY.trm.reverse(e.message));
+    show_error_message_and_test(T, /expected a jsidentifier got a null/, function() {
+      return types.validate.jsidentifier(null);
+    });
+    show_error_message_and_test(T, /expected a jsidentifier got a float/, function() {
+      return types.validate.jsidentifier(4);
+    });
+    if (T != null) {
+      T.eq(types.validate.optional_integer(1234), true);
     }
     if (T != null) {
-      T.throws(/expected a jsidentifier got a float/, function() {
-        return types.validate.jsidentifier(4);
-      });
+      T.eq(types.validate.optional_integer(null), true);
     }
     if (T != null) {
-      T.throws(/expected a jsidentifier got a null/, function() {
-        return types.validate.jsidentifier(null);
-      });
+      T.eq(types.validate.nothing(null), true);
     }
+    if (T != null) {
+      T.eq(types.validate.nothing(void 0), true);
+    }
+    show_error_message_and_test(T, /expected a nothing got a text/, function() {
+      return types.validate.nothing('yay!');
+    });
     if (typeof done === "function") {
       done();
     }
