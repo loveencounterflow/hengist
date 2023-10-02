@@ -479,15 +479,25 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+show_error_message_and_test = ( T, matcher, fn ) ->
+  try fn() catch e then warn GUY.trm.reverse e.message
+  T?.throws matcher, fn
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @types_validate_1 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   types           = new WG.types.Types()
   #.........................................................................................................
   T?.eq ( types.validate.integer 1234 ), true
   T?.eq ( types.validate.jsidentifier 'xxx' ), true
-  try types.validate.jsidentifier 4 catch e then warn GUY.trm.reverse e.message
-  T?.throws /expected a jsidentifier got a float/, -> types.validate.jsidentifier 4
-  T?.throws /expected a jsidentifier got a null/, -> types.validate.jsidentifier null
+  show_error_message_and_test T, /expected a jsidentifier got a null/, -> types.validate.jsidentifier null
+  show_error_message_and_test T, /expected a jsidentifier got a float/, -> types.validate.jsidentifier 4
+  T?.eq ( types.validate.optional_integer 1234 ), true
+  T?.eq ( types.validate.optional_integer null ), true
+  T?.eq ( types.validate.nothing null ), true
+  T?.eq ( types.validate.nothing undefined ), true
+  show_error_message_and_test T, /expected a nothing got a text/, -> types.validate.nothing 'yay!'
   #.........................................................................................................
   done?()
   return null
