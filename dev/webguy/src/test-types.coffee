@@ -95,24 +95,28 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.list           ( [ '123', ]            ) ), true
   T?.eq ( WG.types.isa.set            ( new Set '123'         ) ), true
   T?.eq ( WG.types.isa.map            ( new Map()             ) ), true
-  T?.eq ( WG.types.isa.numeric        ( 4                ) ), true
-  T?.eq ( WG.types.isa.numeric        ( 4n                ) ), true
-  T?.eq ( WG.types.isa.float          ( 4                ) ), true
-  T?.eq ( WG.types.isa.float          ( 4.5                ) ), true
-  T?.eq ( WG.types.isa.bigint         ( 5n                ) ), true
-  T?.eq ( WG.types.isa.bigint         ( BigInt '123'                ) ), true
-  T?.eq ( WG.types.isa.integer        ( 123456789                ) ), true
+  T?.eq ( WG.types.isa.numeric        ( 4                     ) ), true
+  T?.eq ( WG.types.isa.numeric        ( 4n                    ) ), true
+  T?.eq ( WG.types.isa.float          ( 4                     ) ), true
+  T?.eq ( WG.types.isa.float          ( 4.5                   ) ), true
+  T?.eq ( WG.types.isa.bigint         ( 5n                    ) ), true
+  T?.eq ( WG.types.isa.bigint         ( BigInt '123'          ) ), true
+  T?.eq ( WG.types.isa.integer        ( 123456789             ) ), true
   T?.eq ( WG.types.isa.cardinal       ( 123456789             ) ), true
-  T?.eq ( WG.types.isa.zero           ( 0                ) ), true
-  T?.eq ( WG.types.isa.zero           ( 0n                ) ), true
-  # T?.eq ( WG.types.isa.nan            ( null                ) ), true
-  # T?.eq ( WG.types.isa.even           ( null                ) ), true
-  # T?.eq ( WG.types.isa.odd            ( null                ) ), true
-  # T?.eq ( WG.types.isa.boolean        ( null                ) ), true
-  # T?.eq ( WG.types.isa.object         ( null                ) ), true
-  # T?.eq ( WG.types.isa.function       ( null                ) ), true
-  # T?.eq ( WG.types.isa.asyncfunction  ( null                ) ), true
-  # T?.eq ( WG.types.isa.symbol         ( null                ) ), true
+  T?.eq ( WG.types.isa.zero           ( 0                     ) ), true
+  T?.eq ( WG.types.isa.zero           ( 0n                    ) ), true
+  T?.eq ( WG.types.isa.nan            ( 0 / 0                 ) ), true
+  T?.eq ( WG.types.isa.even           ( 4                     ) ), true
+  T?.eq ( WG.types.isa.even           ( 4n                    ) ), true
+  T?.eq ( WG.types.isa.odd            ( 5                     ) ), true
+  T?.eq ( WG.types.isa.odd            ( 5n                    ) ), true
+  T?.eq ( WG.types.isa.boolean        ( true                  ) ), true
+  T?.eq ( WG.types.isa.boolean        ( false                 ) ), true
+  T?.eq ( WG.types.isa.object         ( {}                    ) ), true
+  T?.eq ( WG.types.isa.function       ( ->                    ) ), true
+  T?.eq ( WG.types.isa.asyncfunction  ( -> await 4            ) ), true
+  T?.eq ( WG.types.isa.symbol         ( Symbol 'x'            ) ), true
+  T?.eq ( WG.types.isa.symbol         ( Symbol.for 'x'        ) ), true
   T?.eq ( WG.types.isa.class          ( Promise               ) ), true
   T?.eq ( WG.types.isa.class          ( class C               ) ), true
   #.........................................................................................................
@@ -152,6 +156,16 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.class          ( null                      ) ), false
   T?.eq ( WG.types.isa.class          ( new Promise ( a, b ) ->   ) ), false
   T?.eq ( WG.types.isa.class          ( new ( class C )()         ) ), false
+  T?.eq ( WG.types.isa.numeric        ( '4'                       ) ), false
+  T?.eq ( WG.types.isa.numeric        ( true                      ) ), false
+  T?.eq ( WG.types.isa.float          ( '4.5'                     ) ), false
+  T?.eq ( WG.types.isa.bigint         ( '4'                       ) ), false
+  T?.eq ( WG.types.isa.integer        ( '4'                       ) ), false
+  T?.eq ( WG.types.isa.cardinal       ( '4'                       ) ), false
+  T?.eq ( WG.types.isa.zero           ( '0'                       ) ), false
+  T?.eq ( WG.types.isa.nan            ( 1 / 0                     ) ), false
+  T?.eq ( WG.types.isa.even           ( '4'                       ) ), false
+  T?.eq ( WG.types.isa.odd            ( '5'                       ) ), false
   #.........................................................................................................
   done?()
   return null
@@ -464,12 +478,26 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@types_validate_1 = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  types           = new WG.types.Types()
+  #.........................................................................................................
+  T?.eq ( types.validate.integer 1234 ), true
+  T?.eq ( types.validate.jsidentifier 'xxx' ), true
+  try types.validate.jsidentifier 4 catch e then warn GUY.trm.reverse e.message
+  T?.throws /expected a jsidentifier got a float/, -> types.validate.jsidentifier 4
+  T?.throws /expected a jsidentifier got a null/, -> types.validate.jsidentifier null
+  #.........................................................................................................
+  done?()
+  return null
 
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
+  # await test @
+  await test @types_validate_1
   # await test @types_isa_2
   # @types_demo_method_object_construction()
   # test @types_demo_method_object_construction
