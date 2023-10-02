@@ -502,12 +502,37 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_declare_1 = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  do =>
+    types = new WG.types.Types()
+    debug '^types_declare_1@1^', types
+    debug '^types_declare_1@1^', types.isa
+    debug '^types_declare_1@1^', types.validate
+    debug '^types_declare_1@1^', types.declare
+    # types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
+    types.declare.nonzero_integer ( x ) -> ( @isa.nonzero x ) and ( @isa.integer x )
+    T?.eq ( types.isa.nonzero_integer           4     ), true
+    T?.eq ( types.isa.nonzero_integer           4n    ), true
+    T?.eq ( types.isa.optional_nonzero_integer  null  ), true
+    T?.eq ( types.isa.optional_nonzero_integer  4     ), true
+    T?.eq ( types.isa.optional_nonzero_integer  4n    ), true
+    T?.eq ( types.isa.nonzero_integer           0     ), false
+    T?.eq ( types.isa.nonzero_integer           null  ), false
+    T?.eq ( types.isa.optional_nonzero_integer  0     ), false
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  # await test @
-  await test @types_validate_1
+  await test @
+  # await test @types_validate_1
+  # await test @types_declare_1
   # await test @types_isa_2
   # @types_demo_method_object_construction()
   # test @types_demo_method_object_construction
