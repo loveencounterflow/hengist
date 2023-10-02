@@ -1094,15 +1094,59 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_declare_1 = function(T, done) {
+    var WG;
+    WG = require('../../../apps/webguy');
+    (() => {      //.........................................................................................................
+      types = new WG.types.Types();
+      debug('^types_declare_1@1^', types);
+      debug('^types_declare_1@1^', types.isa);
+      debug('^types_declare_1@1^', types.validate);
+      debug('^types_declare_1@1^', types.declare);
+      // types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
+      types.declare.nonzero_integer(function(x) {
+        return (this.isa.nonzero(x)) && (this.isa.integer(x));
+      });
+      if (T != null) {
+        T.eq(types.isa.nonzero_integer(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.nonzero_integer(4n), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional_nonzero_integer(null), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional_nonzero_integer(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional_nonzero_integer(4n), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.nonzero_integer(0), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.nonzero_integer(null), false);
+      }
+      return T != null ? T.eq(types.isa.optional_nonzero_integer(0), false) : void 0;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (async() => {
-      // await test @
-      return (await test(this.types_validate_1));
+      return (await test(this));
     })();
   }
 
-  // await test @types_isa_2
+  // await test @types_validate_1
+// await test @types_declare_1
+// await test @types_isa_2
 // @types_demo_method_object_construction()
 // test @types_demo_method_object_construction
 // test @types_get_miller_device_name
