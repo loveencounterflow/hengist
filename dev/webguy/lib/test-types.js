@@ -226,22 +226,13 @@
       T.eq(WG.types.isa.zero(0), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.zero(0n), true);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.nan(0 / 0), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.even(4), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.even(4n), true);
-    }
-    if (T != null) {
       T.eq(WG.types.isa.odd(5), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.odd(5n), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.boolean(true), true);
@@ -367,6 +358,15 @@
     }
     if (T != null) {
       T.eq(WG.types.isa.odd('5'), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.zero(0n), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.even(4n), false);
+    }
+    if (T != null) {
+      T.eq(WG.types.isa.odd(5n), false);
     }
     if (typeof done === "function") {
       done();
@@ -651,7 +651,7 @@
       T.eq(WG.types.isa.optional_zero(-0), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_zero(0n), true);
+      T.eq(WG.types.isa.optional_zero(0n), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_zero(4), false);
@@ -680,7 +680,7 @@
       T.eq(WG.types.isa.optional_even(4), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_even(4n), true);
+      T.eq(WG.types.isa.optional_even(4n), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_even(4.5), false);
@@ -702,7 +702,7 @@
       T.eq(WG.types.isa.optional_odd(5), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(5n), true);
+      T.eq(WG.types.isa.optional_odd(5n), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.optional_odd(5.5), false);
@@ -1095,24 +1095,37 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.types_declare_1 = function(T, done) {
-    var WG;
+  this.types_declare_with_class = function(T, done) {
+    var Isa, Types, WG, _;
     WG = require('../../../apps/webguy');
+    _ = WG.types;
+    ({Types, Isa} = WG.types);
     (() => {      //.........................................................................................................
-      types = new WG.types.Types();
-      debug('^types_declare_1@1^', types);
-      debug('^types_declare_1@1^', types.isa);
-      debug('^types_declare_1@1^', types.validate);
-      debug('^types_declare_1@1^', types.declare);
+      var declarations;
+      declarations = class declarations extends Isa {
+        nonzero_integer(x) {
+          help('^nonzero_integer@1^', x, this.isa.nonzero(x), this.isa.integer(x));
+          return (this.isa.nonzero(x)) && (this.isa.integer(x));
+        }
+
+      };
+      //.......................................................................................................
+      types = new Types({declarations});
+      if (T != null) {
+        T.eq(_.isa.function(types.isa.nonzero), true);
+      }
+      if (T != null) {
+        T.eq(_.isa.function(types.isa.integer), true);
+      }
+      if (T != null) {
+        T.eq(_.isa.function(types.isa.nonzero_integer), true);
+      }
       // types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
-      types.declare.nonzero_integer(function(x) {
-        return (this.isa.nonzero(x)) && (this.isa.integer(x));
-      });
       if (T != null) {
         T.eq(types.isa.nonzero_integer(4), true);
       }
       if (T != null) {
-        T.eq(types.isa.nonzero_integer(4n), true);
+        T.eq(types.isa.nonzero_integer(4n), false);
       }
       if (T != null) {
         T.eq(types.isa.optional_nonzero_integer(null), true);
@@ -1121,7 +1134,7 @@
         T.eq(types.isa.optional_nonzero_integer(4), true);
       }
       if (T != null) {
-        T.eq(types.isa.optional_nonzero_integer(4n), true);
+        T.eq(types.isa.optional_nonzero_integer(4n), false);
       }
       if (T != null) {
         T.eq(types.isa.nonzero_integer(0), false);
@@ -1140,13 +1153,13 @@
   //###########################################################################################################
   if (require.main === module) {
     await (async() => {
-      return (await test(this));
+      // await test @
+      // await test @types_validate_1
+      return (await test(this.types_declare_with_class));
     })();
   }
 
-  // await test @types_validate_1
-// await test @types_declare_1
-// await test @types_isa_2
+  // await test @types_isa_2
 // @types_demo_method_object_construction()
 // test @types_demo_method_object_construction
 // test @types_get_miller_device_name
