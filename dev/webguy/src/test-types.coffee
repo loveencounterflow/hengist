@@ -104,12 +104,9 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.integer        ( 123456789             ) ), true
   T?.eq ( WG.types.isa.cardinal       ( 123456789             ) ), true
   T?.eq ( WG.types.isa.zero           ( 0                     ) ), true
-  T?.eq ( WG.types.isa.zero           ( 0n                    ) ), true
   T?.eq ( WG.types.isa.nan            ( 0 / 0                 ) ), true
   T?.eq ( WG.types.isa.even           ( 4                     ) ), true
-  T?.eq ( WG.types.isa.even           ( 4n                    ) ), true
   T?.eq ( WG.types.isa.odd            ( 5                     ) ), true
-  T?.eq ( WG.types.isa.odd            ( 5n                    ) ), true
   T?.eq ( WG.types.isa.boolean        ( true                  ) ), true
   T?.eq ( WG.types.isa.boolean        ( false                 ) ), true
   T?.eq ( WG.types.isa.object         ( {}                    ) ), true
@@ -166,6 +163,9 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.nan            ( 1 / 0                     ) ), false
   T?.eq ( WG.types.isa.even           ( '4'                       ) ), false
   T?.eq ( WG.types.isa.odd            ( '5'                       ) ), false
+  T?.eq ( WG.types.isa.zero           ( 0n                        ) ), false
+  T?.eq ( WG.types.isa.even           ( 4n                        ) ), false
+  T?.eq ( WG.types.isa.odd            ( 5n                        ) ), false
   #.........................................................................................................
   done?()
   return null
@@ -277,7 +277,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.optional_zero           ( undefined          ) ), true
   T?.eq ( WG.types.isa.optional_zero           ( 0                  ) ), true
   T?.eq ( WG.types.isa.optional_zero           ( -0                 ) ), true
-  T?.eq ( WG.types.isa.optional_zero           ( 0n                 ) ), true
+  T?.eq ( WG.types.isa.optional_zero           ( 0n                 ) ), false
   T?.eq ( WG.types.isa.optional_zero           ( 4                  ) ), false
   #.........................................................................................................
   T?.eq ( WG.types.isa.optional_nan            ( null               ) ), true
@@ -288,7 +288,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.optional_even           ( null               ) ), true
   T?.eq ( WG.types.isa.optional_even           ( undefined          ) ), true
   T?.eq ( WG.types.isa.optional_even           ( 4                  ) ), true
-  T?.eq ( WG.types.isa.optional_even           ( 4n                 ) ), true
+  T?.eq ( WG.types.isa.optional_even           ( 4n                 ) ), false
   T?.eq ( WG.types.isa.optional_even           ( 4.5                ) ), false
   T?.eq ( WG.types.isa.optional_even           ( 5                  ) ), false
   T?.eq ( WG.types.isa.optional_even           ( 5n                 ) ), false
@@ -296,7 +296,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.optional_odd            ( null               ) ), true
   T?.eq ( WG.types.isa.optional_odd            ( undefined          ) ), true
   T?.eq ( WG.types.isa.optional_odd            ( 5                  ) ), true
-  T?.eq ( WG.types.isa.optional_odd            ( 5n                 ) ), true
+  T?.eq ( WG.types.isa.optional_odd            ( 5n                 ) ), false
   T?.eq ( WG.types.isa.optional_odd            ( 5.5                ) ), false
   T?.eq ( WG.types.isa.optional_odd            ( 4                  ) ), false
   T?.eq ( WG.types.isa.optional_odd            ( 4n                 ) ), false
@@ -503,25 +503,30 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@types_declare_1 = ( T, done ) ->
+@types_declare_with_class = ( T, done ) ->
   WG              = require '../../../apps/webguy'
+  _               = WG.types
+  { Types, Isa, } = WG.types
   #.........................................................................................................
   do =>
-    types = new WG.types.Types()
-    debug '^types_declare_1@1^', types
-    debug '^types_declare_1@1^', types.isa
-    debug '^types_declare_1@1^', types.validate
-    debug '^types_declare_1@1^', types.declare
+    class declarations extends Isa
+      nonzero_integer: ( x ) ->
+        help '^nonzero_integer@1^', x, ( @isa.nonzero x ), ( @isa.integer x )
+        ( @isa.nonzero x ) and ( @isa.integer x )
+    #.......................................................................................................
+    types = new Types { declarations, }
+    T?.eq ( _.isa.function types.isa.nonzero              ), true
+    T?.eq ( _.isa.function types.isa.integer              ), true
+    T?.eq ( _.isa.function types.isa.nonzero_integer      ), true
     # types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
-    types.declare.nonzero_integer ( x ) -> ( @isa.nonzero x ) and ( @isa.integer x )
-    T?.eq ( types.isa.nonzero_integer           4     ), true
-    T?.eq ( types.isa.nonzero_integer           4n    ), true
-    T?.eq ( types.isa.optional_nonzero_integer  null  ), true
-    T?.eq ( types.isa.optional_nonzero_integer  4     ), true
-    T?.eq ( types.isa.optional_nonzero_integer  4n    ), true
-    T?.eq ( types.isa.nonzero_integer           0     ), false
-    T?.eq ( types.isa.nonzero_integer           null  ), false
-    T?.eq ( types.isa.optional_nonzero_integer  0     ), false
+    T?.eq ( types.isa.nonzero_integer           4         ), true
+    T?.eq ( types.isa.nonzero_integer           4n        ), false
+    T?.eq ( types.isa.optional_nonzero_integer  null      ), true
+    T?.eq ( types.isa.optional_nonzero_integer  4         ), true
+    T?.eq ( types.isa.optional_nonzero_integer  4n        ), false
+    T?.eq ( types.isa.nonzero_integer           0         ), false
+    T?.eq ( types.isa.nonzero_integer           null      ), false
+    T?.eq ( types.isa.optional_nonzero_integer  0         ), false
   #.........................................................................................................
   done?()
   return null
@@ -530,9 +535,9 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
+  # await test @
   # await test @types_validate_1
-  # await test @types_declare_1
+  await test @types_declare_with_class
   # await test @types_isa_2
   # @types_demo_method_object_construction()
   # test @types_demo_method_object_construction
@@ -540,6 +545,3 @@ if require.main is module then await do =>
   # test @types_get_carter_device_name
   # @types_isa_4()
   # test @types_isa_4
-
-
-
