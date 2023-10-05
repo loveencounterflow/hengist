@@ -157,7 +157,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @props_walk_depth_first_properties = ( T, done ) ->
-  WGUY = require '../../../apps/webguy'
+  WGUY      = require '../../../apps/webguy'
+  { props } = WGUY
   #.........................................................................................................
   class A
     a1: ->
@@ -169,33 +170,6 @@ types                     = new ( require 'intertype-newest' ).Intertype()
     b_3: ->
   a = new A()
   b = new B()
-  #.........................................................................................................
-  templates =
-    acquire_depth_first:
-      source:     null
-      target:     null
-      filter:     null
-      decorator:  null
-  #.........................................................................................................
-  class Props
-    walk_depth_first_property_descriptors: ( x ) ->
-      for proto in protos = ( WGUY.props.get_prototype_chain x ).reverse()
-        for key, dsc of Object.getOwnPropertyDescriptors proto
-          continue if key is 'constructor'
-          yield [ key, dsc, ]
-      return null
-    #.........................................................................................................
-    acquire_depth_first: ( cfg ) ->
-      cfg = { templates..., cfg..., }
-      R   = cfg.target ? {}
-      for [ key, dsc, ] from @walk_depth_first_property_descriptors cfg.source
-        if cfg.filter? then continue unless cfg.filter key
-        dsc.value = cfg.decorator dsc.value if cfg.decorator?
-        Object.defineProperty R, key, dsc
-      return R
-  #.........................................................................................................
-  Object.setPrototypeOf Props, WGUY.props
-  props = new Props()
   #.........................................................................................................
   urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B        )..., ]
   urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B::      )..., ]
