@@ -156,26 +156,107 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@props_walk_depth_first_properties = ( T, done ) ->
+@props_walk_depth_first_property_descriptors = ( T, done ) ->
   WGUY      = require '../../../apps/webguy'
   { props } = WGUY
   #.........................................................................................................
+  a1  = ->
+  a2  = ->
+  a3  = ->
+  b_1 = ->
+  b_2 = ->
+  b_3 = ->
+  #.........................................................................................................
   class A
-    a1: ->
-    a2: ->
-    a3: ->
+    a1: a1
+    a2: a2
+    a3: a3
+    c:  'declared in A'
   class B extends A
-    b_1: ->
-    b_2: ->
-    b_3: ->
+    b_1: b_1
+    b_2: b_2
+    b_3: b_3
+    c:  'declared in B'
   a = new A()
   b = new B()
   #.........................................................................................................
-  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B        )..., ]
-  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B::      )..., ]
-  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors new B()  )..., ]
+  # urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B        )..., ]
+  # urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B::  )..., ]
+  T?.eq ( [ d.key, d.descriptor, ] for d from props.walk_depth_first_property_descriptors B:: ), [
+    [ 'a1', { value: a1, writable: true, enumerable: true, configurable: true } ]
+    [ 'a2', { value: a2, writable: true, enumerable: true, configurable: true } ]
+    [ 'a3', { value: a3, writable: true, enumerable: true, configurable: true } ]
+    [ 'c', { value: 'declared in A', writable: true, enumerable: true, configurable: true } ]
+    [ 'b_1', { value: b_1, writable: true, enumerable: true, configurable: true } ]
+    [ 'b_2', { value: b_2, writable: true, enumerable: true, configurable: true } ]
+    [ 'b_3', { value: b_3, writable: true, enumerable: true, configurable: true } ]
+    [ 'c', { value: 'declared in B', writable: true, enumerable: true, configurable: true } ]
+    ]
+  T?.eq ( [ d.key, d.descriptor, ] for d from props.walk_depth_first_property_descriptors new B() ), [
+    [ 'a1', { value: a1, writable: true, enumerable: true, configurable: true } ]
+    [ 'a2', { value: a2, writable: true, enumerable: true, configurable: true } ]
+    [ 'a3', { value: a3, writable: true, enumerable: true, configurable: true } ]
+    [ 'c', { value: 'declared in A', writable: true, enumerable: true, configurable: true } ]
+    [ 'b_1', { value: b_1, writable: true, enumerable: true, configurable: true } ]
+    [ 'b_2', { value: b_2, writable: true, enumerable: true, configurable: true } ]
+    [ 'b_3', { value: b_3, writable: true, enumerable: true, configurable: true } ]
+    [ 'c', { value: 'declared in B', writable: true, enumerable: true, configurable: true } ]
+    ]
   #.........................................................................................................
-  urge '^3223^', ( k for [ k, d ] from props.walk_depth_first_property_descriptors props.acquire_depth_first { source: ( B:: ), } )
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@props_acquire_depth_first = ( T, done ) ->
+  WGUY      = require '../../../apps/webguy'
+  { props } = WGUY
+  #.........................................................................................................
+  a1  = ->
+  a2  = ->
+  a3  = ->
+  b_1 = ->
+  b_2 = ->
+  b_3 = ->
+  #.........................................................................................................
+  class A
+    a1: a1
+    a2: a2
+    a3: a3
+    c:  'declared in A'
+  class B extends A
+    b_1: b_1
+    b_2: b_2
+    b_3: b_3
+    c:  'declared in B'
+  a = new A()
+  b = new B()
+  #.........................................................................................................
+  do =>
+    result = ( props.acquire_depth_first ( B:: ), { descriptor: { enumerable: true, }, overwrite: true, } )
+    T?.eq ( k for k of result ), [ 'a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3' ]
+    T?.eq result, { a1, a2, a3, c: 'declared in B', b_1, b_2, b_3, }
+    T?.ok result.a1 is a1
+    return null
+  #.........................................................................................................
+  do =>
+    T?.throws /duplicate key 'c'/, ->
+      ( props.acquire_depth_first ( B:: ), { descriptor: { enumerable: true, }, overwrite: false, } )
+    return null
+  #.........................................................................................................
+  do =>
+    result = ( props.acquire_depth_first ( B:: ), { descriptor: { enumerable: false, }, overwrite: true, } )
+    T?.eq ( k for k of result ), []
+    T?.eq result, {}
+    T?.ok result.a1 is a1
+    return null
+  #.........................................................................................................
+  do =>
+    result = ( props.acquire_depth_first ( B:: ), { descriptor: { enumerable: true, }, overwrite: 'ignore', } )
+    T?.eq ( k for k of result ), [ 'a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3' ]
+    T?.eq result, { a1, a2, a3, c: 'declared in A', b_1, b_2, b_3, }
+    T?.ok result.a1 is a1
+    return null
+  #.........................................................................................................
   done()
   return null
 
@@ -215,7 +296,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #===========================================================================================================
 if require.main is module then do =>
-  # test @
+  test @
   # test @props_get_prototype_chain
-  test @props_walk_depth_first_properties
+  # test @props_walk_depth_first_property_descriptors
+  # test @props_acquire_depth_first
 
