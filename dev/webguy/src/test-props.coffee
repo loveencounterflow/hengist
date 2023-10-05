@@ -121,6 +121,90 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@props_get_prototype_chain = ( T, done ) ->
+  WGUY = require '../../../apps/webguy'
+  #.........................................................................................................
+  class A
+    a1: ->
+    a2: ->
+    a3: ->
+  class B extends A
+    b_1: ->
+    b_2: ->
+    b_3: ->
+  a = new A()
+  b = new B()
+  #.........................................................................................................
+  o1  = {}
+  o2  = new Object()
+  a1  = []
+  a1p = Object.getPrototypeOf a1
+  b   = new B()
+  bp  = Object.getPrototypeOf b
+  bp1 = Object.getPrototypeOf bp
+  T?.eq ( WGUY.props.get_prototype_chain A                ), [ A, ]
+  T?.eq ( WGUY.props.get_prototype_chain B                ), [ B, A, ]
+  T?.eq ( WGUY.props.get_prototype_chain ( b )            ), [ b, bp, bp1, ]
+  T?.eq ( WGUY.props.get_prototype_chain ( b )::          ), []
+  T?.eq ( WGUY.props.get_prototype_chain Object           ), [ Object, ]
+  T?.eq ( WGUY.props.get_prototype_chain o1               ), [ o1, ]
+  T?.eq ( WGUY.props.get_prototype_chain o2               ), [ o2, ]
+  T?.eq ( WGUY.props.get_prototype_chain a1               ), [ a1, a1p, ]
+  #.........................................................................................................
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@props_walk_depth_first_properties = ( T, done ) ->
+  WGUY = require '../../../apps/webguy'
+  #.........................................................................................................
+  class A
+    a1: ->
+    a2: ->
+    a3: ->
+  class B extends A
+    b_1: ->
+    b_2: ->
+    b_3: ->
+  a = new A()
+  b = new B()
+  #.........................................................................................................
+  templates =
+    acquire_depth_first:
+      source:     null
+      target:     null
+      filter:     null
+      decorator:  null
+  #.........................................................................................................
+  class Props
+    walk_depth_first_property_descriptors: ( x ) ->
+      for proto in protos = ( WGUY.props.get_prototype_chain x ).reverse()
+        for key, dsc of Object.getOwnPropertyDescriptors proto
+          continue if key is 'constructor'
+          yield [ key, dsc, ]
+      return null
+    #.........................................................................................................
+    acquire_depth_first: ( cfg ) ->
+      cfg = { templates..., cfg..., }
+      R   = cfg.target ? {}
+      for [ key, dsc, ] from @walk_depth_first_property_descriptors cfg.source
+        if cfg.filter? then continue unless cfg.filter key
+        dsc.value = cfg.decorator dsc.value if cfg.decorator?
+        Object.defineProperty R, key, dsc
+      return R
+  #.........................................................................................................
+  Object.setPrototypeOf Props, WGUY.props
+  props = new Props()
+  #.........................................................................................................
+  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B        )..., ]
+  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B::      )..., ]
+  urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors new B()  )..., ]
+  #.........................................................................................................
+  urge '^3223^', ( k for [ k, d ] from props.walk_depth_first_property_descriptors props.acquire_depth_first { source: ( B:: ), } )
+  done()
+  return null
+
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #   #---------------------------------------------------------------------------------------------------------
@@ -157,5 +241,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #===========================================================================================================
 if require.main is module then do =>
-  test @
+  # test @
+  # test @props_get_prototype_chain
+  test @props_walk_depth_first_properties
 
