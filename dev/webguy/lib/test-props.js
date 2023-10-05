@@ -227,58 +227,375 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.props_walk_depth_first_properties = function(T, done) {
-    var A, B, WGUY, a, b, d, i, j, k, l, len, len1, len2, props, ref, ref1, ref2, x;
+  this.props_walk_depth_first_property_descriptors = function(T, done) {
+    var A, B, WGUY, a, a1, a2, a3, b, b_1, b_2, b_3, d, props;
     WGUY = require('../../../apps/webguy');
     ({props} = WGUY);
     //.........................................................................................................
-    A = class A {
-      a1() {}
+    a1 = function() {};
+    a2 = function() {};
+    a3 = function() {};
+    b_1 = function() {};
+    b_2 = function() {};
+    b_3 = function() {};
+    A = (function() {
+      //.........................................................................................................
+      class A {};
 
-      a2() {}
+      A.prototype.a1 = a1;
 
-      a3() {}
+      A.prototype.a2 = a2;
 
-    };
-    B = class B extends A {
-      b_1() {}
+      A.prototype.a3 = a3;
 
-      b_2() {}
+      A.prototype.c = 'declared in A';
 
-      b_3() {}
+      return A;
 
-    };
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.b_1 = b_1;
+
+      B.prototype.b_2 = b_2;
+
+      B.prototype.b_3 = b_3;
+
+      B.prototype.c = 'declared in B';
+
+      return B;
+
+    }).call(this);
     a = new A();
     b = new B();
-    ref = [...(props.walk_depth_first_property_descriptors(B))];
-    for (i = 0, len = ref.length; i < len; i++) {
-      x = ref[i];
-      //.........................................................................................................
-      urge('^3223^', x);
+    //.........................................................................................................
+    // urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B        )..., ]
+    // urge '^3223^', x for x in [ ( props.walk_depth_first_property_descriptors B::  )..., ]
+    if (T != null) {
+      T.eq((function() {
+        var ref, results;
+        ref = props.walk_depth_first_property_descriptors(B.prototype);
+        results = [];
+        for (d of ref) {
+          results.push([d.key, d.descriptor]);
+        }
+        return results;
+      })(), [
+        [
+          'a1',
+          {
+            value: a1,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'a2',
+          {
+            value: a2,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'a3',
+          {
+            value: a3,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'c',
+          {
+            value: 'declared in A',
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_1',
+          {
+            value: b_1,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_2',
+          {
+            value: b_2,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_3',
+          {
+            value: b_3,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'c',
+          {
+            value: 'declared in B',
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ]
+      ]);
     }
-    ref1 = [...(props.walk_depth_first_property_descriptors(B.prototype))];
-    for (j = 0, len1 = ref1.length; j < len1; j++) {
-      x = ref1[j];
-      urge('^3223^', x);
-    }
-    ref2 = [...(props.walk_depth_first_property_descriptors(new B()))];
-    for (l = 0, len2 = ref2.length; l < len2; l++) {
-      x = ref2[l];
-      urge('^3223^', x);
+    if (T != null) {
+      T.eq((function() {
+        var ref, results;
+        ref = props.walk_depth_first_property_descriptors(new B());
+        results = [];
+        for (d of ref) {
+          results.push([d.key, d.descriptor]);
+        }
+        return results;
+      })(), [
+        [
+          'a1',
+          {
+            value: a1,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'a2',
+          {
+            value: a2,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'a3',
+          {
+            value: a3,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'c',
+          {
+            value: 'declared in A',
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_1',
+          {
+            value: b_1,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_2',
+          {
+            value: b_2,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'b_3',
+          {
+            value: b_3,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ],
+        [
+          'c',
+          {
+            value: 'declared in B',
+            writable: true,
+            enumerable: true,
+            configurable: true
+          }
+        ]
+      ]);
     }
     //.........................................................................................................
-    urge('^3223^', (function() {
-      var ref3, results, y;
-      ref3 = props.walk_depth_first_property_descriptors(props.acquire_depth_first({
-        source: B.prototype
-      }));
-      results = [];
-      for (y of ref3) {
-        [k, d] = y;
-        results.push(k);
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_acquire_depth_first = function(T, done) {
+    var A, B, WGUY, a, a1, a2, a3, b, b_1, b_2, b_3, props;
+    WGUY = require('../../../apps/webguy');
+    ({props} = WGUY);
+    //.........................................................................................................
+    a1 = function() {};
+    a2 = function() {};
+    a3 = function() {};
+    b_1 = function() {};
+    b_2 = function() {};
+    b_3 = function() {};
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.a1 = a1;
+
+      A.prototype.a2 = a2;
+
+      A.prototype.a3 = a3;
+
+      A.prototype.c = 'declared in A';
+
+      return A;
+
+    }).call(this);
+    B = (function() {
+      class B extends A {};
+
+      B.prototype.b_1 = b_1;
+
+      B.prototype.b_2 = b_2;
+
+      B.prototype.b_3 = b_3;
+
+      B.prototype.c = 'declared in B';
+
+      return B;
+
+    }).call(this);
+    a = new A();
+    b = new B();
+    (() => {      //.........................................................................................................
+      var k, result;
+      result = props.acquire_depth_first(B.prototype, {
+        descriptor: {
+          enumerable: true
+        },
+        overwrite: true
+      });
+      if (T != null) {
+        T.eq((function() {
+          var results;
+          results = [];
+          for (k in result) {
+            results.push(k);
+          }
+          return results;
+        })(), ['a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3']);
       }
-      return results;
-    })());
+      if (T != null) {
+        T.eq(result, {
+          a1,
+          a2,
+          a3,
+          c: 'declared in B',
+          b_1,
+          b_2,
+          b_3
+        });
+      }
+      if (T != null) {
+        T.ok(result.a1 === a1);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.throws(/duplicate key 'c'/, function() {
+          return props.acquire_depth_first(B.prototype, {
+            descriptor: {
+              enumerable: true
+            },
+            overwrite: false
+          });
+        });
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var k, result;
+      result = props.acquire_depth_first(B.prototype, {
+        descriptor: {
+          enumerable: false
+        },
+        overwrite: true
+      });
+      if (T != null) {
+        T.eq((function() {
+          var results;
+          results = [];
+          for (k in result) {
+            results.push(k);
+          }
+          return results;
+        })(), []);
+      }
+      if (T != null) {
+        T.eq(result, {});
+      }
+      if (T != null) {
+        T.ok(result.a1 === a1);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var k, result;
+      result = props.acquire_depth_first(B.prototype, {
+        descriptor: {
+          enumerable: true
+        },
+        overwrite: 'ignore'
+      });
+      if (T != null) {
+        T.eq((function() {
+          var results;
+          results = [];
+          for (k in result) {
+            results.push(k);
+          }
+          return results;
+        })(), ['a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3']);
+      }
+      if (T != null) {
+        T.eq(result, {
+          a1,
+          a2,
+          a3,
+          c: 'declared in A',
+          b_1,
+          b_2,
+          b_3
+        });
+      }
+      if (T != null) {
+        T.ok(result.a1 === a1);
+      }
+      return null;
+    })();
+    //.........................................................................................................
     done();
     return null;
   };
@@ -319,11 +636,13 @@
   //===========================================================================================================
   if (require.main === module) {
     (() => {
-      // test @
-      // test @props_get_prototype_chain
-      return test(this.props_walk_depth_first_properties);
+      return test(this);
     })();
   }
+
+  // test @props_get_prototype_chain
+// test @props_walk_depth_first_property_descriptors
+// test @props_acquire_depth_first
 
 }).call(this);
 
