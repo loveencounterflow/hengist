@@ -228,8 +228,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.props_walk_depth_first_properties = function(T, done) {
-    var A, B, Props, WGUY, a, b, d, i, j, k, l, len, len1, len2, props, ref, ref1, ref2, templates, x;
+    var A, B, WGUY, a, b, d, i, j, k, l, len, len1, len2, props, ref, ref1, ref2, x;
     WGUY = require('../../../apps/webguy');
+    ({props} = WGUY);
     //.........................................................................................................
     A = class A {
       a1() {}
@@ -249,59 +250,6 @@
     };
     a = new A();
     b = new B();
-    //.........................................................................................................
-    templates = {
-      acquire_depth_first: {
-        source: null,
-        target: null,
-        filter: null,
-        decorator: null
-      }
-    };
-    //.........................................................................................................
-    Props = class Props {
-      * walk_depth_first_property_descriptors(x) {
-        var dsc, i, key, len, proto, protos, ref, ref1;
-        ref = protos = (WGUY.props.get_prototype_chain(x)).reverse();
-        for (i = 0, len = ref.length; i < len; i++) {
-          proto = ref[i];
-          ref1 = Object.getOwnPropertyDescriptors(proto);
-          for (key in ref1) {
-            dsc = ref1[key];
-            if (key === 'constructor') {
-              continue;
-            }
-            yield [key, dsc];
-          }
-        }
-        return null;
-      }
-
-      //.........................................................................................................
-      acquire_depth_first(cfg) {
-        var R, dsc, key, ref, ref1, y;
-        cfg = {...templates, ...cfg};
-        R = (ref = cfg.target) != null ? ref : {};
-        ref1 = this.walk_depth_first_property_descriptors(cfg.source);
-        for (y of ref1) {
-          [key, dsc] = y;
-          if (cfg.filter != null) {
-            if (!cfg.filter(key)) {
-              continue;
-            }
-          }
-          if (cfg.decorator != null) {
-            dsc.value = cfg.decorator(dsc.value);
-          }
-          Object.defineProperty(R, key, dsc);
-        }
-        return R;
-      }
-
-    };
-    //.........................................................................................................
-    Object.setPrototypeOf(Props, WGUY.props);
-    props = new Props();
     ref = [...(props.walk_depth_first_property_descriptors(B))];
     for (i = 0, len = ref.length; i < len; i++) {
       x = ref[i];
