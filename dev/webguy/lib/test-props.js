@@ -166,6 +166,175 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_get_prototype_chain = function(T, done) {
+    var A, B, WGUY, a, a1, a1p, b, bp, bp1, o1, o2;
+    WGUY = require('../../../apps/webguy');
+    //.........................................................................................................
+    A = class A {
+      a1() {}
+
+      a2() {}
+
+      a3() {}
+
+    };
+    B = class B extends A {
+      b_1() {}
+
+      b_2() {}
+
+      b_3() {}
+
+    };
+    a = new A();
+    b = new B();
+    //.........................................................................................................
+    o1 = {};
+    o2 = new Object();
+    a1 = [];
+    a1p = Object.getPrototypeOf(a1);
+    b = new B();
+    bp = Object.getPrototypeOf(b);
+    bp1 = Object.getPrototypeOf(bp);
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(A), [A]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(B), [B, A]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(b), [b, bp, bp1]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(b.prototype), []);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(Object), [Object]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(o1), [o1]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(o2), [o2]);
+    }
+    if (T != null) {
+      T.eq(WGUY.props.get_prototype_chain(a1), [a1, a1p]);
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_walk_depth_first_properties = function(T, done) {
+    var A, B, Props, WGUY, a, b, d, i, j, k, l, len, len1, len2, props, ref, ref1, ref2, templates, x;
+    WGUY = require('../../../apps/webguy');
+    //.........................................................................................................
+    A = class A {
+      a1() {}
+
+      a2() {}
+
+      a3() {}
+
+    };
+    B = class B extends A {
+      b_1() {}
+
+      b_2() {}
+
+      b_3() {}
+
+    };
+    a = new A();
+    b = new B();
+    //.........................................................................................................
+    templates = {
+      acquire_depth_first: {
+        source: null,
+        target: null,
+        filter: null,
+        decorator: null
+      }
+    };
+    //.........................................................................................................
+    Props = class Props {
+      * walk_depth_first_property_descriptors(x) {
+        var dsc, i, key, len, proto, protos, ref, ref1;
+        ref = protos = (WGUY.props.get_prototype_chain(x)).reverse();
+        for (i = 0, len = ref.length; i < len; i++) {
+          proto = ref[i];
+          ref1 = Object.getOwnPropertyDescriptors(proto);
+          for (key in ref1) {
+            dsc = ref1[key];
+            if (key === 'constructor') {
+              continue;
+            }
+            yield [key, dsc];
+          }
+        }
+        return null;
+      }
+
+      //.........................................................................................................
+      acquire_depth_first(cfg) {
+        var R, dsc, key, ref, ref1, y;
+        cfg = {...templates, ...cfg};
+        R = (ref = cfg.target) != null ? ref : {};
+        ref1 = this.walk_depth_first_property_descriptors(cfg.source);
+        for (y of ref1) {
+          [key, dsc] = y;
+          if (cfg.filter != null) {
+            if (!cfg.filter(key)) {
+              continue;
+            }
+          }
+          if (cfg.decorator != null) {
+            dsc.value = cfg.decorator(dsc.value);
+          }
+          Object.defineProperty(R, key, dsc);
+        }
+        return R;
+      }
+
+    };
+    //.........................................................................................................
+    Object.setPrototypeOf(Props, WGUY.props);
+    props = new Props();
+    ref = [...(props.walk_depth_first_property_descriptors(B))];
+    for (i = 0, len = ref.length; i < len; i++) {
+      x = ref[i];
+      //.........................................................................................................
+      urge('^3223^', x);
+    }
+    ref1 = [...(props.walk_depth_first_property_descriptors(B.prototype))];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      x = ref1[j];
+      urge('^3223^', x);
+    }
+    ref2 = [...(props.walk_depth_first_property_descriptors(new B()))];
+    for (l = 0, len2 = ref2.length; l < len2; l++) {
+      x = ref2[l];
+      urge('^3223^', x);
+    }
+    //.........................................................................................................
+    urge('^3223^', (function() {
+      var ref3, results, y;
+      ref3 = props.walk_depth_first_property_descriptors(props.acquire_depth_first({
+        source: B.prototype
+      }));
+      results = [];
+      for (y of ref3) {
+        [k, d] = y;
+        results.push(k);
+      }
+      return results;
+    })());
+    done();
+    return null;
+  };
+
   // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   //   #---------------------------------------------------------------------------------------------------------
@@ -202,7 +371,9 @@
   //===========================================================================================================
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // test @props_get_prototype_chain
+      return test(this.props_walk_depth_first_properties);
     })();
   }
 
