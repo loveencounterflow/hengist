@@ -656,6 +656,8 @@
         return null;
       };
       //.......................................................................................................
+      // proto     = {}
+      // mytarget  = Object.create proto
       mytarget = {};
       cfg = {
         target: mytarget,
@@ -665,6 +667,13 @@
         generate: generate
       };
       result = props.acquire_depth_first(A.prototype, cfg);
+      // help '^309-1^', result
+      // help '^309-1^', Object.getOwnPropertyNames result
+      // help '^309-1^', mytarget
+      // help '^309-1^', ( k for k of mytarget )
+      // help '^309-1^', mytarget.add_1
+      // help '^309-1^', Object.getOwnPropertyNames mytarget
+      // help '^309-1^', Object.getOwnPropertyNames Object.getPrototypeOf mytarget
       //.......................................................................................................
       if (T != null) {
         T.ok((Object.getOwnPropertyDescriptor(A.prototype, 'add_1')).enumerable, false);
