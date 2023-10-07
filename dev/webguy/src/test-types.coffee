@@ -489,14 +489,14 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   WG              = require '../../../apps/webguy'
   types           = new WG.types.Types()
   #.........................................................................................................
-  T?.eq ( types.validate.integer 1234 ), true
-  T?.eq ( types.validate.jsidentifier 'xxx' ), true
+  T?.eq ( types.validate.integer 1234 ), 1234
+  T?.eq ( types.validate.jsidentifier 'xxx' ), 'xxx'
   show_error_message_and_test T, /expected a jsidentifier got a null/, -> types.validate.jsidentifier null
   show_error_message_and_test T, /expected a jsidentifier got a float/, -> types.validate.jsidentifier 4
-  T?.eq ( types.validate.optional_integer 1234 ), true
-  T?.eq ( types.validate.optional_integer null ), true
-  T?.eq ( types.validate.nothing null ), true
-  T?.eq ( types.validate.nothing undefined ), true
+  T?.eq ( types.validate.optional_integer 1234 ), 1234
+  T?.eq ( types.validate.optional_integer null ), null
+  T?.eq ( types.validate.nothing null ), null
+  T?.eq ( types.validate.nothing undefined ), undefined
   show_error_message_and_test T, /expected a nothing got a text/, -> types.validate.nothing 'yay!'
   #.........................................................................................................
   done?()
@@ -535,9 +535,9 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 
 ############################################################################################################
 if require.main is module then await do =>
-  # await test @
+  await test @
   # await test @types_validate_1
-  await test @types_declare_with_class
+  # await test @types_declare_with_class
   # await test @types_isa_2
   # @types_demo_method_object_construction()
   # test @types_demo_method_object_construction
