@@ -260,6 +260,72 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   done()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@props_acquire_depth_first_with_generated_properties = ( T, done ) ->
+  WGUY      = require '../../../apps/webguy'
+  { props } = WGUY
+  #.........................................................................................................
+  add_1 = ( a, b = 1 ) -> a + b
+  mul_1 = ( a, b = 1 ) -> a * b
+  #.........................................................................................................
+  class A
+    add_1:  add_1
+    mul_1:  mul_1
+  #.........................................................................................................
+  do =>
+    generate = ({ target, owner, key, descriptor, }) ->
+      T?.ok target is mytarget
+      method = descriptor.value = props.nameit key, descriptor.value.bind target
+      yield { key, descriptor, }
+      return null unless key.endsWith '_1'
+      #.....................................................................................................
+      for n in [ 2, 3, ]
+        subkey  = key[ ... key.length - 1 ] + "#{n}"
+        value   = do ( n ) =>
+          f = ( a, b = n ) -> method a, b
+          return props.nameit subkey, f.bind target
+        #...................................................................................................
+        yield { key: subkey, descriptor: { descriptor..., value, }, }
+      return null
+    #.......................................................................................................
+    mytarget  = {}
+    cfg       =
+      target:       mytarget
+      descriptor:   { enumerable: true, }
+      generate:     generate
+    result    = props.acquire_depth_first ( A:: ), cfg
+    #.......................................................................................................
+    T?.ok ( Object.getOwnPropertyDescriptor A::,    'add_1' ).enumerable, false
+    T?.ok ( Object.getOwnPropertyDescriptor result, 'add_1' ).enumerable, true
+    T?.ok ( Object.getOwnPropertyDescriptor result, 'add_2' ).enumerable, true
+    T?.ok ( Object.getOwnPropertyDescriptor result, 'add_3' ).enumerable, true
+    T?.ok result is mytarget
+    T?.ok isa.function result.add_1
+    T?.ok isa.function result.add_2
+    T?.ok isa.function result.add_3
+    T?.ok isa.function result.mul_1
+    T?.ok isa.function result.mul_2
+    T?.ok isa.function result.mul_3
+    T?.eq ( result.add_1 7 ), 8
+    T?.eq ( result.add_2 7 ), 9
+    T?.eq ( result.add_3 7 ), 10
+    T?.eq ( result.mul_1 7 ), 7
+    T?.eq ( result.mul_2 7 ), 14
+    T?.eq ( result.mul_3 7 ), 21
+    T?.eq ( result.add_1.name ), 'add_1'
+    T?.eq ( result.add_2.name ), 'add_2'
+    T?.eq ( result.add_3.name ), 'add_3'
+    T?.eq ( result.mul_1.name ), 'mul_1'
+    T?.eq ( result.mul_2.name ), 'mul_2'
+    T?.eq ( result.mul_3.name ), 'mul_3'
+    # T?.eq ( k for k of result ), [ 'a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3' ]
+    # T?.eq result, { a1, a2, a3, c: 'declared in A', b_1, b_2, b_3, }
+    # T?.ok result.a1 is a1
+    return null
+  #.........................................................................................................
+  done()
+  return null
+
 # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #   #---------------------------------------------------------------------------------------------------------
@@ -296,8 +362,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #===========================================================================================================
 if require.main is module then do =>
-  test @
+  # test @
+  test @props_acquire_depth_first_with_generated_properties
   # test @props_get_prototype_chain
   # test @props_walk_depth_first_property_descriptors
   # test @props_acquire_depth_first
-
