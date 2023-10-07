@@ -288,12 +288,21 @@ types                     = new ( require 'intertype-newest' ).Intertype()
         yield { key: subkey, descriptor: { descriptor..., value, }, }
       return null
     #.......................................................................................................
+    # proto     = {}
+    # mytarget  = Object.create proto
     mytarget  = {}
     cfg       =
       target:       mytarget
       descriptor:   { enumerable: true, }
       generate:     generate
     result    = props.acquire_depth_first ( A:: ), cfg
+    # help '^309-1^', result
+    # help '^309-1^', Object.getOwnPropertyNames result
+    # help '^309-1^', mytarget
+    # help '^309-1^', ( k for k of mytarget )
+    # help '^309-1^', mytarget.add_1
+    # help '^309-1^', Object.getOwnPropertyNames mytarget
+    # help '^309-1^', Object.getOwnPropertyNames Object.getPrototypeOf mytarget
     #.......................................................................................................
     T?.ok ( Object.getOwnPropertyDescriptor A::,    'add_1' ).enumerable, false
     T?.ok ( Object.getOwnPropertyDescriptor result, 'add_1' ).enumerable, true
