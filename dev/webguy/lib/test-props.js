@@ -600,6 +600,151 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_acquire_depth_first_with_generated_properties = function(T, done) {
+    var A, WGUY, add_1, mul_1, props;
+    WGUY = require('../../../apps/webguy');
+    ({props} = WGUY);
+    //.........................................................................................................
+    add_1 = function(a, b = 1) {
+      return a + b;
+    };
+    mul_1 = function(a, b = 1) {
+      return a * b;
+    };
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.add_1 = add_1;
+
+      A.prototype.mul_1 = mul_1;
+
+      return A;
+
+    }).call(this);
+    (() => {      //.........................................................................................................
+      var cfg, generate, mytarget, result;
+      generate = function*({target, owner, key, descriptor}) {
+        var i, len, method, n, ref, subkey, value;
+        if (T != null) {
+          T.ok(target === mytarget);
+        }
+        method = descriptor.value = props.nameit(key, descriptor.value.bind(target));
+        yield ({key, descriptor});
+        if (!key.endsWith('_1')) {
+          return null;
+        }
+        ref = [2, 3];
+        //.....................................................................................................
+        for (i = 0, len = ref.length; i < len; i++) {
+          n = ref[i];
+          subkey = key.slice(0, key.length - 1) + `${n}`;
+          value = ((n) => {
+            var f;
+            f = function(a, b = n) {
+              return method(a, b);
+            };
+            return props.nameit(subkey, f.bind(target));
+          })(n);
+          yield ({
+            //...................................................................................................
+            key: subkey,
+            descriptor: {...descriptor, value}
+          });
+        }
+        return null;
+      };
+      //.......................................................................................................
+      mytarget = {};
+      cfg = {
+        target: mytarget,
+        descriptor: {
+          enumerable: true
+        },
+        generate: generate
+      };
+      result = props.acquire_depth_first(A.prototype, cfg);
+      //.......................................................................................................
+      if (T != null) {
+        T.ok((Object.getOwnPropertyDescriptor(A.prototype, 'add_1')).enumerable, false);
+      }
+      if (T != null) {
+        T.ok((Object.getOwnPropertyDescriptor(result, 'add_1')).enumerable, true);
+      }
+      if (T != null) {
+        T.ok((Object.getOwnPropertyDescriptor(result, 'add_2')).enumerable, true);
+      }
+      if (T != null) {
+        T.ok((Object.getOwnPropertyDescriptor(result, 'add_3')).enumerable, true);
+      }
+      if (T != null) {
+        T.ok(result === mytarget);
+      }
+      if (T != null) {
+        T.ok(isa.function(result.add_1));
+      }
+      if (T != null) {
+        T.ok(isa.function(result.add_2));
+      }
+      if (T != null) {
+        T.ok(isa.function(result.add_3));
+      }
+      if (T != null) {
+        T.ok(isa.function(result.mul_1));
+      }
+      if (T != null) {
+        T.ok(isa.function(result.mul_2));
+      }
+      if (T != null) {
+        T.ok(isa.function(result.mul_3));
+      }
+      if (T != null) {
+        T.eq(result.add_1(7), 8);
+      }
+      if (T != null) {
+        T.eq(result.add_2(7), 9);
+      }
+      if (T != null) {
+        T.eq(result.add_3(7), 10);
+      }
+      if (T != null) {
+        T.eq(result.mul_1(7), 7);
+      }
+      if (T != null) {
+        T.eq(result.mul_2(7), 14);
+      }
+      if (T != null) {
+        T.eq(result.mul_3(7), 21);
+      }
+      if (T != null) {
+        T.eq(result.add_1.name, 'add_1');
+      }
+      if (T != null) {
+        T.eq(result.add_2.name, 'add_2');
+      }
+      if (T != null) {
+        T.eq(result.add_3.name, 'add_3');
+      }
+      if (T != null) {
+        T.eq(result.mul_1.name, 'mul_1');
+      }
+      if (T != null) {
+        T.eq(result.mul_2.name, 'mul_2');
+      }
+      if (T != null) {
+        T.eq(result.mul_3.name, 'mul_3');
+      }
+      // T?.eq ( k for k of result ), [ 'a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3' ]
+      // T?.eq result, { a1, a2, a3, c: 'declared in A', b_1, b_2, b_3, }
+      // T?.ok result.a1 is a1
+      return null;
+    })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
   // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
   //   #---------------------------------------------------------------------------------------------------------
@@ -636,7 +781,8 @@
   //===========================================================================================================
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      return test(this.props_acquire_depth_first_with_generated_properties);
     })();
   }
 
