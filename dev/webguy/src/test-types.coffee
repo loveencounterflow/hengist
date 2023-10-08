@@ -511,7 +511,9 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   do =>
     class declarations extends Isa
       nonzero_integer: ( x ) ->
-        help '^nonzero_integer@1^', x, ( @isa.nonzero x ), ( @isa.integer x )
+        # help '^nonzero_integer@1^', @, x
+        # help '^nonzero_integer@1^', @isa
+        # help '^nonzero_integer@1^', ( @isa.nonzero x ), ( @isa.integer x )
         ( @isa.nonzero x ) and ( @isa.integer x )
     #.......................................................................................................
     types = new Types { declarations, }
@@ -531,12 +533,42 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_check_method_names = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  _               = WG.types
+  { Types, Isa, } = WG.types
+  #.........................................................................................................
+  class declarations extends Isa
+    nonzero_integer:  ( x ) -> ( @isa.nonzero x ) and ( @isa.integer x )
+    nonzero_cardinal: ( x ) -> ( @isa.nonzero x ) and ( @isa.cardinal x )
+  #.........................................................................................................
+  { isa, validate, } = new Types { declarations, }
+  T?.eq ( isa.integer                         ).name,                           'isa_integer'
+  T?.eq ( isa.optional_integer                ).name,                  'isa_optional_integer'
+  T?.eq ( validate.integer                    ).name,                      'validate_integer'
+  T?.eq ( validate.optional_integer           ).name,             'validate_optional_integer'
+  T?.eq ( isa.nonzero_integer                 ).name,                   'isa_nonzero_integer'
+  T?.eq ( isa.optional_nonzero_integer        ).name,          'isa_optional_nonzero_integer'
+  T?.eq ( validate.nonzero_integer            ).name,              'validate_nonzero_integer'
+  T?.eq ( validate.optional_nonzero_integer   ).name,     'validate_optional_nonzero_integer'
+  T?.eq ( isa.nonzero_cardinal                ).name,                  'isa_nonzero_cardinal'
+  T?.eq ( isa.optional_nonzero_cardinal       ).name,         'isa_optional_nonzero_cardinal'
+  T?.eq ( validate.nonzero_cardinal           ).name,             'validate_nonzero_cardinal'
+  T?.eq ( validate.optional_nonzero_cardinal  ).name,    'validate_optional_nonzero_cardinal'
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
+  # await test @
+  test @types_check_method_names
   # await test @types_validate_1
+  # @types_type_of()
+  # @types_declare_with_class()
   # await test @types_declare_with_class
   # await test @types_isa_2
   # @types_demo_method_object_construction()
