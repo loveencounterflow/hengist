@@ -1104,7 +1104,9 @@
       var declarations;
       declarations = class declarations extends Isa {
         nonzero_integer(x) {
-          help('^nonzero_integer@1^', x, this.isa.nonzero(x), this.isa.integer(x));
+          // help '^nonzero_integer@1^', @, x
+          // help '^nonzero_integer@1^', @isa
+          // help '^nonzero_integer@1^', ( @isa.nonzero x ), ( @isa.integer x )
           return (this.isa.nonzero(x)) && (this.isa.integer(x));
         }
 
@@ -1150,14 +1152,78 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_check_method_names = function(T, done) {
+    var Isa, Types, WG, _, declarations, validate;
+    WG = require('../../../apps/webguy');
+    _ = WG.types;
+    ({Types, Isa} = WG.types);
+    //.........................................................................................................
+    declarations = class declarations extends Isa {
+      nonzero_integer(x) {
+        return (this.isa.nonzero(x)) && (this.isa.integer(x));
+      }
+
+      nonzero_cardinal(x) {
+        return (this.isa.nonzero(x)) && (this.isa.cardinal(x));
+      }
+
+    };
+    //.........................................................................................................
+    ({isa, validate} = new Types({declarations}));
+    if (T != null) {
+      T.eq(isa.integer.name, 'isa_integer');
+    }
+    if (T != null) {
+      T.eq(isa.optional_integer.name, 'isa_optional_integer');
+    }
+    if (T != null) {
+      T.eq(validate.integer.name, 'validate_integer');
+    }
+    if (T != null) {
+      T.eq(validate.optional_integer.name, 'validate_optional_integer');
+    }
+    if (T != null) {
+      T.eq(isa.nonzero_integer.name, 'isa_nonzero_integer');
+    }
+    if (T != null) {
+      T.eq(isa.optional_nonzero_integer.name, 'isa_optional_nonzero_integer');
+    }
+    if (T != null) {
+      T.eq(validate.nonzero_integer.name, 'validate_nonzero_integer');
+    }
+    if (T != null) {
+      T.eq(validate.optional_nonzero_integer.name, 'validate_optional_nonzero_integer');
+    }
+    if (T != null) {
+      T.eq(isa.nonzero_cardinal.name, 'isa_nonzero_cardinal');
+    }
+    if (T != null) {
+      T.eq(isa.optional_nonzero_cardinal.name, 'isa_optional_nonzero_cardinal');
+    }
+    if (T != null) {
+      T.eq(validate.nonzero_cardinal.name, 'validate_nonzero_cardinal');
+    }
+    if (T != null) {
+      T.eq(validate.optional_nonzero_cardinal.name, 'validate_optional_nonzero_cardinal');
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    await (async() => {
-      return (await test(this));
+    await (() => {
+      // await test @
+      return test(this.types_check_method_names);
     })();
   }
 
   // await test @types_validate_1
+// @types_type_of()
+// @types_declare_with_class()
 // await test @types_declare_with_class
 // await test @types_isa_2
 // @types_demo_method_object_construction()

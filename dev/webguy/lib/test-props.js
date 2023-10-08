@@ -1,6 +1,7 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, echo, help, info, inspect, isa, jr, log, plain, praise, rpr, test, types, urge, warn, whisper;
+  var GUY, alert, debug, echo, help, info, inspect, isa, jr, log, plain, praise, rpr, test, types, urge, warn, whisper,
+    modulo = function(a, b) { return (+a % (b = +b) + b) % b; };
 
   //###########################################################################################################
   GUY = require('guy');
@@ -624,8 +625,8 @@
 
     }).call(this);
     (() => {      //.........................................................................................................
-      var cfg, generate, mytarget, result;
-      generate = function*({target, owner, key, descriptor}) {
+      var cfg, generator, mytarget, result;
+      generator = function*({target, owner, key, descriptor}) {
         var i, len, method, n, ref, subkey, value;
         if (T != null) {
           T.ok(target === mytarget);
@@ -656,24 +657,15 @@
         return null;
       };
       //.......................................................................................................
-      // proto     = {}
-      // mytarget  = Object.create proto
       mytarget = {};
       cfg = {
         target: mytarget,
         descriptor: {
           enumerable: true
         },
-        generate: generate
+        generator: generator
       };
       result = props.acquire_depth_first(A.prototype, cfg);
-      // help '^309-1^', result
-      // help '^309-1^', Object.getOwnPropertyNames result
-      // help '^309-1^', mytarget
-      // help '^309-1^', ( k for k of mytarget )
-      // help '^309-1^', mytarget.add_1
-      // help '^309-1^', Object.getOwnPropertyNames mytarget
-      // help '^309-1^', Object.getOwnPropertyNames Object.getPrototypeOf mytarget
       //.......................................................................................................
       if (T != null) {
         T.ok((Object.getOwnPropertyDescriptor(A.prototype, 'add_1')).enumerable, false);
@@ -744,11 +736,234 @@
       if (T != null) {
         T.eq(result.mul_3.name, 'mul_3');
       }
-      // T?.eq ( k for k of result ), [ 'a1', 'a2', 'a3', 'c', 'b_1', 'b_2', 'b_3' ]
-      // T?.eq result, { a1, a2, a3, c: 'declared in A', b_1, b_2, b_3, }
-      // T?.ok result.a1 is a1
       return null;
     })();
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_acquire_depth_first_with_generated_properties_and_decorator = function(T, done) {
+    var A, WGUY, add_1, cfg, mul_1, mytarget, props, result;
+    WGUY = require('../../../apps/webguy');
+    ({props} = WGUY);
+    //.........................................................................................................
+    add_1 = function(a, b = 1) {
+      return a + b;
+    };
+    mul_1 = function(a, b = 1) {
+      return a * b;
+    };
+    A = (function() {
+      //.........................................................................................................
+      class A {};
+
+      A.prototype.add_1 = add_1;
+
+      A.prototype.mul_1 = mul_1;
+
+      return A;
+
+    }).call(this);
+    //.........................................................................................................
+    mytarget = {};
+    //---------------------------------------------------------------------------------------------------------
+    cfg = {
+      target: mytarget,
+      descriptor: {
+        enumerable: true
+      },
+      //.......................................................................................................
+      generator: function*({target, owner, key, descriptor}) {
+        var i, len, method, n, ref, subkey, value;
+        if (T != null) {
+          T.ok(target === mytarget);
+        }
+        method = descriptor.value = props.nameit(key, descriptor.value.bind(target));
+        yield ({key, descriptor});
+        if (!key.endsWith('_1')) {
+          return null;
+        }
+        ref = [2, 3];
+        //.....................................................................................................
+        for (i = 0, len = ref.length; i < len; i++) {
+          n = ref[i];
+          subkey = key.slice(0, key.length - 1) + `${n}`;
+          value = ((n) => {
+            var f;
+            f = function(a, b = n) {
+              return method(a, b);
+            };
+            return f;
+          })(n);
+          yield ({
+            //...................................................................................................
+            key: subkey,
+            descriptor: {...descriptor, value}
+          });
+        }
+        return null;
+      },
+      //.......................................................................................................
+      decorator: function({target, owner, key, descriptor}) {
+        var value;
+        debug('^345-1^', descriptor.value);
+        value = props.nameit(key, descriptor.value.bind(target));
+        debug('^345-2^', value);
+        return {value};
+      }
+    };
+    //.........................................................................................................
+    result = props.acquire_depth_first(A.prototype, cfg);
+    //.........................................................................................................
+    if (T != null) {
+      T.ok((Object.getOwnPropertyDescriptor(A.prototype, 'add_1')).enumerable, false);
+    }
+    if (T != null) {
+      T.ok((Object.getOwnPropertyDescriptor(result, 'add_1')).enumerable, true);
+    }
+    if (T != null) {
+      T.ok((Object.getOwnPropertyDescriptor(result, 'add_2')).enumerable, true);
+    }
+    if (T != null) {
+      T.ok((Object.getOwnPropertyDescriptor(result, 'add_3')).enumerable, true);
+    }
+    if (T != null) {
+      T.ok(result === mytarget);
+    }
+    if (T != null) {
+      T.ok(isa.function(result.add_1));
+    }
+    if (T != null) {
+      T.ok(isa.function(result.add_2));
+    }
+    if (T != null) {
+      T.ok(isa.function(result.add_3));
+    }
+    if (T != null) {
+      T.ok(isa.function(result.mul_1));
+    }
+    if (T != null) {
+      T.ok(isa.function(result.mul_2));
+    }
+    if (T != null) {
+      T.ok(isa.function(result.mul_3));
+    }
+    if (T != null) {
+      T.eq(result.add_1(7), 8);
+    }
+    if (T != null) {
+      T.eq(result.add_2(7), 9);
+    }
+    if (T != null) {
+      T.eq(result.add_3(7), 10);
+    }
+    if (T != null) {
+      T.eq(result.mul_1(7), 7);
+    }
+    if (T != null) {
+      T.eq(result.mul_2(7), 14);
+    }
+    if (T != null) {
+      T.eq(result.mul_3(7), 21);
+    }
+    if (T != null) {
+      T.eq(result.add_1.name, 'add_1');
+    }
+    if (T != null) {
+      T.eq(result.add_2.name, 'add_2');
+    }
+    if (T != null) {
+      T.eq(result.add_3.name, 'add_3');
+    }
+    if (T != null) {
+      T.eq(result.mul_1.name, 'mul_1');
+    }
+    if (T != null) {
+      T.eq(result.mul_2.name, 'mul_2');
+    }
+    if (T != null) {
+      T.eq(result.mul_3.name, 'mul_3');
+    }
+    //.........................................................................................................
+    done();
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.props_acquire_depth_first_with_dynamic_targets_from_generator = function(T, done) {
+    var WGUY, add_1, cfg, k, mul_1, props, result, source, t1, t2, t3;
+    WGUY = require('../../../apps/webguy');
+    ({props} = WGUY);
+    //.........................................................................................................
+    add_1 = function(a, b = 1) {
+      return a + b;
+    };
+    mul_1 = function(a, b = 1) {
+      return a * b;
+    };
+    //.........................................................................................................
+    source = {
+      p1: 1,
+      p2: 2,
+      p3: 3,
+      p4: 4,
+      p5: 5,
+      p6: 6
+    };
+    //.........................................................................................................
+    t1 = {};
+    t2 = {};
+    t3 = {};
+    //---------------------------------------------------------------------------------------------------------
+    cfg = {
+      descriptor: {
+        enumerable: true
+      },
+      //.......................................................................................................
+      generator: function*({target, owner, key, descriptor}) {
+        if ((modulo(descriptor.value, 3)) === 0) {
+          target = t3;
+        } else if ((modulo(descriptor.value, 2)) === 0) {
+          target = t2;
+        } else {
+          target = t1;
+        }
+        yield ({target, key, descriptor});
+        return null;
+      }
+    };
+    //.........................................................................................................
+    result = props.acquire_depth_first(source, cfg);
+    if (T != null) {
+      T.eq((function() {
+        var results;
+        results = [];
+        for (k in result) {
+          results.push(k);
+        }
+        return results;
+      })(), []);
+    }
+    if (T != null) {
+      T.eq(t1.p1, 1);
+    }
+    if (T != null) {
+      T.eq(t2.p2, 2);
+    }
+    if (T != null) {
+      T.eq(t3.p3, 3);
+    }
+    if (T != null) {
+      T.eq(t2.p4, 4);
+    }
+    if (T != null) {
+      T.eq(t1.p5, 5);
+    }
+    if (T != null) {
+      T.eq(t3.p6, 6);
+    }
     //.........................................................................................................
     done();
     return null;
@@ -791,7 +1006,8 @@
   if (require.main === module) {
     (() => {
       // test @
-      return test(this.props_acquire_depth_first_with_generated_properties);
+      // test @props_acquire_depth_first_with_generated_properties
+      return test(this.props_acquire_depth_first_with_dynamic_targets_from_generator);
     })();
   }
 
