@@ -1153,7 +1153,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.types_check_method_names = function(T, done) {
+  this.types_check_method_names_1 = function(T, done) {
     var Isa, Types, WG, _, declarations, validate;
     WG = require('../../../apps/webguy');
     _ = WG.types;
@@ -1213,15 +1213,40 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_check_method_names_2 = function(T, done) {
+    var WG, validate;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    ({isa, validate} = WG.types);
+    if (T != null) {
+      T.eq(isa.integer.name, 'isa_integer');
+    }
+    if (T != null) {
+      T.eq(isa.optional_integer.name, 'isa_optional_integer');
+    }
+    if (T != null) {
+      T.eq(validate.integer.name, 'validate_integer');
+    }
+    if (T != null) {
+      T.eq(validate.optional_integer.name, 'validate_optional_integer');
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
-    await (() => {
-      // await test @
-      return test(this.types_check_method_names);
+    await (async() => {
+      return (await test(this));
     })();
   }
 
-  // await test @types_validate_1
+  // @types_check_method_names_2()
+// test @types_check_method_names_2
+// await test @types_validate_1
 // @types_type_of()
 // @types_declare_with_class()
 // await test @types_declare_with_class
