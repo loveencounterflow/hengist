@@ -573,11 +573,24 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+# #-----------------------------------------------------------------------------------------------------------
+# @types_xxxxxxxx = ( T, done ) ->
+#   WG              = require '../../../apps/webguy'
+#   #.........................................................................................................
+#   { isa, validate, } = WG.types
+#   debug '^types_xxxxxxxx@1^', isa.codepointid 123
+#   debug '^types_xxxxxxxx@1^', isa.codepointid -123
+#   debug '^types_xxxxxxxx@1^', validate.codepointid 123
+#   #.........................................................................................................
+#   done?()
+#   return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
   await test @
+  # @types_xxxxxxxx()
   # @types_check_method_names_2()
   # test @types_check_method_names_2
   # await test @types_validate_1
