@@ -534,7 +534,7 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@types_check_method_names = ( T, done ) ->
+@types_check_method_names_1 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   _               = WG.types
   { Types, Isa, } = WG.types
@@ -560,12 +560,26 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_check_method_names_2 = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  { isa, validate, } = WG.types
+  T?.eq ( isa.integer                         ).name,                           'isa_integer'
+  T?.eq ( isa.optional_integer                ).name,                  'isa_optional_integer'
+  T?.eq ( validate.integer                    ).name,                      'validate_integer'
+  T?.eq ( validate.optional_integer           ).name,             'validate_optional_integer'
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  # await test @
-  test @types_check_method_names
+  await test @
+  # @types_check_method_names_2()
+  # test @types_check_method_names_2
   # await test @types_validate_1
   # @types_type_of()
   # @types_declare_with_class()
