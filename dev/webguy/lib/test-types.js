@@ -273,7 +273,7 @@
   this.types_isa_4 = function(T, done) {
     var C, WG;
     WG = require('../../../apps/webguy');
-    types = new WG.types.Types();
+    types = new WG.types.Intertype();
     //.........................................................................................................
     // debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
     // debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
@@ -977,7 +977,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_demo_method_object_construction = function(T, done) {
-    var Isa, Types, WG, proto;
+    var Intertype, Isa, WG, proto;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
     Isa = class Isa {
@@ -997,7 +997,7 @@
       iam: 'proto'
     };
     //.........................................................................................................
-    Types = class Types {
+    Intertype = class Intertype {
       constructor() {
         var i, isa_method, len, ref, type;
         this.isa = Object.create(proto);
@@ -1012,7 +1012,7 @@
 
     };
     //.........................................................................................................
-    types = new Types();
+    types = new Intertype();
     // info '^demo@1^', types.constructor.name
     // info '^demo@2^', types.isa.constructor.name
     //.........................................................................................................
@@ -1059,7 +1059,7 @@
   this.types_validate_1 = function(T, done) {
     var WG;
     WG = require('../../../apps/webguy');
-    types = new WG.types.Types();
+    types = new WG.types.Intertype();
     //.........................................................................................................
     if (T != null) {
       T.eq(types.validate.integer(1234), 1234);
@@ -1067,10 +1067,10 @@
     if (T != null) {
       T.eq(types.validate.jsidentifier('xxx'), 'xxx');
     }
-    show_error_message_and_test(T, /expected a jsidentifier got a null/, function() {
+    show_error_message_and_test(T, /expected a jsidentifier, got a null/, function() {
       return types.validate.jsidentifier(null);
     });
-    show_error_message_and_test(T, /expected a jsidentifier got a float/, function() {
+    show_error_message_and_test(T, /expected a jsidentifier, got a float/, function() {
       return types.validate.jsidentifier(4);
     });
     if (T != null) {
@@ -1085,7 +1085,7 @@
     if (T != null) {
       T.eq(types.validate.nothing(void 0), void 0);
     }
-    show_error_message_and_test(T, /expected a nothing got a text/, function() {
+    show_error_message_and_test(T, /expected a nothing, got a text/, function() {
       return types.validate.nothing('yay!');
     });
     if (typeof done === "function") {
@@ -1096,10 +1096,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_declare_with_class = function(T, done) {
-    var Isa, Types, WG, _;
+    var Intertype, Isa, WG, _;
     WG = require('../../../apps/webguy');
     _ = WG.types;
-    ({Types, Isa} = WG.types);
+    ({Intertype, Isa} = WG.types);
     (() => {      //.........................................................................................................
       var declarations;
       declarations = class declarations extends Isa {
@@ -1112,7 +1112,7 @@
 
       };
       //.......................................................................................................
-      types = new Types({declarations});
+      types = new Intertype({declarations});
       if (T != null) {
         T.eq(_.isa.function(types.isa.nonzero), true);
       }
@@ -1154,10 +1154,10 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_check_method_names_1 = function(T, done) {
-    var Isa, Types, WG, _, declarations, validate;
+    var Intertype, Isa, WG, _, declarations, validate;
     WG = require('../../../apps/webguy');
     _ = WG.types;
-    ({Types, Isa} = WG.types);
+    ({Intertype, Isa} = WG.types);
     //.........................................................................................................
     declarations = class declarations extends Isa {
       nonzero_integer(x) {
@@ -1170,7 +1170,7 @@
 
     };
     //.........................................................................................................
-    ({isa, validate} = new Types({declarations}));
+    ({isa, validate} = new Intertype({declarations}));
     if (T != null) {
       T.eq(isa.integer.name, 'isa_integer');
     }
@@ -1237,27 +1237,57 @@
     return null;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @types_xxxxxxxx = ( T, done ) ->
-  //   WG              = require '../../../apps/webguy'
-  //   #.........................................................................................................
-  //   { isa, validate, } = WG.types
-  //   debug '^types_xxxxxxxx@1^', isa.codepointid 123
-  //   debug '^types_xxxxxxxx@1^', isa.codepointid -123
-  //   debug '^types_xxxxxxxx@1^', validate.codepointid 123
-  //   #.........................................................................................................
-  //   done?()
-  //   return null
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_declaration_1 = function(T, done) {
+    var WG, declarations, validate;
+    WG = require('../../../apps/webguy');
+    //.........................................................................................................
+    declarations = class declarations extends WG.types.Isa {
+      foo(x) {
+        return (this.isa.text(x)) && (/oo$/.test(x));
+      }
+
+    };
+    //.........................................................................................................
+    types = new WG.types.Intertype({declarations});
+    ({isa, validate} = types);
+    if (T != null) {
+      T.eq(isa.codepointid(123), true);
+    }
+    if (T != null) {
+      T.eq(isa.codepointid(-123), false);
+    }
+    if (T != null) {
+      T.eq(isa.foo(-123), false);
+    }
+    if (T != null) {
+      T.eq(isa.foo('fo'), false);
+    }
+    show_error_message_and_test(T, /expected a foo, got a text/, function() {
+      return validate.foo('fo');
+    });
+    if (T != null) {
+      T.eq(isa.foo('foo'), true);
+    }
+    if (T != null) {
+      T.eq(validate.codepointid(123), 123);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
 
   //###########################################################################################################
   if (require.main === module) {
-    await (async() => {
-      return (await test(this));
+    await (() => {
+      // await test @
+      this.types_declaration_1();
+      return test(this.types_declaration_1);
     })();
   }
 
-  // @types_xxxxxxxx()
-// @types_check_method_names_2()
+  // @types_check_method_names_2()
 // test @types_check_method_names_2
 // await test @types_validate_1
 // @types_type_of()
