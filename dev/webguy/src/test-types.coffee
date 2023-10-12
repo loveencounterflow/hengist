@@ -123,7 +123,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 @types_isa_4 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
-  types = new WG.types.Types()
+  types = new WG.types.Intertype()
   #.........................................................................................................
   # debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
   # debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
@@ -456,7 +456,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   proto =
     iam: 'proto'
   #.........................................................................................................
-  class Types
+  class Intertype
     constructor: ->
       @isa = Object.create proto
       for type in WG.props.public_keys Isa::
@@ -464,7 +464,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
         proto[ type ] = isa_method.bind @
       return undefined
   #.........................................................................................................
-  types = new Types()
+  types = new Intertype()
   # info '^demo@1^', types.constructor.name
   # info '^demo@2^', types.isa.constructor.name
   #.........................................................................................................
@@ -487,17 +487,17 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 #-----------------------------------------------------------------------------------------------------------
 @types_validate_1 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
-  types           = new WG.types.Types()
+  types           = new WG.types.Intertype()
   #.........................................................................................................
   T?.eq ( types.validate.integer 1234 ), 1234
   T?.eq ( types.validate.jsidentifier 'xxx' ), 'xxx'
-  show_error_message_and_test T, /expected a jsidentifier got a null/, -> types.validate.jsidentifier null
-  show_error_message_and_test T, /expected a jsidentifier got a float/, -> types.validate.jsidentifier 4
+  show_error_message_and_test T, /expected a jsidentifier, got a null/, -> types.validate.jsidentifier null
+  show_error_message_and_test T, /expected a jsidentifier, got a float/, -> types.validate.jsidentifier 4
   T?.eq ( types.validate.optional_integer 1234 ), 1234
   T?.eq ( types.validate.optional_integer null ), null
   T?.eq ( types.validate.nothing null ), null
   T?.eq ( types.validate.nothing undefined ), undefined
-  show_error_message_and_test T, /expected a nothing got a text/, -> types.validate.nothing 'yay!'
+  show_error_message_and_test T, /expected a nothing, got a text/, -> types.validate.nothing 'yay!'
   #.........................................................................................................
   done?()
   return null
@@ -506,7 +506,7 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 @types_declare_with_class = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   _               = WG.types
-  { Types, Isa, } = WG.types
+  { Intertype, Isa, } = WG.types
   #.........................................................................................................
   do =>
     class declarations extends Isa
@@ -516,7 +516,7 @@ show_error_message_and_test = ( T, matcher, fn ) ->
         # help '^nonzero_integer@1^', ( @isa.nonzero x ), ( @isa.integer x )
         ( @isa.nonzero x ) and ( @isa.integer x )
     #.......................................................................................................
-    types = new Types { declarations, }
+    types = new Intertype { declarations, }
     T?.eq ( _.isa.function types.isa.nonzero              ), true
     T?.eq ( _.isa.function types.isa.integer              ), true
     T?.eq ( _.isa.function types.isa.nonzero_integer      ), true
@@ -537,13 +537,13 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 @types_check_method_names_1 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   _               = WG.types
-  { Types, Isa, } = WG.types
+  { Intertype, Isa, } = WG.types
   #.........................................................................................................
   class declarations extends Isa
     nonzero_integer:  ( x ) -> ( @isa.nonzero x ) and ( @isa.integer x )
     nonzero_cardinal: ( x ) -> ( @isa.nonzero x ) and ( @isa.cardinal x )
   #.........................................................................................................
-  { isa, validate, } = new Types { declarations, }
+  { isa, validate, } = new Intertype { declarations, }
   T?.eq ( isa.integer                         ).name,                           'isa_integer'
   T?.eq ( isa.optional_integer                ).name,                  'isa_optional_integer'
   T?.eq ( validate.integer                    ).name,                      'validate_integer'
@@ -573,24 +573,33 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
-# #-----------------------------------------------------------------------------------------------------------
-# @types_xxxxxxxx = ( T, done ) ->
-#   WG              = require '../../../apps/webguy'
-#   #.........................................................................................................
-#   { isa, validate, } = WG.types
-#   debug '^types_xxxxxxxx@1^', isa.codepointid 123
-#   debug '^types_xxxxxxxx@1^', isa.codepointid -123
-#   debug '^types_xxxxxxxx@1^', validate.codepointid 123
-#   #.........................................................................................................
-#   done?()
-#   return null
+#-----------------------------------------------------------------------------------------------------------
+@types_declaration_1 = ( T, done ) ->
+  WG              = require '../../../apps/webguy'
+  #.........................................................................................................
+  class declarations extends WG.types.Isa
+    foo: ( x ) -> ( @isa.text x ) and ( /oo$/.test x )
+  #.........................................................................................................
+  types               = new WG.types.Intertype { declarations, }
+  { isa, validate, }  = types
+  T?.eq ( isa.codepointid 123   ), true
+  T?.eq ( isa.codepointid -123  ), false
+  T?.eq ( isa.foo -123          ), false
+  T?.eq ( isa.foo 'fo'          ), false
+  show_error_message_and_test T, /expected a foo, got a text/, -> validate.foo 'fo'
+  T?.eq ( isa.foo 'foo'             ), true
+  T?.eq ( validate.codepointid 123  ), 123
+  #.........................................................................................................
+  done?()
+  return null
 
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  await test @
-  # @types_xxxxxxxx()
+  # await test @
+  @types_declaration_1()
+  test @types_declaration_1
   # @types_check_method_names_2()
   # test @types_check_method_names_2
   # await test @types_validate_1
