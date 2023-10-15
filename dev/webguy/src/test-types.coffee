@@ -184,157 +184,159 @@ types                     = new ( require 'intertype-newest' ).Intertype()
 
 #-----------------------------------------------------------------------------------------------------------
 @types_isa_6 = ( T, done ) ->
-  WG              = require '../../../apps/webguy'
+  { types     } = require '../../../apps/webguy'
+  { isa
+    optional  } = types
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_null           ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_null           ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_null           ( 4                  ) ), false
+  T?.eq ( isa.null          optional ( null               ) ), true
+  T?.eq ( isa.null          optional ( undefined          ) ), true
+  T?.eq ( isa.null          optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_undefined      ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_undefined      ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_undefined      ( 4                  ) ), false
+  T?.eq ( isa.undefined     optional ( null               ) ), true
+  T?.eq ( isa.undefined     optional ( undefined          ) ), true
+  T?.eq ( isa.undefined     optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_anything       ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_anything       ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_anything       ( 4                  ) ), true
+  T?.eq ( isa.anything      optional ( null               ) ), true
+  T?.eq ( isa.anything      optional ( undefined          ) ), true
+  T?.eq ( isa.anything      optional ( 4                  ) ), true
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_something      ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_something      ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_something      ( 4                  ) ), true
+  T?.eq ( isa.something     optional ( null               ) ), true
+  T?.eq ( isa.something     optional ( undefined          ) ), true
+  T?.eq ( isa.something     optional ( 4                  ) ), true
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_nothing        ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_nothing        ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_nothing        ( 4                  ) ), false
+  T?.eq ( isa.nothing       optional ( null               ) ), true
+  T?.eq ( isa.nothing       optional ( undefined          ) ), true
+  T?.eq ( isa.nothing       optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_text           ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_text           ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_text           ( 'x'                ) ), true
-  T?.eq ( WG.types.isa.optional_text           ( 4                  ) ), false
+  T?.eq ( isa.text          optional ( null               ) ), true
+  T?.eq ( isa.text          optional ( undefined          ) ), true
+  T?.eq ( isa.text          optional ( 'x'                ) ), true
+  T?.eq ( isa.text          optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_chr            ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_chr            ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_chr            ( 'x'                ) ), true
-  T?.eq ( WG.types.isa.optional_chr            ( 4                  ) ), false
+  T?.eq ( isa.chr           optional ( null               ) ), true
+  T?.eq ( isa.chr           optional ( undefined          ) ), true
+  T?.eq ( isa.chr           optional ( 'x'                ) ), true
+  T?.eq ( isa.chr           optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_codepointid    ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_codepointid    ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_codepointid    ( '4'                ) ), false
-  T?.eq ( WG.types.isa.optional_codepointid    ( 4                  ) ), true
+  T?.eq ( isa.codepointid   optional ( null               ) ), true
+  T?.eq ( isa.codepointid   optional ( undefined          ) ), true
+  T?.eq ( isa.codepointid   optional ( '4'                ) ), false
+  T?.eq ( isa.codepointid   optional ( 4                  ) ), true
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_regex          ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_regex          ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_regex          ( /x/                ) ), true
-  T?.eq ( WG.types.isa.optional_regex          ( 4                  ) ), false
+  T?.eq ( isa.regex         optional ( null               ) ), true
+  T?.eq ( isa.regex         optional ( undefined          ) ), true
+  T?.eq ( isa.regex         optional ( /x/                ) ), true
+  T?.eq ( isa.regex         optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_buffer         ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_buffer         ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_buffer         ( Buffer.from ''     ) ), true
-  T?.eq ( WG.types.isa.optional_buffer         ( 'x'                ) ), false
+  T?.eq ( isa.buffer        optional ( null               ) ), true
+  T?.eq ( isa.buffer        optional ( undefined          ) ), true
+  T?.eq ( isa.buffer        optional ( Buffer.from ''     ) ), true
+  T?.eq ( isa.buffer        optional ( 'x'                ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_jsidentifier   ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_jsidentifier   ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_jsidentifier   ( 'xxx'              ) ), true
-  T?.eq ( WG.types.isa.optional_jsidentifier   ( ' x '              ) ), false
-  T?.eq ( WG.types.isa.optional_jsidentifier   ( 4                  ) ), false
+  T?.eq ( isa.jsidentifier  optional ( null               ) ), true
+  T?.eq ( isa.jsidentifier  optional ( undefined          ) ), true
+  T?.eq ( isa.jsidentifier  optional ( 'xxx'              ) ), true
+  T?.eq ( isa.jsidentifier  optional ( ' x '              ) ), false
+  T?.eq ( isa.jsidentifier  optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_list           ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_list           ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_list           ( []                 ) ), true
-  T?.eq ( WG.types.isa.optional_list           ( 4                  ) ), false
+  T?.eq ( isa.list          optional ( null               ) ), true
+  T?.eq ( isa.list          optional ( undefined          ) ), true
+  T?.eq ( isa.list          optional ( []                 ) ), true
+  T?.eq ( isa.list          optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_set            ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_set            ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_set            ( new Set()          ) ), true
-  T?.eq ( WG.types.isa.optional_set            ( 4                  ) ), false
+  T?.eq ( isa.set           optional ( null               ) ), true
+  T?.eq ( isa.set           optional ( undefined          ) ), true
+  T?.eq ( isa.set           optional ( new Set()          ) ), true
+  T?.eq ( isa.set           optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_map            ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_map            ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_map            ( new Map()          ) ), true
-  T?.eq ( WG.types.isa.optional_map            ( 4                  ) ), false
+  T?.eq ( isa.map           optional ( null               ) ), true
+  T?.eq ( isa.map           optional ( undefined          ) ), true
+  T?.eq ( isa.map           optional ( new Map()          ) ), true
+  T?.eq ( isa.map           optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_numeric        ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_numeric        ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_numeric        ( 4                  ) ), true
-  T?.eq ( WG.types.isa.optional_numeric        ( 4n                 ) ), true
-  T?.eq ( WG.types.isa.optional_numeric        ( {}                 ) ), false
+  T?.eq ( isa.numeric       optional ( null               ) ), true
+  T?.eq ( isa.numeric       optional ( undefined          ) ), true
+  T?.eq ( isa.numeric       optional ( 4                  ) ), true
+  T?.eq ( isa.numeric       optional ( 4n                 ) ), true
+  T?.eq ( isa.numeric       optional ( {}                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_float          ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_float          ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_float          ( 4                  ) ), true
-  T?.eq ( WG.types.isa.optional_float          ( 4.5                ) ), true
-  T?.eq ( WG.types.isa.optional_float          ( Infinity           ) ), false
-  T?.eq ( WG.types.isa.optional_float          ( 4n                 ) ), false
-  T?.eq ( WG.types.isa.optional_float          ( true               ) ), false
+  T?.eq ( isa.float         optional ( null               ) ), true
+  T?.eq ( isa.float         optional ( undefined          ) ), true
+  T?.eq ( isa.float         optional ( 4                  ) ), true
+  T?.eq ( isa.float         optional ( 4.5                ) ), true
+  T?.eq ( isa.float         optional ( Infinity           ) ), false
+  T?.eq ( isa.float         optional ( 4n                 ) ), false
+  T?.eq ( isa.float         optional ( true               ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_bigint         ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_bigint         ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_bigint         ( 4n                 ) ), true
-  T?.eq ( WG.types.isa.optional_bigint         ( 4                  ) ), false
-  T?.eq ( WG.types.isa.optional_bigint         ( Infinity           ) ), false
+  T?.eq ( isa.bigint        optional ( null               ) ), true
+  T?.eq ( isa.bigint        optional ( undefined          ) ), true
+  T?.eq ( isa.bigint        optional ( 4n                 ) ), true
+  T?.eq ( isa.bigint        optional ( 4                  ) ), false
+  T?.eq ( isa.bigint        optional ( Infinity           ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_integer        ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_integer        ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_integer        ( 4                  ) ), true
-  T?.eq ( WG.types.isa.optional_integer        ( 4.5                ) ), false
-  T?.eq ( WG.types.isa.optional_integer        ( 4n                 ) ), false
+  T?.eq ( isa.integer       optional ( null               ) ), true
+  T?.eq ( isa.integer       optional ( undefined          ) ), true
+  T?.eq ( isa.integer       optional ( 4                  ) ), true
+  T?.eq ( isa.integer       optional ( 4.5                ) ), false
+  T?.eq ( isa.integer       optional ( 4n                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_cardinal       ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_cardinal       ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_cardinal       ( 0                  ) ), true
-  T?.eq ( WG.types.isa.optional_cardinal       ( 1                  ) ), true
-  T?.eq ( WG.types.isa.optional_cardinal       ( -1                 ) ), false
-  T?.eq ( WG.types.isa.optional_cardinal       ( 1n                 ) ), false
+  T?.eq ( isa.cardinal      optional ( null               ) ), true
+  T?.eq ( isa.cardinal      optional ( undefined          ) ), true
+  T?.eq ( isa.cardinal      optional ( 0                  ) ), true
+  T?.eq ( isa.cardinal      optional ( 1                  ) ), true
+  T?.eq ( isa.cardinal      optional ( -1                 ) ), false
+  T?.eq ( isa.cardinal      optional ( 1n                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_zero           ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_zero           ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_zero           ( 0                  ) ), true
-  T?.eq ( WG.types.isa.optional_zero           ( -0                 ) ), true
-  T?.eq ( WG.types.isa.optional_zero           ( 0n                 ) ), false
-  T?.eq ( WG.types.isa.optional_zero           ( 4                  ) ), false
+  T?.eq ( isa.zero          optional ( null               ) ), true
+  T?.eq ( isa.zero          optional ( undefined          ) ), true
+  T?.eq ( isa.zero          optional ( 0                  ) ), true
+  T?.eq ( isa.zero          optional ( -0                 ) ), true
+  T?.eq ( isa.zero          optional ( 0n                 ) ), false
+  T?.eq ( isa.zero          optional ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_nan            ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_nan            ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_nan            ( NaN                ) ), true
-  T?.eq ( WG.types.isa.optional_nan            ( 0 / 0              ) ), true
+  T?.eq ( isa.nan           optional ( null               ) ), true
+  T?.eq ( isa.nan           optional ( undefined          ) ), true
+  T?.eq ( isa.nan           optional ( NaN                ) ), true
+  T?.eq ( isa.nan           optional ( 0 / 0              ) ), true
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_even           ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_even           ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_even           ( 4                  ) ), true
-  T?.eq ( WG.types.isa.optional_even           ( 4n                 ) ), false
-  T?.eq ( WG.types.isa.optional_even           ( 4.5                ) ), false
-  T?.eq ( WG.types.isa.optional_even           ( 5                  ) ), false
-  T?.eq ( WG.types.isa.optional_even           ( 5n                 ) ), false
+  T?.eq ( isa.even          optional ( null               ) ), true
+  T?.eq ( isa.even          optional ( undefined          ) ), true
+  T?.eq ( isa.even          optional ( 4                  ) ), true
+  T?.eq ( isa.even          optional ( 4n                 ) ), false
+  T?.eq ( isa.even          optional ( 4.5                ) ), false
+  T?.eq ( isa.even          optional ( 5                  ) ), false
+  T?.eq ( isa.even          optional ( 5n                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_odd            ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_odd            ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_odd            ( 5                  ) ), true
-  T?.eq ( WG.types.isa.optional_odd            ( 5n                 ) ), false
-  T?.eq ( WG.types.isa.optional_odd            ( 5.5                ) ), false
-  T?.eq ( WG.types.isa.optional_odd            ( 4                  ) ), false
-  T?.eq ( WG.types.isa.optional_odd            ( 4n                 ) ), false
+  T?.eq ( isa.odd           optional ( null               ) ), true
+  T?.eq ( isa.odd           optional ( undefined          ) ), true
+  T?.eq ( isa.odd           optional ( 5                  ) ), true
+  T?.eq ( isa.odd           optional ( 5n                 ) ), false
+  T?.eq ( isa.odd           optional ( 5.5                ) ), false
+  T?.eq ( isa.odd           optional ( 4                  ) ), false
+  T?.eq ( isa.odd           optional ( 4n                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_boolean        ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_boolean        ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_boolean        ( true               ) ), true
-  T?.eq ( WG.types.isa.optional_boolean        ( false              ) ), true
-  T?.eq ( WG.types.isa.optional_boolean        ( 1                  ) ), false
-  T?.eq ( WG.types.isa.optional_boolean        ( 0                  ) ), false
+  T?.eq ( isa.boolean       optional ( null               ) ), true
+  T?.eq ( isa.boolean       optional ( undefined          ) ), true
+  T?.eq ( isa.boolean       optional ( true               ) ), true
+  T?.eq ( isa.boolean       optional ( false              ) ), true
+  T?.eq ( isa.boolean       optional ( 1                  ) ), false
+  T?.eq ( isa.boolean       optional ( 0                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_object         ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_object         ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_object         ( {}                 ) ), true
-  T?.eq ( WG.types.isa.optional_object         ( []                 ) ), false
+  T?.eq ( isa.object        optional ( null               ) ), true
+  T?.eq ( isa.object        optional ( undefined          ) ), true
+  T?.eq ( isa.object        optional ( {}                 ) ), true
+  T?.eq ( isa.object        optional ( []                 ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_function       ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_function       ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_asyncfunction  ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_asyncfunction  ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_symbol         ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_symbol         ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_class          ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_class          ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_class          ( Promise            ) ), true
-  T?.eq ( WG.types.isa.optional_class          ( class C            ) ), true
+  T?.eq ( isa.function      optional ( null               ) ), true
+  T?.eq ( isa.function      optional ( undefined          ) ), true
+  T?.eq ( isa.asyncfunction optional ( null               ) ), true
+  T?.eq ( isa.asyncfunction optional ( undefined          ) ), true
+  T?.eq ( isa.symbol        optional ( null               ) ), true
+  T?.eq ( isa.symbol        optional ( undefined          ) ), true
+  T?.eq ( isa.class         optional ( null               ) ), true
+  T?.eq ( isa.class         optional ( undefined          ) ), true
+  T?.eq ( isa.class         optional ( Promise            ) ), true
+  T?.eq ( isa.class         optional ( class C            ) ), true
   #.........................................................................................................
   done?()
   return null
@@ -504,16 +506,18 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 @types_validate_1 = ( T, done ) ->
   WG              = require '../../../apps/webguy'
   types           = new WG.types.Intertype()
+  { validate
+    optional    } = types
   #.........................................................................................................
-  T?.eq ( types.validate.integer 1234 ), 1234
-  T?.eq ( types.validate.jsidentifier 'xxx' ), 'xxx'
-  show_error_message_and_test T, /expected a jsidentifier, got a null/, -> types.validate.jsidentifier null
-  show_error_message_and_test T, /expected a jsidentifier, got a float/, -> types.validate.jsidentifier 4
-  T?.eq ( types.validate.optional_integer 1234 ), 1234
-  T?.eq ( types.validate.optional_integer null ), null
-  T?.eq ( types.validate.nothing null ), null
-  T?.eq ( types.validate.nothing undefined ), undefined
-  show_error_message_and_test T, /expected a nothing, got a text/, -> types.validate.nothing 'yay!'
+  T?.eq ( validate.integer 1234 ), 1234
+  T?.eq ( validate.jsidentifier 'xxx' ), 'xxx'
+  show_error_message_and_test T, /expected a jsidentifier, got a null/, -> validate.jsidentifier null
+  show_error_message_and_test T, /expected a jsidentifier, got a float/, -> validate.jsidentifier 4
+  T?.eq ( validate.integer optional 1234 ), 1234
+  T?.eq ( validate.integer optional null ), null
+  T?.eq ( validate.nothing null ), null
+  T?.eq ( validate.nothing undefined ), undefined
+  show_error_message_and_test T, /expected a nothing, got a text/, -> validate.nothing 'yay!'
   #.........................................................................................................
   done?()
   return null
@@ -532,19 +536,21 @@ show_error_message_and_test = ( T, matcher, fn ) ->
         # help '^nonzero_integer@1^', ( @isa.nonzero x ), ( @isa.integer x )
         ( @isa.nonzero x ) and ( @isa.integer x )
     #.......................................................................................................
-    types = new Intertype { declarations, }
+    types         = new Intertype { declarations, }
+    { isa
+      optional  } = types
     T?.eq ( _.isa.function types.isa.nonzero              ), true
     T?.eq ( _.isa.function types.isa.integer              ), true
     T?.eq ( _.isa.function types.isa.nonzero_integer      ), true
     # types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
-    T?.eq ( types.isa.nonzero_integer           4         ), true
-    T?.eq ( types.isa.nonzero_integer           4n        ), false
-    T?.eq ( types.isa.optional_nonzero_integer  null      ), true
-    T?.eq ( types.isa.optional_nonzero_integer  4         ), true
-    T?.eq ( types.isa.optional_nonzero_integer  4n        ), false
-    T?.eq ( types.isa.nonzero_integer           0         ), false
-    T?.eq ( types.isa.nonzero_integer           null      ), false
-    T?.eq ( types.isa.optional_nonzero_integer  0         ), false
+    T?.eq ( isa.nonzero_integer           4         ), true
+    T?.eq ( isa.nonzero_integer           4n        ), false
+    T?.eq ( isa.nonzero_integer optional  null      ), true
+    T?.eq ( isa.nonzero_integer optional  4         ), true
+    T?.eq ( isa.nonzero_integer optional  4n        ), false
+    T?.eq ( isa.nonzero_integer           0         ), false
+    T?.eq ( isa.nonzero_integer           null      ), false
+    T?.eq ( isa.nonzero_integer optional  0         ), false
   #.........................................................................................................
   done?()
   return null
@@ -561,17 +567,11 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   #.........................................................................................................
   { isa, validate, } = new Intertype { declarations, }
   T?.eq ( isa.integer                         ).name,                           'isa_integer'
-  T?.eq ( isa.optional_integer                ).name,                  'isa_optional_integer'
   T?.eq ( validate.integer                    ).name,                      'validate_integer'
-  T?.eq ( validate.optional_integer           ).name,             'validate_optional_integer'
   T?.eq ( isa.nonzero_integer                 ).name,                   'isa_nonzero_integer'
-  T?.eq ( isa.optional_nonzero_integer        ).name,          'isa_optional_nonzero_integer'
   T?.eq ( validate.nonzero_integer            ).name,              'validate_nonzero_integer'
-  T?.eq ( validate.optional_nonzero_integer   ).name,     'validate_optional_nonzero_integer'
   T?.eq ( isa.nonzero_cardinal                ).name,                  'isa_nonzero_cardinal'
-  T?.eq ( isa.optional_nonzero_cardinal       ).name,         'isa_optional_nonzero_cardinal'
   T?.eq ( validate.nonzero_cardinal           ).name,             'validate_nonzero_cardinal'
-  T?.eq ( validate.optional_nonzero_cardinal  ).name,    'validate_optional_nonzero_cardinal'
   #.........................................................................................................
   done?()
   return null
@@ -582,9 +582,7 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   #.........................................................................................................
   { isa, validate, } = WG.types
   T?.eq ( isa.integer                         ).name,                           'isa_integer'
-  T?.eq ( isa.optional_integer                ).name,                  'isa_optional_integer'
   T?.eq ( validate.integer                    ).name,                      'validate_integer'
-  T?.eq ( validate.optional_integer           ).name,             'validate_optional_integer'
   #.........................................................................................................
   done?()
   return null
