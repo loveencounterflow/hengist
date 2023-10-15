@@ -727,16 +727,63 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_optional = ( T, done ) ->
+  { types         } = require '../../../apps/webguy'
+  { isa
+    type_of
+    validate
+    optional      } = types
+  #.........................................................................................................
+  unless T?
+    help '^types_optional@1^', ( types._optional                  ), 'Optional { value: Symbol(nothing) }'
+    help '^types_optional@1^', ( isa.object types._optional       ), true
+    help '^types_optional@2^', ( rpr type_of types._optional      ), 'null' ### special case! ###
+    help '^types_optional@3^', ( optional null                    ), 'Optional { value: null, }'
+    help '^types_optional@4^', ( optional undefined               ), 'Optional { value: undefined, }'
+    help '^types_optional@5^', ( optional 1000                    ), 1000
+    help '^types_optional@6^', ( isa.integer optional 1000        ), true
+    help '^types_optional@7^', ( isa.text    optional 1000        ), false
+    help '^types_optional@8^', ( isa.integer optional null        ), true
+    help '^types_optional@9^', ( isa.text    optional null        ), true
+    help '^types_optional@10^', ( isa.text    optional undefined  ), true
+    #.........................................................................................................
+    # validate.text null
+    try validate.text optional 22 catch e then warn GUY.trm.reverse e.message
+    help '^types_optional@11^', ( validate.text optional null ), null
+  #.........................................................................................................
+  T?.eq ( isa.object types._optional      ), true
+  T?.eq ( optional null                   ), { value: null, }
+  T?.eq ( optional undefined              ), { value: undefined, }
+  T?.eq ( optional 1000                   ), 1000
+  T?.eq ( isa.integer optional 1000       ), true
+  T?.eq ( isa.text    optional 1000       ), false
+  T?.eq ( isa.integer optional null       ), true
+  T?.eq ( isa.text    optional null       ), true
+  T?.eq ( isa.text    optional undefined  ), true
+  #.........................................................................................................
+  # validate.text null
+  T?.throws /expected a text/, -> validate.text optional 22
+  T?.eq ( validate.text optional null ), null
+  T?.eq ( validate.text optional undefined ), undefined
+  T?.eq ( validate.text optional 'abc' ), 'abc'
+  #.........................................................................................................
+  done?()
+  return null
+
+
 
 ############################################################################################################
 if require.main is module then await do =>
   # await test @
-  @types_declaration_1()
-  test @types_declaration_1
+  # @types_declaration_1()
+  # test @types_declaration_1
   # @types_check_method_names_2()
   # test @types_check_method_names_2
   # await test @types_validate_1
   # @types_type_of()
+  @types_optional()
+  test @types_optional
   # @types_declare_with_class()
   # await test @types_declare_with_class
   # await test @types_isa_2
@@ -745,4 +792,5 @@ if require.main is module then await do =>
   # test @types_get_miller_device_name
   # test @types_get_carter_device_name
   # @types_isa_4()
-  # test @types_isa_4
+  # test @types_isa_5
+  # test @types_assert_standard_types_exist
