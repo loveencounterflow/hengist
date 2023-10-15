@@ -47,7 +47,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.something      undefined ), false
   T?.eq ( WG.types.isa.nothing        undefined ), true
   T?.eq ( WG.types.isa.text           undefined ), false
-  T?.eq ( WG.types.isa.codepoint      undefined ), false
+  T?.eq ( WG.types.isa.chr            undefined ), false
   T?.eq ( WG.types.isa.codepointid    undefined ), false
   T?.eq ( WG.types.isa.regex          undefined ), false
   T?.eq ( WG.types.isa.buffer         undefined ), false
@@ -85,8 +85,8 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.nothing        ( null                  ) ), true
   T?.eq ( WG.types.isa.text           ( ''                    ) ), true
   T?.eq ( WG.types.isa.text           ( 'eiuowe'              ) ), true
-  T?.eq ( WG.types.isa.codepoint      ( 'x'                   ) ), true
-  T?.eq ( WG.types.isa.codepoint      ( '\u{20000}'           ) ), true
+  T?.eq ( WG.types.isa.chr            ( 'x'                   ) ), true
+  T?.eq ( WG.types.isa.chr            ( '\u{20000}'           ) ), true
   T?.eq ( WG.types.isa.codepointid    ( 0x1ffff               ) ), true
   T?.eq ( WG.types.isa.codepointid    ( 67                    ) ), true
   T?.eq ( WG.types.isa.regex          ( /123/y                ) ), true
@@ -125,7 +125,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   WG              = require '../../../apps/webguy'
   types = new WG.types.Intertype()
   #.........................................................................................................
-  # debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
+  # debug '^types_isa_4@1^', ( types.isa.chr            ( 0x20000                   ) )
   # debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
   # debug '^types_isa_4@1^', ( types.isa.codepointid    ( -67                       ) )
   # debug '^types_isa_4@1^', ( types.isa.codepointid    ( 67.89                     ) )
@@ -140,7 +140,7 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   # debug '^types_isa_4@1^', ( WG.types.isa.class          ( new Promise ( a, b ) ->   ) )
   # debug '^types_isa_4@1^', ( WG.types.isa.class          ( new ( class C )()         ) )
   #.........................................................................................................
-  T?.eq ( WG.types.isa.codepoint      ( 0x20000                   ) ), false
+  T?.eq ( WG.types.isa.chr            ( 0x20000                   ) ), false
   T?.eq ( WG.types.isa.codepointid    ( 0x20000                   ) ), false
   T?.eq ( WG.types.isa.codepointid    ( -67                       ) ), false
   T?.eq ( WG.types.isa.codepointid    ( 67.89                     ) ), false
@@ -199,10 +199,10 @@ types                     = new ( require 'intertype-newest' ).Intertype()
   T?.eq ( WG.types.isa.optional_text           ( 'x'                ) ), true
   T?.eq ( WG.types.isa.optional_text           ( 4                  ) ), false
   #.........................................................................................................
-  T?.eq ( WG.types.isa.optional_codepoint      ( null               ) ), true
-  T?.eq ( WG.types.isa.optional_codepoint      ( undefined          ) ), true
-  T?.eq ( WG.types.isa.optional_codepoint      ( 'x'                ) ), true
-  T?.eq ( WG.types.isa.optional_codepoint      ( 4                  ) ), false
+  T?.eq ( WG.types.isa.optional_chr            ( null               ) ), true
+  T?.eq ( WG.types.isa.optional_chr            ( undefined          ) ), true
+  T?.eq ( WG.types.isa.optional_chr            ( 'x'                ) ), true
+  T?.eq ( WG.types.isa.optional_chr            ( 4                  ) ), false
   #.........................................................................................................
   T?.eq ( WG.types.isa.optional_codepointid    ( null               ) ), true
   T?.eq ( WG.types.isa.optional_codepointid    ( undefined          ) ), true
