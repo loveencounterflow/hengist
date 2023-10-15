@@ -398,405 +398,406 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_isa_6 = function(T, done) {
-    var C, WG;
-    WG = require('../../../apps/webguy');
+    var C, optional;
+    ({types} = require('../../../apps/webguy'));
+    ({isa, optional} = types);
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_null(null), true);
+      T.eq(isa.null(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_null(void 0), true);
+      T.eq(isa.null(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_null(4), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_undefined(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_undefined(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_undefined(4), false);
+      T.eq(isa.null(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_anything(null), true);
+      T.eq(isa.undefined(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_anything(void 0), true);
+      T.eq(isa.undefined(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_anything(4), true);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_something(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_something(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_something(4), true);
+      T.eq(isa.undefined(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_nothing(null), true);
+      T.eq(isa.anything(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_nothing(void 0), true);
+      T.eq(isa.anything(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_nothing(4), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_text(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_text(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_text('x'), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_text(4), false);
+      T.eq(isa.anything(optional(4)), true);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_chr(null), true);
+      T.eq(isa.something(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_chr(void 0), true);
+      T.eq(isa.something(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_chr('x'), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_chr(4), false);
+      T.eq(isa.something(optional(4)), true);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepointid(null), true);
+      T.eq(isa.nothing(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepointid(void 0), true);
+      T.eq(isa.nothing(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepointid('4'), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_codepointid(4), true);
+      T.eq(isa.nothing(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_regex(null), true);
+      T.eq(isa.text(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_regex(void 0), true);
+      T.eq(isa.text(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_regex(/x/), true);
+      T.eq(isa.text(optional('x')), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_regex(4), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_buffer(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_buffer(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_buffer(Buffer.from('')), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_buffer('x'), false);
+      T.eq(isa.text(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_jsidentifier(null), true);
+      T.eq(isa.chr(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_jsidentifier(void 0), true);
+      T.eq(isa.chr(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_jsidentifier('xxx'), true);
+      T.eq(isa.chr(optional('x')), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_jsidentifier(' x '), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_jsidentifier(4), false);
+      T.eq(isa.chr(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_list(null), true);
+      T.eq(isa.codepointid(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_list(void 0), true);
+      T.eq(isa.codepointid(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_list([]), true);
+      T.eq(isa.codepointid(optional('4')), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_list(4), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_set(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_set(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_set(new Set()), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_set(4), false);
+      T.eq(isa.codepointid(optional(4)), true);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_map(null), true);
+      T.eq(isa.regex(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_map(void 0), true);
+      T.eq(isa.regex(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_map(new Map()), true);
+      T.eq(isa.regex(optional(/x/)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_map(4), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_numeric(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_numeric(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_numeric(4), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_numeric(4n), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_numeric({}), false);
+      T.eq(isa.regex(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_float(null), true);
+      T.eq(isa.buffer(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_float(void 0), true);
+      T.eq(isa.buffer(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_float(4), true);
+      T.eq(isa.buffer(optional(Buffer.from(''))), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_float(4.5), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_float(2e308), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_float(4n), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_float(true), false);
+      T.eq(isa.buffer(optional('x')), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_bigint(null), true);
+      T.eq(isa.jsidentifier(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_bigint(void 0), true);
+      T.eq(isa.jsidentifier(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_bigint(4n), true);
+      T.eq(isa.jsidentifier(optional('xxx')), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_bigint(4), false);
+      T.eq(isa.jsidentifier(optional(' x ')), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_bigint(2e308), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_integer(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_integer(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_integer(4), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_integer(4.5), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_integer(4n), false);
+      T.eq(isa.jsidentifier(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(null), true);
+      T.eq(isa.list(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(void 0), true);
+      T.eq(isa.list(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(0), true);
+      T.eq(isa.list(optional([])), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(1), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(-1), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_cardinal(1n), false);
+      T.eq(isa.list(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_zero(null), true);
+      T.eq(isa.set(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_zero(void 0), true);
+      T.eq(isa.set(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_zero(0), true);
+      T.eq(isa.set(optional(new Set())), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_zero(-0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_zero(0n), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_zero(4), false);
+      T.eq(isa.set(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_nan(null), true);
+      T.eq(isa.map(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_nan(void 0), true);
+      T.eq(isa.map(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_nan(0/0), true);
+      T.eq(isa.map(optional(new Map())), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_nan(0 / 0), true);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(null), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(4), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(4n), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(4.5), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(5), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_even(5n), false);
+      T.eq(isa.map(optional(4)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(null), true);
+      T.eq(isa.numeric(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(void 0), true);
+      T.eq(isa.numeric(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(5), true);
+      T.eq(isa.numeric(optional(4)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(5n), false);
+      T.eq(isa.numeric(optional(4n)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_odd(5.5), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_odd(4), false);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_odd(4n), false);
+      T.eq(isa.numeric(optional({})), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(null), true);
+      T.eq(isa.float(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(void 0), true);
+      T.eq(isa.float(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(true), true);
+      T.eq(isa.float(optional(4)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(false), true);
+      T.eq(isa.float(optional(4.5)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(1), false);
+      T.eq(isa.float(optional(2e308)), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_boolean(0), false);
-    }
-    //.........................................................................................................
-    if (T != null) {
-      T.eq(WG.types.isa.optional_object(null), true);
+      T.eq(isa.float(optional(4n)), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_object(void 0), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_object({}), true);
-    }
-    if (T != null) {
-      T.eq(WG.types.isa.optional_object([]), false);
+      T.eq(isa.float(optional(true)), false);
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_function(null), true);
+      T.eq(isa.bigint(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_function(void 0), true);
+      T.eq(isa.bigint(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_asyncfunction(null), true);
+      T.eq(isa.bigint(optional(4n)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_asyncfunction(void 0), true);
+      T.eq(isa.bigint(optional(4)), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_symbol(null), true);
+      T.eq(isa.bigint(optional(2e308)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.integer(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_symbol(void 0), true);
+      T.eq(isa.integer(optional(void 0)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_class(null), true);
+      T.eq(isa.integer(optional(4)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_class(void 0), true);
+      T.eq(isa.integer(optional(4.5)), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_class(Promise), true);
+      T.eq(isa.integer(optional(4n)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.cardinal(optional(null)), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_class((C = class C {})), true);
+      T.eq(isa.cardinal(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.cardinal(optional(0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.cardinal(optional(1)), true);
+    }
+    if (T != null) {
+      T.eq(isa.cardinal(optional(-1)), false);
+    }
+    if (T != null) {
+      T.eq(isa.cardinal(optional(1n)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.zero(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.zero(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.zero(optional(0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.zero(optional(-0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.zero(optional(0n)), false);
+    }
+    if (T != null) {
+      T.eq(isa.zero(optional(4)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.nan(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.nan(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.nan(optional(0/0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.nan(optional(0 / 0)), true);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.even(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(4)), true);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(4n)), false);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(4.5)), false);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(5)), false);
+    }
+    if (T != null) {
+      T.eq(isa.even(optional(5n)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.odd(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(5)), true);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(5n)), false);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(5.5)), false);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(4)), false);
+    }
+    if (T != null) {
+      T.eq(isa.odd(optional(4n)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.boolean(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(optional(true)), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(optional(false)), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(optional(1)), false);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(optional(0)), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.object(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.object(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.object(optional({})), true);
+    }
+    if (T != null) {
+      T.eq(isa.object(optional([])), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.function(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.function(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.asyncfunction(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.asyncfunction(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.symbol(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.symbol(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.class(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.class(optional(void 0)), true);
+    }
+    if (T != null) {
+      T.eq(isa.class(optional(Promise)), true);
+    }
+    if (T != null) {
+      T.eq(isa.class(optional((C = class C {}))), true);
     }
     if (typeof done === "function") {
       done();
@@ -1087,36 +1088,37 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_validate_1 = function(T, done) {
-    var WG;
+    var WG, optional, validate;
     WG = require('../../../apps/webguy');
     types = new WG.types.Intertype();
+    ({validate, optional} = types);
     //.........................................................................................................
     if (T != null) {
-      T.eq(types.validate.integer(1234), 1234);
+      T.eq(validate.integer(1234), 1234);
     }
     if (T != null) {
-      T.eq(types.validate.jsidentifier('xxx'), 'xxx');
+      T.eq(validate.jsidentifier('xxx'), 'xxx');
     }
     show_error_message_and_test(T, /expected a jsidentifier, got a null/, function() {
-      return types.validate.jsidentifier(null);
+      return validate.jsidentifier(null);
     });
     show_error_message_and_test(T, /expected a jsidentifier, got a float/, function() {
-      return types.validate.jsidentifier(4);
+      return validate.jsidentifier(4);
     });
     if (T != null) {
-      T.eq(types.validate.optional_integer(1234), 1234);
+      T.eq(validate.integer(optional(1234)), 1234);
     }
     if (T != null) {
-      T.eq(types.validate.optional_integer(null), null);
+      T.eq(validate.integer(optional(null)), null);
     }
     if (T != null) {
-      T.eq(types.validate.nothing(null), null);
+      T.eq(validate.nothing(null), null);
     }
     if (T != null) {
-      T.eq(types.validate.nothing(void 0), void 0);
+      T.eq(validate.nothing(void 0), void 0);
     }
     show_error_message_and_test(T, /expected a nothing, got a text/, function() {
-      return types.validate.nothing('yay!');
+      return validate.nothing('yay!');
     });
     if (typeof done === "function") {
       done();
@@ -1131,7 +1133,7 @@
     _ = WG.types;
     ({Intertype, Isa} = WG.types);
     (() => {      //.........................................................................................................
-      var declarations;
+      var declarations, optional;
       declarations = class declarations extends Isa {
         nonzero_integer(x) {
           // help '^nonzero_integer@1^', @, x
@@ -1143,6 +1145,7 @@
       };
       //.......................................................................................................
       types = new Intertype({declarations});
+      ({isa, optional} = types);
       if (T != null) {
         T.eq(_.isa.function(types.isa.nonzero), true);
       }
@@ -1154,27 +1157,27 @@
       }
       // types.declare.integer ( x ) -> 'whatever' ### must throw because known type ###
       if (T != null) {
-        T.eq(types.isa.nonzero_integer(4), true);
+        T.eq(isa.nonzero_integer(4), true);
       }
       if (T != null) {
-        T.eq(types.isa.nonzero_integer(4n), false);
+        T.eq(isa.nonzero_integer(4n), false);
       }
       if (T != null) {
-        T.eq(types.isa.optional_nonzero_integer(null), true);
+        T.eq(isa.nonzero_integer(optional(null)), true);
       }
       if (T != null) {
-        T.eq(types.isa.optional_nonzero_integer(4), true);
+        T.eq(isa.nonzero_integer(optional(4)), true);
       }
       if (T != null) {
-        T.eq(types.isa.optional_nonzero_integer(4n), false);
+        T.eq(isa.nonzero_integer(optional(4n)), false);
       }
       if (T != null) {
-        T.eq(types.isa.nonzero_integer(0), false);
+        T.eq(isa.nonzero_integer(0), false);
       }
       if (T != null) {
-        T.eq(types.isa.nonzero_integer(null), false);
+        T.eq(isa.nonzero_integer(null), false);
       }
-      return T != null ? T.eq(types.isa.optional_nonzero_integer(0), false) : void 0;
+      return T != null ? T.eq(isa.nonzero_integer(optional(0)), false) : void 0;
     })();
     if (typeof done === "function") {
       done();
@@ -1205,37 +1208,19 @@
       T.eq(isa.integer.name, 'isa_integer');
     }
     if (T != null) {
-      T.eq(isa.optional_integer.name, 'isa_optional_integer');
-    }
-    if (T != null) {
       T.eq(validate.integer.name, 'validate_integer');
-    }
-    if (T != null) {
-      T.eq(validate.optional_integer.name, 'validate_optional_integer');
     }
     if (T != null) {
       T.eq(isa.nonzero_integer.name, 'isa_nonzero_integer');
     }
     if (T != null) {
-      T.eq(isa.optional_nonzero_integer.name, 'isa_optional_nonzero_integer');
-    }
-    if (T != null) {
       T.eq(validate.nonzero_integer.name, 'validate_nonzero_integer');
-    }
-    if (T != null) {
-      T.eq(validate.optional_nonzero_integer.name, 'validate_optional_nonzero_integer');
     }
     if (T != null) {
       T.eq(isa.nonzero_cardinal.name, 'isa_nonzero_cardinal');
     }
     if (T != null) {
-      T.eq(isa.optional_nonzero_cardinal.name, 'isa_optional_nonzero_cardinal');
-    }
-    if (T != null) {
       T.eq(validate.nonzero_cardinal.name, 'validate_nonzero_cardinal');
-    }
-    if (T != null) {
-      T.eq(validate.optional_nonzero_cardinal.name, 'validate_optional_nonzero_cardinal');
     }
     if (typeof done === "function") {
       done();
@@ -1253,13 +1238,7 @@
       T.eq(isa.integer.name, 'isa_integer');
     }
     if (T != null) {
-      T.eq(isa.optional_integer.name, 'isa_optional_integer');
-    }
-    if (T != null) {
       T.eq(validate.integer.name, 'validate_integer');
-    }
-    if (T != null) {
-      T.eq(validate.optional_integer.name, 'validate_optional_integer');
     }
     if (typeof done === "function") {
       done();
