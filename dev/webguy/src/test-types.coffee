@@ -769,26 +769,80 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_iterator = ( T, done ) ->
+  { types         } = require '../../../apps/webguy'
+  { isa
+    type_of
+    validate
+    optional
+    Iterator      } = types
+  #.........................................................................................................
+  unless T?
+    help "^types_iterator@1^", new Iterator [ 'a', 'b', 'c', ]
+    help "^types_iterator@1^", [ ( new Iterator [ 'a', 'b', 'c', ] )..., ]
+    help "^types_iterator@1^", [ ( new Iterator '𫝀𫝁𫝂' )..., ]
+    # help "^types_iterator@1^", [ ( new Iterator 'foo' )..., ]
+    #.........................................................................................................
+    null
+  #.........................................................................................................
+  T?.eq [ ( new Iterator [ 'a', 'b', 'c', ] )..., ], [ 'a', 'b', 'c', ]
+  T?.eq [ ( new Iterator '𫝀𫝁𫝂' )..., ], [ '𫝀', '𫝁', '𫝂' ]
+  #.........................................................................................................
+  T?.throws /unable to iterate over a float/, -> [ ( new Iterator 4 )..., ]
+  T?.throws /unable to iterate over a float/, -> new Iterator 4
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@types_all_and_any_of = ( T, done ) ->
+  { types         } = require '../../../apps/webguy'
+  { isa
+    type_of
+    validate
+    all_of
+    any_of
+    optional
+    Iterator      } = types
+  #.........................................................................................................
+  unless T?
+    help '^types_all_and_any_of@1^', ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
+    help '^types_all_and_any_of@2^', ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), false
+    help '^types_all_and_any_of@3^', ( isa.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
+    help '^types_all_and_any_of@4^', ( isa.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), true
+    help '^types_all_and_any_of@5^', ( isa.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] ), false
+    help '^types_all_and_any_of@6^', ( isa.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] ), false
+    #.......................................................................................................
+    help '^types_all_and_any_of@7^', ( validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
+    help '^types_all_and_any_of@8^', ( validate.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
+    help '^types_all_and_any_of@9^', ( validate.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ]
+    try validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@10^', e.message
+    try validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@11^', e.message
+    try validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@12^', e.message
+    null
+  #.........................................................................................................
+  T?.eq ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
+  T?.eq ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), false
+  T?.eq ( isa.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
+  T?.eq ( isa.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), true
+  T?.eq ( isa.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] ), false
+  T?.eq ( isa.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] ), false
+  #.........................................................................................................
+  T?.eq ( validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
+  T?.eq ( validate.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
+  T?.eq ( validate.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ]
+  T?.throws /expected a integer, got a float/, -> validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ]
+  T?.throws /expected a integer, got a float/, -> validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ]
+  T?.throws /expected a integer, got a float/, -> validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ]
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
   # await test @
-  # @types_declaration_1()
-  # test @types_declaration_1
-  # @types_check_method_names_2()
-  # test @types_check_method_names_2
-  # await test @types_validate_1
-  # @types_type_of()
-  @types_optional()
-  test @types_optional
-  # @types_declare_with_class()
-  # await test @types_declare_with_class
-  # await test @types_isa_2
-  # @types_demo_method_object_construction()
-  # test @types_demo_method_object_construction
-  # test @types_get_miller_device_name
-  # test @types_get_carter_device_name
-  # @types_isa_4()
-  # test @types_isa_5
-  # test @types_assert_standard_types_exist
+  @types_all_and_any_of()
+  test @types_all_and_any_of
