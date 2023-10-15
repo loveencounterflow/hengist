@@ -68,7 +68,7 @@
       T.eq(WG.types.isa.text(void 0), false);
     }
     if (T != null) {
-      T.eq(WG.types.isa.codepoint(void 0), false);
+      T.eq(WG.types.isa.chr(void 0), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.codepointid(void 0), false);
@@ -169,10 +169,10 @@
       T.eq(WG.types.isa.text('eiuowe'), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.codepoint('x'), true);
+      T.eq(WG.types.isa.chr('x'), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.codepoint('\u{20000}'), true);
+      T.eq(WG.types.isa.chr('\u{20000}'), true);
     }
     if (T != null) {
       T.eq(WG.types.isa.codepointid(0x1ffff), true);
@@ -275,7 +275,7 @@
     WG = require('../../../apps/webguy');
     types = new WG.types.Intertype();
     //.........................................................................................................
-    // debug '^types_isa_4@1^', ( types.isa.codepoint      ( 0x20000                   ) )
+    // debug '^types_isa_4@1^', ( types.isa.chr            ( 0x20000                   ) )
     // debug '^types_isa_4@1^', ( types.isa.codepointid    ( 0x20000                   ) )
     // debug '^types_isa_4@1^', ( types.isa.codepointid    ( -67                       ) )
     // debug '^types_isa_4@1^', ( types.isa.codepointid    ( 67.89                     ) )
@@ -291,7 +291,7 @@
     // debug '^types_isa_4@1^', ( WG.types.isa.class          ( new ( class C )()         ) )
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.codepoint(0x20000), false);
+      T.eq(WG.types.isa.chr(0x20000), false);
     }
     if (T != null) {
       T.eq(WG.types.isa.codepointid(0x20000), false);
@@ -376,6 +376,28 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_isa_5 = function(T, done) {
+    ({isa} = (require('../../../apps/webguy')).types);
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.integer(+2e308), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(-2e308), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(123456n), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(0 / 0), false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_isa_6 = function(T, done) {
     var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
@@ -443,16 +465,16 @@
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepoint(null), true);
+      T.eq(WG.types.isa.optional_chr(null), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepoint(void 0), true);
+      T.eq(WG.types.isa.optional_chr(void 0), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepoint('x'), true);
+      T.eq(WG.types.isa.optional_chr('x'), true);
     }
     if (T != null) {
-      T.eq(WG.types.isa.optional_codepoint(4), false);
+      T.eq(WG.types.isa.optional_chr(4), false);
     }
     //.........................................................................................................
     if (T != null) {
@@ -921,17 +943,19 @@
     var C, WG;
     WG = require('../../../apps/webguy');
     //.........................................................................................................
-    // help '^types_type_of@1  ', ( WG.types.type_of undefined                     ), 'undefined'
-    // help '^types_type_of@2  ', ( WG.types.type_of null                          ), 'null'
-    // help '^types_type_of@3  ', ( WG.types.type_of 4                             ), 'float'
-    // help '^types_type_of@4  ', ( WG.types.type_of 4.5                           ), 'float'
-    // help '^types_type_of@5  ', ( WG.types.type_of NaN                           ), 'nan'
-    // help '^types_type_of@6  ', ( WG.types.type_of Promise                       ), 'class'
-    // help '^types_type_of@7  ', ( WG.types.type_of Buffer                        ), 'buffer'
-    // help '^types_type_of@8  ', ( WG.types.type_of ( class C )                   ), 'class'
-    // help '^types_type_of@9  ', ( WG.types.type_of ( class C extends Object )    ), 'class'
-    // help '^types_type_of@10 ', ( WG.types.type_of ( -> )                        ), 'function'
-    // help '^types_type_of@10 ', ( WG.types.type_of new ArrayBuffer()             ), 'ArrayBuffer'
+    help('^types_type_of@1  ', WG.types.type_of(void 0), 'undefined');
+    help('^types_type_of@2  ', WG.types.type_of(null), 'null');
+    help('^types_type_of@3  ', WG.types.type_of(4), 'float');
+    help('^types_type_of@4  ', WG.types.type_of(4.5), 'float');
+    help('^types_type_of@5  ', WG.types.type_of(0/0), 'nan');
+    help('^types_type_of@6  ', WG.types.type_of(Promise), 'class');
+    help('^types_type_of@7  ', WG.types.type_of(Buffer), 'buffer');
+    help('^types_type_of@8  ', WG.types.type_of((C = class C {})), 'class');
+    help('^types_type_of@9  ', WG.types.type_of((C = class C extends Object {})), 'class');
+    help('^types_type_of@10 ', WG.types.type_of((function() {})), 'function');
+    help('^types_type_of@10 ', WG.types.type_of(new ArrayBuffer()), 'ArrayBuffer');
+    help('^types_type_of@10 ', WG.types.type_of(new Uint8ClampedArray(2)), 'uint8clampedarray');
+    help('^types_type_of@10 ', WG.types.type_of(new Date()), 'date');
     //.........................................................................................................
     if (T != null) {
       T.eq(WG.types.type_of(void 0), 'undefined');
@@ -971,6 +995,12 @@
     }
     if (T != null) {
       T.eq(WG.types.type_of(new ArrayBuffer()), 'arraybuffer');
+    }
+    if (T != null) {
+      T.eq(WG.types.type_of(new Uint8ClampedArray(2)), 'uint8clampedarray');
+    }
+    if (T != null) {
+      T.eq(WG.types.type_of(new Date()), 'date');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1278,20 +1308,233 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_assert_standard_types_exist = function(T, done) {
+    var i, intertype_main_types, len, message, type;
+    // pending:
+    //   'callable'
+    // 'negative'
+    // 'negative_float'
+    // 'negative_integer'
+    // 'nonnegative'
+    // 'nonpositive'
+    // 'positive'
+    // 'positive_float'
+    // 'positive_integer'
+    intertype_main_types = [
+      // 'arguments'
+      'arraybuffer',
+      'asyncfunction',
+      'asyncgenerator',
+      'asyncgeneratorfunction',
+      'blank_text',
+      'boolean',
+      'buffer',
+      'cardinal',
+      'chr',
+      'date',
+      // 'empty'
+      'empty_list',
+      'empty_map',
+      'empty_object',
+      'empty_set',
+      'empty_text',
+      'error',
+      'even',
+      'extensible',
+      'false',
+      'falsy',
+      // 'finite'
+      'float',
+      'safeinteger',
+      'float32array',
+      'float64array',
+      'frozen',
+      // 'fs_stats'
+      'function',
+      'generator',
+      'generatorfunction',
+      'global',
+      // 'happy'
+      // 'immediate'
+      'infinity',
+      'infinitefloat',
+      'int10text',
+      'int16array',
+      'int16text',
+      'int2text',
+      'int32',
+      'int32array',
+      'int8array',
+      'integer',
+      'jsidentifier',
+      'list',
+      // 'list_of'
+      'listiterator',
+      'map',
+      'mapiterator',
+      'nan',
+      'nativepromise',
+      'nonblank_text',
+      // 'nonempty'
+      'nonempty_list',
+      'nonempty_map',
+      'nonempty_object',
+      'nonempty_set',
+      'nonempty_text',
+      'null',
+      'float', // 'number'
+      'numeric',
+      'object',
+      // 'object_of'
+      'odd',
+      // 'plural'
+      'promise',
+      'proper_fraction',
+      'regex',
+      // # 'sad'
+      // # 'saddened'
+      'safeinteger',
+      'sealed',
+      'set',
+      'setiterator',
+      // 'singular'
+      'symbol',
+      'text',
+      'textiterator',
+      'thenable',
+      'true',
+      'truthy',
+      'uint16array',
+      'uint32array',
+      'uint8array',
+      'uint8clampedarray',
+      'undefined',
+      // 'unset'
+      // 'vnr'
+      'weakmap',
+      'weakset',
+      'zero'
+    ];
+//.........................................................................................................
+    for (i = 0, len = intertype_main_types.length; i < len; i++) {
+      type = intertype_main_types[i];
+      if (!isa.$known_type_name(type)) {
+        message = `unknown type ${type}`;
+        if (T != null) {
+          T.fail(message);
+        }
+        warn("^types_assert_standard_types_exist@1^", rpr(type));
+      } else {
+        if (T != null) {
+          T.ok(true);
+        }
+      }
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_optional = function(T, done) {
+    var e, optional, type_of, validate;
+    ({types} = require('../../../apps/webguy'));
+    ({isa, type_of, validate, optional} = types);
+    //.........................................................................................................
+    if (T == null) {
+      help('^types_optional@1^', types._optional, 'Optional { value: Symbol(nothing) }');
+      help('^types_optional@1^', isa.object(types._optional), true);
+      help('^types_optional@2^', rpr(type_of(types._optional)), 'null');
+      /* special case! */      help('^types_optional@3^', optional(null), 'Optional { value: null, }');
+      help('^types_optional@4^', optional(void 0), 'Optional { value: undefined, }');
+      help('^types_optional@5^', optional(1000), 1000);
+      help('^types_optional@6^', isa.integer(optional(1000)), true);
+      help('^types_optional@7^', isa.text(optional(1000)), false);
+      help('^types_optional@8^', isa.integer(optional(null)), true);
+      help('^types_optional@9^', isa.text(optional(null)), true);
+      help('^types_optional@10^', isa.text(optional(void 0)), true);
+      try {
+        //.........................................................................................................
+        // validate.text null
+        validate.text(optional(22));
+      } catch (error) {
+        e = error;
+        warn(GUY.trm.reverse(e.message));
+      }
+      help('^types_optional@11^', validate.text(optional(null)), null);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.object(types._optional), true);
+    }
+    if (T != null) {
+      T.eq(optional(null), {
+        value: null
+      });
+    }
+    if (T != null) {
+      T.eq(optional(void 0), {
+        value: void 0
+      });
+    }
+    if (T != null) {
+      T.eq(optional(1000), 1000);
+    }
+    if (T != null) {
+      T.eq(isa.integer(optional(1000)), true);
+    }
+    if (T != null) {
+      T.eq(isa.text(optional(1000)), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.text(optional(null)), true);
+    }
+    if (T != null) {
+      T.eq(isa.text(optional(void 0)), true);
+    }
+    //.........................................................................................................
+    // validate.text null
+    if (T != null) {
+      T.throws(/expected a text/, function() {
+        return validate.text(optional(22));
+      });
+    }
+    if (T != null) {
+      T.eq(validate.text(optional(null)), null);
+    }
+    if (T != null) {
+      T.eq(validate.text(optional(void 0)), void 0);
+    }
+    if (T != null) {
+      T.eq(validate.text(optional('abc')), 'abc');
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
       // await test @
-      this.types_declaration_1();
-      return test(this.types_declaration_1);
+      // @types_declaration_1()
+      // test @types_declaration_1
+      // @types_check_method_names_2()
+      // test @types_check_method_names_2
+      // await test @types_validate_1
+      // @types_type_of()
+      this.types_optional();
+      return test(this.types_optional);
     })();
   }
 
-  // @types_check_method_names_2()
-// test @types_check_method_names_2
-// await test @types_validate_1
-// @types_type_of()
-// @types_declare_with_class()
+  // @types_declare_with_class()
 // await test @types_declare_with_class
 // await test @types_isa_2
 // @types_demo_method_object_construction()
@@ -1299,7 +1542,8 @@
 // test @types_get_miller_device_name
 // test @types_get_carter_device_name
 // @types_isa_4()
-// test @types_isa_4
+// test @types_isa_5
+// test @types_assert_standard_types_exist
 
 }).call(this);
 
