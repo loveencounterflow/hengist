@@ -1557,19 +1557,19 @@
         validate.integer(all_of([6.0, 5.0, 4.0, 3.0, 2.3, 1.0]));
       } catch (error) {
         e = error;
-        warn(GUY.trm.reverse('^types_all_and_any_of@10^', e.message));
+        warn('^types_all_and_any_of@10^', GUY.trm.reverse(e.message), 'expected a integer, got a float');
       }
       try {
         validate.integer(all_of([6.1, 5.2, 4.3, 3.4, 2.5, 1.6]));
       } catch (error) {
         e = error;
-        warn(GUY.trm.reverse('^types_all_and_any_of@11^', e.message));
+        warn('^types_all_and_any_of@11^', GUY.trm.reverse(e.message), 'expected a integer, got a float');
       }
       try {
         validate.integer(any_of([6.1, 5.2, 4.3, 3.4, 2.5, 1.6]));
       } catch (error) {
         e = error;
-        warn(GUY.trm.reverse('^types_all_and_any_of@12^', e.message));
+        warn('^types_all_and_any_of@12^', GUY.trm.reverse(e.message), 'expected a integer, got a float');
       }
       null;
     }
@@ -1623,12 +1623,77 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_verify = function(T, done) {
+    var Failure, Iterator, Optional, all_of, any_of, optional, type_of, validate, verify;
+    ({types} = require('../../../apps/webguy'));
+    ({isa, type_of, validate, all_of, any_of, verify, Optional, Failure, optional, Iterator} = types);
+    //.........................................................................................................
+    if (T == null) {
+      help('^types_verify@1^', optional(null), 'Optional { value: null, }');
+      help('^types_verify@2^', (optional(null)) instanceof Optional, true);
+      help('^types_verify@3^', verify.list([]), []);
+      help('^types_verify@4^', verify.list(null), 'Failure { value: null, }');
+      help('^types_verify@5^', (verify.list(null)) instanceof Failure, true);
+      help('^types_verify@6^', verify.list(optional(null)), 'Optional { value: null, }');
+      help('^types_verify@7^', (verify.list(optional(null))) instanceof Optional, true);
+      help('^types_verify@8^', isa.integer(all_of(verify.list([]))), true);
+      help('^types_verify@9^', isa.integer(all_of(verify.list([1, 2]))), true);
+      help('^types_verify@10^', isa.integer(all_of(verify.list([1, 2.4]))), false);
+      help('^types_verify@11^', isa.integer(all_of(verify.list(null))), false);
+      help('^types_verify@12^', isa.integer(all_of(verify.list(optional(null)))), true);
+      null;
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(optional(null), new Optional(null));
+    }
+    if (T != null) {
+      T.eq((optional(null)) instanceof Optional, true);
+    }
+    if (T != null) {
+      T.eq(verify.list([]), []);
+    }
+    if (T != null) {
+      T.eq(verify.list(null), new Failure(null));
+    }
+    if (T != null) {
+      T.eq((verify.list(null)) instanceof Failure, true);
+    }
+    if (T != null) {
+      T.eq(verify.list(optional(null)), new Optional(null));
+    }
+    if (T != null) {
+      T.eq((verify.list(optional(null))) instanceof Optional, true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(verify.list([]))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(verify.list([1, 2]))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(verify.list([1, 2.4]))), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(verify.list(null))), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(verify.list(optional(null)))), true);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
       // await test @
-      this.types_all_and_any_of();
-      return test(this.types_all_and_any_of);
+      // @types_all_and_any_of(); test @types_all_and_any_of
+      this.types_verify();
+      return test(this.types_verify);
     })();
   }
 
