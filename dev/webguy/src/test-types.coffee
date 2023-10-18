@@ -817,9 +817,9 @@ show_error_message_and_test = ( T, matcher, fn ) ->
     help '^types_all_and_any_of@7^', ( validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
     help '^types_all_and_any_of@8^', ( validate.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
     help '^types_all_and_any_of@9^', ( validate.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ]
-    try validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@10^', e.message
-    try validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@11^', e.message
-    try validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn GUY.trm.reverse '^types_all_and_any_of@12^', e.message
+    try validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] catch e then warn '^types_all_and_any_of@10^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
+    try validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@11^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
+    try validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@12^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
     null
   #.........................................................................................................
   T?.eq ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
@@ -839,10 +839,55 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_verify = ( T, done ) ->
+  { types         } = require '../../../apps/webguy'
+  { isa
+    type_of
+    validate
+    all_of
+    any_of
+    verify
+    Optional
+    Failure
+    optional
+    Iterator      } = types
+  #.........................................................................................................
+  unless T?
+    help '^types_verify@1^', ( optional null                                     ), 'Optional { value: null, }'
+    help '^types_verify@2^', ( ( optional null ) instanceof Optional             ), true
+    help '^types_verify@3^', ( verify.list []                                    ), []
+    help '^types_verify@4^', ( verify.list null                                  ), 'Failure { value: null, }'
+    help '^types_verify@5^', ( ( verify.list null ) instanceof Failure           ), true
+    help '^types_verify@6^', ( verify.list optional null                         ), 'Optional { value: null, }'
+    help '^types_verify@7^', ( ( verify.list optional null ) instanceof Optional ), true
+    help '^types_verify@8^', ( isa.integer all_of verify.list []                 ), true
+    help '^types_verify@9^', ( isa.integer all_of verify.list [ 1, 2, ]          ), true
+    help '^types_verify@10^', ( isa.integer all_of verify.list [ 1, 2.4, ]        ), false
+    help '^types_verify@11^', ( isa.integer all_of verify.list null               ), false
+    help '^types_verify@12^', ( isa.integer all_of verify.list optional null      ), true
+    null
+  #.........................................................................................................
+  T?.eq ( optional null                                     ), new Optional null
+  T?.eq ( ( optional null ) instanceof Optional             ), true
+  T?.eq ( verify.list []                                    ), []
+  T?.eq ( verify.list null                                  ), new Failure null
+  T?.eq ( ( verify.list null ) instanceof Failure           ), true
+  T?.eq ( verify.list optional null                         ), new Optional null
+  T?.eq ( ( verify.list optional null ) instanceof Optional ), true
+  T?.eq ( isa.integer all_of verify.list []                 ), true
+  T?.eq ( isa.integer all_of verify.list [ 1, 2, ]          ), true
+  T?.eq ( isa.integer all_of verify.list [ 1, 2.4, ]        ), false
+  T?.eq ( isa.integer all_of verify.list null               ), false
+  T?.eq ( isa.integer all_of verify.list optional null      ), true
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
   # await test @
-  @types_all_and_any_of()
-  test @types_all_and_any_of
+  # @types_all_and_any_of(); test @types_all_and_any_of
+  @types_verify(); test @types_verify
