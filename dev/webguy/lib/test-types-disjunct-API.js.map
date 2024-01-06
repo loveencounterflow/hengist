@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "",
+  "sourceRoot": "",
+  "sources": [
+    "../src/test-types-disjunct-API.coffee"
+  ],
+  "names": [],
+  "mappings": "AACA;EAAA;AAAA,MAAA,GAAA,EAAA,KAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA,EAAA,GAAA,EAAA,EAAA,EAAA,GAAA,EAAA,KAAA,EAAA,MAAA,EAAA,GAAA,EAAA,IAAA,EAAA,KAAA,EAAA,IAAA,EAAA,IAAA,EAAA,OAAA;;;EAIA,GAAA,GAA4B,OAAA,CAAQ,KAAR;;EAC5B,CAAA,CAAE,KAAF,EACE,KADF,EAEE,IAFF,EAGE,IAHF,EAIE,KAJF,EAKE,MALF,EAME,IANF,EAOE,IAPF,EAQE,OARF,CAAA,GAQ4B,GAAG,CAAC,GAAG,CAAC,WAAR,CAAoB,sCAApB,CAR5B;;EASA,CAAA,CAAE,GAAF,EACE,OADF,EAEE,IAFF,EAGE,GAHF,CAAA,GAG4B,GAAG,CAAC,GAHhC,EAdA;;;EAmBA,IAAA,GAA4B,OAAA,CAAQ,UAAR;;EAC5B,EAAA,GAA4B,IAAI,CAAC;;EACjC,KAAA,GAA4B,IAAI,CAAE,OAAA,CAAQ,kBAAR,CAAF,CAA8B,CAAC,SAAnC,CAAA;;EAC5B,CAAA,CAAE,GAAF,CAAA,GAA4B,KAA5B;AAtBA",
+  "sourcesContent": [
+    "\n'use strict'\n\n\n############################################################################################################\nGUY                       = require 'guy'\n{ alert\n  debug\n  help\n  info\n  plain\n  praise\n  urge\n  warn\n  whisper }               = GUY.trm.get_loggers 'webguy/tests/test-types-disjunct-API'\n{ rpr\n  inspect\n  echo\n  log     }               = GUY.trm\n#...........................................................................................................\ntest                      = require 'guy-test'\njr                        = JSON.stringify\ntypes                     = new ( require 'intertype-newest' ).Intertype()\n{ isa }                   = types\n\n\n\n"
+  ]
+}
