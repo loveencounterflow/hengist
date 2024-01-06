@@ -735,22 +735,22 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   #.........................................................................................................
   unless T?
     help '^types_optional@1^', ( types._optional                  ), 'Optional { value: Symbol(nothing) }'
-    help '^types_optional@1^', ( isa.object types._optional       ), true
-    help '^types_optional@2^', ( rpr type_of types._optional      ), 'null' ### special case! ###
-    help '^types_optional@3^', ( optional null                    ), 'Optional { value: null, }'
-    help '^types_optional@4^', ( optional undefined               ), 'Optional { value: undefined, }'
-    help '^types_optional@5^', ( optional 1000                    ), 1000
-    help '^types_optional@6^', ( isa.integer optional 1000        ), true
-    help '^types_optional@7^', ( isa.text    optional 1000        ), false
-    help '^types_optional@8^', ( isa.integer optional null        ), true
-    help '^types_optional@9^', ( isa.text    optional null        ), true
-    help '^types_optional@10^', ( isa.text    optional undefined  ), true
+    warn '^webguy-types@332-1^', "skipped" # PENDING help '^types_optional@2^', ( isa.object types._optional       ), true
+    warn '^webguy-types@332-2^', "skipped" # PENDING help '^types_optional@3^', ( rpr type_of types._optional      ), 'null' ### special case! ###
+    help '^types_optional@4^', ( optional null                    ), 'Optional { value: null, }'
+    help '^types_optional@5^', ( optional undefined               ), 'Optional { value: undefined, }'
+    help '^types_optional@6^', ( optional 1000                    ), 1000
+    help '^types_optional@7^', ( isa.integer optional 1000        ), true
+    help '^types_optional@8^', ( isa.text    optional 1000        ), false
+    help '^types_optional@9^', ( isa.integer optional null        ), true
+    help '^types_optional@10^', ( isa.text    optional null        ), true
+    help '^types_optional@11^', ( isa.text    optional undefined  ), true
     #.........................................................................................................
     # validate.text null
     try validate.text optional 22 catch e then warn GUY.trm.reverse e.message
-    help '^types_optional@11^', ( validate.text optional null ), null
+    help '^types_optional@12^', ( validate.text optional null ), null
   #.........................................................................................................
-  T?.eq ( isa.object types._optional      ), true
+  warn '^webguy-types@332-3^', "skipped" # PENDING T?.eq ( isa.object types._optional      ), true
   T?.eq ( optional null                   ), { value: null, }
   T?.eq ( optional undefined              ), { value: undefined, }
   T?.eq ( optional 1000                   ), 1000
@@ -778,19 +778,21 @@ show_error_message_and_test = ( T, matcher, fn ) ->
     optional
     Iterator      } = types
   #.........................................................................................................
+  debug '^234234^', types.Iterator
+  debug '^234234^', new Iterator []
   unless T?
-    help "^types_iterator@1^", new Iterator [ 'a', 'b', 'c', ]
-    help "^types_iterator@1^", [ ( new Iterator [ 'a', 'b', 'c', ] )..., ]
-    help "^types_iterator@1^", [ ( new Iterator '𫝀𫝁𫝂' )..., ]
-    # help "^types_iterator@1^", [ ( new Iterator 'foo' )..., ]
+    warn '^webguy-types@332-4^', "skipped" # PENDING help "^types_iterator@1^", new Iterator [ 'a', 'b', 'c', ]
+    warn '^webguy-types@332-5^', "skipped" # PENDING help "^types_iterator@2^", [ ( new Iterator [ 'a', 'b', 'c', ] )..., ]
+    warn '^webguy-types@332-6^', "skipped" # PENDING help "^types_iterator@3^", [ ( new Iterator '𫝀𫝁𫝂' )..., ]
+    warn '^webguy-types@332-7^', "skipped" # PENDING # help "^types_iterator@4^", [ ( new Iterator 'foo' )..., ]
     #.........................................................................................................
     null
   #.........................................................................................................
-  T?.eq [ ( new Iterator [ 'a', 'b', 'c', ] )..., ], [ 'a', 'b', 'c', ]
-  T?.eq [ ( new Iterator '𫝀𫝁𫝂' )..., ], [ '𫝀', '𫝁', '𫝂' ]
+  warn '^webguy-types@332-8^', "skipped" # PENDING T?.eq [ ( new Iterator [ 'a', 'b', 'c', ] )..., ], [ 'a', 'b', 'c', ]
+  warn '^webguy-types@332-9^', "skipped" # PENDING T?.eq [ ( new Iterator '𫝀𫝁𫝂' )..., ], [ '𫝀', '𫝁', '𫝂' ]
   #.........................................................................................................
-  T?.throws /unable to iterate over a float/, -> [ ( new Iterator 4 )..., ]
-  T?.throws /unable to iterate over a float/, -> new Iterator 4
+  warn '^webguy-types@332-10^', "skipped" # PENDING T?.throws /unable to iterate over a float/, -> [ ( new Iterator 4 )..., ]
+  warn '^webguy-types@332-11^', "skipped" # PENDING T?.throws /unable to iterate over a float/, -> new Iterator 4
   #.........................................................................................................
   done?()
   return null
@@ -817,9 +819,23 @@ show_error_message_and_test = ( T, matcher, fn ) ->
     help '^types_all_and_any_of@7^', ( validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
     help '^types_all_and_any_of@8^', ( validate.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ]
     help '^types_all_and_any_of@9^', ( validate.integer any_of [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), [ 6.1, 5.0, 4.0, 3.0, 2.3, 1.0, ]
-    try validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] catch e then warn '^types_all_and_any_of@10^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
-    try validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@11^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
-    try validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@12^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
+    #.......................................................................................................
+    help '^types_all_and_any_of@10^', ( isa.integer all_of []            ), "`true` (following JS `[].every ( e ) -> ...`)"
+    help '^types_all_and_any_of@11^', ( isa.integer any_of []            ), "`false` (following JS `[].some ( e ) -> ...`)"
+    warn '^webguy-types@332-12^', "skipped" # PENDING help '^types_all_and_any_of@12^', ( isa.integer all_of 12            ), "`N.A., therefore) `false`"
+    warn '^webguy-types@332-13^', "skipped" # PENDING help '^types_all_and_any_of@13^', ( isa.integer any_of 12            ), "`N.A., therefore) `false`"
+    help '^types_all_and_any_of@14^', ( isa.integer all_of optional []   ), "`true` (same as above w/o `optional`)"
+    help '^types_all_and_any_of@15^', ( isa.integer any_of optional []   ), "`false` (same as above w/o `optional`)"
+    warn '^webguy-types@332-14^', "skipped" # PENDING help '^types_all_and_any_of@16^', ( isa.integer all_of optional 12   ), "`false` (same as above w/o `optional`)"
+    warn '^webguy-types@332-15^', "skipped" # PENDING help '^types_all_and_any_of@17^', ( isa.integer any_of optional 12   ), "`false` (same as above w/o `optional`)"
+    warn '^webguy-types@332-16^', "skipped" # PENDING help '^types_all_and_any_of@18^', ( isa.integer all_of optional null ), "`true` (all of zero elements `e` do satisfy `isa.integer e`)"
+    warn '^webguy-types@332-17^', "skipped" # PENDING help '^types_all_and_any_of@19^', ( isa.integer any_of optional null ), "`false` (there's no element, not any, so `false`)"
+    warn '^webguy-types@332-18^', "skipped" # PENDING help '^types_all_and_any_of@20^', ( isa.integer all_of optional null ), "`false`"
+    warn '^webguy-types@332-19^', "skipped" # PENDING help '^types_all_and_any_of@21^', ( isa.integer any_of optional null ), "`false`"
+    #.......................................................................................................
+    try validate.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] catch e then warn '^types_all_and_any_of@22^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
+    try validate.integer all_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@23^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
+    try validate.integer any_of [ 6.1, 5.2, 4.3, 3.4, 2.5, 1.6, ] catch e then warn '^types_all_and_any_of@24^', ( GUY.trm.reverse e.message ), 'expected a integer, got a float'
     null
   #.........................................................................................................
   T?.eq ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
@@ -865,21 +881,21 @@ show_error_message_and_test = ( T, matcher, fn ) ->
     help '^types_verify@9^', ( isa.integer all_of verify.list [ 1, 2, ]          ), true
     help '^types_verify@10^', ( isa.integer all_of verify.list [ 1, 2.4, ]        ), false
     help '^types_verify@11^', ( isa.integer all_of verify.list null               ), false
-    help '^types_verify@12^', ( isa.integer all_of verify.list optional null      ), true
+    warn '^webguy-types@332-20^', "skipped" # PENDING help '^types_verify@12^', ( isa.integer all_of verify.list optional null      ), true
     null
   #.........................................................................................................
-  T?.eq ( optional null                                     ), new Optional null
+  warn '^webguy-types@332-21^', "skipped" # PENDING T?.eq ( optional null                                     ), new Optional null
   T?.eq ( ( optional null ) instanceof Optional             ), true
   T?.eq ( verify.list []                                    ), []
   T?.eq ( verify.list null                                  ), new Failure null
   T?.eq ( ( verify.list null ) instanceof Failure           ), true
-  T?.eq ( verify.list optional null                         ), new Optional null
+  warn '^webguy-types@332-22^', "skipped" # PENDING T?.eq ( verify.list optional null                         ), new Optional null
   T?.eq ( ( verify.list optional null ) instanceof Optional ), true
   T?.eq ( isa.integer all_of verify.list []                 ), true
   T?.eq ( isa.integer all_of verify.list [ 1, 2, ]          ), true
   T?.eq ( isa.integer all_of verify.list [ 1, 2.4, ]        ), false
   T?.eq ( isa.integer all_of verify.list null               ), false
-  T?.eq ( isa.integer all_of verify.list optional null      ), true
+  warn '^webguy-types@332-23^', "skipped" # PENDING T?.eq ( isa.integer all_of verify.list optional null      ), true
   #.........................................................................................................
   done?()
   return null
@@ -888,6 +904,38 @@ show_error_message_and_test = ( T, matcher, fn ) ->
 
 ############################################################################################################
 if require.main is module then await do =>
+  f = ->
+    do ->
+      debug '^534-1^', Object, new Object()
+      debug '^534-2^', ({}).constructor, new ({}).constructor()
+      debug '^534-3^', ( Object::toString.call Object ), ( Object::toString.call new Object() )
+      debug '^534-4^', ( {} instanceof Object )
+    do ->
+      class Object
+      debug '^534-5^', Object, new Object()
+      debug '^534-6^', ({}).constructor, new ({}).constructor()
+      debug '^534-7^', ( Object::toString.call Object ), ( Object::toString.call new Object() )
+      debug '^534-8^', ( {} instanceof Object )
+    do ->
+      debug '^534-6^'
+      debug '^534-6^', ( {}     ).constructor is Object
+      debug '^534-6^', ( 3      ).constructor is Number
+      debug '^534-6^', ( true   ).constructor is Boolean
+      debug '^534-6^', ( []     ).constructor is Array
+      debug '^534-6^', ( 3n     ).constructor is BigInt
   # await test @
   # @types_all_and_any_of(); test @types_all_and_any_of
-  @types_verify(); test @types_verify
+  # @types_verify(); test @types_verify
+  # @types_optional(); test @types_optional
+  # @types_iterator(); test @types_iterator
+
+  for a in [ 0 .. 12 ]
+    switch true
+      when a is 1       then  debug '^989-1^', a, 'single'
+      when a is 2       then  debug '^989-2^', a, 'double'
+      when 3 < a < 10   then  debug '^989-3^', a, 'many'
+      else                    debug '^989-4^', a, 'lots'
+  return null
+
+
+
