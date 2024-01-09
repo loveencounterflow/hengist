@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var GUY, alert, debug, echo, help, info, inspect, log, main, plain, praise, rpr, urge, use_events, warn, whisper;
+  var GUY, alert, debug, echo, help, info, inspect, log, main, plain, praise, rpr, urge, warn, whisper;
 
   //###########################################################################################################
   GUY = require('../../../apps/guy');
@@ -10,17 +10,16 @@
   ({rpr, inspect, echo, log} = GUY.trm);
 
   // stdin.setEncoding 'utf8'
-  use_events = function() {
-    help('^409-1^', "use_events");
-    // process.stdin.on 'readable', () ->
-    //   warn '^409-2^', "readable!"
-    //   return null
-    process.stdin.on('data', function(chunk) {
-      info('^409-3^', rpr(chunk));
-      return null;
-    });
-    return process.stdin.resume();
-  };
+
+  // use_events = ->
+  //   help '^409-1^', "use_events"
+  //   # process.stdin.on 'readable', () ->
+  //   #   warn '^409-2^', "readable!"
+  //   #   return null
+  //   process.stdin.on 'data', (chunk) ->
+  //     info '^409-3^', rpr chunk
+  //     return null
+  //   process.stdin.resume()
 
   // # stdin.on('end', () ->
   // #   console.log("Hello " + data)
@@ -34,13 +33,16 @@
     ref = process.stdin;
     for await (chunk of ref) {
       debug('^409-5^', Date.now(), rpr(chunk.toString('hex')));
-      debug('^409-5^', Date.now(), new InputEvent(chunk));
+      debug('^409-5^', chunk.length);
+      // event = new InputEvent chunk
       process.stdout.write(chunk);
     }
     return null;
   };
 
   
+// =========================================================================================================
+// adapted from https://github.com/song940/input-event/blob/master/lib/index.js
 const EVENT_TYPES = {
   EV_SYN: 0x00,
   EV_KEY: 0x01, // [joystick] JS_EVENT_BUTTON
@@ -58,13 +60,21 @@ const EVENT_TYPES = {
   EV_INIT: 0x80 // [joystick] JS_EVENT_INIT
 };
 
+const KEY_STATUS = {
+  KEY_UP    : 0x00,
+  KEY_PRESS : 0x01,
+  KEY_DOWN  : 0x02
+};
+
 class InputEvent {
 
 
 
   constructor( chunk ) {
     this.chunk = chunk;
-    this.process();
+    this.event = this.process();
+    this.assign_key_event_type();
+    debug( '^409-10^', this.event );
     return undefined; }
 
   process() {
@@ -88,12 +98,15 @@ class InputEvent {
       var part = this.chunk.slice(lastPos, i);
       event = this.parse(part);
       if (event) urge( "event", 'data', event, part);
+      return event;
     } else {
       event = this.parse(this.chunk);
       if (event) urge( "event", 'data', event, this.chunk);
+      return event;
     }
   }
   parse() {
+    debug( '^39837459^', "chunk.length", this.chunk.length, this.chunk.toString( 'hex' ) );
     if (this.chunk.length >= 24) {
       // unsigned long time structure.
       return {
@@ -146,9 +159,36 @@ class InputEvent {
       };
     }
   }
+  // =======================================================================================================
+  // adapted from https://github.com/song940/input-event/blob/master/lib/keyboard.js
+  assign_key_event_type() {
+    // filting key event
+    // debug( '^39837459^', this.event.type, EVENT_TYPES.EV_KEY );
+    debug( '^39837459^', this.event.value, KEY_STATUS );
+    // if ( this.event.type === EVENT_TYPES.EV_KEY ) {
+    // ### TAINT needs some clarification why not EV_KEY but EV_MSC
+    if ( this.event.type === EVENT_TYPES.EV_MSC ) {
+      switch ( this.event.value ) {
+        case KEY_STATUS.KEY_UP:
+          this.event.key_event_type = 'keyup';
+          break;
+        case KEY_STATUS.KEY_DOWN:
+          this.event.key_event_type = 'keydown';
+          break;
+        case KEY_STATUS.KEY_PRESS:
+          this.event.key_event_type = 'keypress';
+          break;
+      }
+    }
+  }
 }
 
 InputEvent.EVENT_TYPES = EVENT_TYPES;
+
+
+
+
+
   // use_linux_input_device = ->
   //   LinuxInputListener        = require 'linux-input-device'
   //   SW_LID = 0x00;
@@ -183,6 +223,7 @@ InputEvent.EVENT_TYPES = EVENT_TYPES;
   }
 
   // use_events()
+// use_linux_input_device()
 
 }).call(this);
 
