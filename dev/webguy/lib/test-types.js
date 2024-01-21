@@ -1442,7 +1442,6 @@
       help('^types_optional@9^', validate.text(optional(null)), null);
     }
     //.........................................................................................................
-    // warn '^types_optional@10^', "skipped" # PENDING
     if (T != null) {
       T.eq(optional(null), {
         value: null
@@ -1478,7 +1477,6 @@
     }
     //.........................................................................................................
     // validate.text null
-    // warn '^types_optional@11^', "skipped" # PENDING
     if (T != null) {
       T.throws(/expected a text/, function() {
         return validate.text(22);
@@ -1505,34 +1503,6 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.types_iterator = function(T, done) {
-    var Iterator, optional, type_of, validate;
-    ({types} = require('../../../apps/webguy'));
-    ({isa, type_of, validate, optional, Iterator} = types);
-    //.........................................................................................................
-    debug('^234234^', types.Iterator);
-    debug('^234234^', new Iterator([]));
-    if (T == null) {
-      warn('^webguy-types@332-4^', "skipped"); // PENDING help "^types_iterator@1^", new Iterator [ 'a', 'b', 'c', ]
-      warn('^webguy-types@332-5^', "skipped"); // PENDING help "^types_iterator@2^", [ ( new Iterator [ 'a', 'b', 'c', ] )..., ]
-      warn('^webguy-types@332-6^', "skipped"); // PENDING help "^types_iterator@3^", [ ( new Iterator '𫝀𫝁𫝂' )..., ]
-      warn('^webguy-types@332-7^', "skipped"); // PENDING # help "^types_iterator@4^", [ ( new Iterator 'foo' )..., ]
-      //.........................................................................................................
-      null;
-    }
-    //.........................................................................................................
-    warn('^webguy-types@332-8^', "skipped"); // PENDING T?.eq [ ( new Iterator [ 'a', 'b', 'c', ] )..., ], [ 'a', 'b', 'c', ]
-    warn('^webguy-types@332-9^', "skipped"); // PENDING T?.eq [ ( new Iterator '𫝀𫝁𫝂' )..., ], [ '𫝀', '𫝁', '𫝂' ]
-    //.........................................................................................................
-    warn('^webguy-types@332-10^', "skipped"); // PENDING T?.throws /unable to iterate over a float/, -> [ ( new Iterator 4 )..., ]
-    warn('^webguy-types@332-11^', "skipped"); // PENDING T?.throws /unable to iterate over a float/, -> new Iterator 4
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
   this.types_all_and_any_of = function(T, done) {
     var Iterator, all_of, any_of, e, optional, type_of, validate;
     ({types} = require('../../../apps/webguy'));
@@ -1552,16 +1522,16 @@
       //.......................................................................................................
       help('^types_all_and_any_of@10^', isa.integer(all_of([])), "`true` (following JS `[].every ( e ) -> ...`)");
       help('^types_all_and_any_of@11^', isa.integer(any_of([])), "`false` (following JS `[].some ( e ) -> ...`)");
-      warn('^webguy-types@332-12^', "skipped"); // PENDING help '^types_all_and_any_of@12^', ( isa.integer all_of 12            ), "`N.A., therefore) `false`"
-      warn('^webguy-types@332-13^', "skipped"); // PENDING help '^types_all_and_any_of@13^', ( isa.integer any_of 12            ), "`N.A., therefore) `false`"
+      help('^types_all_and_any_of@12^', isa.integer(all_of(12)), "(N.A., therefore) `true`");
+      help('^types_all_and_any_of@13^', isa.integer(any_of(12)), "(N.A., therefore) `false`");
       help('^types_all_and_any_of@14^', isa.integer(all_of(optional([]))), "`true` (same as above w/o `optional`)");
       help('^types_all_and_any_of@15^', isa.integer(any_of(optional([]))), "`false` (same as above w/o `optional`)");
-      warn('^webguy-types@332-14^', "skipped"); // PENDING help '^types_all_and_any_of@16^', ( isa.integer all_of optional 12   ), "`false` (same as above w/o `optional`)"
-      warn('^webguy-types@332-15^', "skipped"); // PENDING help '^types_all_and_any_of@17^', ( isa.integer any_of optional 12   ), "`false` (same as above w/o `optional`)"
-      warn('^webguy-types@332-16^', "skipped"); // PENDING help '^types_all_and_any_of@18^', ( isa.integer all_of optional null ), "`true` (all of zero elements `e` do satisfy `isa.integer e`)"
-      warn('^webguy-types@332-17^', "skipped"); // PENDING help '^types_all_and_any_of@19^', ( isa.integer any_of optional null ), "`false` (there's no element, not any, so `false`)"
-      warn('^webguy-types@332-18^', "skipped"); // PENDING help '^types_all_and_any_of@20^', ( isa.integer all_of optional null ), "`false`"
-      warn('^webguy-types@332-19^', "skipped"); // PENDING help '^types_all_and_any_of@21^', ( isa.integer any_of optional null ), "`false`"
+      help('^types_all_and_any_of@16^', isa.integer(all_of(optional(12))), "`true` (same as above w/o `optional`)");
+      help('^types_all_and_any_of@17^', isa.integer(any_of(optional(12))), "`false` (same as above w/o `optional`)");
+      help('^types_all_and_any_of@18^', isa.integer(all_of(optional(null))), "`true` (all of zero elements `e` do satisfy `isa.integer e`)");
+      help('^types_all_and_any_of@19^', isa.integer(any_of(optional(null))), "`false` (there's no element, not any, so `false`)");
+      help('^types_all_and_any_of@20^', isa.integer(all_of(optional(null))), "`true`");
+      help('^types_all_and_any_of@21^', isa.integer(any_of(optional(null))), "`false`");
       try {
         //.......................................................................................................
         validate.integer(all_of([6.0, 5.0, 4.0, 3.0, 2.3, 1.0]));
@@ -1627,6 +1597,44 @@
         return validate.integer(any_of([6.1, 5.2, 4.3, 3.4, 2.5, 1.6]));
       });
     }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.integer(all_of([])), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of([])), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(12)), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of(12)), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(optional([]))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of(optional([]))), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.integer(all_of(optional(12))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of(optional(12))), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(optional(null))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of(optional(null))), false);
+    }
+    if (T != null) {
+      T.eq(isa.integer(all_of(optional(null))), true);
+    }
+    if (T != null) {
+      T.eq(isa.integer(any_of(optional(null))), false);
+    }
     if (typeof done === "function") {
       done();
     }
@@ -1651,7 +1659,6 @@
       help('^types_verify@9^', isa.integer(all_of(verify.list([1, 2]))), true);
       help('^types_verify@10^', isa.integer(all_of(verify.list([1, 2.4]))), false);
       help('^types_verify@11^', isa.integer(all_of(verify.list(null))), false);
-      // warn '^webguy-types@332-20^', "skipped" # PENDING
       help('^types_verify@12^', all_of(optional(null)), new All_of(new Optional(null)));
       help('^types_verify@13^', (all_of(optional(null))).value, new Optional(null));
       help('^types_verify@14^', (all_of(optional(null))).get(), null);
@@ -1665,7 +1672,9 @@
       null;
     }
     //.........................................................................................................
-    warn('^webguy-types@332-21^', "skipped"); // PENDING T?.eq ( optional null                                     ), new Optional null
+    if (T != null) {
+      T.eq(optional(null), new Optional(null));
+    }
     if (T != null) {
       T.eq((optional(null)) instanceof Optional, true);
     }
@@ -1726,7 +1735,6 @@
       T.eq(isa.integer(any_of(null)), false);
     }
     //#########################################################################################################
-    // warn '^webguy-types@332-23^', "skipped" # PENDING
     if (T != null) {
       T.eq(isa.integer(all_of(verify.list(optional(null)))), true);
     }
@@ -1742,13 +1750,13 @@
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
-      return test(this);
+      test(this);
+      this.types_all_and_any_of();
+      return test(this.types_all_and_any_of);
     })();
   }
 
-  // @types_all_and_any_of()
-// test @types_all_and_any_of
-// await GUY.async.after 1, => test @types_optional
+  // await GUY.async.after 1, => test @types_optional
 // await GUY.async.after 1, =>
 // await test @
 
