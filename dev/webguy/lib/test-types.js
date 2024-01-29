@@ -1504,11 +1504,26 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.types_all_and_any_of = function(T, done) {
-    var Iterator, all_of, any_of, e, optional, type_of, validate;
+    var Iterator, all_of, any_of, e, optional, type, type_of, validate;
     ({types} = require('../../../apps/webguy'));
     ({isa, type_of, validate, all_of, any_of, optional, Iterator} = types);
     //.........................................................................................................
     if (T == null) {
+      // help isa.integer 93.1
+      // help type_of 93.1
+      // help isa.integer 93.0
+      // help type_of 93.0
+      help((function() {
+        var i, len, ref, results;
+        ref = types._isa_methods;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          [type] = ref[i];
+          results.push(type);
+        }
+        return results;
+      })());
+      fghdfhfhrterte;
       help('^types_all_and_any_of@1^', isa.integer(all_of([6.0, 5.0, 4.0, 3.0, 2.0, 1.0])), true);
       help('^types_all_and_any_of@2^', isa.integer(all_of([6.0, 5.0, 4.0, 3.0, 2.3, 1.0])), false);
       help('^types_all_and_any_of@3^', isa.integer(any_of([6.0, 5.0, 4.0, 3.0, 2.0, 1.0])), true);
@@ -1747,16 +1762,122 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_types_of = function(T, done) {
+    var E, e, type_of, types_of;
+    ({types} = require('../../../apps/webguy'));
+    ({type_of, types_of} = types);
+    e = new (E = class E {})();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types_of(0), ['float', 'infinitefloat', 'int32', 'proper_fraction', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'zero', 'even', 'frozen', 'sealed', 'falsy', 'number']);
+    }
+    if (T != null) {
+      T.eq(types_of(1), ['float', 'infinitefloat', 'int32', 'proper_fraction', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'nonzero', 'odd', 'frozen', 'sealed', 'truthy', 'number']);
+    }
+    if (T != null) {
+      T.eq(types_of(2), ['float', 'infinitefloat', 'int32', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'nonzero', 'even', 'frozen', 'sealed', 'truthy', 'number']);
+    }
+    if (T != null) {
+      T.eq(types_of(''), ['text', 'blank_text', 'frozen', 'sealed', 'empty_text', 'falsy', 'string']);
+    }
+    if (T != null) {
+      T.eq(types_of('d'), ['text', 'chr', 'nonblank_text', 'int16text', 'jsidentifier', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string']);
+    }
+    if (T != null) {
+      T.eq(types_of('de'), ['text', 'nonblank_text', 'int16text', 'jsidentifier', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string']);
+    }
+    if (T != null) {
+      T.eq(types_of(' '), ['text', 'chr', 'blank_text', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string']);
+    }
+    if (T != null) {
+      T.eq(types_of('  '), ['text', 'blank_text', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string']);
+    }
+    if (T != null) {
+      T.eq(types_of(e), ['object', 'extensible', 'empty_object', 'truthy', 'e']);
+    }
+    if (T != null) {
+      T.eq(types_of(true), ['boolean', 'true', 'frozen', 'sealed', 'truthy']);
+    }
+    if (T != null) {
+      T.eq(types_of(false), ['boolean', 'false', 'frozen', 'sealed', 'falsy']);
+    }
+    if (T != null) {
+      T.eq(types_of(null), ['null', 'frozen', 'sealed', 'falsy']);
+    }
+    if (T != null) {
+      T.eq(types_of(void 0), ['undefined', 'frozen', 'sealed', 'falsy']);
+    }
+    if (T != null) {
+      T.eq(types_of({}), ['object', 'extensible', 'empty_object', 'truthy']);
+    }
+    if (T != null) {
+      T.eq(types_of(Object.create(null)), ['object', 'extensible', 'empty_object', 'truthy']);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.types_field_declarations = function(T, done) {
+    var Intertype, Isa;
+    ({
+      types: {Isa, Intertype}
+    } = require('../../../apps/webguy'));
+    (() => {      //.........................................................................................................
+      var declarations, optional;
+      declarations = (function() {
+        class declarations extends Isa {
+          foo(x) {
+            return x === 'foo';
+          }
+
+        };
+
+        declarations.prototype.quantity = {
+          fields: {
+            v: 'float',
+            u: 'text'
+          }
+        };
+
+        return declarations;
+
+      }).call(this);
+      //.......................................................................................................
+      types = new Intertype({declarations});
+      ({isa, optional} = types);
+      //.......................................................................................................
+      debug('^334^', isa.foo(4));
+      debug('^334^', isa.foo('foo'));
+      debug('^334^', isa.quantity('foo'));
+      debug('^334^', isa.quantity({
+        v: 6
+      }));
+      debug('^334^', isa.quantity({
+        v: 6,
+        u: ''
+      }));
+      return null;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
-      test(this);
-      this.types_all_and_any_of();
-      return test(this.types_all_and_any_of);
+      // test @
+      return this.types_field_declarations();
     })();
   }
 
-  // await GUY.async.after 1, => test @types_optional
+  // test @types_field_declarations
+// await GUY.async.after 1, => test @types_optional
 // await GUY.async.after 1, =>
 // await test @
 
