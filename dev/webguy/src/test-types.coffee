@@ -780,6 +780,12 @@ show_error_message_and_test = ( T, matcher, fn ) ->
     Iterator      } = types
   #.........................................................................................................
   unless T?
+    # help isa.integer 93.1
+    # help type_of 93.1
+    # help isa.integer 93.0
+    # help type_of 93.0
+    help ( type for [ type, ] in types._isa_methods )
+    fghdfhfhrterte
     help '^types_all_and_any_of@1^', ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
     help '^types_all_and_any_of@2^', ( isa.integer all_of [ 6.0, 5.0, 4.0, 3.0, 2.3, 1.0, ] ), false
     help '^types_all_and_any_of@3^', ( isa.integer any_of [ 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, ] ), true
@@ -909,13 +915,67 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@types_types_of = ( T, done ) ->
+  { types         } = require '../../../apps/webguy'
+  { type_of
+    types_of      } = types
+  e                 = new ( class E )()
+  #.........................................................................................................
+  T?.eq ( types_of 0                  ), [ 'float', 'infinitefloat', 'int32', 'proper_fraction', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'zero', 'even', 'frozen', 'sealed', 'falsy', 'number' ]
+  T?.eq ( types_of 1                  ), [ 'float', 'infinitefloat', 'int32', 'proper_fraction', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'nonzero', 'odd', 'frozen', 'sealed', 'truthy', 'number' ]
+  T?.eq ( types_of 2                  ), [ 'float', 'infinitefloat', 'int32', 'numeric', 'integer', 'safeinteger', 'codepointid', 'cardinal', 'nonzero', 'even', 'frozen', 'sealed', 'truthy', 'number' ]
+  T?.eq ( types_of ''                 ), [ 'text', 'blank_text', 'frozen', 'sealed', 'empty_text', 'falsy', 'string' ]
+  T?.eq ( types_of 'd'                ), [ 'text', 'chr', 'nonblank_text', 'int16text', 'jsidentifier', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string' ]
+  T?.eq ( types_of 'de'               ), [ 'text', 'nonblank_text', 'int16text', 'jsidentifier', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string' ]
+  T?.eq ( types_of ' '                ), [ 'text', 'chr', 'blank_text', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string' ]
+  T?.eq ( types_of '  '               ), [ 'text', 'blank_text', 'frozen', 'sealed', 'nonempty_text', 'truthy', 'string' ]
+  T?.eq ( types_of e                  ), [ 'object', 'extensible', 'empty_object', 'truthy', 'e' ]
+  T?.eq ( types_of true               ), [ 'boolean', 'true', 'frozen', 'sealed', 'truthy' ]
+  T?.eq ( types_of false              ), [ 'boolean', 'false', 'frozen', 'sealed', 'falsy' ]
+  T?.eq ( types_of null               ), [ 'null', 'frozen', 'sealed', 'falsy' ]
+  T?.eq ( types_of undefined          ), [ 'undefined', 'frozen', 'sealed', 'falsy' ]
+  T?.eq ( types_of {}                 ), [ 'object', 'extensible', 'empty_object', 'truthy' ]
+  T?.eq ( types_of Object.create null ), [ 'object', 'extensible', 'empty_object', 'truthy' ]
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@types_field_declarations = ( T, done ) ->
+  { types: {
+      Isa
+      Intertype } } = require '../../../apps/webguy'
+  #.........................................................................................................
+  do =>
+    class declarations extends Isa
+      foo: ( x ) -> x is 'foo'
+      quantity:
+        fields:
+          v:    'float'
+          u:    'text'
+    #.......................................................................................................
+    types         = new Intertype { declarations, }
+    { isa
+      optional  } = types
+    #.......................................................................................................
+    debug '^334^', isa.foo 4
+    debug '^334^', isa.foo 'foo'
+    debug '^334^', isa.quantity 'foo'
+    debug '^334^', isa.quantity { v: 6, }
+    debug '^334^', isa.quantity { v: 6, u: '', }
+    null
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 ############################################################################################################
 if require.main is module then await do =>
-  test @
-  @types_all_and_any_of()
-  test @types_all_and_any_of
+  # test @
+  @types_field_declarations()
+  # test @types_field_declarations
   # await GUY.async.after 1, => test @types_optional
   # await GUY.async.after 1, =>
   # await test @
