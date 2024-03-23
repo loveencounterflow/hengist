@@ -1821,6 +1821,44 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.types_type_aliases = function(T, done) {
+    var Intertype, Isa;
+    ({
+      types: {Isa, Intertype}
+    } = require('../../../apps/webguy'));
+    (() => {      //.........................................................................................................
+      var declarations, optional;
+      declarations = (function() {
+        class declarations {
+          float(x) {
+            return Number.isFinite(x);
+          }
+
+          integer(x) {
+            return Number.isInteger(x);
+          }
+
+        };
+
+        declarations.prototype.int = 'integer';
+
+        return declarations;
+
+      }).call(this);
+      //.......................................................................................................
+      types = new Intertype({declarations});
+      ({isa, optional} = types);
+      //.......................................................................................................
+      debug('^549-1^', isa.foo);
+      return null;
+    })();
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.types_field_declarations = function(T, done) {
     var Intertype, Isa;
     ({
@@ -1850,13 +1888,15 @@
       types = new Intertype({declarations});
       ({isa, optional} = types);
       //.......................................................................................................
-      debug('^334^', isa.foo(4));
-      debug('^334^', isa.foo('foo'));
-      debug('^334^', isa.quantity('foo'));
-      debug('^334^', isa.quantity({
+      debug('^549-1^', isa.foo);
+      debug('^549-2^', isa.quantity);
+      debug('^549-3^', isa.foo(4));
+      debug('^549-4^', isa.foo('foo'));
+      debug('^549-5^', isa.quantity('something'));
+      debug('^549-6^', isa.quantity({
         v: 6
       }));
-      debug('^334^', isa.quantity({
+      debug('^549-7^', isa.quantity({
         v: 6,
         u: ''
       }));
@@ -1872,14 +1912,74 @@
   if (require.main === module) {
     await (() => {
       // test @
-      return this.types_field_declarations();
+      return this.types_type_aliases();
     })();
   }
 
-  // test @types_field_declarations
+  // @types_field_declarations()
+// test @types_field_declarations
 // await GUY.async.after 1, => test @types_optional
 // await GUY.async.after 1, =>
 // await test @
+
+  //#########################################################################################################
+
+  // #---------------------------------------------------------------------------------------------------------
+// zzz_combine_tagged_arguments = ( parts, values... ) ->
+//   parts = [ parts, ] unless Array.isArray parts
+//   R     = parts[ 0 ]
+//   for expression, idx in values
+//     R += expression.toString() + ( parts[ idx + 1 ] ? '' )
+//   return R
+
+  // #---------------------------------------------------------------------------------------------------------
+// create =
+//   quantity: ( parts, values... ) ->
+//     debug '^332-1^', { parts, values, }
+//     debug '^332-2^', [ arguments..., ].flat Infinity
+//     R = zzz_combine_tagged_arguments parts, values...
+//   quantity2: ( P... ) ->
+//     debug '^332-3^', P
+//   quantity3: ( P... ) ->
+//     debug '^332-3^', P.flat Infinity
+
+  // #---------------------------------------------------------------------------------------------------------
+// unit = 'km'
+// help '^332-4^', rpr create.quantity'12u'
+// help '^332-5^', rpr create.quantity'12${unit}'
+// help '^332-6^', rpr create.quantity"12#{unit}"
+// help '^332-7^', rpr create.quantity "12#{unit}"
+// help '^332-8^', rpr create.quantity '12u'
+// help '^332-9^', rpr create.quantity '12u', 4
+// help '^332-10^', rpr create.quantity '12u', 4, 5, true
+// help '^332-11^', rpr create.quantity 24
+// help '^332-12^', rpr create.quantity 24, 'm'
+// help()
+// create.quantity2'12u'
+// create.quantity2'12${unit}'
+// create.quantity2"12#{unit}"
+// help()
+// create.quantity2 "12#{unit}"
+// create.quantity2 '12u'
+// create.quantity2 '12u', 4
+// create.quantity2 '12u', 4, 5, true
+// create.quantity2 24
+// create.quantity2 24, 'm'
+// create.quantity2 [ 24, 'm', ]
+// help()
+// create.quantity3'12u'
+// create.quantity3'12${unit}'
+// create.quantity3"12#{unit}"
+// help()
+// create.quantity3 "12#{unit}"
+// create.quantity3 '12u'
+// create.quantity3 '12u', 4
+// create.quantity3 '12u', 4, 5, true
+// create.quantity3 24
+// create.quantity3 24, 'm'
+// create.quantity3 [ 24, 'm', ]
+
+  //#########################################################################################################
 
   // f = ->
 //   do ->
