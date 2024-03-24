@@ -57,6 +57,7 @@
     for (subsidiary_key in host) {
       subsidiary = host[subsidiary_key];
       if (is_subsidiary(subsidiary)) {
+        /* TAINT this loop should be changed so we catch all relevant objects, including from inherited classes */
         results.push((yield {subsidiary_key, subsidiary}));
       }
     }
@@ -130,7 +131,6 @@
       constructor() {
         var ref, subsidiary, subsidiary_key, x;
         ref = walk_subsidiaries(this);
-        /* TAINT this loop should be changed so we catch all relevant objects, including from inherited classes */
         for (x of ref) {
           ({subsidiary_key, subsidiary} = x);
           create_ties({
