@@ -14,28 +14,78 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'intertalk'
+  whisper }               = GUY.trm.get_loggers 'subsidiary'
 { rpr
   inspect
   echo
   log     }               = GUY.trm
-# WG                        = require '../../../apps/webguy'
-# hub_s                     = Symbol.for 'hub'
+test                      = require 'guy-test'
 
 
-###
 
-**Note**: I first had in mind to use an ingenious / tricky / treacherous construction that would allow the
-'secondary' to reference methods on the host / primary using `this` / `@`; this would have allowed both the
-primary and the secondary to use a unified notation like `@f`, `@$.f` to reference `f` on the primary and on
-the secondary. However this also would be surprising because now `this` means not the secondary, but the
-primary instance in methods of the secondary instance which is too surprising to sound right.
+# #-----------------------------------------------------------------------------------------------------------
+# @imports = ( T, done ) ->
+#   # T?.halt_on_error()
+#   SUB                 = require '../../../apps/subsidiary'
+#   T?.eq ( k for k of SUB ).sort(), [ 'SUBSIDIARY', 'Subsidiary', ]
+#   probes_and_matchers = []
+#   #.........................................................................................................
+#   for [ probe, matcher, error, ] in probes_and_matchers
+#     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
+#       result = eval probe
+#       resolve result
+#       return null
+#   done?()
+#   return null
 
-Instead, we're using composition, albeit with a backlink.
+#-----------------------------------------------------------------------------------------------------------
+@imports = ( T, done ) ->
+  # T?.halt_on_error()
+  SUB = require '../../../apps/subsidiary'
+  T?.eq ( k for k of SUB ).sort(), [ 'SUBSIDIARY', 'Subsidiary', ]
+  done?()
+  return null
 
-###
+#-----------------------------------------------------------------------------------------------------------
+@api = ( T, done ) ->
+  # T?.halt_on_error()
+  { SUBSIDIARY }  = require '../../../apps/subsidiary'
+  keys            = GUY.props.keys SUBSIDIARY, { hidden: true, }
+  keys            = keys.sort()
+  debug keys
+  T?.eq keys, [
+    'constructor'
+    'create'
+    'get_host'
+    'hosts'
+    'is_subsidiary'
+    'subsidiaries'
+    'tie_host_and_subsidiary'
+    'walk_subsidiaries' ]
+  done?()
+  return null
 
-
+#-----------------------------------------------------------------------------------------------------------
+@ad_hoc_use = ( T, done ) ->
+  # T?.halt_on_error()
+  { SUBSIDIARY } = require '../../../apps/subsidiary'
+  #.........................................................................................................
+  host        = { a: true, }
+  subsidiary  = SUBSIDIARY.create { b: true, }
+  SUBSIDIARY.tie_host_and_subsidiary { host, subsidiary, enumerable: true, }
+  #.........................................................................................................
+  urge '^722-1^', host
+  urge '^722-1^', host.$
+  urge '^722-1^', subsidiary
+  urge '^722-1^', subsidiary._
+  #.........................................................................................................
+  T?.ok host.$          is subsidiary
+  T?.ok subsidiary._    is host
+  T?.ok host.$.b        is true
+  T?.ok subsidiary._.a  is true
+  #.........................................................................................................
+  done?()
+  return null
 
 
 #===========================================================================================================
@@ -139,15 +189,13 @@ class Host
 
 #===========================================================================================================
 if module is require.main then await do =>
-  h = new Host()
-  h.show()
-  h.$a.show()
-  h.$b.show()
-  #.........................................................................................................
-  host        = { a: true, }
-  subsidiary  = SUBSIDIARY.create { b: true, }
-  SUBSIDIARY.tie_host_and_subsidiary { host, subsidiary, enumerable: true, }
-  urge '^722-1^', host
-  urge '^722-1^', host.$
-  urge '^722-1^', subsidiary
-  urge '^722-1^', subsidiary._
+  await test @
+
+  # #.........................................................................................................
+  # host        = { a: true, }
+  # subsidiary  = SUBSIDIARY.create { b: true, }
+  # SUBSIDIARY.tie_host_and_subsidiary { host, subsidiary, enumerable: true, }
+  # urge '^722-1^', host
+  # urge '^722-1^', host.$
+  # urge '^722-1^', subsidiary
+  # urge '^722-1^', subsidiary._
