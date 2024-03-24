@@ -62,6 +62,10 @@ hosts         = new WeakMap()
 # class ???
 
 #-----------------------------------------------------------------------------------------------------------
+walk_subsidiaries = ( host ) ->
+  yield { subsidiary_key, subsidiary, } for subsidiary_key, subsidiary of host when is_subsidiary subsidiary
+
+#-----------------------------------------------------------------------------------------------------------
 create_subsidiary = ( subsidiary ) ->
   if subsidiaries.has subsidiary
     throw new Error "object already in use as subsidiary"
@@ -105,6 +109,7 @@ class Host
       debug '^233-1^', @[ key ]
     #   continue unless key.startsWith '$'
     #   debug '^233-2^', key, candidate, candidate?.prototype
+    for { subsidiary_key, subsidiary, } from walk_subsidiaries @
     # @$ = new Secondary @
     return undefined
 
