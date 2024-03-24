@@ -63,6 +63,7 @@ hosts         = new WeakMap()
 
 #-----------------------------------------------------------------------------------------------------------
 walk_subsidiaries = ( host ) ->
+  ### TAINT this loop should be changed so we catch all relevant objects, including from inherited classes ###
   yield { subsidiary_key, subsidiary, } for subsidiary_key, subsidiary of host when is_subsidiary subsidiary
 
 #-----------------------------------------------------------------------------------------------------------
@@ -102,7 +103,6 @@ class Host
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    ### TAINT this loop should be changed so we catch all relevant objects, including from inherited classes ###
     for key, candidate of @
       create_ties @, key, candidate, '_'
       debug '^233-1^', key, ( is_subsidiary candidate ), ( candidate._ is @ )
