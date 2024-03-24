@@ -78,19 +78,23 @@ create_subsidiary = ( subsidiary ) ->
 is_subsidiary = ( value ) -> subsidiaries.has value
 
 #-----------------------------------------------------------------------------------------------------------
-create_ties = ( host, subsidiary_key, subsidiary, host_key = '_' ) ->
+create_ties = ( cfg ) ->
+  ### TAINT use types, validate ###
+  template  = { host: null, subsidiary: null, subsidiary_key: '$', host_key: '_', }
+  cfg       = { template..., cfg..., }
+  debug '^340-1^', cfg
   ### TAINT shouldn't be necessary if done explicitly? ###
-  unless subsidiaries.has subsidiary
+  unless subsidiaries.has cfg.subsidiary
     throw new Error "object isn't a subsidiary"
-  if hosts.has subsidiary
+  if hosts.has cfg.subsidiary
     throw new Error "subsidiary already has a host"
   ### host->subsidiary is a standard containment/compository relationship and is expressed directly;
   subsidiary-> host is a backlink that would create a circular reference which we avoid by using a
   `WeakMap` instance, `hosts`: ###
-  Object.defineProperty host,       subsidiary_key, value: subsidiary
-  Object.defineProperty subsidiary, host_key,       get: -> get_host        subsidiary
-  hosts.set subsidiary, host
-  return subsidiary
+  Object.defineProperty cfg.host,       cfg.subsidiary_key, value:  cfg.subsidiary
+  Object.defineProperty cfg.subsidiary, cfg.host_key,       get:    -> get_host cfg.subsidiary
+  hosts.set cfg.subsidiary, cfg.host
+  return cfg.subsidiary
 
 #-----------------------------------------------------------------------------------------------------------
 get_host = ( subsidiary ) ->
@@ -103,13 +107,12 @@ class Host
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    for key, candidate of @
-      create_ties @, key, candidate, '_'
-      debug '^233-1^', key, ( is_subsidiary candidate ), ( candidate._ is @ )
-      debug '^233-1^', @[ key ]
-    #   continue unless key.startsWith '$'
-    #   debug '^233-2^', key, candidate, candidate?.prototype
     for { subsidiary_key, subsidiary, } from walk_subsidiaries @
+      create_ties { host: @, subsidiary, host_key: '_', subsidiary_key, }
+      debug '^233-1^', subsidiary_key, ( is_subsidiary subsidiary ), ( subsidiary._ is @ )
+      debug '^233-1^', @[ subsidiary_key ]
+    #   continue unless subsidiary_key.startsWith '$'
+    #   debug '^233-2^', subsidiary_key, subsidiary, subsidiary?.prototype
     # @$ = new Secondary @
     return undefined
 
@@ -133,6 +136,9 @@ class Host
       warn '^650-1^', "$b.show"
       @_.show()
       return null
+
+  #---------------------------------------------------------------------------------------------------------
+  $not_a_subsidiary: {}
 
 
 #===========================================================================================================
