@@ -62,35 +62,41 @@
     //---------------------------------------------------------------------------------------------------------
     tie_host_and_subsidiary(cfg) {
       /* TAINT use types, validate */
-      var template;
+      var enumerable, host, host_key, subsidiary, subsidiary_key, template;
       template = {
         host: null,
         subsidiary: null,
         subsidiary_key: '$',
-        host_key: '_'
+        host_key: '_',
+        enumerable: false
       };
       cfg = {...template, ...cfg};
+      //.......................................................................................................
+      ({host, subsidiary, host_key, subsidiary_key, enumerable} = cfg);
+      //.......................................................................................................
       debug('^340-1^', cfg);
       /* TAINT shouldn't be necessary if done explicitly? */
-      if (!this.subsidiaries.has(cfg.subsidiary)) {
+      if (!this.subsidiaries.has(subsidiary)) {
         throw new Error("object isn't a subsidiary");
       }
-      if (this.hosts.has(cfg.subsidiary)) {
+      if (this.hosts.has(subsidiary)) {
         throw new Error("subsidiary already has a host");
       }
       /* host->subsidiary is a standard containment/compository relationship and is expressed directly;
          subsidiary-> host is a backlink that would create a circular reference which we avoid by using a
          `WeakMap` instance, `@hosts`: */
-      Object.defineProperty(cfg.host, cfg.subsidiary_key, {
-        value: cfg.subsidiary
+      Object.defineProperty(host, subsidiary_key, {
+        value: subsidiary,
+        enumerable
       });
-      Object.defineProperty(cfg.subsidiary, cfg.host_key, {
-        get: () => {
-          return this.get_host(cfg.subsidiary);
-        }
+      Object.defineProperty(subsidiary, host_key, {
+        get: (() => {
+          return this.get_host(subsidiary);
+        }),
+        enumerable
       });
-      this.hosts.set(cfg.subsidiary, cfg.host);
-      return cfg.subsidiary;
+      this.hosts.set(subsidiary, host);
+      return subsidiary;
     }
 
     //---------------------------------------------------------------------------------------------------------
@@ -172,11 +178,27 @@
   //===========================================================================================================
   if (module === require.main) {
     await (() => {
-      var h;
+      var h, host, subsidiary;
       h = new Host();
       h.show();
       h.$a.show();
-      return h.$b.show();
+      h.$b.show();
+      //.........................................................................................................
+      host = {
+        a: true
+      };
+      subsidiary = SUBSIDIARY.create({
+        b: true
+      });
+      SUBSIDIARY.tie_host_and_subsidiary({
+        host,
+        subsidiary,
+        enumerable: true
+      });
+      urge('^722-1^', host);
+      urge('^722-1^', host.$);
+      urge('^722-1^', subsidiary);
+      return urge('^722-1^', subsidiary._);
     })();
   }
 
