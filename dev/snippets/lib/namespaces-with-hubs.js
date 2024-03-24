@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, Host, Secondary, alert, create_subsidiary, create_ties, debug, echo, get_host, help, hosts, info, inspect, is_subsidiary, log, plain, praise, rpr, subsidiaries, urge, walk_subsidiaries, warn, whisper;
+  var GUY, Host, alert, create_subsidiary, create_ties, debug, echo, get_host, help, hosts, info, inspect, is_subsidiary, log, plain, praise, rpr, subsidiaries, urge, walk_subsidiaries, warn, whisper;
 
   //===========================================================================================================
   GUY = require('guy');
@@ -22,26 +22,6 @@
   Instead, we're using composition, albeit with a backlink.
 
    */
-  //===========================================================================================================
-  Secondary = class Secondary {
-    //---------------------------------------------------------------------------------------------------------
-    constructor(host) {
-      // WG.props.hide @, '_', host
-      this._ = host;
-      return void 0;
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    show() {
-      urge('^650-4^', this);
-      urge('^650-5^', this._);
-      urge('^650-6^', this._.show);
-      urge('^650-7^', this._.show());
-      return null;
-    }
-
-  };
-
   //===========================================================================================================
   subsidiaries = new WeakSet();
 
