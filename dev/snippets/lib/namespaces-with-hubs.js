@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, Host, Secondary, alert, create_subsidiary, create_ties, debug, echo, get_host, help, hosts, info, inspect, is_subsidiary, log, plain, praise, rpr, subsidiaries, urge, warn, whisper;
+  var GUY, Host, Secondary, alert, create_subsidiary, create_ties, debug, echo, get_host, help, hosts, info, inspect, is_subsidiary, log, plain, praise, rpr, subsidiaries, urge, walk_subsidiaries, warn, whisper;
 
   //===========================================================================================================
   GUY = require('guy');
@@ -51,6 +51,19 @@
   // class ???
 
   //-----------------------------------------------------------------------------------------------------------
+  walk_subsidiaries = function*(host) {
+    var results, subsidiary, subsidiary_key;
+    results = [];
+    for (subsidiary_key in host) {
+      subsidiary = host[subsidiary_key];
+      if (is_subsidiary(subsidiary)) {
+        results.push((yield {subsidiary_key, subsidiary}));
+      }
+    }
+    return results;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   create_subsidiary = function(subsidiary) {
     if (subsidiaries.has(subsidiary)) {
       throw new Error("object already in use as subsidiary");
@@ -66,27 +79,37 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  create_ties = function(host, subsidiary_key, subsidiary, host_key = '_') {
+  create_ties = function(cfg) {
+    /* TAINT use types, validate */
+    var template;
+    template = {
+      host: null,
+      subsidiary: null,
+      subsidiary_key: '$',
+      host_key: '_'
+    };
+    cfg = {...template, ...cfg};
+    debug('^340-1^', cfg);
     /* TAINT shouldn't be necessary if done explicitly? */
-    if (!subsidiaries.has(subsidiary)) {
+    if (!subsidiaries.has(cfg.subsidiary)) {
       throw new Error("object isn't a subsidiary");
     }
-    if (hosts.has(subsidiary)) {
+    if (hosts.has(cfg.subsidiary)) {
       throw new Error("subsidiary already has a host");
     }
     /* host->subsidiary is a standard containment/compository relationship and is expressed directly;
      subsidiary-> host is a backlink that would create a circular reference which we avoid by using a
      `WeakMap` instance, `hosts`: */
-    Object.defineProperty(host, subsidiary_key, {
-      value: subsidiary
+    Object.defineProperty(cfg.host, cfg.subsidiary_key, {
+      value: cfg.subsidiary
     });
-    Object.defineProperty(subsidiary, host_key, {
+    Object.defineProperty(cfg.subsidiary, cfg.host_key, {
       get: function() {
-        return get_host(subsidiary);
+        return get_host(cfg.subsidiary);
       }
     });
-    hosts.set(subsidiary, host);
-    return subsidiary;
+    hosts.set(cfg.subsidiary, cfg.host);
+    return cfg.subsidiary;
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -105,17 +128,22 @@
     class Host {
       //---------------------------------------------------------------------------------------------------------
       constructor() {
-        var candidate, key, ref;
-        ref = this;
+        var ref, subsidiary, subsidiary_key, x;
+        ref = walk_subsidiaries(this);
         /* TAINT this loop should be changed so we catch all relevant objects, including from inherited classes */
-        for (key in ref) {
-          candidate = ref[key];
-          create_ties(this, key, candidate, '_');
-          debug('^233-1^', key, is_subsidiary(candidate), candidate._ === this);
-          debug('^233-1^', this[key]);
+        for (x of ref) {
+          ({subsidiary_key, subsidiary} = x);
+          create_ties({
+            host: this,
+            subsidiary,
+            host_key: '_',
+            subsidiary_key
+          });
+          debug('^233-1^', subsidiary_key, is_subsidiary(subsidiary), subsidiary._ === this);
+          debug('^233-1^', this[subsidiary_key]);
         }
-        //   continue unless key.startsWith '$'
-        //   debug '^233-2^', key, candidate, candidate?.prototype
+        //   continue unless subsidiary_key.startsWith '$'
+        //   debug '^233-2^', subsidiary_key, subsidiary, subsidiary?.prototype
         // @$ = new Secondary @
         return void 0;
       }
@@ -148,6 +176,9 @@
       }
 
     })());
+
+    //---------------------------------------------------------------------------------------------------------
+    Host.prototype.$not_a_subsidiary = {};
 
     return Host;
 
