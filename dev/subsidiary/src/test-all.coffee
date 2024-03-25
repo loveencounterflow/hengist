@@ -75,9 +75,9 @@ test                      = require 'guy-test'
   SUBSIDIARY.tie_host_and_subsidiary { host, subsidiary, enumerable: true, }
   #.........................................................................................................
   urge '^722-1^', host
-  urge '^722-1^', host.$
-  urge '^722-1^', subsidiary
-  urge '^722-1^', subsidiary._
+  urge '^722-2^', host.$
+  urge '^722-3^', subsidiary
+  urge '^722-4^', subsidiary._
   #.........................................................................................................
   T?.ok host.$          is subsidiary
   T?.ok subsidiary._    is host
