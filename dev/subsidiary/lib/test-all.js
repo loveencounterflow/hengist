@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, Host, SUBSIDIARY, Subsidiary_helpers, alert, debug, echo, help, info, inspect, log, plain, praise, rpr, test, urge, warn, whisper;
+  var GUY, alert, debug, echo, help, info, inspect, log, plain, praise, rpr, test, urge, warn, whisper;
 
   //===========================================================================================================
   GUY = require('guy');
@@ -58,7 +58,7 @@
     keys = keys.sort();
     debug(keys);
     if (T != null) {
-      T.eq(keys, ['constructor', 'create', 'get_host', 'hosts', 'is_subsidiary', 'subsidiaries', 'tie_host_and_subsidiary', 'walk_subsidiaries']);
+      T.eq(keys, ['constructor', 'create', 'get_host', 'hosts', 'is_subsidiary', 'subsidiaries', 'tie_all', 'tie_host_and_subsidiary', 'walk_subsidiaries']);
     }
     if (typeof done === "function") {
       done();
@@ -85,9 +85,9 @@
     });
     //.........................................................................................................
     urge('^722-1^', host);
-    urge('^722-1^', host.$);
-    urge('^722-1^', subsidiary);
-    urge('^722-1^', subsidiary._);
+    urge('^722-2^', host.$);
+    urge('^722-3^', subsidiary);
+    urge('^722-4^', subsidiary._);
     //.........................................................................................................
     if (T != null) {
       T.ok(host.$ === subsidiary);
@@ -107,158 +107,217 @@
     return null;
   };
 
-  //===========================================================================================================
-  Subsidiary_helpers = class Subsidiary_helpers {
-    //---------------------------------------------------------------------------------------------------------
-    constructor() {
-      this.subsidiaries = new WeakSet();
-      this.hosts = new WeakMap();
-    }
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_in_class_1 = function(T, done) {
+    var Host, SUBSIDIARY, host, host_$a, host_$b, host_$not_a_subsidiary;
+    // T?.halt_on_error()
+    ({SUBSIDIARY} = require('../../../apps/subsidiary'));
+    host_$a = null;
+    host_$b = null;
+    host_$not_a_subsidiary = null;
+    Host = (function() {
+      var B;
 
-    //---------------------------------------------------------------------------------------------------------
-    * walk_subsidiaries(host) {
-      var results, subsidiary, subsidiary_key;
-      results = [];
-      for (subsidiary_key in host) {
-        subsidiary = host[subsidiary_key];
-        if (this.is_subsidiary(subsidiary)) {
-          /* TAINT this loop should be changed so we catch all relevant objects, including from inherited classes */
-          results.push((yield {subsidiary_key, subsidiary}));
+      //=========================================================================================================
+      class Host {
+        //-------------------------------------------------------------------------------------------------------
+        constructor() {
+          var ref, subsidiary, subsidiary_key, x;
+          ref = SUBSIDIARY.walk_subsidiaries(this);
+          for (x of ref) {
+            ({subsidiary_key, subsidiary} = x);
+            SUBSIDIARY.tie_host_and_subsidiary({
+              host: this,
+              subsidiary,
+              host_key: '_',
+              subsidiary_key
+            });
+          }
+          return void 0;
         }
-      }
-      return results;
-    }
 
-    //---------------------------------------------------------------------------------------------------------
-    create(subsidiary) {
-      if (this.subsidiaries.has(subsidiary)) {
-        throw new Error("object already in use as subsidiary");
-      }
-      this.subsidiaries.add(subsidiary);
-      return subsidiary;
-    }
+        //-------------------------------------------------------------------------------------------------------
+        show() {
+          return null;
+        }
 
-    //---------------------------------------------------------------------------------------------------------
-    /* TAINT safeguard against non-object values */
-    is_subsidiary(x) {
-      return this.subsidiaries.has(x);
-    }
-
-    //---------------------------------------------------------------------------------------------------------
-    tie_host_and_subsidiary(cfg) {
-      /* TAINT use types, validate */
-      var enumerable, host, host_key, subsidiary, subsidiary_key, template;
-      template = {
-        host: null,
-        subsidiary: null,
-        subsidiary_key: '$',
-        host_key: '_',
-        enumerable: false
       };
-      cfg = {...template, ...cfg};
-      //.......................................................................................................
-      ({host, subsidiary, host_key, subsidiary_key, enumerable} = cfg);
-      //.......................................................................................................
-      debug('^340-1^', cfg);
-      /* TAINT shouldn't be necessary if done explicitly? */
-      if (!this.subsidiaries.has(subsidiary)) {
-        throw new Error("object isn't a subsidiary");
-      }
-      if (this.hosts.has(subsidiary)) {
-        throw new Error("subsidiary already has a host");
-      }
-      /* host->subsidiary is a standard containment/compository relationship and is expressed directly;
-         subsidiary-> host is a backlink that would create a circular reference which we avoid by using a
-         `WeakMap` instance, `@hosts`: */
-      Object.defineProperty(host, subsidiary_key, {
-        value: subsidiary,
-        enumerable
-      });
-      Object.defineProperty(subsidiary, host_key, {
-        get: (() => {
-          return this.get_host(subsidiary);
-        }),
-        enumerable
-      });
-      this.hosts.set(subsidiary, host);
-      return subsidiary;
-    }
 
-    //---------------------------------------------------------------------------------------------------------
-    get_host(subsidiary) {
-      var R;
-      if ((R = this.hosts.get(subsidiary)) != null) {
-        return R;
-      }
-      throw new Error("no host registered for object");
-    }
+      //-------------------------------------------------------------------------------------------------------
+      /* use plain object */
+      Host.prototype.$a = host_$a = SUBSIDIARY.create({
+        $a: true,
+        show: function() {
+          this._.show();
+          return null;
+        }
+      });
 
+      //-------------------------------------------------------------------------------------------------------
+      /* use instance */
+      Host.prototype.$b = host_$b = SUBSIDIARY.create(new (B = (function() {
+        class B {
+          show() {
+            this._.show();
+            return null;
+          }
+
+        };
+
+        B.prototype.$b = true;
+
+        return B;
+
+      }).call(this))());
+
+      //-------------------------------------------------------------------------------------------------------
+      Host.prototype.$not_a_subsidiary = host_$not_a_subsidiary = {};
+
+      return Host;
+
+    }).call(this);
+    //=========================================================================================================
+    host = new Host();
+    //.........................................................................................................
+    urge('^722-5^', host);
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$a), true);
+    }
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$b), true);
+    }
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$not_a_subsidiary), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.ok(host.$a === host_$a);
+    }
+    if (T != null) {
+      T.ok(host.$b === host_$b);
+    }
+    if (T != null) {
+      T.ok(host.$not_a_subsidiary === host_$not_a_subsidiary);
+    }
+    debug(host.$not_a_subsidiary);
+    debug(host_$not_a_subsidiary);
+    if (T != null) {
+      T.ok(host.$a._ === host);
+    }
+    if (T != null) {
+      T.ok(host.$b._ === host);
+    }
+    if (T != null) {
+      T.ok(host.$not_a_subsidiary._ === void 0);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
   };
 
-  //===========================================================================================================
-  SUBSIDIARY = new Subsidiary_helpers();
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_in_class_2 = function(T, done) {
+    var Host, SUBSIDIARY, host, host_$a, host_$b, host_$not_a_subsidiary;
+    // T?.halt_on_error()
+    ({SUBSIDIARY} = require('../../../apps/subsidiary'));
+    host_$a = null;
+    host_$b = null;
+    host_$not_a_subsidiary = null;
+    Host = (function() {
+      var B;
 
-  Host = (function() {
-    var B;
-
-    //===========================================================================================================
-    class Host {
-      //---------------------------------------------------------------------------------------------------------
-      constructor() {
-        var ref, subsidiary, subsidiary_key, y;
-        ref = SUBSIDIARY.walk_subsidiaries(this);
-        for (y of ref) {
-          ({subsidiary_key, subsidiary} = y);
-          SUBSIDIARY.tie_host_and_subsidiary({
+      //=========================================================================================================
+      class Host {
+        //-------------------------------------------------------------------------------------------------------
+        constructor() {
+          SUBSIDIARY.tie_all({
             host: this,
-            subsidiary,
             host_key: '_',
-            subsidiary_key
+            enumerable: true
           });
-          debug('^233-1^', subsidiary_key, SUBSIDIARY.is_subsidiary(subsidiary), subsidiary._ === this);
-          debug('^233-1^', this[subsidiary_key]);
+          return void 0;
         }
-        //   continue unless subsidiary_key.startsWith '$'
-        //   debug '^233-2^', subsidiary_key, subsidiary, subsidiary?.prototype
-        // @$ = new Secondary @
-        return void 0;
-      }
 
-      //---------------------------------------------------------------------------------------------------------
-      show() {
-        help('^650-1^', this);
-        help('^650-2^', this.$a, this.$a.show);
-        help('^650-2^', this.$b, this.$b.show);
-        return null;
-      }
+        //-------------------------------------------------------------------------------------------------------
+        show() {
+          return null;
+        }
 
-    };
+      };
 
-    //---------------------------------------------------------------------------------------------------------
-    Host.prototype.$a = SUBSIDIARY.create({
-      show: function() {
-        warn('^650-1^', "$a.show");
-        this._.show();
-        return null;
-      }
-    });
+      //-------------------------------------------------------------------------------------------------------
+      /* use plain object */
+      Host.prototype.$a = host_$a = SUBSIDIARY.create({
+        $a: true,
+        show: function() {
+          this._.show();
+          return null;
+        }
+      });
 
-    //---------------------------------------------------------------------------------------------------------
-    Host.prototype.$b = SUBSIDIARY.create(new (B = class B {
-      show() {
-        warn('^650-1^', "$b.show");
-        this._.show();
-        return null;
-      }
+      //-------------------------------------------------------------------------------------------------------
+      /* use instance */
+      Host.prototype.$b = host_$b = SUBSIDIARY.create(new (B = (function() {
+        class B {
+          show() {
+            this._.show();
+            return null;
+          }
 
-    })());
+        };
 
-    //---------------------------------------------------------------------------------------------------------
-    Host.prototype.$not_a_subsidiary = {};
+        B.prototype.$b = true;
 
-    return Host;
+        return B;
 
-  }).call(this);
+      }).call(this))());
+
+      //-------------------------------------------------------------------------------------------------------
+      Host.prototype.$not_a_subsidiary = host_$not_a_subsidiary = {};
+
+      return Host;
+
+    }).call(this);
+    //=========================================================================================================
+    host = new Host();
+    //.........................................................................................................
+    urge('^722-5^', host);
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$a), true);
+    }
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$b), true);
+    }
+    if (T != null) {
+      T.eq(SUBSIDIARY.is_subsidiary(host.$not_a_subsidiary), false);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.ok(host.$a === host_$a);
+    }
+    if (T != null) {
+      T.ok(host.$b === host_$b);
+    }
+    if (T != null) {
+      T.ok(host.$not_a_subsidiary === host_$not_a_subsidiary);
+    }
+    debug(host.$not_a_subsidiary);
+    debug(host_$not_a_subsidiary);
+    if (T != null) {
+      T.ok(host.$a._ === host);
+    }
+    if (T != null) {
+      T.ok(host.$b._ === host);
+    }
+    if (T != null) {
+      T.ok(host.$not_a_subsidiary._ === void 0);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
 
   //===========================================================================================================
   if (module === require.main) {
@@ -266,15 +325,6 @@
       return (await test(this));
     })();
   }
-
-  // #.........................................................................................................
-// host        = { a: true, }
-// subsidiary  = SUBSIDIARY.create { b: true, }
-// SUBSIDIARY.tie_host_and_subsidiary { host, subsidiary, enumerable: true, }
-// urge '^722-1^', host
-// urge '^722-1^', host.$
-// urge '^722-1^', subsidiary
-// urge '^722-1^', subsidiary._
 
 }).call(this);
 
