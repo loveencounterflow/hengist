@@ -60,6 +60,7 @@ test                      = require 'guy-test'
     'hosts'
     'is_subsidiary'
     'subsidiaries'
+    'tie_all'
     'tie_host_and_subsidiary'
     'walk_subsidiaries' ]
   done?()
@@ -87,11 +88,110 @@ test                      = require 'guy-test'
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@use_in_class_1 = ( T, done ) ->
+  # T?.halt_on_error()
+  { SUBSIDIARY }          = require '../../../apps/subsidiary'
+  host_$a                 = null
+  host_$b                 = null
+  host_$not_a_subsidiary  = null
+  #=========================================================================================================
+  class Host
+    #-------------------------------------------------------------------------------------------------------
+    constructor: ->
+      for { subsidiary_key, subsidiary, } from SUBSIDIARY.walk_subsidiaries @
+        SUBSIDIARY.tie_host_and_subsidiary { host: @, subsidiary, host_key: '_', subsidiary_key, }
+      return undefined
+    #-------------------------------------------------------------------------------------------------------
     show: ->
       return null
+    #-------------------------------------------------------------------------------------------------------
+    ### use plain object ###
+    $a: host_$a = SUBSIDIARY.create
+      $a: true
+      show: ->
+        @_.show()
+        return null
+    #-------------------------------------------------------------------------------------------------------
+    ### use instance ###
+    $b: host_$b = SUBSIDIARY.create new class B
+      $b: true
+      show: ->
+        @_.show()
+        return null
+    #-------------------------------------------------------------------------------------------------------
+    $not_a_subsidiary: host_$not_a_subsidiary = {}
+  #=========================================================================================================
+  host        = new Host()
+  #.........................................................................................................
+  urge '^722-5^', host
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$a                ), true
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$b                ), true
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$not_a_subsidiary ), false
+  #.........................................................................................................
+  T?.ok host.$a                   is host_$a
+  T?.ok host.$b                   is host_$b
+  T?.ok host.$not_a_subsidiary    is host_$not_a_subsidiary
+  debug host.$not_a_subsidiary
+  debug host_$not_a_subsidiary
+  T?.ok host.$a._                 is host
+  T?.ok host.$b._                 is host
+  T?.ok host.$not_a_subsidiary._  is undefined
+  #.........................................................................................................
+  done?()
+  return null
 
+#-----------------------------------------------------------------------------------------------------------
+@use_in_class_2 = ( T, done ) ->
+  # T?.halt_on_error()
+  { SUBSIDIARY }          = require '../../../apps/subsidiary'
+  host_$a                 = null
+  host_$b                 = null
+  host_$not_a_subsidiary  = null
+  #=========================================================================================================
+  class Host
+    #-------------------------------------------------------------------------------------------------------
+    constructor: ->
+      SUBSIDIARY.tie_all { host: @, host_key: '_', enumerable: true, }
+      return undefined
+    #-------------------------------------------------------------------------------------------------------
     show: ->
       return null
+    #-------------------------------------------------------------------------------------------------------
+    ### use plain object ###
+    $a: host_$a = SUBSIDIARY.create
+      $a: true
+      show: ->
+        @_.show()
+        return null
+    #-------------------------------------------------------------------------------------------------------
+    ### use instance ###
+    $b: host_$b = SUBSIDIARY.create new class B
+      $b: true
+      show: ->
+        @_.show()
+        return null
+    #-------------------------------------------------------------------------------------------------------
+    $not_a_subsidiary: host_$not_a_subsidiary = {}
+  #=========================================================================================================
+  host        = new Host()
+  #.........................................................................................................
+  urge '^722-5^', host
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$a                ), true
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$b                ), true
+  T?.eq ( SUBSIDIARY.is_subsidiary host.$not_a_subsidiary ), false
+  #.........................................................................................................
+  T?.ok host.$a                   is host_$a
+  T?.ok host.$b                   is host_$b
+  T?.ok host.$not_a_subsidiary    is host_$not_a_subsidiary
+  debug host.$not_a_subsidiary
+  debug host_$not_a_subsidiary
+  T?.ok host.$a._                 is host
+  T?.ok host.$b._                 is host
+  T?.ok host.$not_a_subsidiary._  is undefined
+  #.........................................................................................................
+  done?()
+  return null
 
 
 #===========================================================================================================
