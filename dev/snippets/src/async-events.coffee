@@ -31,6 +31,7 @@ isa =
   function:               ( x ) -> ( Object::toString.call x ) is '[object Function]'
   asyncfunction:          ( x ) -> ( Object::toString.call x ) is '[object AsyncFunction]'
   symbol:                 ( x ) -> ( typeof x ) is 'symbol'
+  object:                 ( x ) -> x? and ( typeof x is 'object' ) and ( ( Object::toString.call x ) is '[object Object]' )
   text:                   ( x ) -> ( typeof x ) is 'string'
   event_listener:         ( x ) -> ( @function x ) or ( @asyncfunction x )
   event_key:              ( x ) -> ( @text x ) or ( @symbol x )
