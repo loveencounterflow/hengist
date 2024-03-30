@@ -1908,6 +1908,14 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.missing_corrections = function(T, done) {
+    if (T != null) {
+      T.ok(false);
+    }
+/* TAINT rewrite `generatorfunction` as '[object GeneratorFunction]' &c */    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     await (() => {
