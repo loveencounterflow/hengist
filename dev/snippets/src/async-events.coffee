@@ -86,8 +86,8 @@ class Async_events
     await resolved_promise ### as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 ###
     return await Promise.all ( ( -> await listener key, data... )() for listener from listeners )
 
-  #---------------------------------------------------------------------------------------------------------
-  matches: ( matcher, candidate ) ->
+  # #---------------------------------------------------------------------------------------------------------
+  # matches: ( matcher, candidate ) ->
 
 
 #===========================================================================================================
