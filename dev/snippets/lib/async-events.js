@@ -32,6 +32,9 @@
     symbol: function(x) {
       return (typeof x) === 'symbol';
     },
+    object: function(x) {
+      return (x != null) && (typeof x === 'object') && ((Object.prototype.toString.call(x)) === '[object Object]');
+    },
     text: function(x) {
       return (typeof x) === 'string';
     },
