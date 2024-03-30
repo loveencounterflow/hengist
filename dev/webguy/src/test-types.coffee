@@ -993,6 +993,11 @@ show_error_message_and_test = ( T, matcher, fn ) ->
   done?()
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+@missing_corrections = ( T, done ) ->
+  T?.ok false ### TAINT rewrite `generatorfunction` as '[object GeneratorFunction]' &c ###
+  return null
+
 
 
 ############################################################################################################
