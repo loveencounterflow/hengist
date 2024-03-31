@@ -170,68 +170,72 @@
   Async_events = class Async_events {
     //---------------------------------------------------------------------------------------------------------
     constructor() {
-      this.symbols = {};
+      this.key_symbols = {};
       this.listeners = new WeakMap();
       return void 0;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    on(key, receiver) {
-      var key_symbol, listener, listener0, listener_name, registry, unsubscribe;
+    on($key, receiver) {
+      var listener, listener0, listener_name, unsubscribe;
       if (!isa.binary(arguments)) {
-        /* TAINT prevent from registering a listener more than once per event key */
+        /* TAINT prevent from registering a listener more than once per event $key */
         throw new Error(`expected 2 arguments, got ${arguments.length}`);
       }
-      validate.event_key(key);
+      validate.event_key($key);
       validate.something(receiver);
-      if ((key_symbol = this.symbols[key]) == null) {
-        //.......................................................................................................
-        /* TAINT is this necessary and does it what it intends to do? */
-        /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
-        this.symbols[key] = (key_symbol = Symbol(key));
-      }
-      if ((registry = this.listeners.get(key_symbol)) == null) {
-        this.listeners.set(key_symbol, (registry = []));
-      }
       //.......................................................................................................
       /* if receiver is a callable, use it; else, try to retrieve a suitably named method and use that: */
       if (isa.event_listener(receiver)) {
         listener = receiver;
       } else {
-        listener_name = `on_${key}`;
+        listener_name = `on_${$key}`;
         listener0 = validate.event_listener(receiver[listener_name]);
         listener = async function(...P) {
           return (await listener0.call(receiver, ...P));
         };
       }
       //.......................................................................................................
-      registry[key_symbol] = listener;
+      (this._listeners_from_key($key)).push(listener);
       unsubscribe = function() {};
       return unsubscribe;
     }
 
     //---------------------------------------------------------------------------------------------------------
-    /* TAINT pass arguments to new Datom / new Event */
-    async emit(key, data = null) {
-      var event, listener, listeners, ref, results;
-      if (!isa.unary_or_binary(arguments)) {
-        throw new Error(`expected 1 or 2 arguments, got ${arguments.length}`);
+    _listeners_from_key(key) {
+      var R, key_symbol;
+      if ((key_symbol = this.key_symbols[key]) == null) {
+        /* TAINT is this necessary and does it what it intends to do? */
+        /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
+        this.key_symbols[key] = (key_symbol = Symbol(key));
       }
-      event = new Event(key, data);
-      listeners = (ref = AE.listeners.get(AE.symbols[key])) != null ? ref : [];
-      for (listener of listeners) {
-        help('^992-1^', listener);
+      if ((R = this.listeners.get(key_symbol)) == null) {
+        this.listeners.set(key_symbol, (R = []));
       }
-      for (listener of listeners) {
-        help('^992-2^', (await listener(key, data)));
-      }
+      return R;
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _listeners_from_event(event) {
+      var key_symbol, listeners;
+      key_symbol = this.key_symbols[event.$key];
+      listeners = this.listeners.get(key_symbol);
+      return listeners != null ? listeners : [];
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    async emit(...P) {
+      var $key, event, listener, listeners, results;
+      event = new Event(...P);
+      ({$key} = event);
+      listeners = this._listeners_from_event(event);
       await resolved_promise/* as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 */
       results = (await Promise.all((function() {
         var results1;
         results1 = [];
         for (listener of listeners) {
           results1.push((async function() {
-            return (await listener(key, data));
+            return (await listener(event));
           })());
         }
         return results1;
@@ -241,9 +245,6 @@
 
   };
 
-  // #---------------------------------------------------------------------------------------------------------
-  // matches: ( matcher, candidate ) ->
-
   //===========================================================================================================
   AE = new Async_events();
 
@@ -251,43 +252,43 @@
   demo_1 = async function() {
     var e, receiver;
     receiver = {
-      on_blah: function(key, data) {
-        info('^992-3^', key, data, this);
-        return JSON.stringify({key, data});
+      on_blah: function(event) {
+        info('^992-4^', event, this);
+        return event.$value ** 2;
       },
-      on_foo: function(key, data) {
-        info('^992-4^', key, data, this);
-        return JSON.stringify({key, data});
+      on_foo: function(event) {
+        info('^992-5^', event, this);
+        return event.$value ** 2;
       },
-      on_dig: function(key, data) {
-        info('^992-5^', key, data, this);
-        return JSON.stringify({key, data});
+      on_dig: function(event) {
+        info('^992-6^', event, this);
+        return event.$value ** 2;
       }
     };
     AE.on('blah', receiver);
     AE.on('foo', receiver);
     AE.on('dig', receiver.on_dig);
-    debug('^992-6^', AE);
-    debug('^992-7^', AE.symbols['blah']);
-    debug('^992-8^', AE.listeners);
-    debug('^992-9^', AE.listeners.get(AE.symbols['blah']));
-    debug('^992-10^', (await AE.emit('blah')));
-    debug('^992-11^', (await AE.emit('foo')));
-    debug('^992-12^', (await AE.emit('dig')));
+    urge('^992-7^', AE);
+    urge('^992-8^', AE.key_symbols['blah']);
+    urge('^992-9^', AE.listeners);
+    urge('^992-10^', AE.listeners.get(AE.key_symbols['blah']));
+    urge('^992-11^', (await AE.emit('blah', 11)));
+    urge('^992-12^', (await AE.emit('foo', 12)));
+    urge('^992-13^', (await AE.emit('dig', 13)));
     try {
       /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-      debug('^992-13^', (await AE.emit('foo', 3, 4, 5, 6)));
+      urge('^992-14^', (await AE.emit('foo', 3, 4, 5, 6)));
     } catch (error) {
       e = error;
-      warn('^992-14^', reverse(e.message));
+      warn('^992-15^', reverse(e.message));
     }
     try {
-      debug('^992-15^', (await AE.emit('foo', 3, [4, 5, 6])));
+      urge('^992-16^', (await AE.emit('foo', 3, [4, 5, 6])));
     } catch (error) {
       e = error;
-      warn('^992-16^', reverse(e.message));
+      warn('^992-17^', reverse(e.message));
     }
-    debug('^992-17^', (await AE.emit('foo', [3, 4, 5, 6])));
+    urge('^992-18^', (await AE.emit('foo', [3, 4, 5, 6])));
     return null;
   };
 
@@ -296,80 +297,80 @@
     var A, B, e;
     A = class A {};
     B = class B extends Object {};
-    urge('^992-18^', A);
-    urge('^992-19^', A.freeze);
-    urge('^992-20^', new A());
-    urge('^992-21^', B);
-    urge('^992-22^', new B());
-    urge('^992-23^', isa.object(A));
-    urge('^992-24^', isa.object(B));
-    urge('^992-25^', isa.object(new A()));
-    urge('^992-26^', isa.object(new B()));
+    urge('^992-19^', A);
+    urge('^992-20^', A.freeze);
+    urge('^992-21^', new A());
+    urge('^992-22^', B);
+    urge('^992-23^', new B());
+    urge('^992-24^', isa.object(A));
+    urge('^992-25^', isa.object(B));
+    urge('^992-26^', isa.object(new A()));
+    urge('^992-27^', isa.object(new B()));
     try {
       new Datom();
-    } catch (error) {
-      e = error;
-      warn('^992-27^', reverse(e.message));
-    }
-    try {
-      new Datom(5);
     } catch (error) {
       e = error;
       warn('^992-28^', reverse(e.message));
     }
     try {
-      new Datom(null);
+      new Datom(5);
     } catch (error) {
       e = error;
       warn('^992-29^', reverse(e.message));
     }
     try {
-      new Datom({});
+      new Datom(null);
     } catch (error) {
       e = error;
       warn('^992-30^', reverse(e.message));
     }
-    urge('^992-31^', new Datom('foo'));
-    urge('^992-32^', new Datom('foo', null));
-    urge('^992-33^', new Datom('foo', void 0));
-    urge('^992-34^', new Datom('foo', 56));
-    urge('^992-35^', new Datom('foo', {
+    try {
+      new Datom({});
+    } catch (error) {
+      e = error;
+      warn('^992-31^', reverse(e.message));
+    }
+    urge('^992-32^', new Datom('foo'));
+    urge('^992-33^', new Datom('foo', null));
+    urge('^992-34^', new Datom('foo', void 0));
+    urge('^992-35^', new Datom('foo', 56));
+    urge('^992-36^', new Datom('foo', {
       bar: 56
     }));
-    urge('^992-36^', new Datom('foo', {
+    urge('^992-37^', new Datom('foo', {
       bar: 56,
       $key: 'other'
     }));
-    urge('^992-37^', new Datom(s`foo`, {
-      bar: 56,
-      $key: 'other'
-    }));
-    urge('^992-38^', new Datom({
+    urge('^992-38^', new Datom(s`foo`, {
       bar: 56,
       $key: 'other'
     }));
     urge('^992-39^', new Datom({
       bar: 56,
-      $key: 'other',
-      $freeze: false
+      $key: 'other'
     }));
     urge('^992-40^', new Datom({
       bar: 56,
       $key: 'other',
-      $freeze: true
+      $freeze: false
     }));
     urge('^992-41^', new Datom({
       bar: 56,
       $key: 'other',
-      $freeze: null
-    }));
-    urge('^992-42^', new Datom('something', {
-      $freeze: false
-    }));
-    urge('^992-43^', new Datom('something', {
       $freeze: true
     }));
+    urge('^992-42^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: null
+    }));
+    urge('^992-43^', new Datom('something', {
+      $freeze: false
+    }));
     urge('^992-44^', new Datom('something', {
+      $freeze: true
+    }));
+    urge('^992-45^', new Datom('something', {
       $freeze: null
     }));
     (() => {      //.........................................................................................................
@@ -379,7 +380,7 @@
         $freeze: false
       });
       d.p = 7;
-      urge('^992-45^', d);
+      urge('^992-46^', d);
       return null;
     })();
     (() => {      //.........................................................................................................
@@ -390,21 +391,21 @@
         $freeze: false
       });
       e = new Datom(d);
-      urge('^992-46^', d, e, d === e);
+      urge('^992-47^', d, e, d === e);
       return null;
     })();
     //.........................................................................................................
     /* events are just `Datom`s: */
-    urge('^992-47^', new Event(s`foo`, {
+    urge('^992-48^', new Event(s`foo`, {
       bar: 56
     }));
     await (async() => {      //.........................................................................................................
       /* calls to `emit` are just calls to `new Event()`: */
       AE.on('myevent', function(event) {
-        info('^992-48^', event);
+        info('^992-49^', event);
         return event.n ** 2;
       });
-      help('^992-49^', (await AE.emit('myevent', {
+      help('^992-50^', (await AE.emit('myevent', {
         n: 16
       })));
       return null;
@@ -422,7 +423,7 @@
 
   // await demo_2()
 // await demo_3()
-// urge '^992-50^', await Promise.all (
+// urge '^992-51^', await Promise.all (
 //   # new Promise ( ( resolve, reject ) -> resolve i ) for i in [ 1 .. 10 ]
 //   ( ( ( count ) -> await count ) i + 1 ) for i in [ 1 .. 10 ]
 //   )
