@@ -214,7 +214,7 @@
       return 'on_' + this._text_from_key($key);
     }
 
-    _key_symbol_from_key($key) {
+    _unique_key_symbol_from_key($key) {
       return Symbol(this._text_from_key($key));
     }
 
@@ -224,7 +224,7 @@
       /* TAINT is this necessary and does it what it intends to do? */
       /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
       if ((key_symbol = this.key_symbols.get($key)) == null) {
-        this.key_symbols.set($key, (key_symbol = this._key_symbol_from_key($key)));
+        this.key_symbols.set($key, (key_symbol = this._unique_key_symbol_from_key($key)));
       }
       if ((R = this.listeners.get(key_symbol)) == null) {
         this.listeners.set(key_symbol, (R = []));
