@@ -113,7 +113,7 @@ class Async_events
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    @key_symbols  = {}
+    @key_symbols  = new Map
     @listeners    = new WeakMap()
     return undefined
 
