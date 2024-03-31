@@ -128,7 +128,7 @@ class Async_events
     if isa.event_listener receiver
       listener      = receiver
     else
-      listener_name = "on_#{$key}"
+      listener_name = @_listener_name_from_key $key
       listener0     = validate.event_listener receiver[ listener_name ]
       listener      = ( P... ) -> await listener0.call receiver, P...
     #.......................................................................................................
@@ -137,17 +137,23 @@ class Async_events
     return unsubscribe
 
   #---------------------------------------------------------------------------------------------------------
+  _text_from_key:           ( $key ) -> if isa.symbol $key then $key.description else $key
+  _listener_name_from_key:  ( $key ) -> 'on_' + @_text_from_key $key
+  _key_symbol_from_key:     ( $key ) -> Symbol @_text_from_key $key
+
+  #---------------------------------------------------------------------------------------------------------
   _listeners_from_key: ( $key ) ->
     ### TAINT is this necessary and does it what it intends to do? ###
     ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
-    @key_symbols[ key ]       = ( key_symbol  = Symbol key  ) unless ( key_symbol = @key_symbols[ key ]       )?
-    @listeners.set key_symbol,  ( R           = []          ) unless ( R          = @listeners.get key_symbol )?
+    unless ( key_symbol = @key_symbols.get $key )?
+      @key_symbols.set $key, ( key_symbol = @_key_symbol_from_key $key )
+    unless ( R = @listeners.get key_symbol )?
+      @listeners.set key_symbol, ( R = [] )
     return R
 
   #---------------------------------------------------------------------------------------------------------
   _listeners_from_event: ( event ) ->
-    key_symbol  = @key_symbols[ event.$key ]
-    listeners   = @listeners.get key_symbol
+    listeners   = @_listeners_from_key event.$key
     return listeners ? []
 
   #---------------------------------------------------------------------------------------------------------
@@ -166,21 +172,25 @@ AE = new Async_events()
 #===========================================================================================================
 demo_1 = ->
   receiver =
-    on_square:  ( event ) -> info '^992-4^', event; event.$value ** 2
-    on_cube:    ( event ) -> info '^992-6^', event; event.$value ** 3
-    on_double:  ( event ) -> info '^992-5^', event; event.$value *  2
-    on_any:     ( event ) -> info '^992-5^', event
+    on_square:      ( event ) -> info '^992-4^', event; event.$value ** 2
+    on_cube:        ( event ) -> info '^992-6^', event; event.$value ** 3
+    on_double:      ( event ) -> info '^992-5^', event; event.$value *  2
+    on_any:         ( event ) -> info '^992-5^', event
+    on_cube_symbol: ( event ) -> info '^992-6^', event; event.$value ** 3
   AE.on 'square',   receiver
   AE.on 'double',   receiver
   AE.on 'cube',     receiver.on_cube
+  AE.on s'cube',    receiver.on_cube
   AE.on '*',        receiver.on_any
   # urge '^992-7^', AE
   # urge '^992-8^', AE.key_symbols[ 'square' ]
   # urge '^992-9^', AE.listeners
   # urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
-  urge '^992-11^', await AE.emit 'square', 11
-  urge '^992-12^', await AE.emit 'double', 12
-  urge '^992-13^', await AE.emit 'cube', 13
+  urge '^992-11^', await AE.emit            'square', 11
+  urge '^992-12^', await AE.emit            'double', 12
+  urge '^992-13^', await AE.emit            'cube',   13
+  urge '^992-13^', await AE.emit new Event  'cube',   14
+  urge '^992-13^', await AE.emit new Event  s'cube',  14
   ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
   try ( urge '^992-14^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-15^', reverse e.message
   try ( urge '^992-16^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-17^', reverse e.message
