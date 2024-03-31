@@ -141,7 +141,6 @@ class Async_events
   emit: ( key, data = null ) ->
     throw new Error "expected 1 or 2 arguments, got #{arguments.length}" unless isa.unary_or_binary arguments
     event = new Event key, data
-    listeners = ( AE.listeners.get AE.symbols[ key ] ) ? []
     help '^992-1^', listener for listener from listeners
     help '^992-2^', await listener key, data for listener from listeners
   _listeners_from_key: ( key ) ->
@@ -150,6 +149,12 @@ class Async_events
     @key_symbols[ key ]       = ( key_symbol  = Symbol key  ) unless ( key_symbol = @key_symbols[ key ]       )?
     @listeners.set key_symbol,  ( R           = []          ) unless ( R          = @listeners.get key_symbol )?
     return R
+
+  #---------------------------------------------------------------------------------------------------------
+  _listeners_from_event: ( event ) ->
+    key_symbol  = @key_symbols[ event.$key ]
+    listeners   = @listeners.get key_symbol
+    return listeners ? []
     await resolved_promise ### as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 ###
     results = await Promise.all ( ( -> await listener key, data )() for listener from listeners )
     return new Event_results event, results
