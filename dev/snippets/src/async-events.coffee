@@ -137,7 +137,7 @@ class Async_events
     return unsubscribe
 
   #---------------------------------------------------------------------------------------------------------
-  _listeners_from_key: ( key ) ->
+  _listeners_from_key: ( $key ) ->
     ### TAINT is this necessary and does it what it intends to do? ###
     ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
     @key_symbols[ key ]       = ( key_symbol  = Symbol key  ) unless ( key_symbol = @key_symbols[ key ]       )?
