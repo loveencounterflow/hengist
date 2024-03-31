@@ -252,32 +252,36 @@
   demo_1 = async function() {
     var e, receiver;
     receiver = {
-      on_blah: function(event) {
-        info('^992-4^', event, this);
+      on_square: function(event) {
+        info('^992-4^', event);
         return event.$value ** 2;
       },
-      on_foo: function(event) {
-        info('^992-5^', event, this);
-        return event.$value ** 2;
+      on_cube: function(event) {
+        info('^992-6^', event);
+        return event.$value ** 3;
       },
-      on_dig: function(event) {
-        info('^992-6^', event, this);
-        return event.$value ** 2;
+      on_double: function(event) {
+        info('^992-5^', event);
+        return event.$value * 2;
+      },
+      on_any: function(event) {
+        return info('^992-5^', event);
       }
     };
-    AE.on('blah', receiver);
-    AE.on('foo', receiver);
-    AE.on('dig', receiver.on_dig);
-    urge('^992-7^', AE);
-    urge('^992-8^', AE.key_symbols['blah']);
-    urge('^992-9^', AE.listeners);
-    urge('^992-10^', AE.listeners.get(AE.key_symbols['blah']));
-    urge('^992-11^', (await AE.emit('blah', 11)));
-    urge('^992-12^', (await AE.emit('foo', 12)));
-    urge('^992-13^', (await AE.emit('dig', 13)));
+    AE.on('square', receiver);
+    AE.on('double', receiver);
+    AE.on('cube', receiver.on_cube);
+    AE.on('*', receiver.on_any);
+    // urge '^992-7^', AE
+    // urge '^992-8^', AE.key_symbols[ 'square' ]
+    // urge '^992-9^', AE.listeners
+    // urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
+    urge('^992-11^', (await AE.emit('square', 11)));
+    urge('^992-12^', (await AE.emit('double', 12)));
+    urge('^992-13^', (await AE.emit('cube', 13)));
     try {
       /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-      urge('^992-14^', (await AE.emit('foo', 3, 4, 5, 6)));
+      urge('^992-14^', (await AE.emit('double', 3, 4, 5, 6)));
     } catch (error) {
       e = error;
       warn('^992-15^', reverse(e.message));
