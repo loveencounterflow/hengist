@@ -95,9 +95,17 @@ class Datom
     return undefined
 
 
-
 #===========================================================================================================
 class Event extends Datom
+
+#===========================================================================================================
+class Event_results extends Datom
+
+  #---------------------------------------------------------------------------------------------------------
+  constructor: ( event, results ) ->
+    throw new Error "expected 2 arguments, got #{arguments.length}" unless isa.binary arguments
+    super 'event-results', { event, results, }
+    return undefined
 
 
 #===========================================================================================================
@@ -111,26 +119,25 @@ class Async_events
 
   #---------------------------------------------------------------------------------------------------------
   on: ( key, receiver ) ->
-    ### TAINT too convoluted ###
+    ### TAINT prevent from registering a listener more than once per event key ###
     throw new Error "expected 2 arguments, got #{arguments.length}" unless isa.binary arguments
     validate.event_key key
     validate.something receiver
     #.......................................................................................................
+    ### TAINT is this necessary and does it what it intends to do? ###
+    ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
     @symbols[ key ]           = ( key_symbol  = Symbol key  ) unless ( key_symbol = @symbols[ key ]           )?
-    debug '^992-1^', { key_symbol, }
-    @listeners.set key_symbol,  ( registry    = new Set()   ) unless ( registry   = @listeners.get key_symbol )?
+    @listeners.set key_symbol,  ( registry    = []          ) unless ( registry   = @listeners.get key_symbol )?
     #.......................................................................................................
+    ### if receiver is a callable, use it; else, try to retrieve a suitably named method and use that: ###
     if isa.event_listener receiver
       listener      = receiver
     else
       listener_name = "on_#{key}"
-      listener      = receiver[ listener_name ]
-      validate.event_listener listener
-      ### TAINT this anonymous function subverts the purpose of using s set ###
-      listener = do ( original_listener = listener ) ->
-        ( P... ) -> await original_listener.call receiver, P...
-    registry.add listener
+      listener0     = validate.event_listener receiver[ listener_name ]
+      listener      = ( P... ) -> await listener0.call receiver, P...
     #.......................................................................................................
+    registry[ key_symbol ] = listener
     unsubscribe = ->
     return unsubscribe
 
@@ -138,11 +145,13 @@ class Async_events
   ### TAINT pass arguments to new Datom / new Event ###
   emit: ( key, data = null ) ->
     throw new Error "expected 1 or 2 arguments, got #{arguments.length}" unless isa.unary_or_binary arguments
-    listeners = ( AE.listeners.get AE.symbols[ 'blah' ] ) ? ( new Set() )
-    help '^992-2^', listener for listener from listeners
+    event = new Event key, data
+    listeners = ( AE.listeners.get AE.symbols[ key ] ) ? []
+    help '^992-1^', listener for listener from listeners
     help '^992-2^', await listener key, data for listener from listeners
     await resolved_promise ### as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 ###
-    return await Promise.all ( ( -> await listener key, data )() for listener from listeners )
+    results = await Promise.all ( ( -> await listener key, data )() for listener from listeners )
+    return new Event_results event, results
 
   # #---------------------------------------------------------------------------------------------------------
   # matches: ( matcher, candidate ) ->
@@ -154,58 +163,62 @@ AE = new Async_events()
 #===========================================================================================================
 demo_1 = ->
   receiver =
-    on_blah:  ( key, data ) -> info '^992-3^', key, data; JSON.stringify { key, data, }
-    on_foo:   ( key, data ) -> info '^992-4^', key, data; JSON.stringify { key, data, }
+    on_blah:  ( key, data ) -> info '^992-3^', key, data, @; JSON.stringify { key, data, }
+    on_foo:   ( key, data ) -> info '^992-4^', key, data, @; JSON.stringify { key, data, }
+    on_dig:   ( key, data ) -> info '^992-5^', key, data, @; JSON.stringify { key, data, }
   AE.on 'blah', receiver
   AE.on 'foo',  receiver
-  debug '^992-5^', AE
-  debug '^992-6^', AE.symbols[ 'blah' ]
-  debug '^992-7^', AE.listeners
-  debug '^992-8^', AE.listeners.get AE.symbols[ 'blah' ]
-  debug '^992-9^', await AE.emit 'blah'
+  AE.on 'dig',  receiver.on_dig
+  debug '^992-6^', AE
+  debug '^992-7^', AE.symbols[ 'blah' ]
+  debug '^992-8^', AE.listeners
+  debug '^992-9^', AE.listeners.get AE.symbols[ 'blah' ]
+  debug '^992-10^', await AE.emit 'blah'
+  debug '^992-11^', await AE.emit 'foo'
+  debug '^992-12^', await AE.emit 'dig'
   ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-  try ( debug '^992-10^', await AE.emit 'foo', 3, 4, 5, 6      ) catch e then warn '^992-11^', reverse e.message
-  try ( debug '^992-12^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-13^', reverse e.message
-  debug '^992-14^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
+  try ( debug '^992-13^', await AE.emit 'foo', 3, 4, 5, 6      ) catch e then warn '^992-14^', reverse e.message
+  try ( debug '^992-15^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-16^', reverse e.message
+  debug '^992-17^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
   return null
 
 #===========================================================================================================
 demo_2 = ->
   class A
   class B extends Object
-  urge '^992-16^', A
-  urge '^992-17^', A.freeze
-  urge '^992-18^', new A()
-  urge '^992-19^', B
-  urge '^992-20^', new B()
-  urge '^992-21^', isa.object A
-  urge '^992-22^', isa.object B
-  urge '^992-23^', isa.object new A()
-  urge '^992-24^', isa.object new B()
-  try new Datom()     catch e then warn '^992-25^', reverse e.message
-  try new Datom 5     catch e then warn '^992-26^', reverse e.message
-  try new Datom null  catch e then warn '^992-27^', reverse e.message
-  try new Datom {}    catch e then warn '^992-28^', reverse e.message
-  urge '^992-29^', new Datom 'foo'
-  urge '^992-30^', new Datom 'foo', null
-  urge '^992-31^', new Datom 'foo', undefined
-  urge '^992-32^', new Datom 'foo', 56
-  urge '^992-33^', new Datom 'foo', { bar: 56, }
-  urge '^992-34^', new Datom 'foo', { bar: 56, $key: 'other', }
-  urge '^992-35^', new Datom s'foo', { bar: 56, $key: 'other', }
-  urge '^992-36^', new Datom { bar: 56, $key: 'other', }
-  urge '^992-37^', new Datom { bar: 56, $key: 'other', $freeze: false, }
-  urge '^992-38^', new Datom { bar: 56, $key: 'other', $freeze: true, }
-  urge '^992-39^', new Datom { bar: 56, $key: 'other', $freeze: null, }
-  urge '^992-40^', new Datom 'something', { $freeze: false, }
-  urge '^992-41^', new Datom 'something', { $freeze: true,  }
-  urge '^992-42^', new Datom 'something', { $freeze: null,  }
+  urge '^992-18^', A
+  urge '^992-19^', A.freeze
+  urge '^992-20^', new A()
+  urge '^992-21^', B
+  urge '^992-22^', new B()
+  urge '^992-23^', isa.object A
+  urge '^992-24^', isa.object B
+  urge '^992-25^', isa.object new A()
+  urge '^992-26^', isa.object new B()
+  try new Datom()     catch e then warn '^992-27^', reverse e.message
+  try new Datom 5     catch e then warn '^992-28^', reverse e.message
+  try new Datom null  catch e then warn '^992-29^', reverse e.message
+  try new Datom {}    catch e then warn '^992-30^', reverse e.message
+  urge '^992-31^', new Datom 'foo'
+  urge '^992-32^', new Datom 'foo', null
+  urge '^992-33^', new Datom 'foo', undefined
+  urge '^992-34^', new Datom 'foo', 56
+  urge '^992-35^', new Datom 'foo', { bar: 56, }
+  urge '^992-36^', new Datom 'foo', { bar: 56, $key: 'other', }
+  urge '^992-37^', new Datom s'foo', { bar: 56, $key: 'other', }
+  urge '^992-38^', new Datom { bar: 56, $key: 'other', }
+  urge '^992-39^', new Datom { bar: 56, $key: 'other', $freeze: false, }
+  urge '^992-40^', new Datom { bar: 56, $key: 'other', $freeze: true, }
+  urge '^992-41^', new Datom { bar: 56, $key: 'other', $freeze: null, }
+  urge '^992-42^', new Datom 'something', { $freeze: false, }
+  urge '^992-43^', new Datom 'something', { $freeze: true,  }
+  urge '^992-44^', new Datom 'something', { $freeze: null,  }
   #.........................................................................................................
   ### must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: ###
   do =>
     d = new Datom 'o', { $freeze: false, }
     d.p = 7
-    urge '^992-43^', d
+    urge '^992-45^', d
     return null
   #.........................................................................................................
   ### passing in an existing datom (or event) `d` into `new Datom d` (or `new Event d`) results in a copy
@@ -213,16 +226,16 @@ demo_2 = ->
   do =>
     d = new Datom 'o', { $freeze: false, }
     e = new Datom d
-    urge '^992-44^', d, e, d is e
+    urge '^992-46^', d, e, d is e
     return null
   #.........................................................................................................
   ### events are just `Datom`s: ###
-  urge '^992-45^', new Event s'foo', { bar: 56, }
+  urge '^992-47^', new Event s'foo', { bar: 56, }
   #.........................................................................................................
   ### calls to `emit` are just calls to `new Event()`: ###
   await do =>
-    AE.on 'myevent', ( event ) -> info '^992-46^', event; event.n ** 2
-    help '^992-47^', await AE.emit 'myevent', { n: 16, }
+    AE.on 'myevent', ( event ) -> info '^992-48^', event; event.n ** 2
+    help '^992-49^', await AE.emit 'myevent', { n: 16, }
     return null
   #.........................................................................................................
   return null
@@ -231,9 +244,9 @@ demo_2 = ->
 #===========================================================================================================
 if module is require.main then await do =>
   await demo_1()
-  await demo_2()
+  # await demo_2()
   # await demo_3()
-  # urge '^992-15^', await Promise.all (
+  # urge '^992-50^', await Promise.all (
   #   # new Promise ( ( resolve, reject ) -> resolve i ) for i in [ 1 .. 10 ]
   #   ( ( ( count ) -> await count ) i + 1 ) for i in [ 1 .. 10 ]
   #   )
