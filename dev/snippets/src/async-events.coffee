@@ -113,26 +113,26 @@ class Async_events
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ->
-    @symbols    = {}
-    @listeners  = new WeakMap()
+    @key_symbols  = {}
+    @listeners    = new WeakMap()
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
-  on: ( key, receiver ) ->
-    ### TAINT prevent from registering a listener more than once per event key ###
+  on: ( $key, receiver ) ->
+    ### TAINT prevent from registering a listener more than once per event $key ###
     throw new Error "expected 2 arguments, got #{arguments.length}" unless isa.binary arguments
-    validate.event_key key
+    validate.event_key $key
     validate.something receiver
     #.......................................................................................................
     ### if receiver is a callable, use it; else, try to retrieve a suitably named method and use that: ###
     if isa.event_listener receiver
       listener      = receiver
     else
-      listener_name = "on_#{key}"
+      listener_name = "on_#{$key}"
       listener0     = validate.event_listener receiver[ listener_name ]
       listener      = ( P... ) -> await listener0.call receiver, P...
     #.......................................................................................................
-    registry[ key_symbol ] = listener
+    ( @_listeners_from_key $key ).push listener
     unsubscribe = ->
     return unsubscribe
 
