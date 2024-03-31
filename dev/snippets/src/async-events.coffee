@@ -124,11 +124,6 @@ class Async_events
     validate.event_key key
     validate.something receiver
     #.......................................................................................................
-    ### TAINT is this necessary and does it what it intends to do? ###
-    ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
-    @symbols[ key ]           = ( key_symbol  = Symbol key  ) unless ( key_symbol = @symbols[ key ]           )?
-    @listeners.set key_symbol,  ( registry    = []          ) unless ( registry   = @listeners.get key_symbol )?
-    #.......................................................................................................
     ### if receiver is a callable, use it; else, try to retrieve a suitably named method and use that: ###
     if isa.event_listener receiver
       listener      = receiver
@@ -149,6 +144,12 @@ class Async_events
     listeners = ( AE.listeners.get AE.symbols[ key ] ) ? []
     help '^992-1^', listener for listener from listeners
     help '^992-2^', await listener key, data for listener from listeners
+  _listeners_from_key: ( key ) ->
+    ### TAINT is this necessary and does it what it intends to do? ###
+    ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
+    @key_symbols[ key ]       = ( key_symbol  = Symbol key  ) unless ( key_symbol = @key_symbols[ key ]       )?
+    @listeners.set key_symbol,  ( R           = []          ) unless ( R          = @listeners.get key_symbol )?
+    return R
     await resolved_promise ### as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 ###
     results = await Promise.all ( ( -> await listener key, data )() for listener from listeners )
     return new Event_results event, results
