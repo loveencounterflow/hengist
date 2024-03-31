@@ -137,16 +137,16 @@ class Async_events
     return unsubscribe
 
   #---------------------------------------------------------------------------------------------------------
-  _text_from_key:           ( $key ) -> if isa.symbol $key then $key.description else $key
-  _listener_name_from_key:  ( $key ) -> 'on_' + @_text_from_key $key
-  _key_symbol_from_key:     ( $key ) -> Symbol @_text_from_key $key
+  _text_from_key:               ( $key ) -> if isa.symbol $key then $key.description else $key
+  _listener_name_from_key:      ( $key ) -> 'on_' + @_text_from_key $key
+  _unique_key_symbol_from_key:  ( $key ) -> Symbol @_text_from_key $key
 
   #---------------------------------------------------------------------------------------------------------
   _listeners_from_key: ( $key ) ->
     ### TAINT is this necessary and does it what it intends to do? ###
     ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
     unless ( key_symbol = @key_symbols.get $key )?
-      @key_symbols.set $key, ( key_symbol = @_key_symbol_from_key $key )
+      @key_symbols.set $key, ( key_symbol = @_unique_key_symbol_from_key $key )
     unless ( R = @listeners.get key_symbol )?
       @listeners.set key_symbol, ( R = [] )
     return R
