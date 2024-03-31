@@ -137,12 +137,6 @@ class Async_events
     return unsubscribe
 
   #---------------------------------------------------------------------------------------------------------
-  ### TAINT pass arguments to new Datom / new Event ###
-  emit: ( key, data = null ) ->
-    throw new Error "expected 1 or 2 arguments, got #{arguments.length}" unless isa.unary_or_binary arguments
-    event = new Event key, data
-    help '^992-1^', listener for listener from listeners
-    help '^992-2^', await listener key, data for listener from listeners
   _listeners_from_key: ( key ) ->
     ### TAINT is this necessary and does it what it intends to do? ###
     ### use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: ###
@@ -155,8 +149,14 @@ class Async_events
     key_symbol  = @key_symbols[ event.$key ]
     listeners   = @listeners.get key_symbol
     return listeners ? []
+
+  #---------------------------------------------------------------------------------------------------------
+  emit: ( P... ) ->
+    event     = new Event P...
+    { $key }  = event
+    listeners = @_listeners_from_event event
     await resolved_promise ### as per https://github.com/sindresorhus/emittery/blob/main/index.js#L363 ###
-    results = await Promise.all ( ( -> await listener key, data )() for listener from listeners )
+    results = await Promise.all ( ( -> await listener event )() for listener from listeners )
     return new Event_results event, results
 
 
