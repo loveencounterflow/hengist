@@ -170,7 +170,7 @@
   Async_events = class Async_events {
     //---------------------------------------------------------------------------------------------------------
     constructor() {
-      this.key_symbols = {};
+      this.key_symbols = new Map();
       this.listeners = new WeakMap();
       return void 0;
     }
@@ -189,7 +189,7 @@
       if (isa.event_listener(receiver)) {
         listener = receiver;
       } else {
-        listener_name = `on_${$key}`;
+        listener_name = this._listener_name_from_key($key);
         listener0 = validate.event_listener(receiver[listener_name]);
         listener = async function(...P) {
           return (await listener0.call(receiver, ...P));
@@ -202,12 +202,29 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _listeners_from_key(key) {
+    _text_from_key($key) {
+      if (isa.symbol($key)) {
+        return $key.description;
+      } else {
+        return $key;
+      }
+    }
+
+    _listener_name_from_key($key) {
+      return 'on_' + this._text_from_key($key);
+    }
+
+    _key_symbol_from_key($key) {
+      return Symbol(this._text_from_key($key));
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    _listeners_from_key($key) {
       var R, key_symbol;
-      if ((key_symbol = this.key_symbols[key]) == null) {
-        /* TAINT is this necessary and does it what it intends to do? */
-        /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
-        this.key_symbols[key] = (key_symbol = Symbol(key));
+      /* TAINT is this necessary and does it what it intends to do? */
+      /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
+      if ((key_symbol = this.key_symbols.get($key)) == null) {
+        this.key_symbols.set($key, (key_symbol = this._key_symbol_from_key($key)));
       }
       if ((R = this.listeners.get(key_symbol)) == null) {
         this.listeners.set(key_symbol, (R = []));
@@ -217,9 +234,8 @@
 
     //---------------------------------------------------------------------------------------------------------
     _listeners_from_event(event) {
-      var key_symbol, listeners;
-      key_symbol = this.key_symbols[event.$key];
-      listeners = this.listeners.get(key_symbol);
+      var listeners;
+      listeners = this._listeners_from_key(event.$key);
       return listeners != null ? listeners : [];
     }
 
@@ -266,11 +282,16 @@
       },
       on_any: function(event) {
         return info('^992-5^', event);
+      },
+      on_cube_symbol: function(event) {
+        info('^992-6^', event);
+        return event.$value ** 3;
       }
     };
     AE.on('square', receiver);
     AE.on('double', receiver);
     AE.on('cube', receiver.on_cube);
+    AE.on(s`cube`, receiver.on_cube);
     AE.on('*', receiver.on_any);
     // urge '^992-7^', AE
     // urge '^992-8^', AE.key_symbols[ 'square' ]
@@ -279,6 +300,8 @@
     urge('^992-11^', (await AE.emit('square', 11)));
     urge('^992-12^', (await AE.emit('double', 12)));
     urge('^992-13^', (await AE.emit('cube', 13)));
+    urge('^992-13^', (await AE.emit(new Event('cube', 14))));
+    urge('^992-13^', (await AE.emit(new Event(s`cube`, 14))));
     try {
       /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
       urge('^992-14^', (await AE.emit('double', 3, 4, 5, 6)));
