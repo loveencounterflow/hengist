@@ -159,9 +159,6 @@ class Async_events
     results = await Promise.all ( ( -> await listener key, data )() for listener from listeners )
     return new Event_results event, results
 
-  # #---------------------------------------------------------------------------------------------------------
-  # matches: ( matcher, candidate ) ->
-
 
 #===========================================================================================================
 AE = new Async_events()
