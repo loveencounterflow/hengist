@@ -166,21 +166,23 @@ AE = new Async_events()
 #===========================================================================================================
 demo_1 = ->
   receiver =
-    on_blah:  ( event ) -> info '^992-4^', event, @; event.$value ** 2
-    on_foo:   ( event ) -> info '^992-5^', event, @; event.$value ** 2
-    on_dig:   ( event ) -> info '^992-6^', event, @; event.$value ** 2
-  AE.on 'blah', receiver
-  AE.on 'foo',  receiver
-  AE.on 'dig',  receiver.on_dig
-  urge '^992-7^', AE
-  urge '^992-8^', AE.key_symbols[ 'blah' ]
-  urge '^992-9^', AE.listeners
-  urge '^992-10^', AE.listeners.get AE.key_symbols[ 'blah' ]
-  urge '^992-11^', await AE.emit 'blah', 11
-  urge '^992-12^', await AE.emit 'foo', 12
-  urge '^992-13^', await AE.emit 'dig', 13
+    on_square:  ( event ) -> info '^992-4^', event; event.$value ** 2
+    on_cube:    ( event ) -> info '^992-6^', event; event.$value ** 3
+    on_double:  ( event ) -> info '^992-5^', event; event.$value *  2
+    on_any:     ( event ) -> info '^992-5^', event
+  AE.on 'square',   receiver
+  AE.on 'double',   receiver
+  AE.on 'cube',     receiver.on_cube
+  AE.on '*',        receiver.on_any
+  # urge '^992-7^', AE
+  # urge '^992-8^', AE.key_symbols[ 'square' ]
+  # urge '^992-9^', AE.listeners
+  # urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
+  urge '^992-11^', await AE.emit 'square', 11
+  urge '^992-12^', await AE.emit 'double', 12
+  urge '^992-13^', await AE.emit 'cube', 13
   ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-  try ( urge '^992-14^', await AE.emit 'foo', 3, 4, 5, 6      ) catch e then warn '^992-15^', reverse e.message
+  try ( urge '^992-14^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-15^', reverse e.message
   try ( urge '^992-16^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-17^', reverse e.message
   urge '^992-18^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
   return null
