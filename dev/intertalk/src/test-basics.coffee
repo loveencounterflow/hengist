@@ -2,21 +2,26 @@
 
 'use strict'
 
-
-############################################################################################################
-CND                       = require 'cnd'
-rpr                       = CND.rpr
-badge                     = 'INTERTALK/TESTS'
-debug                     = CND.get_logger 'debug',     badge
-warn                      = CND.get_logger 'warn',      badge
-info                      = CND.get_logger 'info',      badge
-urge                      = CND.get_logger 'urge',      badge
-help                      = CND.get_logger 'help',      badge
-whisper                   = CND.get_logger 'whisper',   badge
-echo                      = CND.echo.bind CND
-#...........................................................................................................
+GUY                       = require 'guy'
+{ alert
+  debug
+  help
+  info
+  plain
+  praise
+  urge
+  warn
+  whisper }               = GUY.trm.get_loggers 'subsidiary'
+{ rpr
+  inspect
+  echo
+  reverse
+  log     }               = GUY.trm
 test                      = require 'guy-test'
-jr                        = JSON.stringify
+#-----------------------------------------------------------------------------------------------------------
+s                         = ( name ) -> Symbol.for  name
+ps                        = ( name ) -> Symbol      name
+
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "_XEMITTER: _" ] = ( T, done ) ->
@@ -35,140 +40,110 @@ jr                        = JSON.stringify
 #       resolve new_datom key, value
 #   done()
 #   return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "INTERTALK: public API shape" ] = ( T, done ) ->
-  { DATOM }                 = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  types                     = DATOM.types
-  { isa
-    validate
-    type_of }               = types
-  { Djehuti }               = require '../../../apps/intertalk'
-  #.........................................................................................................
-  XE = new Djehuti()
-  T.ok isa.asyncfunction  XE.emit
-  T.ok isa.asyncfunction  XE.delegate
-  T.ok isa.function       XE.contract
-  T.ok isa.function       XE.listen_to
-  T.ok isa.function       XE.listen_to_all
-  T.eq XE.emit.length,              2
-  T.eq XE.delegate.length,          2
-  T.eq XE.contract.length,          2
-  T.eq XE.listen_to.length,         2
-  T.eq XE.listen_to_all.length,     1
-  T.eq XE.listen_to_unheard.length, 1
-  known_keys = [ 'types', 'emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard', ]
-  T.eq ( k for k of XE when ( not k.startsWith '_' ) and ( k not in known_keys ) ), []
-  done()
+#===========================================================================================================
+demo_1 = ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  receiver =
+    on_square:      ( event ) -> info '^992-4^', event; event.$value ** 2
+    on_cube:        ( event ) -> info '^992-6^', event; event.$value ** 3
+    on_double:      ( event ) -> info '^992-5^', event; event.$value *  2
+    on_any:         ( event ) -> info '^992-5^', event
+    on_cube_symbol: ( event ) -> info '^992-6^', event; event.$value ** 3
+  AE.on 'square',   receiver
+  AE.on 'double',   receiver
+  AE.on 'cube',     receiver.on_cube
+  AE.on s'cube',    receiver.on_cube
+  AE.on '*',        receiver.on_any
+  # urge '^992-7^', AE
+  # urge '^992-8^', AE.key_symbols[ 'square' ]
+  # urge '^992-9^', AE.listeners
+  # urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
+  urge '^992-11^', await AE.emit            'square', 11
+  urge '^992-12^', await AE.emit            'double', 12
+  urge '^992-13^', await AE.emit            'cube',   13
+  urge '^992-13^', await AE.emit new AE_Event  'cube',   14
+  urge '^992-13^', await AE.emit new AE_Event  s'cube',  14
+  ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
+  try ( urge '^992-14^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-15^', reverse e.message
+  try ( urge '^992-16^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-17^', reverse e.message
+  urge '^992-18^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@[ "INTERTALK: emit equivalently accepts key, value or datom" ] = ( T, done ) ->
-  { DATOM }                 = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  { Djehuti }               = require '../../../apps/intertalk'
+#===========================================================================================================
+demo_2 = ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  class A
+  class B extends Object
+  urge '^992-19^', A
+  urge '^992-20^', A.freeze
+  urge '^992-21^', new A()
+  urge '^992-22^', B
+  urge '^992-23^', new B()
+  urge '^992-24^', isa.object A
+  urge '^992-25^', isa.object B
+  urge '^992-26^', isa.object new A()
+  urge '^992-27^', isa.object new B()
+  try new Datom()     catch e then warn '^992-28^', reverse e.message
+  try new Datom 5     catch e then warn '^992-29^', reverse e.message
+  try new Datom null  catch e then warn '^992-30^', reverse e.message
+  try new Datom {}    catch e then warn '^992-31^', reverse e.message
+  urge '^992-32^', new Datom 'foo'
+  urge '^992-33^', new Datom 'foo', null
+  urge '^992-34^', new Datom 'foo', undefined
+  urge '^992-35^', new Datom 'foo', 56
+  urge '^992-36^', new Datom 'foo', { bar: 56, }
+  urge '^992-37^', new Datom 'foo', { bar: 56, $key: 'other', }
+  urge '^992-38^', new Datom s'foo', { bar: 56, $key: 'other', }
+  urge '^992-39^', new Datom { bar: 56, $key: 'other', }
+  urge '^992-40^', new Datom { bar: 56, $key: 'other', $freeze: false, }
+  urge '^992-41^', new Datom { bar: 56, $key: 'other', $freeze: true, }
+  urge '^992-42^', new Datom { bar: 56, $key: 'other', $freeze: null, }
+  urge '^992-43^', new Datom 'something', { $freeze: false, }
+  urge '^992-44^', new Datom 'something', { $freeze: true,  }
+  urge '^992-45^', new Datom 'something', { $freeze: null,  }
   #.........................................................................................................
-  count = 0
-  XE    = new Djehuti()
-  XE.listen_to '^mykey', ( d ) ->
-    count++
-    T.eq d, { $key: '^mykey', $value: 42, }
-  await XE.emit '^mykey', 42
-  await XE.emit new_datom '^mykey', 42
+  ### must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: ###
+  do =>
+    d = new Datom 'o', { $freeze: false, }
+    d.p = 7
+    urge '^992-46^', d
+    return null
   #.........................................................................................................
-  try await XE.emit { $value: 42, } catch error
-    pattern = /expected a text or a datom got a object/
-    if pattern.test error.message
-      T.ok true
-    else
-      T.fail "expected error to match #{pattern}, got #{rpr error.message}"
-      throw error
-  T.ok error?
+  ### passing in an existing datom (or event) `d` into `new Datom d` (or `new AE_Event d`) results in a copy
+  of `d`: ###
+  do =>
+    d = new Datom 'o', { $freeze: false, }
+    e = new Datom d
+    urge '^992-47^', d, e, d is e
+    return null
   #.........................................................................................................
-  await XE.emit { $key: '^mykey', $value: 42, }
-  await XE.emit new_datom '^notmykey', 42
-  T.eq count, 3
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "INTERTALK: throws when more than one contractor is added for given event key" ] = ( T, done ) ->
-  { DATOM }                 = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  { Djehuti }               = require '../../../apps/intertalk'
-  XE                        = new Djehuti()
+  ### events are just `Datom`s: ###
+  urge '^992-48^', new AE_Event s'foo', { bar: 56, }
   #.........................................................................................................
-  XE.contract '^mykey', ( d ) ->
-  XE.contract '^otherkey', ( d ) ->
-  T.throws /already has a primary listener/, ( -> XE.contract '^otherkey', ( d ) -> )
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "INTERTALK: can listen to events that have no specific listener" ] = ( T, done ) ->
-  { DATOM }                 = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  { Djehuti }               = require '../../../apps/intertalk'
-  XE                        = new Djehuti()
+  ### calls to `emit` are just calls to `new AE_Event()`: ###
+  await do =>
+    AE.on 'myevent', ( event ) -> info '^992-49^', event; event.n ** 2
+    help '^992-50^', await AE.emit 'myevent', { n: 16, }
+    return null
   #.........................................................................................................
-  keys =
-    listen:     []
-    contract:   []
-    all:        []
-    unheard:    []
-  XE.listen_to          '^mykey',     ( d       ) ->  keys.listen   .push d.$key
-  XE.contract           '^otherkey',  ( d       ) ->  keys.contract .push d.$key; return "some value"
-  XE.listen_to_all                    ( key, d  ) ->  keys.all      .push d.$key
-  XE.listen_to_unheard                ( key, d  ) ->  keys.unheard  .push d.$key
-  await XE.emit     '^mykey'
-  await XE.emit     '^otherkey'
-  await XE.emit     '^thirdkey'
-  await XE.delegate '^otherkey'
-  # debug keys
-  T.eq keys, {
-    listen:   [ '^mykey'                                        ],
-    contract: [ '^otherkey', '^otherkey'                        ],
-    all:      [ '^mykey', '^otherkey', '^thirdkey', '^otherkey' ],
-    unheard:  [ '^thirdkey'                                     ] }
-  done()
-  return null
-
-#-----------------------------------------------------------------------------------------------------------
-@[ "INTERTALK: delegation" ] = ( T, done ) ->
-  { DATOM }                 = require '../../../apps/datom'
-  { new_datom
-    select }                = DATOM
-  { Djehuti }               = require '../../../apps/intertalk'
-  XE                        = new Djehuti()
-  #.........................................................................................................
-  keys = { listen: [], all: [], contract: [] }
-  XE.listen_to          '^log',       ( d       ) ->  keys.listen   .push d.$key; urge d
-  XE.contract           '^add',       ( d       ) ->  keys.contract .push d.$key; return ( d?.a ? 0 ) + ( d?.b ? 0 )
-  XE.contract           '^multiply',  ( d       ) ->  keys.contract .push d.$key; return ( d?.a ? 1 ) * ( d?.b ? 1 )
-  XE.listen_to_all                    ( key, d  ) ->  keys.all      .push d.$key
-  await XE.emit     '^log', "message"
-  T.eq ( await XE.delegate '^add',      { a: 123, b: 456, } ), 579
-  T.eq ( await XE.delegate '^multiply', { a: 123, b: 456, } ), 56088
-  T.eq keys, { listen: [ '^log' ], all: [ '^log', '^add', '^multiply' ], contract: [ '^add', '^multiply' ] }
-  done()
   return null
 
 
+#===========================================================================================================
+if module is require.main then await do =>
+  await demo_1()
+  await demo_2()
+  # await demo_3()
+  # urge '^992-51^', await Promise.all (
+  #   # new Promise ( ( resolve, reject ) -> resolve i ) for i in [ 1 .. 10 ]
+  #   ( ( ( count ) -> await count ) i + 1 ) for i in [ 1 .. 10 ]
+  #   )
 
 
-############################################################################################################
-if require.main is module then do =>
-  test @
-  # test @[ "public API shape" ]
-  # test @[ "INTERTALK: can listen to events that have no specific listener" ]
-  # test @[ "INTERTALK: delegation" ]
-  # test @[ "can listen to events that have no specific listener 2" ]
-  # test @[ "emit equivalently accepts key, value or datom" ]
+
+
 
 
 
