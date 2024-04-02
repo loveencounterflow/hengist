@@ -93,8 +93,20 @@ throws = ( T, matcher, f ) ->
   INTERTALK = require '../../../apps/intertalk'
   { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
   #.........................................................................................................
-  await throws T, 'expected 1 or 2 arguments, got 5', ( -> await AE.emit 'double', 3, 4, 5, 6   )
-  await throws T, 'expected 1 or 2 arguments, got 3', ( -> await AE.emit 'foo', 3, [ 4, 5, 6, ] )
+  await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await AE.emit 'double', 3, 4, 5, 6   )
+  await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await AE.emit 'foo', 3, [ 4, 5, 6, ] )
+  await throws T, 'expected 2 arguments, got 0',                ( -> AE.on() )
+  await throws T, 'expected 2 arguments, got 1',                ( -> AE.on 4 )
+  await throws T, 'expected a event_key, got a number',         ( -> AE.on 4, 5 )
+  await throws T, 'expected a event_key, got a number',         ( -> AE.on 4, -> )
+  await throws T, 'expected 2 arguments, got 1',                ( -> AE.on s'abc' )
+  await throws T, 'expected 2 arguments, got 3',                ( -> AE.on s'abc', ( -> ), 9 )
+  await throws T, 'expected 2 arguments, got 3',                ( -> AE.on 'abc', {}, 9 )
+  await throws T, 'expected event_listener for object property on_abc, got a undefined', ( -> AE.on 'abc', {} )
+  await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new Datom() )
+  await throws T, 'expected a event_key, got a number',         ( -> new Datom 42 )
+  await throws T, 'expected a event_key, got a object',         ( -> new Datom null )
+  await throws T, 'expected a event_key, got a undefined',      ( -> new Datom undefined )
   #.........................................................................................................
   done?()
 
@@ -225,11 +237,21 @@ demo_2 = ->
   #.........................................................................................................
   return null
 
+#===========================================================================================================
+demo_3 = ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  AE.on 'abc', {}
+  #.........................................................................................................
+  return null
+
 
 #===========================================================================================================
 if module is require.main then await do =>
   # await demo_1()
   # await demo_2()
+  # await demo_3()
   await test @
 
 
