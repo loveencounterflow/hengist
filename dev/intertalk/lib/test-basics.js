@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, alert, as_object, debug, demo_1, demo_2, echo, help, info, inspect, isa_object, log, plain, praise, ps, reverse, rpr, s, test, throws, urge, warn, whisper;
+  var GUY, alert, as_object, debug, demo_1, demo_2, demo_3, echo, help, info, inspect, isa_object, log, plain, praise, ps, reverse, rpr, s, test, throws, urge, warn, whisper;
 
   GUY = require('guy');
 
@@ -167,6 +167,42 @@
     }));
     await throws(T, 'expected 1 or 2 arguments, got 3', (async function() {
       return (await AE.emit('foo', 3, [4, 5, 6]));
+    }));
+    await throws(T, 'expected 2 arguments, got 0', (function() {
+      return AE.on();
+    }));
+    await throws(T, 'expected 2 arguments, got 1', (function() {
+      return AE.on(4);
+    }));
+    await throws(T, 'expected a event_key, got a number', (function() {
+      return AE.on(4, 5);
+    }));
+    await throws(T, 'expected a event_key, got a number', (function() {
+      return AE.on(4, function() {});
+    }));
+    await throws(T, 'expected 2 arguments, got 1', (function() {
+      return AE.on(s`abc`);
+    }));
+    await throws(T, 'expected 2 arguments, got 3', (function() {
+      return AE.on(s`abc`, (function() {}), 9);
+    }));
+    await throws(T, 'expected 2 arguments, got 3', (function() {
+      return AE.on('abc', {}, 9);
+    }));
+    await throws(T, 'expected event_listener for object property on_abc, got a undefined', (function() {
+      return AE.on('abc', {});
+    }));
+    await throws(T, 'expected 1 or 2 arguments, got 0', (function() {
+      return new Datom();
+    }));
+    await throws(T, 'expected a event_key, got a number', (function() {
+      return new Datom(42);
+    }));
+    await throws(T, 'expected a event_key, got a object', (function() {
+      return new Datom(null);
+    }));
+    await throws(T, 'expected a event_key, got a undefined', (function() {
+      return new Datom(void 0);
     }));
     return typeof done === "function" ? done() : void 0;
   };
@@ -418,10 +454,22 @@
   };
 
   //===========================================================================================================
+  demo_3 = function() {
+    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, validate, validate_optional;
+    INTERTALK = require('../../../apps/intertalk');
+    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    //.........................................................................................................
+    AE.on('abc', {});
+    //.........................................................................................................
+    return null;
+  };
+
+  //===========================================================================================================
   if (module === require.main) {
     await (async() => {
       // await demo_1()
       // await demo_2()
+      // await demo_3()
       return (await test(this));
     })();
   }
