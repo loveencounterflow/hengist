@@ -40,10 +40,104 @@ ps                        = ( name ) -> Symbol      name
 #       resolve new_datom key, value
 #   done()
 #   return null
+
+#===========================================================================================================
+isa_object = ( x ) -> x? and ( typeof x is 'object' ) and ( ( Object::toString.call x ) is '[object Object]' )
+as_object = ( x ) ->
+  return x unless isa_object x
+  R       = {}
+  R[ k ]  = as_object v for k, v of x
+  return R
+#===========================================================================================================
+throws = ( T, matcher, f ) ->
+  await do =>
+    error = null
+    try await f() catch error
+      warn '^992-15^', reverse error.message
+      T?.eq error.message, matcher
+    T?.ok error?
+  return null
+
+#===========================================================================================================
+@interface = ( T, done ) ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  T?.eq ( isa.function      AE.on       ), true
+  T?.eq ( isa.function      AE.on_any   ), false
+  T?.eq ( isa.asyncfunction AE.emit     ), true
+  T?.eq ( AE.emit 'what' )?.constructor?.name, 'Promise'
+  T?.ok ( await AE.emit 'what' ) instanceof AE_Event_results
+  T?.eq ( isa.function      AE.on 'foo', ( ( event ) -> )      ), true
+  #.........................................................................................................
+  done?()
+
+#===========================================================================================================
+@event_emitting_1 = ( T, done ) ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  AE.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
+  AE.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
+  #.........................................................................................................
+  ### NOTE call to `as_object()` not strictly necessary as the underlying `equals()` method does work with
+  the custom types we're using (`AE_Event_results` and `AE_Event`), but that's a flaw in the algorithm so
+  let's try to write it the correct way: ###
+  T?.eq ( as_object await AE.emit 'sum', { a: 100, b: 200, } ), { '$key': 'event-results', event: { '$key': 'sum', a: 100, b: 200 }, results: [ 300 ] }
+  T?.eq ( as_object await AE.emit 'mul', { a: 100, b: 200, } ), { '$key': 'event-results', event: { '$key': 'mul', a: 100, b: 200 }, results: [ 20000 ] }
+  #.........................................................................................................
+  done?()
+
+#===========================================================================================================
+@type_validation = ( T, done ) ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  await throws T, 'expected 1 or 2 arguments, got 5', ( -> await AE.emit 'double', 3, 4, 5, 6   )
+  await throws T, 'expected 1 or 2 arguments, got 3', ( -> await AE.emit 'foo', 3, [ 4, 5, 6, ] )
+  #.........................................................................................................
+  done?()
+
+#===========================================================================================================
+@event_emitting_3 = ( T, done ) ->
+  INTERTALK = require '../../../apps/intertalk'
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  receiver =
+    on_square:      ( event ) -> info '^992-4^', event; event.$value ** 2
+    on_cube:        ( event ) -> info '^992-6^', event; event.$value ** 3
+    on_double:      ( event ) -> info '^992-5^', event; event.$value *  2
+    on_any:         ( event ) -> info '^992-5^', event
+    on_cube_symbol: ( event ) -> info '^992-6^', event; event.$value ** 3
+  #.........................................................................................................
+  AE.on 'square',   receiver
+  AE.on 'double',   receiver
+  AE.on 'cube',     receiver.on_cube
+  AE.on s'cube',    receiver.on_cube
+  # AE.on_any,        receiver.on_any
+  #.........................................................................................................
+  # urge '^992-7^', AE
+  # urge '^992-8^', AE.key_symbols[ 'square' ]
+  # urge '^992-9^', AE.listeners
+  # urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
+  f = ->
+    urge '^992-11^', await AE.emit            'square', 11
+    urge '^992-12^', await AE.emit            'double', 12
+    urge '^992-13^', await AE.emit            'cube',   13
+    urge '^992-13^', await AE.emit new AE_Event  'cube',   14
+    urge '^992-13^', await AE.emit new AE_Event  s'cube',  14
+    ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
+    try ( urge '^992-14^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-15^', reverse e.message
+    try ( urge '^992-16^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-17^', reverse e.message
+    urge '^992-18^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
+  #.........................................................................................................
+  done?()
+
 #===========================================================================================================
 demo_1 = ->
   INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
   receiver =
     on_square:      ( event ) -> info '^992-4^', event; event.$value ** 2
     on_cube:        ( event ) -> info '^992-6^', event; event.$value ** 3
@@ -73,7 +167,8 @@ demo_1 = ->
 #===========================================================================================================
 demo_2 = ->
   INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  #.........................................................................................................
+  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
   class A
   class B extends Object
   urge '^992-19^', A
@@ -133,14 +228,9 @@ demo_2 = ->
 
 #===========================================================================================================
 if module is require.main then await do =>
-  await demo_1()
-  await demo_2()
-  # await demo_3()
-  # urge '^992-51^', await Promise.all (
-  #   # new Promise ( ( resolve, reject ) -> resolve i ) for i in [ 1 .. 10 ]
-  #   ( ( ( count ) -> await count ) i + 1 ) for i in [ 1 .. 10 ]
-  #   )
-
+  # await demo_1()
+  # await demo_2()
+  await test @
 
 
 
