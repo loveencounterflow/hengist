@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var AE, Async_events, Datom, Event, Event_results, GUY, alert, debug, demo_1, demo_2, echo, help, info, inspect, isa, isa_optional, log, plain, praise, ps, resolved_promise, reverse, rpr, s, urge, validate, validate_optional, warn, whisper;
+  var AE, Async_events, Datom, Event, Event_results, GUY, SYMBOLIC, alert, debug, demo_1, demo_2, echo, help, info, inspect, isa, isa_optional, log, plain, praise, ps, resolved_promise, reverse, rpr, s, urge, validate, validate_optional, warn, whisper;
 
   //===========================================================================================================
   GUY = require('guy');
@@ -111,6 +111,32 @@
   })());
 
   //===========================================================================================================
+  SYMBOLIC = class SYMBOLIC {
+    //---------------------------------------------------------------------------------------------------------
+    constructor() {
+      throw new Error("class cannot be instantiated");
+    }
+
+    //---------------------------------------------------------------------------------------------------------
+    static _text_from_key($key) {
+      if (isa.symbol($key)) {
+        return $key.description;
+      } else {
+        return $key;
+      }
+    }
+
+    static _listener_name_from_key($key) {
+      return 'on_' + this._text_from_key($key);
+    }
+
+    static _unique_key_symbol_from_key($key) {
+      return Symbol(this._text_from_key($key));
+    }
+
+  };
+
+  //===========================================================================================================
   Datom = class Datom {
     /* all API methods should start with `$` like `$key` and `$value` */
     //---------------------------------------------------------------------------------------------------------
@@ -189,7 +215,7 @@
       if (isa.event_listener(receiver)) {
         listener = receiver;
       } else {
-        listener_name = this._listener_name_from_key($key);
+        listener_name = SYMBOLIC._listener_name_from_key($key);
         listener0 = validate.event_listener(receiver[listener_name]);
         listener = async function(...P) {
           return (await listener0.call(receiver, ...P));
@@ -202,29 +228,12 @@
     }
 
     //---------------------------------------------------------------------------------------------------------
-    _text_from_key($key) {
-      if (isa.symbol($key)) {
-        return $key.description;
-      } else {
-        return $key;
-      }
-    }
-
-    _listener_name_from_key($key) {
-      return 'on_' + this._text_from_key($key);
-    }
-
-    _unique_key_symbol_from_key($key) {
-      return Symbol(this._text_from_key($key));
-    }
-
-    //---------------------------------------------------------------------------------------------------------
     _listeners_from_key($key) {
       var R, key_symbol;
       /* TAINT is this necessary and does it what it intends to do? */
       /* use Symbol, WeakMap to allow for garbage collection when `Async_events` instance gets out of scope: */
       if ((key_symbol = this.key_symbols.get($key)) == null) {
-        this.key_symbols.set($key, (key_symbol = this._unique_key_symbol_from_key($key)));
+        this.key_symbols.set($key, (key_symbol = SYMBOLIC._unique_key_symbol_from_key($key)));
       }
       if ((R = this.listeners.get(key_symbol)) == null) {
         this.listeners.set(key_symbol, (R = []));
