@@ -189,8 +189,11 @@
     await throws(T, 'expected 2 arguments, got 3', (function() {
       return AE.on('abc', {}, 9);
     }));
-    await throws(T, 'expected event_listener for object property on_abc, got a undefined', (function() {
+    await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
       return AE.on('abc', {});
+    }));
+    await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
+      return AE.on(s`abc`, {});
     }));
     await throws(T, 'expected 1 or 2 arguments, got 0', (function() {
       return new Datom();
