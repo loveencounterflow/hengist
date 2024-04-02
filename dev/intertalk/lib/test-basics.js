@@ -1,33 +1,23 @@
-(function() {
+(async function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper,
-    indexOf = [].indexOf;
+  var GUY, alert, debug, demo_1, demo_2, echo, help, info, inspect, log, plain, praise, ps, reverse, rpr, s, test, urge, warn, whisper;
 
-  //###########################################################################################################
-  CND = require('cnd');
+  GUY = require('guy');
 
-  rpr = CND.rpr;
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('subsidiary'));
 
-  badge = 'INTERTALK/TESTS';
+  ({rpr, inspect, echo, reverse, log} = GUY.trm);
 
-  debug = CND.get_logger('debug', badge);
-
-  warn = CND.get_logger('warn', badge);
-
-  info = CND.get_logger('info', badge);
-
-  urge = CND.get_logger('urge', badge);
-
-  help = CND.get_logger('help', badge);
-
-  whisper = CND.get_logger('whisper', badge);
-
-  echo = CND.echo.bind(CND);
-
-  //...........................................................................................................
   test = require('guy-test');
 
-  jr = JSON.stringify;
+  //-----------------------------------------------------------------------------------------------------------
+  s = function(name) {
+    return Symbol.for(name);
+  };
+
+  ps = function(name) {
+    return Symbol(name);
+  };
 
   // #-----------------------------------------------------------------------------------------------------------
   // @[ "_XEMITTER: _" ] = ( T, done ) ->
@@ -46,207 +36,200 @@
   //       resolve new_datom key, value
   //   done()
   //   return null
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["INTERTALK: public API shape"] = function(T, done) {
-    var DATOM, Djehuti, XE, isa, k, known_keys, new_datom, select, type_of, types, validate;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    types = DATOM.types;
-    ({isa, validate, type_of} = types);
-    ({Djehuti} = require('../../../apps/intertalk'));
-    //.........................................................................................................
-    XE = new Djehuti();
-    T.ok(isa.asyncfunction(XE.emit));
-    T.ok(isa.asyncfunction(XE.delegate));
-    T.ok(isa.function(XE.contract));
-    T.ok(isa.function(XE.listen_to));
-    T.ok(isa.function(XE.listen_to_all));
-    T.eq(XE.emit.length, 2);
-    T.eq(XE.delegate.length, 2);
-    T.eq(XE.contract.length, 2);
-    T.eq(XE.listen_to.length, 2);
-    T.eq(XE.listen_to_all.length, 1);
-    T.eq(XE.listen_to_unheard.length, 1);
-    known_keys = ['types', 'emit', 'delegate', 'contract', 'listen_to', 'listen_to_all', 'listen_to_unheard'];
-    T.eq((function() {
-      var results;
-      results = [];
-      for (k in XE) {
-        if ((!k.startsWith('_')) && (indexOf.call(known_keys, k) < 0)) {
-          results.push(k);
-        }
+  //===========================================================================================================
+  demo_1 = async function() {
+    var AE, AE_Event, Async_events, Datom, Event_results, INTERTALK, e, isa, isa_optional, receiver, validate, validate_optional;
+    INTERTALK = require('../../../apps/intertalk');
+    ({AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    receiver = {
+      on_square: function(event) {
+        info('^992-4^', event);
+        return event.$value ** 2;
+      },
+      on_cube: function(event) {
+        info('^992-6^', event);
+        return event.$value ** 3;
+      },
+      on_double: function(event) {
+        info('^992-5^', event);
+        return event.$value * 2;
+      },
+      on_any: function(event) {
+        return info('^992-5^', event);
+      },
+      on_cube_symbol: function(event) {
+        info('^992-6^', event);
+        return event.$value ** 3;
       }
-      return results;
-    })(), []);
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["INTERTALK: emit equivalently accepts key, value or datom"] = async function(T, done) {
-    var DATOM, Djehuti, XE, count, error, new_datom, pattern, select;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/intertalk'));
-    //.........................................................................................................
-    count = 0;
-    XE = new Djehuti();
-    XE.listen_to('^mykey', function(d) {
-      count++;
-      return T.eq(d, {
-        $key: '^mykey',
-        $value: 42
-      });
-    });
-    await XE.emit('^mykey', 42);
-    await XE.emit(new_datom('^mykey', 42));
+    };
+    AE.on('square', receiver);
+    AE.on('double', receiver);
+    AE.on('cube', receiver.on_cube);
+    AE.on(s`cube`, receiver.on_cube);
+    AE.on('*', receiver.on_any);
+    // urge '^992-7^', AE
+    // urge '^992-8^', AE.key_symbols[ 'square' ]
+    // urge '^992-9^', AE.listeners
+    // urge '^992-10^', AE.listeners.get AE.key_symbols[ 'square' ]
+    urge('^992-11^', (await AE.emit('square', 11)));
+    urge('^992-12^', (await AE.emit('double', 12)));
+    urge('^992-13^', (await AE.emit('cube', 13)));
+    urge('^992-13^', (await AE.emit(new AE_Event('cube', 14))));
+    urge('^992-13^', (await AE.emit(new AE_Event(s`cube`, 14))));
     try {
-      //.........................................................................................................
-      await XE.emit({
-        $value: 42
-      });
-    } catch (error1) {
-      error = error1;
-      pattern = /expected a text or a datom got a object/;
-      if (pattern.test(error.message)) {
-        T.ok(true);
-      } else {
-        T.fail(`expected error to match ${pattern}, got ${rpr(error.message)}`);
-        throw error;
-      }
+      /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
+      urge('^992-14^', (await AE.emit('double', 3, 4, 5, 6)));
+    } catch (error) {
+      e = error;
+      warn('^992-15^', reverse(e.message));
     }
-    T.ok(error != null);
-    //.........................................................................................................
-    await XE.emit({
-      $key: '^mykey',
-      $value: 42
-    });
-    await XE.emit(new_datom('^notmykey', 42));
-    T.eq(count, 3);
-    done();
+    try {
+      urge('^992-16^', (await AE.emit('foo', 3, [4, 5, 6])));
+    } catch (error) {
+      e = error;
+      warn('^992-17^', reverse(e.message));
+    }
+    urge('^992-18^', (await AE.emit('foo', [3, 4, 5, 6])));
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this["INTERTALK: throws when more than one contractor is added for given event key"] = function(T, done) {
-    var DATOM, Djehuti, XE, new_datom, select;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/intertalk'));
-    XE = new Djehuti();
-    //.........................................................................................................
-    XE.contract('^mykey', function(d) {});
-    XE.contract('^otherkey', function(d) {});
-    T.throws(/already has a primary listener/, (function() {
-      return XE.contract('^otherkey', function(d) {});
+  //===========================================================================================================
+  demo_2 = async function() {
+    var A, AE, AE_Event, Async_events, B, Datom, Event_results, INTERTALK, e, isa, isa_optional, validate, validate_optional;
+    INTERTALK = require('../../../apps/intertalk');
+    ({AE, Async_events, AE_Event, Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    A = class A {};
+    B = class B extends Object {};
+    urge('^992-19^', A);
+    urge('^992-20^', A.freeze);
+    urge('^992-21^', new A());
+    urge('^992-22^', B);
+    urge('^992-23^', new B());
+    urge('^992-24^', isa.object(A));
+    urge('^992-25^', isa.object(B));
+    urge('^992-26^', isa.object(new A()));
+    urge('^992-27^', isa.object(new B()));
+    try {
+      new Datom();
+    } catch (error) {
+      e = error;
+      warn('^992-28^', reverse(e.message));
+    }
+    try {
+      new Datom(5);
+    } catch (error) {
+      e = error;
+      warn('^992-29^', reverse(e.message));
+    }
+    try {
+      new Datom(null);
+    } catch (error) {
+      e = error;
+      warn('^992-30^', reverse(e.message));
+    }
+    try {
+      new Datom({});
+    } catch (error) {
+      e = error;
+      warn('^992-31^', reverse(e.message));
+    }
+    urge('^992-32^', new Datom('foo'));
+    urge('^992-33^', new Datom('foo', null));
+    urge('^992-34^', new Datom('foo', void 0));
+    urge('^992-35^', new Datom('foo', 56));
+    urge('^992-36^', new Datom('foo', {
+      bar: 56
     }));
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["INTERTALK: can listen to events that have no specific listener"] = async function(T, done) {
-    var DATOM, Djehuti, XE, keys, new_datom, select;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/intertalk'));
-    XE = new Djehuti();
+    urge('^992-37^', new Datom('foo', {
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-38^', new Datom(s`foo`, {
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-39^', new Datom({
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-40^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: false
+    }));
+    urge('^992-41^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: true
+    }));
+    urge('^992-42^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: null
+    }));
+    urge('^992-43^', new Datom('something', {
+      $freeze: false
+    }));
+    urge('^992-44^', new Datom('something', {
+      $freeze: true
+    }));
+    urge('^992-45^', new Datom('something', {
+      $freeze: null
+    }));
+    (() => {      //.........................................................................................................
+      /* must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: */
+      var d;
+      d = new Datom('o', {
+        $freeze: false
+      });
+      d.p = 7;
+      urge('^992-46^', d);
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      /* passing in an existing datom (or event) `d` into `new Datom d` (or `new AE_Event d`) results in a copy
+       of `d`: */
+      var d;
+      d = new Datom('o', {
+        $freeze: false
+      });
+      e = new Datom(d);
+      urge('^992-47^', d, e, d === e);
+      return null;
+    })();
     //.........................................................................................................
-    keys = {
-      listen: [],
-      contract: [],
-      all: [],
-      unheard: []
-    };
-    XE.listen_to('^mykey', function(d) {
-      return keys.listen.push(d.$key);
-    });
-    XE.contract('^otherkey', function(d) {
-      keys.contract.push(d.$key);
-      return "some value";
-    });
-    XE.listen_to_all(function(key, d) {
-      return keys.all.push(d.$key);
-    });
-    XE.listen_to_unheard(function(key, d) {
-      return keys.unheard.push(d.$key);
-    });
-    await XE.emit('^mykey');
-    await XE.emit('^otherkey');
-    await XE.emit('^thirdkey');
-    await XE.delegate('^otherkey');
-    // debug keys
-    T.eq(keys, {
-      listen: ['^mykey'],
-      contract: ['^otherkey', '^otherkey'],
-      all: ['^mykey', '^otherkey', '^thirdkey', '^otherkey'],
-      unheard: ['^thirdkey']
-    });
-    done();
-    return null;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this["INTERTALK: delegation"] = async function(T, done) {
-    var DATOM, Djehuti, XE, keys, new_datom, select;
-    ({DATOM} = require('../../../apps/datom'));
-    ({new_datom, select} = DATOM);
-    ({Djehuti} = require('../../../apps/intertalk'));
-    XE = new Djehuti();
+    /* events are just `Datom`s: */
+    urge('^992-48^', new AE_Event(s`foo`, {
+      bar: 56
+    }));
+    await (async() => {      //.........................................................................................................
+      /* calls to `emit` are just calls to `new AE_Event()`: */
+      AE.on('myevent', function(event) {
+        info('^992-49^', event);
+        return event.n ** 2;
+      });
+      help('^992-50^', (await AE.emit('myevent', {
+        n: 16
+      })));
+      return null;
+    })();
     //.........................................................................................................
-    keys = {
-      listen: [],
-      all: [],
-      contract: []
-    };
-    XE.listen_to('^log', function(d) {
-      keys.listen.push(d.$key);
-      return urge(d);
-    });
-    XE.contract('^add', function(d) {
-      var ref, ref1;
-      keys.contract.push(d.$key);
-      return ((ref = d != null ? d.a : void 0) != null ? ref : 0) + ((ref1 = d != null ? d.b : void 0) != null ? ref1 : 0);
-    });
-    XE.contract('^multiply', function(d) {
-      var ref, ref1;
-      keys.contract.push(d.$key);
-      return ((ref = d != null ? d.a : void 0) != null ? ref : 1) * ((ref1 = d != null ? d.b : void 0) != null ? ref1 : 1);
-    });
-    XE.listen_to_all(function(key, d) {
-      return keys.all.push(d.$key);
-    });
-    await XE.emit('^log', "message");
-    T.eq((await XE.delegate('^add', {
-      a: 123,
-      b: 456
-    })), 579);
-    T.eq((await XE.delegate('^multiply', {
-      a: 123,
-      b: 456
-    })), 56088);
-    T.eq(keys, {
-      listen: ['^log'],
-      all: ['^log', '^add', '^multiply'],
-      contract: ['^add', '^multiply']
-    });
-    done();
     return null;
   };
 
-  //###########################################################################################################
-  if (require.main === module) {
-    (() => {
-      return test(this);
+  //===========================================================================================================
+  if (module === require.main) {
+    await (async() => {
+      await demo_1();
+      return (await demo_2());
     })();
   }
 
-  // test @[ "public API shape" ]
-// test @[ "INTERTALK: can listen to events that have no specific listener" ]
-// test @[ "INTERTALK: delegation" ]
-// test @[ "can listen to events that have no specific listener 2" ]
-// test @[ "emit equivalently accepts key, value or datom" ]
+  // await demo_3()
+// urge '^992-51^', await Promise.all (
+//   # new Promise ( ( resolve, reject ) -> resolve i ) for i in [ 1 .. 10 ]
+//   ( ( ( count ) -> await count ) i + 1 ) for i in [ 1 .. 10 ]
+//   )
 
 }).call(this);
 

@@ -1,4 +1,5 @@
 (async function() {
+  /* moved to intertalk */
   'use strict';
   var AE, Async_events, Datom, Event, Event_results, GUY, SYMBOLIC, alert, debug, demo_1, demo_2, echo, help, info, inspect, isa, isa_optional, log, plain, praise, ps, resolved_promise, reverse, rpr, s, urge, validate, validate_optional, warn, whisper;
 
