@@ -488,6 +488,9 @@ dependencies:
   validate-npm-package-name:
     specifier: ^3.0.0
     version: 3.0.0
+  weak-map:
+    specifier: ^1.0.8
+    version: 1.0.8
   xql:
     specifier: ^1.4.12
     version: 1.4.12
@@ -6614,6 +6617,10 @@ packages:
     resolution: {integrity: sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=}
     dependencies:
       defaults: 1.0.3
+    dev: false
+
+  /weak-map@1.0.8:
+    resolution: {integrity: sha512-lNR9aAefbGPpHO7AEnY0hCFjz1eTkWCXYvkTRrTHs9qv8zJp+SkVYpzfLIFXQQiG3tVvbNFQgVg2bQS8YGgxyw==}
     dev: false
 
   /web-streams-polyfill@3.2.1:
