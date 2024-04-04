@@ -70,15 +70,15 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @interface = ( T, done ) ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
-  T?.eq ( isa.function      AE.on       ), true
-  T?.eq ( isa.function      AE.on_any   ), false
-  T?.eq ( isa.asyncfunction AE.emit     ), true
-  T?.eq ( AE.emit 'what' )?.constructor?.name, 'Promise'
-  T?.ok ( await AE.emit 'what' ) instanceof AE_Event_results
-  T?.eq ( isa.function      AE.on 'foo', ( ( event ) -> )      ), true
+  T?.eq ( isa.function      IT.on       ), true
+  T?.eq ( isa.function      IT.on_any   ), false
+  T?.eq ( isa.asyncfunction IT.emit     ), true
+  T?.eq ( IT.emit 'what' )?.constructor?.name, 'Promise'
+  T?.ok ( await IT.emit 'what' ) instanceof Results
+  T?.eq ( isa.function      IT.on 'foo', ( ( note ) -> )      ), true
   #.........................................................................................................
   done?()
 
@@ -108,12 +108,12 @@ try_and_show = ( T, f ) ->
       return null
     #.......................................................................................................
     do =>
-      ### make sure INTERTALK works in absence of WeakMap ###
+      ### make sure INTERTALK_LIB works in absence of WeakMap ###
       purge_require_cache_entry_for_intertalk()
-      INTERTALK = require '../../../apps/intertalk'
-      { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
-      debug '^423-4^', AE.listeners
-      T?.ok AE.listeners instanceof Map
+      INTERTALK_LIB = require '../../../apps/intertalk'
+      { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+      debug '^423-4^', IT.listeners
+      T?.ok IT.listeners instanceof Map
       return null
     #.......................................................................................................
   finally
@@ -126,36 +126,36 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @event_emitting_1 = ( T, done ) ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
-  AE.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
-  AE.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
+  IT.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
+  IT.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
   #.........................................................................................................
   ### NOTE call to `as_object()` not strictly necessary as the underlying `equals()` method does work with
-  the custom types we're using (`AE_Event_results` and `AE_Event`), but that's a flaw in the algorithm so
+  the custom types we're using (`Results` and `Note`), but that's a flaw in the algorithm so
   let's try to write it the correct way: ###
-  T?.eq ( as_object await AE.emit 'sum', { a: 100, b: 200, } ), { '$key': 'event-results', event: { '$key': 'sum', a: 100, b: 200 }, results: [ 300 ] }
-  T?.eq ( as_object await AE.emit 'mul', { a: 100, b: 200, } ), { '$key': 'event-results', event: { '$key': 'mul', a: 100, b: 200 }, results: [ 20000 ] }
+  T?.eq ( as_object await IT.emit 'sum', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'sum', a: 100, b: 200 }, results: [ 300 ] }
+  T?.eq ( as_object await IT.emit 'mul', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'mul', a: 100, b: 200 }, results: [ 20000 ] }
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 @type_validation = ( T, done ) ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
-  await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await AE.emit 'double', 3, 4, 5, 6   )
-  await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await AE.emit 'foo', 3, [ 4, 5, 6, ] )
-  await throws T, 'expected 2 arguments, got 0',                ( -> AE.on() )
-  await throws T, 'expected 2 arguments, got 1',                ( -> AE.on 4 )
-  await throws T, 'expected a event_key, got a number',         ( -> AE.on 4, 5 )
-  await throws T, 'expected a event_key, got a number',         ( -> AE.on 4, -> )
-  await throws T, 'expected 2 arguments, got 1',                ( -> AE.on s'abc' )
-  await throws T, 'expected 2 arguments, got 3',                ( -> AE.on s'abc', ( -> ), 9 )
-  await throws T, 'expected 2 arguments, got 3',                ( -> AE.on 'abc', {}, 9 )
-  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> AE.on 'abc', {} )
-  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> AE.on s'abc', {} )
+  await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await IT.emit 'double', 3, 4, 5, 6   )
+  await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await IT.emit 'foo', 3, [ 4, 5, 6, ] )
+  await throws T, 'expected 2 arguments, got 0',                ( -> IT.on() )
+  await throws T, 'expected 2 arguments, got 1',                ( -> IT.on 4 )
+  await throws T, 'expected a event_key, got a number',         ( -> IT.on 4, 5 )
+  await throws T, 'expected a event_key, got a number',         ( -> IT.on 4, -> )
+  await throws T, 'expected 2 arguments, got 1',                ( -> IT.on s'abc' )
+  await throws T, 'expected 2 arguments, got 3',                ( -> IT.on s'abc', ( -> ), 9 )
+  await throws T, 'expected 2 arguments, got 3',                ( -> IT.on 'abc', {}, 9 )
+  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on 'abc', {} )
+  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on s'abc', {} )
   await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new Datom() )
   await throws T, 'expected a event_key, got a number',         ( -> new Datom 42 )
   await throws T, 'expected a event_key, got a object',         ( -> new Datom null )
@@ -165,75 +165,75 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @event_emitting_3 = ( T, done ) ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
   receiver =
-    on_square:      ( event ) -> info '^992-4^', event; event.$value ** 2
-    on_cube:        ( event ) -> info '^992-5^', event; event.$value ** 3
-    on_double:      ( event ) -> info '^992-6^', event; event.$value *  2
-    on_any:         ( event ) -> info '^992-7^', event
-    on_cube_symbol: ( event ) -> info '^992-8^', event; event.$value ** 3
+    on_square:      ( note ) -> info '^992-4^', note; note.$value ** 2
+    on_cube:        ( note ) -> info '^992-5^', note; note.$value ** 3
+    on_double:      ( note ) -> info '^992-6^', note; note.$value *  2
+    on_any:         ( note ) -> info '^992-7^', note
+    on_cube_symbol: ( note ) -> info '^992-8^', note; note.$value ** 3
   #.........................................................................................................
-  AE.on 'square',   receiver
-  AE.on 'double',   receiver
-  AE.on 'cube',     receiver.on_cube
-  AE.on s'cube',    receiver.on_cube
-  # AE.on_any,        receiver.on_any
+  IT.on 'square',   receiver
+  IT.on 'double',   receiver
+  IT.on 'cube',     receiver.on_cube
+  IT.on s'cube',    receiver.on_cube
+  # IT.on_any,        receiver.on_any
   #.........................................................................................................
-  # urge '^992-9^', AE
-  # urge '^992-10^', AE.key_symbols[ 'square' ]
-  # urge '^992-11^', AE.listeners
-  # urge '^992-12^', AE.listeners.get AE.key_symbols[ 'square' ]
+  # urge '^992-9^', IT
+  # urge '^992-10^', IT.key_symbols[ 'square' ]
+  # urge '^992-11^', IT.listeners
+  # urge '^992-12^', IT.listeners.get IT.key_symbols[ 'square' ]
   f = ->
-    urge '^992-13^', await AE.emit            'square', 11
-    urge '^992-14^', await AE.emit            'double', 12
-    urge '^992-15^', await AE.emit            'cube',   13
-    urge '^992-16^', await AE.emit new AE_Event  'cube',   14
-    urge '^992-17^', await AE.emit new AE_Event  s'cube',  14
+    urge '^992-13^', await IT.emit            'square', 11
+    urge '^992-14^', await IT.emit            'double', 12
+    urge '^992-15^', await IT.emit            'cube',   13
+    urge '^992-16^', await IT.emit new Note  'cube',   14
+    urge '^992-17^', await IT.emit new Note  s'cube',  14
     ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-    try ( urge '^992-18^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-19^', reverse e.message
-    try ( urge '^992-20^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-21^', reverse e.message
-    urge '^992-22^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
+    try ( urge '^992-18^', await IT.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-19^', reverse e.message
+    try ( urge '^992-20^', await IT.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-21^', reverse e.message
+    urge '^992-22^', await IT.emit 'foo', [ 3, 4, 5, 6, ]
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 demo_1 = ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
   receiver =
-    on_square:      ( event ) -> info '^992-23^', event; event.$value ** 2
-    on_cube:        ( event ) -> info '^992-24^', event; event.$value ** 3
-    on_double:      ( event ) -> info '^992-25^', event; event.$value *  2
-    on_any:         ( event ) -> info '^992-26^', event
-    on_cube_symbol: ( event ) -> info '^992-27^', event; event.$value ** 3
-  AE.on 'square',   receiver
-  AE.on 'double',   receiver
-  AE.on 'cube',     receiver.on_cube
-  AE.on s'cube',    receiver.on_cube
-  AE.on '*',        receiver.on_any
-  # urge '^992-28^', AE
-  # urge '^992-29^', AE.key_symbols[ 'square' ]
-  # urge '^992-30^', AE.listeners
-  # urge '^992-31^', AE.listeners.get AE.key_symbols[ 'square' ]
-  urge '^992-32^', await AE.emit            'square', 11
-  urge '^992-33^', await AE.emit            'double', 12
-  urge '^992-34^', await AE.emit            'cube',   13
-  urge '^992-35^', await AE.emit new AE_Event  'cube',   14
-  urge '^992-36^', await AE.emit new AE_Event  s'cube',  14
+    on_square:      ( note ) -> info '^992-23^', note; note.$value ** 2
+    on_cube:        ( note ) -> info '^992-24^', note; note.$value ** 3
+    on_double:      ( note ) -> info '^992-25^', note; note.$value *  2
+    on_any:         ( note ) -> info '^992-26^', note
+    on_cube_symbol: ( note ) -> info '^992-27^', note; note.$value ** 3
+  IT.on 'square',   receiver
+  IT.on 'double',   receiver
+  IT.on 'cube',     receiver.on_cube
+  IT.on s'cube',    receiver.on_cube
+  IT.on '*',        receiver.on_any
+  # urge '^992-28^', IT
+  # urge '^992-29^', IT.key_symbols[ 'square' ]
+  # urge '^992-30^', IT.listeners
+  # urge '^992-31^', IT.listeners.get IT.key_symbols[ 'square' ]
+  urge '^992-32^', await IT.emit            'square', 11
+  urge '^992-33^', await IT.emit            'double', 12
+  urge '^992-34^', await IT.emit            'cube',   13
+  urge '^992-35^', await IT.emit new Note  'cube',   14
+  urge '^992-36^', await IT.emit new Note  s'cube',  14
   ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-  try ( urge '^992-37^', await AE.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
-  try ( urge '^992-39^', await AE.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
-  urge '^992-41^', await AE.emit 'foo', [ 3, 4, 5, 6, ]
+  try ( urge '^992-37^', await IT.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
+  try ( urge '^992-39^', await IT.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
+  urge '^992-41^', await IT.emit 'foo', [ 3, 4, 5, 6, ]
   return null
 
 #===========================================================================================================
 demo_2 = ->
-  INTERTALK = require '../../../apps/intertalk'
+  INTERTALK_LIB = require '../../../apps/intertalk'
   #.........................................................................................................
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   class A
   class B extends Object
   urge '^992-42^', A
@@ -271,7 +271,7 @@ demo_2 = ->
     urge '^992-69^', d
     return null
   #.........................................................................................................
-  ### passing in an existing datom (or event) `d` into `new Datom d` (or `new AE_Event d`) results in a copy
+  ### passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
   of `d`: ###
   do =>
     d = new Datom 'o', { $freeze: false, }
@@ -280,22 +280,22 @@ demo_2 = ->
     return null
   #.........................................................................................................
   ### events are just `Datom`s: ###
-  urge '^992-71^', new AE_Event s'foo', { bar: 56, }
+  urge '^992-71^', new Note s'foo', { bar: 56, }
   #.........................................................................................................
-  ### calls to `emit` are just calls to `new AE_Event()`: ###
+  ### calls to `emit` are just calls to `new Note()`: ###
   await do =>
-    AE.on 'myevent', ( event ) -> info '^992-72^', event; event.n ** 2
-    help '^992-73^', await AE.emit 'myevent', { n: 16, }
+    IT.on 'myevent', ( note ) -> info '^992-72^', note; note.n ** 2
+    help '^992-73^', await IT.emit 'myevent', { n: 16, }
     return null
   #.........................................................................................................
   return null
 
 #===========================================================================================================
 demo_3 = ->
-  INTERTALK = require '../../../apps/intertalk'
-  { AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK
+  INTERTALK_LIB = require '../../../apps/intertalk'
+  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   #.........................................................................................................
-  AE.on 'abc', {}
+  IT.on 'abc', {}
   #.........................................................................................................
   return null
 
