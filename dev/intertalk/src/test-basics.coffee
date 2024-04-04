@@ -11,7 +11,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'subsidiary'
+  whisper }               = GUY.trm.get_loggers 'intertalk'
 { rpr
   inspect
   echo
