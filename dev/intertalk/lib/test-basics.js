@@ -4,7 +4,7 @@
 
   GUY = require('guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('subsidiary'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('intertalk'));
 
   ({rpr, inspect, echo, reverse, log} = GUY.trm);
 
@@ -93,27 +93,27 @@
 
   //===========================================================================================================
   this.interface = async function(T, done) {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, ref, ref1, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, ref, ref1, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
     if (T != null) {
-      T.eq(isa.function(AE.on), true);
+      T.eq(isa.function(IT.on), true);
     }
     if (T != null) {
-      T.eq(isa.function(AE.on_any), false);
+      T.eq(isa.function(IT.on_any), false);
     }
     if (T != null) {
-      T.eq(isa.asyncfunction(AE.emit), true);
+      T.eq(isa.asyncfunction(IT.emit), true);
     }
     if (T != null) {
-      T.eq((ref = AE.emit('what')) != null ? (ref1 = ref.constructor) != null ? ref1.name : void 0 : void 0, 'Promise');
+      T.eq((ref = IT.emit('what')) != null ? (ref1 = ref.constructor) != null ? ref1.name : void 0 : void 0, 'Promise');
     }
     if (T != null) {
-      T.ok(((await AE.emit('what'))) instanceof AE_Event_results);
+      T.ok(((await IT.emit('what'))) instanceof Results);
     }
     if (T != null) {
-      T.eq(isa.function(AE.on('foo', (function(event) {}))), true);
+      T.eq(isa.function(IT.on('foo', (function(note) {}))), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -169,14 +169,14 @@
         return null;
       })();
       (() => {        //.......................................................................................................
-        var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, validate, validate_optional;
-        /* make sure INTERTALK works in absence of WeakMap */
+        var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
+        /* make sure INTERTALK_LIB works in absence of WeakMap */
         purge_require_cache_entry_for_intertalk();
-        INTERTALK = require('../../../apps/intertalk');
-        ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
-        debug('^423-4^', AE.listeners);
+        INTERTALK_LIB = require('../../../apps/intertalk');
+        ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+        debug('^423-4^', IT.listeners);
         if (T != null) {
-          T.ok(AE.listeners instanceof Map);
+          T.ok(IT.listeners instanceof Map);
         }
         return null;
       })();
@@ -192,18 +192,18 @@
 
   //===========================================================================================================
   this.event_emitting_1 = async function(T, done) {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, on_mul, on_sum, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, on_mul, on_sum, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
-    AE.on('sum', on_sum = function(e) {
+    IT.on('sum', on_sum = function(e) {
       return new Promise(function(resolve) {
         return setTimeout((function() {
           return resolve(e.a + e.b);
         }), 100);
       });
     });
-    AE.on('mul', on_mul = function(e) {
+    IT.on('mul', on_mul = function(e) {
       return new Promise(function(resolve) {
         return setTimeout((function() {
           return resolve(e.a * e.b);
@@ -212,15 +212,15 @@
     });
     //.........................................................................................................
     /* NOTE call to `as_object()` not strictly necessary as the underlying `equals()` method does work with
-     the custom types we're using (`AE_Event_results` and `AE_Event`), but that's a flaw in the algorithm so
+     the custom types we're using (`Results` and `Note`), but that's a flaw in the algorithm so
      let's try to write it the correct way: */
     if (T != null) {
-      T.eq(as_object((await AE.emit('sum', {
+      T.eq(as_object((await IT.emit('sum', {
         a: 100,
         b: 200
       }))), {
-        '$key': 'event-results',
-        event: {
+        '$key': '$results',
+        note: {
           '$key': 'sum',
           a: 100,
           b: 200
@@ -229,12 +229,12 @@
       });
     }
     if (T != null) {
-      T.eq(as_object((await AE.emit('mul', {
+      T.eq(as_object((await IT.emit('mul', {
         a: 100,
         b: 200
       }))), {
-        '$key': 'event-results',
-        event: {
+        '$key': '$results',
+        note: {
           '$key': 'mul',
           a: 100,
           b: 200
@@ -247,42 +247,42 @@
 
   //===========================================================================================================
   this.type_validation = async function(T, done) {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
     await throws(T, 'expected 1 or 2 arguments, got 5', (async function() {
-      return (await AE.emit('double', 3, 4, 5, 6));
+      return (await IT.emit('double', 3, 4, 5, 6));
     }));
     await throws(T, 'expected 1 or 2 arguments, got 3', (async function() {
-      return (await AE.emit('foo', 3, [4, 5, 6]));
+      return (await IT.emit('foo', 3, [4, 5, 6]));
     }));
     await throws(T, 'expected 2 arguments, got 0', (function() {
-      return AE.on();
+      return IT.on();
     }));
     await throws(T, 'expected 2 arguments, got 1', (function() {
-      return AE.on(4);
+      return IT.on(4);
     }));
     await throws(T, 'expected a event_key, got a number', (function() {
-      return AE.on(4, 5);
+      return IT.on(4, 5);
     }));
     await throws(T, 'expected a event_key, got a number', (function() {
-      return AE.on(4, function() {});
+      return IT.on(4, function() {});
     }));
     await throws(T, 'expected 2 arguments, got 1', (function() {
-      return AE.on(s`abc`);
+      return IT.on(s`abc`);
     }));
     await throws(T, 'expected 2 arguments, got 3', (function() {
-      return AE.on(s`abc`, (function() {}), 9);
+      return IT.on(s`abc`, (function() {}), 9);
     }));
     await throws(T, 'expected 2 arguments, got 3', (function() {
-      return AE.on('abc', {}, 9);
+      return IT.on('abc', {}, 9);
     }));
     await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
-      return AE.on('abc', {});
+      return IT.on('abc', {});
     }));
     await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
-      return AE.on(s`abc`, {});
+      return IT.on(s`abc`, {});
     }));
     await throws(T, 'expected 1 or 2 arguments, got 0', (function() {
       return new Datom();
@@ -301,131 +301,131 @@
 
   //===========================================================================================================
   this.event_emitting_3 = function(T, done) {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, f, isa, isa_optional, receiver, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, f, isa, isa_optional, receiver, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
     receiver = {
-      on_square: function(event) {
-        info('^992-4^', event);
-        return event.$value ** 2;
+      on_square: function(note) {
+        info('^992-4^', note);
+        return note.$value ** 2;
       },
-      on_cube: function(event) {
-        info('^992-5^', event);
-        return event.$value ** 3;
+      on_cube: function(note) {
+        info('^992-5^', note);
+        return note.$value ** 3;
       },
-      on_double: function(event) {
-        info('^992-6^', event);
-        return event.$value * 2;
+      on_double: function(note) {
+        info('^992-6^', note);
+        return note.$value * 2;
       },
-      on_any: function(event) {
-        return info('^992-7^', event);
+      on_any: function(note) {
+        return info('^992-7^', note);
       },
-      on_cube_symbol: function(event) {
-        info('^992-8^', event);
-        return event.$value ** 3;
+      on_cube_symbol: function(note) {
+        info('^992-8^', note);
+        return note.$value ** 3;
       }
     };
     //.........................................................................................................
-    AE.on('square', receiver);
-    AE.on('double', receiver);
-    AE.on('cube', receiver.on_cube);
-    AE.on(s`cube`, receiver.on_cube);
-    // AE.on_any,        receiver.on_any
+    IT.on('square', receiver);
+    IT.on('double', receiver);
+    IT.on('cube', receiver.on_cube);
+    IT.on(s`cube`, receiver.on_cube);
+    // IT.on_any,        receiver.on_any
     //.........................................................................................................
-    // urge '^992-9^', AE
-    // urge '^992-10^', AE.key_symbols[ 'square' ]
-    // urge '^992-11^', AE.listeners
-    // urge '^992-12^', AE.listeners.get AE.key_symbols[ 'square' ]
+    // urge '^992-9^', IT
+    // urge '^992-10^', IT.key_symbols[ 'square' ]
+    // urge '^992-11^', IT.listeners
+    // urge '^992-12^', IT.listeners.get IT.key_symbols[ 'square' ]
     f = async function() {
       var e;
-      urge('^992-13^', (await AE.emit('square', 11)));
-      urge('^992-14^', (await AE.emit('double', 12)));
-      urge('^992-15^', (await AE.emit('cube', 13)));
-      urge('^992-16^', (await AE.emit(new AE_Event('cube', 14))));
-      urge('^992-17^', (await AE.emit(new AE_Event(s`cube`, 14))));
+      urge('^992-13^', (await IT.emit('square', 11)));
+      urge('^992-14^', (await IT.emit('double', 12)));
+      urge('^992-15^', (await IT.emit('cube', 13)));
+      urge('^992-16^', (await IT.emit(new Note('cube', 14))));
+      urge('^992-17^', (await IT.emit(new Note(s`cube`, 14))));
       try {
         /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-        urge('^992-18^', (await AE.emit('double', 3, 4, 5, 6)));
+        urge('^992-18^', (await IT.emit('double', 3, 4, 5, 6)));
       } catch (error1) {
         e = error1;
         warn('^992-19^', reverse(e.message));
       }
       try {
-        urge('^992-20^', (await AE.emit('foo', 3, [4, 5, 6])));
+        urge('^992-20^', (await IT.emit('foo', 3, [4, 5, 6])));
       } catch (error1) {
         e = error1;
         warn('^992-21^', reverse(e.message));
       }
-      return urge('^992-22^', (await AE.emit('foo', [3, 4, 5, 6])));
+      return urge('^992-22^', (await IT.emit('foo', [3, 4, 5, 6])));
     };
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
   demo_1 = async function() {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, e, isa, isa_optional, receiver, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, e, isa, isa_optional, receiver, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
     receiver = {
-      on_square: function(event) {
-        info('^992-23^', event);
-        return event.$value ** 2;
+      on_square: function(note) {
+        info('^992-23^', note);
+        return note.$value ** 2;
       },
-      on_cube: function(event) {
-        info('^992-24^', event);
-        return event.$value ** 3;
+      on_cube: function(note) {
+        info('^992-24^', note);
+        return note.$value ** 3;
       },
-      on_double: function(event) {
-        info('^992-25^', event);
-        return event.$value * 2;
+      on_double: function(note) {
+        info('^992-25^', note);
+        return note.$value * 2;
       },
-      on_any: function(event) {
-        return info('^992-26^', event);
+      on_any: function(note) {
+        return info('^992-26^', note);
       },
-      on_cube_symbol: function(event) {
-        info('^992-27^', event);
-        return event.$value ** 3;
+      on_cube_symbol: function(note) {
+        info('^992-27^', note);
+        return note.$value ** 3;
       }
     };
-    AE.on('square', receiver);
-    AE.on('double', receiver);
-    AE.on('cube', receiver.on_cube);
-    AE.on(s`cube`, receiver.on_cube);
-    AE.on('*', receiver.on_any);
-    // urge '^992-28^', AE
-    // urge '^992-29^', AE.key_symbols[ 'square' ]
-    // urge '^992-30^', AE.listeners
-    // urge '^992-31^', AE.listeners.get AE.key_symbols[ 'square' ]
-    urge('^992-32^', (await AE.emit('square', 11)));
-    urge('^992-33^', (await AE.emit('double', 12)));
-    urge('^992-34^', (await AE.emit('cube', 13)));
-    urge('^992-35^', (await AE.emit(new AE_Event('cube', 14))));
-    urge('^992-36^', (await AE.emit(new AE_Event(s`cube`, 14))));
+    IT.on('square', receiver);
+    IT.on('double', receiver);
+    IT.on('cube', receiver.on_cube);
+    IT.on(s`cube`, receiver.on_cube);
+    IT.on('*', receiver.on_any);
+    // urge '^992-28^', IT
+    // urge '^992-29^', IT.key_symbols[ 'square' ]
+    // urge '^992-30^', IT.listeners
+    // urge '^992-31^', IT.listeners.get IT.key_symbols[ 'square' ]
+    urge('^992-32^', (await IT.emit('square', 11)));
+    urge('^992-33^', (await IT.emit('double', 12)));
+    urge('^992-34^', (await IT.emit('cube', 13)));
+    urge('^992-35^', (await IT.emit(new Note('cube', 14))));
+    urge('^992-36^', (await IT.emit(new Note(s`cube`, 14))));
     try {
       /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-      urge('^992-37^', (await AE.emit('double', 3, 4, 5, 6)));
+      urge('^992-37^', (await IT.emit('double', 3, 4, 5, 6)));
     } catch (error1) {
       e = error1;
       warn('^992-38^', reverse(e.message));
     }
     try {
-      urge('^992-39^', (await AE.emit('foo', 3, [4, 5, 6])));
+      urge('^992-39^', (await IT.emit('foo', 3, [4, 5, 6])));
     } catch (error1) {
       e = error1;
       warn('^992-40^', reverse(e.message));
     }
-    urge('^992-41^', (await AE.emit('foo', [3, 4, 5, 6])));
+    urge('^992-41^', (await IT.emit('foo', [3, 4, 5, 6])));
     return null;
   };
 
   //===========================================================================================================
   demo_2 = async function() {
-    var A, AE, AE_Event, AE_Event_results, Async_events, B, Datom, INTERTALK, e, isa, isa_optional, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
+    var A, B, Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, e, isa, isa_optional, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
     //.........................................................................................................
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     A = class A {};
     B = class B extends Object {};
     urge('^992-42^', A);
@@ -515,7 +515,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      /* passing in an existing datom (or event) `d` into `new Datom d` (or `new AE_Event d`) results in a copy
+      /* passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
        of `d`: */
       var d;
       d = new Datom('o', {
@@ -527,16 +527,16 @@
     })();
     //.........................................................................................................
     /* events are just `Datom`s: */
-    urge('^992-71^', new AE_Event(s`foo`, {
+    urge('^992-71^', new Note(s`foo`, {
       bar: 56
     }));
     await (async() => {      //.........................................................................................................
-      /* calls to `emit` are just calls to `new AE_Event()`: */
-      AE.on('myevent', function(event) {
-        info('^992-72^', event);
-        return event.n ** 2;
+      /* calls to `emit` are just calls to `new Note()`: */
+      IT.on('myevent', function(note) {
+        info('^992-72^', note);
+        return note.n ** 2;
       });
-      help('^992-73^', (await AE.emit('myevent', {
+      help('^992-73^', (await IT.emit('myevent', {
         n: 16
       })));
       return null;
@@ -547,11 +547,11 @@
 
   //===========================================================================================================
   demo_3 = function() {
-    var AE, AE_Event, AE_Event_results, Async_events, Datom, INTERTALK, isa, isa_optional, validate, validate_optional;
-    INTERTALK = require('../../../apps/intertalk');
-    ({AE, Async_events, AE_Event, AE_Event_results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK);
+    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
+    INTERTALK_LIB = require('../../../apps/intertalk');
+    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     //.........................................................................................................
-    AE.on('abc', {});
+    IT.on('abc', {});
     //.........................................................................................................
     return null;
   };
