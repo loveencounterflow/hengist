@@ -70,15 +70,14 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @interface = ( T, done ) ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
-  T?.eq ( isa.function      IT.on       ), true
-  T?.eq ( isa.function      IT.on_any   ), false
-  T?.eq ( isa.asyncfunction IT.emit     ), true
+  T?.eq ( IT._extras.isa.function      IT.on       ), true
+  T?.eq ( IT._extras.isa.function      IT.on_any   ), false
+  T?.eq ( IT._extras.isa.asyncfunction IT.emit     ), true
   T?.eq ( IT.emit 'what' )?.constructor?.name, 'Promise'
-  T?.ok ( await IT.emit 'what' ) instanceof Results
-  T?.eq ( isa.function      IT.on 'foo', ( ( note ) -> )      ), true
+  T?.ok ( await IT.emit 'what' ) instanceof IT.Results
+  T?.eq ( IT._extras.isa.function IT.on 'foo', ( ( note ) -> )      ), true
   #.........................................................................................................
   done?()
 
@@ -110,8 +109,7 @@ try_and_show = ( T, f ) ->
     do =>
       ### make sure INTERTALK_LIB works in absence of WeakMap ###
       purge_require_cache_entry_for_intertalk()
-      INTERTALK_LIB = require '../../../apps/intertalk'
-      { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+      IT = require '../../../apps/intertalk'
       debug '^423-4^', IT.listeners
       T?.ok IT.listeners instanceof Map
       return null
@@ -126,8 +124,7 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @event_emitting_1 = ( T, done ) ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
   IT.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
   IT.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
@@ -142,8 +139,7 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @type_validation = ( T, done ) ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
   await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await IT.emit 'double', 3, 4, 5, 6   )
   await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await IT.emit 'foo', 3, [ 4, 5, 6, ] )
@@ -156,17 +152,16 @@ try_and_show = ( T, f ) ->
   await throws T, 'expected 2 arguments, got 3',                ( -> IT.on 'abc', {}, 9 )
   await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on 'abc', {} )
   await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on s'abc', {} )
-  await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new Datom() )
-  await throws T, 'expected a event_key, got a number',         ( -> new Datom 42 )
-  await throws T, 'expected a event_key, got a object',         ( -> new Datom null )
-  await throws T, 'expected a event_key, got a undefined',      ( -> new Datom undefined )
+  await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new IT._extras.Datom() )
+  await throws T, 'expected a event_key, got a number',         ( -> new IT._extras.Datom 42 )
+  await throws T, 'expected a event_key, got a object',         ( -> new IT._extras.Datom null )
+  await throws T, 'expected a event_key, got a undefined',      ( -> new IT._extras.Datom undefined )
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 @event_emitting_3 = ( T, done ) ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
   receiver =
     on_square:      ( note ) -> info '^992-4^', note; note.$value ** 2
@@ -200,8 +195,7 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 demo_1 = ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
   receiver =
     on_square:      ( note ) -> info '^992-23^', note; note.$value ** 2
@@ -231,9 +225,8 @@ demo_1 = ->
 
 #===========================================================================================================
 demo_2 = ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
   class A
   class B extends Object
   urge '^992-42^', A
@@ -292,8 +285,7 @@ demo_2 = ->
 
 #===========================================================================================================
 demo_3 = ->
-  INTERTALK_LIB = require '../../../apps/intertalk'
-  { IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional } = INTERTALK_LIB
+  IT = require '../../../apps/intertalk'
   #.........................................................................................................
   IT.on 'abc', {}
   #.........................................................................................................
