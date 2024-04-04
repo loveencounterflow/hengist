@@ -93,27 +93,26 @@
 
   //===========================================================================================================
   this.interface = async function(T, done) {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, ref, ref1, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT, ref, ref1;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     if (T != null) {
-      T.eq(isa.function(IT.on), true);
+      T.eq(IT._extras.isa.function(IT.on), true);
     }
     if (T != null) {
-      T.eq(isa.function(IT.on_any), false);
+      T.eq(IT._extras.isa.function(IT.on_any), false);
     }
     if (T != null) {
-      T.eq(isa.asyncfunction(IT.emit), true);
+      T.eq(IT._extras.isa.asyncfunction(IT.emit), true);
     }
     if (T != null) {
       T.eq((ref = IT.emit('what')) != null ? (ref1 = ref.constructor) != null ? ref1.name : void 0 : void 0, 'Promise');
     }
     if (T != null) {
-      T.ok(((await IT.emit('what'))) instanceof Results);
+      T.ok(((await IT.emit('what'))) instanceof IT.Results);
     }
     if (T != null) {
-      T.eq(isa.function(IT.on('foo', (function(note) {}))), true);
+      T.eq(IT._extras.isa.function(IT.on('foo', (function(note) {}))), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -169,11 +168,10 @@
         return null;
       })();
       (() => {        //.......................................................................................................
-        var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
+        var IT;
         /* make sure INTERTALK_LIB works in absence of WeakMap */
         purge_require_cache_entry_for_intertalk();
-        INTERTALK_LIB = require('../../../apps/intertalk');
-        ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+        IT = require('../../../apps/intertalk');
         debug('^423-4^', IT.listeners);
         if (T != null) {
           T.ok(IT.listeners instanceof Map);
@@ -192,9 +190,8 @@
 
   //===========================================================================================================
   this.event_emitting_1 = async function(T, done) {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, on_mul, on_sum, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT, on_mul, on_sum;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     IT.on('sum', on_sum = function(e) {
       return new Promise(function(resolve) {
@@ -247,9 +244,8 @@
 
   //===========================================================================================================
   this.type_validation = async function(T, done) {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     await throws(T, 'expected 1 or 2 arguments, got 5', (async function() {
       return (await IT.emit('double', 3, 4, 5, 6));
@@ -285,25 +281,24 @@
       return IT.on(s`abc`, {});
     }));
     await throws(T, 'expected 1 or 2 arguments, got 0', (function() {
-      return new Datom();
+      return new IT._extras.Datom();
     }));
     await throws(T, 'expected a event_key, got a number', (function() {
-      return new Datom(42);
+      return new IT._extras.Datom(42);
     }));
     await throws(T, 'expected a event_key, got a object', (function() {
-      return new Datom(null);
+      return new IT._extras.Datom(null);
     }));
     await throws(T, 'expected a event_key, got a undefined', (function() {
-      return new Datom(void 0);
+      return new IT._extras.Datom(void 0);
     }));
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
   this.event_emitting_3 = function(T, done) {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, f, isa, isa_optional, receiver, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT, f, receiver;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     receiver = {
       on_square: function(note) {
@@ -364,9 +359,8 @@
 
   //===========================================================================================================
   demo_1 = async function() {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, e, isa, isa_optional, receiver, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT, e, receiver;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     receiver = {
       on_square: function(note) {
@@ -422,10 +416,9 @@
 
   //===========================================================================================================
   demo_2 = async function() {
-    var A, B, Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, e, isa, isa_optional, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
+    var A, B, IT, e;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
     A = class A {};
     B = class B extends Object {};
     urge('^992-42^', A);
@@ -547,9 +540,8 @@
 
   //===========================================================================================================
   demo_3 = function() {
-    var Datom, INTERTALK_LIB, IT, Intertalk, Note, Results, isa, isa_optional, validate, validate_optional;
-    INTERTALK_LIB = require('../../../apps/intertalk');
-    ({IT, Intertalk, Note, Results, Datom, isa, validate, isa_optional, validate_optional} = INTERTALK_LIB);
+    var IT;
+    IT = require('../../../apps/intertalk');
     //.........................................................................................................
     IT.on('abc', {});
     //.........................................................................................................
