@@ -70,14 +70,16 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @interface = ( T, done ) ->
-  IT = require '../../../apps/intertalk'
+  INTERTALK     = require '../../../apps/intertalk'
+  { Intertalk } = INTERTALK
+  itk           = new Intertalk()
   #.........................................................................................................
-  T?.eq ( IT._extras.isa.function      IT.on       ), true
-  T?.eq ( IT._extras.isa.function      IT.on_any   ), false
-  T?.eq ( IT._extras.isa.asyncfunction IT.emit     ), true
-  T?.eq ( IT.emit 'what' )?.constructor?.name, 'Promise'
-  T?.ok ( await IT.emit 'what' ) instanceof IT.Results
-  T?.eq ( IT._extras.isa.function IT.on 'foo', ( ( note ) -> )      ), true
+  T?.eq ( INTERTALK._extras.isa.function      itk.on       ), true
+  T?.eq ( INTERTALK._extras.isa.function      itk.on_any   ), true
+  T?.eq ( INTERTALK._extras.isa.asyncfunction itk.emit     ), true
+  T?.eq ( itk.emit 'what' )?.constructor?.name, 'Promise'
+  T?.ok ( await itk.emit 'what' ) instanceof INTERTALK.Results
+  T?.eq ( INTERTALK._extras.isa.function itk.on 'foo', ( ( note ) -> )      ), true
   #.........................................................................................................
   done?()
 
@@ -109,9 +111,10 @@ try_and_show = ( T, f ) ->
     do =>
       ### make sure INTERTALK_LIB works in absence of WeakMap ###
       purge_require_cache_entry_for_intertalk()
-      IT = require '../../../apps/intertalk'
-      debug '^423-4^', IT.listeners
-      T?.ok IT.listeners instanceof Map
+      { Intertalk } = require '../../../apps/intertalk'
+      itk           = new Intertalk()
+      debug '^423-4^', itk.listeners
+      T?.ok itk.listeners instanceof Map
       return null
     #.......................................................................................................
   finally
@@ -124,78 +127,92 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 @event_emitting_1 = ( T, done ) ->
-  IT = require '../../../apps/intertalk'
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
   #.........................................................................................................
-  IT.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
-  IT.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
+  itk.on 'sum', on_sum = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a + e.b ), 100
+  itk.on 'mul', on_mul = ( e ) -> new Promise ( resolve ) -> setTimeout ( -> resolve e.a * e.b ), 100
   #.........................................................................................................
   ### NOTE call to `as_object()` not strictly necessary as the underlying `equals()` method does work with
   the custom types we're using (`Results` and `Note`), but that's a flaw in the algorithm so
   let's try to write it the correct way: ###
-  T?.eq ( as_object await IT.emit 'sum', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'sum', a: 100, b: 200 }, results: [ 300 ] }
-  T?.eq ( as_object await IT.emit 'mul', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'mul', a: 100, b: 200 }, results: [ 20000 ] }
+  T?.eq ( as_object await itk.emit 'sum', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'sum', a: 100, b: 200 }, results: [ 300 ] }
+  T?.eq ( as_object await itk.emit 'mul', { a: 100, b: 200, } ), { '$key': '$results', note: { '$key': 'mul', a: 100, b: 200 }, results: [ 20000 ] }
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 @type_validation = ( T, done ) ->
-  IT = require '../../../apps/intertalk'
+  INTERTALK     = require '../../../apps/intertalk'
+  { Intertalk } = INTERTALK
+  itk           = new Intertalk()
   #.........................................................................................................
-  await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await IT.emit 'double', 3, 4, 5, 6   )
-  await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await IT.emit 'foo', 3, [ 4, 5, 6, ] )
-  await throws T, 'expected 2 arguments, got 0',                ( -> IT.on() )
-  await throws T, 'expected 2 arguments, got 1',                ( -> IT.on 4 )
-  await throws T, 'expected a event_key, got a number',         ( -> IT.on 4, 5 )
-  await throws T, 'expected a event_key, got a number',         ( -> IT.on 4, -> )
-  await throws T, 'expected 2 arguments, got 1',                ( -> IT.on s'abc' )
-  await throws T, 'expected 2 arguments, got 3',                ( -> IT.on s'abc', ( -> ), 9 )
-  await throws T, 'expected 2 arguments, got 3',                ( -> IT.on 'abc', {}, 9 )
-  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on 'abc', {} )
-  await throws T, 'expected event_listener for object property \'on_abc\', got a undefined', ( -> IT.on s'abc', {} )
-  await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new IT._extras.Datom() )
-  await throws T, 'expected a event_key, got a number',         ( -> new IT._extras.Datom 42 )
-  await throws T, 'expected a event_key, got a object',         ( -> new IT._extras.Datom null )
-  await throws T, 'expected a event_key, got a undefined',      ( -> new IT._extras.Datom undefined )
+  await throws T, 'expected 1 or 2 arguments, got 5',           ( -> await itk.emit 'double', 3, 4, 5, 6   )
+  await throws T, 'expected 1 or 2 arguments, got 3',           ( -> await itk.emit 'foo', 3, [ 4, 5, 6, ] )
+  await throws T, 'expected 2 arguments, got 0',                ( -> itk.on() )
+  await throws T, 'expected 2 arguments, got 1',                ( -> itk.on 4 )
+  await throws T, 'expected a IT_note_$key, got a number',      ( -> itk.on 4, 5 )
+  await throws T, 'expected a IT_note_$key, got a number',      ( -> itk.on 4, -> )
+  await throws T, 'expected 2 arguments, got 1',                ( -> itk.on s'abc' )
+  await throws T, 'expected 2 arguments, got 3',                ( -> itk.on s'abc', ( -> ), 9 )
+  await throws T, 'expected 2 arguments, got 3',                ( -> itk.on 'abc', {}, 9 )
+  await throws T, 'expected a IT_listener, got a object',       ( -> itk.on 'abc', {} )
+  await throws T, 'expected a IT_listener, got a object',       ( -> itk.on s'abc', {} )
+  await throws T, 'expected 1 or 2 arguments, got 0',           ( -> new INTERTALK._extras.Datom() )
+  await throws T, 'expected a IT_note_$key, got a number',      ( -> new INTERTALK._extras.Datom 42 )
+  await throws T, 'expected a IT_note_$key, got a object',      ( -> new INTERTALK._extras.Datom null )
+  await throws T, 'expected a IT_note_$key, got a undefined',   ( -> new INTERTALK._extras.Datom undefined )
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
-@event_emitting_3 = ( T, done ) ->
-  IT = require '../../../apps/intertalk'
+@on_any = ( T, done ) ->
+  { Intertalk } = require '../../../apps/intertalk'
   #.........................................................................................................
-  receiver =
-    on_square:      ( note ) -> info '^992-4^', note; note.$value ** 2
-    on_cube:        ( note ) -> info '^992-5^', note; note.$value ** 3
-    on_double:      ( note ) -> info '^992-6^', note; note.$value *  2
-    on_any:         ( note ) -> info '^992-7^', note
-    on_cube_symbol: ( note ) -> info '^992-8^', note; note.$value ** 3
+  await do ->
+    itk     = new Intertalk()
+    counter = 0
+    itk.on_any ( note ) -> counter++
+    await itk.emit 'foo'
+    await itk.emit 'bar'
+    await itk.emit 'baz'
+    T?.eq counter, 3
+    return null
   #.........................................................................................................
-  IT.on 'square',   receiver
-  IT.on 'double',   receiver
-  IT.on 'cube',     receiver.on_cube
-  IT.on s'cube',    receiver.on_cube
-  # IT.on_any,        receiver.on_any
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'any', 1 ], [ 'any', 2 ], [ 'any', 3 ] ]
+    results = []
+    itk.on_any ( note ) -> 'any'
+    itk.on 'd1', ( note ) -> 1
+    itk.on 'd2', ( note ) -> 2
+    itk.on 'd3', ( note ) -> 3
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, matcher
+    return null
   #.........................................................................................................
-  # urge '^992-9^', IT
-  # urge '^992-10^', IT.key_symbols[ 'square' ]
-  # urge '^992-11^', IT.listeners
-  # urge '^992-12^', IT.listeners.get IT.key_symbols[ 'square' ]
-  f = ->
-    urge '^992-13^', await IT.emit            'square', 11
-    urge '^992-14^', await IT.emit            'double', 12
-    urge '^992-15^', await IT.emit            'cube',   13
-    urge '^992-16^', await IT.emit new Note  'cube',   14
-    urge '^992-17^', await IT.emit new Note  s'cube',  14
-    ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-    try ( urge '^992-18^', await IT.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-19^', reverse e.message
-    try ( urge '^992-20^', await IT.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-21^', reverse e.message
-    urge '^992-22^', await IT.emit 'foo', [ 3, 4, 5, 6, ]
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'any', 1 ], [ 'any', 2 ], [ 'any', 3 ] ]
+    results = []
+    itk.on 'd1', ( note ) -> 1
+    itk.on 'd2', ( note ) -> 2
+    itk.on 'd3', ( note ) -> 3
+    itk.on_any ( note ) -> 'any'
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, matcher
+    return null
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
 demo_1 = ->
-  IT = require '../../../apps/intertalk'
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
   #.........................................................................................................
   receiver =
     on_square:      ( note ) -> info '^992-23^', note; note.$value ** 2
@@ -203,29 +220,30 @@ demo_1 = ->
     on_double:      ( note ) -> info '^992-25^', note; note.$value *  2
     on_any:         ( note ) -> info '^992-26^', note
     on_cube_symbol: ( note ) -> info '^992-27^', note; note.$value ** 3
-  IT.on 'square',   receiver
-  IT.on 'double',   receiver
-  IT.on 'cube',     receiver.on_cube
-  IT.on s'cube',    receiver.on_cube
-  IT.on '*',        receiver.on_any
-  # urge '^992-28^', IT
-  # urge '^992-29^', IT.key_symbols[ 'square' ]
-  # urge '^992-30^', IT.listeners
-  # urge '^992-31^', IT.listeners.get IT.key_symbols[ 'square' ]
-  urge '^992-32^', await IT.emit            'square', 11
-  urge '^992-33^', await IT.emit            'double', 12
-  urge '^992-34^', await IT.emit            'cube',   13
-  urge '^992-35^', await IT.emit new Note  'cube',   14
-  urge '^992-36^', await IT.emit new Note  s'cube',  14
+  itk.on 'square',   receiver
+  itk.on 'double',   receiver
+  itk.on 'cube',     receiver.on_cube
+  itk.on s'cube',    receiver.on_cube
+  itk.on '*',        receiver.on_any
+  # urge '^992-28^', itk
+  # urge '^992-29^', itk.key_symbols[ 'square' ]
+  # urge '^992-30^', itk.listeners
+  # urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
+  urge '^992-32^', await itk.emit            'square', 11
+  urge '^992-33^', await itk.emit            'double', 12
+  urge '^992-34^', await itk.emit            'cube',   13
+  urge '^992-35^', await itk.emit new Note  'cube',   14
+  urge '^992-36^', await itk.emit new Note  s'cube',  14
   ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-  try ( urge '^992-37^', await IT.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
-  try ( urge '^992-39^', await IT.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
-  urge '^992-41^', await IT.emit 'foo', [ 3, 4, 5, 6, ]
+  try ( urge '^992-37^', await itk.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
+  try ( urge '^992-39^', await itk.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
+  urge '^992-41^', await itk.emit 'foo', [ 3, 4, 5, 6, ]
   return null
 
 #===========================================================================================================
 demo_2 = ->
-  IT = require '../../../apps/intertalk'
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
   #.........................................................................................................
   class A
   class B extends Object
@@ -277,17 +295,18 @@ demo_2 = ->
   #.........................................................................................................
   ### calls to `emit` are just calls to `new Note()`: ###
   await do =>
-    IT.on 'myevent', ( note ) -> info '^992-72^', note; note.n ** 2
-    help '^992-73^', await IT.emit 'myevent', { n: 16, }
+    itk.on 'myevent', ( note ) -> info '^992-72^', note; note.n ** 2
+    help '^992-73^', await itk.emit 'myevent', { n: 16, }
     return null
   #.........................................................................................................
   return null
 
 #===========================================================================================================
 demo_3 = ->
-  IT = require '../../../apps/intertalk'
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
   #.........................................................................................................
-  IT.on 'abc', {}
+  itk.on 'abc', {}
   #.........................................................................................................
   return null
 
@@ -298,8 +317,8 @@ if module is require.main then await do =>
   # await demo_2()
   # await demo_3()
   # await test @WeakMap_replacement
+  # await test @interface
   await test @
-
 
 
 
