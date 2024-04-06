@@ -93,26 +93,28 @@
 
   //===========================================================================================================
   this.interface = async function(T, done) {
-    var IT, ref, ref1;
-    IT = require('../../../apps/intertalk');
+    var INTERTALK, Intertalk, itk, ref, ref1;
+    INTERTALK = require('../../../apps/intertalk');
+    ({Intertalk} = INTERTALK);
+    itk = new Intertalk();
     //.........................................................................................................
     if (T != null) {
-      T.eq(IT._extras.isa.function(IT.on), true);
+      T.eq(INTERTALK._extras.isa.function(itk.on), true);
     }
     if (T != null) {
-      T.eq(IT._extras.isa.function(IT.on_any), false);
+      T.eq(INTERTALK._extras.isa.function(itk.on_any), true);
     }
     if (T != null) {
-      T.eq(IT._extras.isa.asyncfunction(IT.emit), true);
+      T.eq(INTERTALK._extras.isa.asyncfunction(itk.emit), true);
     }
     if (T != null) {
-      T.eq((ref = IT.emit('what')) != null ? (ref1 = ref.constructor) != null ? ref1.name : void 0 : void 0, 'Promise');
+      T.eq((ref = itk.emit('what')) != null ? (ref1 = ref.constructor) != null ? ref1.name : void 0 : void 0, 'Promise');
     }
     if (T != null) {
-      T.ok(((await IT.emit('what'))) instanceof IT.Results);
+      T.ok(((await itk.emit('what'))) instanceof INTERTALK.Results);
     }
     if (T != null) {
-      T.eq(IT._extras.isa.function(IT.on('foo', (function(note) {}))), true);
+      T.eq(INTERTALK._extras.isa.function(itk.on('foo', (function(note) {}))), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -168,13 +170,14 @@
         return null;
       })();
       (() => {        //.......................................................................................................
-        var IT;
+        var Intertalk, itk;
         /* make sure INTERTALK_LIB works in absence of WeakMap */
         purge_require_cache_entry_for_intertalk();
-        IT = require('../../../apps/intertalk');
-        debug('^423-4^', IT.listeners);
+        ({Intertalk} = require('../../../apps/intertalk'));
+        itk = new Intertalk();
+        debug('^423-4^', itk.listeners);
         if (T != null) {
-          T.ok(IT.listeners instanceof Map);
+          T.ok(itk.listeners instanceof Map);
         }
         return null;
       })();
@@ -190,17 +193,18 @@
 
   //===========================================================================================================
   this.event_emitting_1 = async function(T, done) {
-    var IT, on_mul, on_sum;
-    IT = require('../../../apps/intertalk');
+    var Intertalk, itk, on_mul, on_sum;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
     //.........................................................................................................
-    IT.on('sum', on_sum = function(e) {
+    itk.on('sum', on_sum = function(e) {
       return new Promise(function(resolve) {
         return setTimeout((function() {
           return resolve(e.a + e.b);
         }), 100);
       });
     });
-    IT.on('mul', on_mul = function(e) {
+    itk.on('mul', on_mul = function(e) {
       return new Promise(function(resolve) {
         return setTimeout((function() {
           return resolve(e.a * e.b);
@@ -212,7 +216,7 @@
      the custom types we're using (`Results` and `Note`), but that's a flaw in the algorithm so
      let's try to write it the correct way: */
     if (T != null) {
-      T.eq(as_object((await IT.emit('sum', {
+      T.eq(as_object((await itk.emit('sum', {
         a: 100,
         b: 200
       }))), {
@@ -226,7 +230,7 @@
       });
     }
     if (T != null) {
-      T.eq(as_object((await IT.emit('mul', {
+      T.eq(as_object((await itk.emit('mul', {
         a: 100,
         b: 200
       }))), {
@@ -244,123 +248,136 @@
 
   //===========================================================================================================
   this.type_validation = async function(T, done) {
-    var IT;
-    IT = require('../../../apps/intertalk');
+    var INTERTALK, Intertalk, itk;
+    INTERTALK = require('../../../apps/intertalk');
+    ({Intertalk} = INTERTALK);
+    itk = new Intertalk();
     //.........................................................................................................
     await throws(T, 'expected 1 or 2 arguments, got 5', (async function() {
-      return (await IT.emit('double', 3, 4, 5, 6));
+      return (await itk.emit('double', 3, 4, 5, 6));
     }));
     await throws(T, 'expected 1 or 2 arguments, got 3', (async function() {
-      return (await IT.emit('foo', 3, [4, 5, 6]));
+      return (await itk.emit('foo', 3, [4, 5, 6]));
     }));
     await throws(T, 'expected 2 arguments, got 0', (function() {
-      return IT.on();
+      return itk.on();
     }));
     await throws(T, 'expected 2 arguments, got 1', (function() {
-      return IT.on(4);
+      return itk.on(4);
     }));
-    await throws(T, 'expected a event_key, got a number', (function() {
-      return IT.on(4, 5);
+    await throws(T, 'expected a IT_note_$key, got a number', (function() {
+      return itk.on(4, 5);
     }));
-    await throws(T, 'expected a event_key, got a number', (function() {
-      return IT.on(4, function() {});
+    await throws(T, 'expected a IT_note_$key, got a number', (function() {
+      return itk.on(4, function() {});
     }));
     await throws(T, 'expected 2 arguments, got 1', (function() {
-      return IT.on(s`abc`);
+      return itk.on(s`abc`);
     }));
     await throws(T, 'expected 2 arguments, got 3', (function() {
-      return IT.on(s`abc`, (function() {}), 9);
+      return itk.on(s`abc`, (function() {}), 9);
     }));
     await throws(T, 'expected 2 arguments, got 3', (function() {
-      return IT.on('abc', {}, 9);
+      return itk.on('abc', {}, 9);
     }));
-    await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
-      return IT.on('abc', {});
+    await throws(T, 'expected a IT_listener, got a object', (function() {
+      return itk.on('abc', {});
     }));
-    await throws(T, 'expected event_listener for object property \'on_abc\', got a undefined', (function() {
-      return IT.on(s`abc`, {});
+    await throws(T, 'expected a IT_listener, got a object', (function() {
+      return itk.on(s`abc`, {});
     }));
     await throws(T, 'expected 1 or 2 arguments, got 0', (function() {
-      return new IT._extras.Datom();
+      return new INTERTALK._extras.Datom();
     }));
-    await throws(T, 'expected a event_key, got a number', (function() {
-      return new IT._extras.Datom(42);
+    await throws(T, 'expected a IT_note_$key, got a number', (function() {
+      return new INTERTALK._extras.Datom(42);
     }));
-    await throws(T, 'expected a event_key, got a object', (function() {
-      return new IT._extras.Datom(null);
+    await throws(T, 'expected a IT_note_$key, got a object', (function() {
+      return new INTERTALK._extras.Datom(null);
     }));
-    await throws(T, 'expected a event_key, got a undefined', (function() {
-      return new IT._extras.Datom(void 0);
+    await throws(T, 'expected a IT_note_$key, got a undefined', (function() {
+      return new INTERTALK._extras.Datom(void 0);
     }));
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
-  this.event_emitting_3 = function(T, done) {
-    var IT, f, receiver;
-    IT = require('../../../apps/intertalk');
-    //.........................................................................................................
-    receiver = {
-      on_square: function(note) {
-        info('^992-4^', note);
-        return note.$value ** 2;
-      },
-      on_cube: function(note) {
-        info('^992-5^', note);
-        return note.$value ** 3;
-      },
-      on_double: function(note) {
-        info('^992-6^', note);
-        return note.$value * 2;
-      },
-      on_any: function(note) {
-        return info('^992-7^', note);
-      },
-      on_cube_symbol: function(note) {
-        info('^992-8^', note);
-        return note.$value ** 3;
+  this.on_any = async function(T, done) {
+    var Intertalk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    await (async function() {      //.........................................................................................................
+      var counter, itk;
+      itk = new Intertalk();
+      counter = 0;
+      itk.on_any(function(note) {
+        return counter++;
+      });
+      await itk.emit('foo');
+      await itk.emit('bar');
+      await itk.emit('baz');
+      if (T != null) {
+        T.eq(counter, 3);
       }
-    };
-    //.........................................................................................................
-    IT.on('square', receiver);
-    IT.on('double', receiver);
-    IT.on('cube', receiver.on_cube);
-    IT.on(s`cube`, receiver.on_cube);
-    // IT.on_any,        receiver.on_any
-    //.........................................................................................................
-    // urge '^992-9^', IT
-    // urge '^992-10^', IT.key_symbols[ 'square' ]
-    // urge '^992-11^', IT.listeners
-    // urge '^992-12^', IT.listeners.get IT.key_symbols[ 'square' ]
-    f = async function() {
-      var e;
-      urge('^992-13^', (await IT.emit('square', 11)));
-      urge('^992-14^', (await IT.emit('double', 12)));
-      urge('^992-15^', (await IT.emit('cube', 13)));
-      urge('^992-16^', (await IT.emit(new Note('cube', 14))));
-      urge('^992-17^', (await IT.emit(new Note(s`cube`, 14))));
-      try {
-        /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-        urge('^992-18^', (await IT.emit('double', 3, 4, 5, 6)));
-      } catch (error1) {
-        e = error1;
-        warn('^992-19^', reverse(e.message));
+      return null;
+    })();
+    await (async function() {      //.........................................................................................................
+      var itk, matcher, results;
+      itk = new Intertalk();
+      matcher = [['any', 1], ['any', 2], ['any', 3]];
+      results = [];
+      itk.on_any(function(note) {
+        return 'any';
+      });
+      itk.on('d1', function(note) {
+        return 1;
+      });
+      itk.on('d2', function(note) {
+        return 2;
+      });
+      itk.on('d3', function(note) {
+        return 3;
+      });
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
       }
-      try {
-        urge('^992-20^', (await IT.emit('foo', 3, [4, 5, 6])));
-      } catch (error1) {
-        e = error1;
-        warn('^992-21^', reverse(e.message));
+      return null;
+    })();
+    await (async function() {      //.........................................................................................................
+      var itk, matcher, results;
+      itk = new Intertalk();
+      matcher = [['any', 1], ['any', 2], ['any', 3]];
+      results = [];
+      itk.on('d1', function(note) {
+        return 1;
+      });
+      itk.on('d2', function(note) {
+        return 2;
+      });
+      itk.on('d3', function(note) {
+        return 3;
+      });
+      itk.on_any(function(note) {
+        return 'any';
+      });
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
       }
-      return urge('^992-22^', (await IT.emit('foo', [3, 4, 5, 6])));
-    };
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
   demo_1 = async function() {
-    var IT, e, receiver;
-    IT = require('../../../apps/intertalk');
+    var Intertalk, e, itk, receiver;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
     //.........................................................................................................
     receiver = {
       on_square: function(note) {
@@ -383,41 +400,42 @@
         return note.$value ** 3;
       }
     };
-    IT.on('square', receiver);
-    IT.on('double', receiver);
-    IT.on('cube', receiver.on_cube);
-    IT.on(s`cube`, receiver.on_cube);
-    IT.on('*', receiver.on_any);
-    // urge '^992-28^', IT
-    // urge '^992-29^', IT.key_symbols[ 'square' ]
-    // urge '^992-30^', IT.listeners
-    // urge '^992-31^', IT.listeners.get IT.key_symbols[ 'square' ]
-    urge('^992-32^', (await IT.emit('square', 11)));
-    urge('^992-33^', (await IT.emit('double', 12)));
-    urge('^992-34^', (await IT.emit('cube', 13)));
-    urge('^992-35^', (await IT.emit(new Note('cube', 14))));
-    urge('^992-36^', (await IT.emit(new Note(s`cube`, 14))));
+    itk.on('square', receiver);
+    itk.on('double', receiver);
+    itk.on('cube', receiver.on_cube);
+    itk.on(s`cube`, receiver.on_cube);
+    itk.on('*', receiver.on_any);
+    // urge '^992-28^', itk
+    // urge '^992-29^', itk.key_symbols[ 'square' ]
+    // urge '^992-30^', itk.listeners
+    // urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
+    urge('^992-32^', (await itk.emit('square', 11)));
+    urge('^992-33^', (await itk.emit('double', 12)));
+    urge('^992-34^', (await itk.emit('cube', 13)));
+    urge('^992-35^', (await itk.emit(new Note('cube', 14))));
+    urge('^992-36^', (await itk.emit(new Note(s`cube`, 14))));
     try {
       /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-      urge('^992-37^', (await IT.emit('double', 3, 4, 5, 6)));
+      urge('^992-37^', (await itk.emit('double', 3, 4, 5, 6)));
     } catch (error1) {
       e = error1;
       warn('^992-38^', reverse(e.message));
     }
     try {
-      urge('^992-39^', (await IT.emit('foo', 3, [4, 5, 6])));
+      urge('^992-39^', (await itk.emit('foo', 3, [4, 5, 6])));
     } catch (error1) {
       e = error1;
       warn('^992-40^', reverse(e.message));
     }
-    urge('^992-41^', (await IT.emit('foo', [3, 4, 5, 6])));
+    urge('^992-41^', (await itk.emit('foo', [3, 4, 5, 6])));
     return null;
   };
 
   //===========================================================================================================
   demo_2 = async function() {
-    var A, B, IT, e;
-    IT = require('../../../apps/intertalk');
+    var A, B, Intertalk, e, itk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
     //.........................................................................................................
     A = class A {};
     B = class B extends Object {};
@@ -525,11 +543,11 @@
     }));
     await (async() => {      //.........................................................................................................
       /* calls to `emit` are just calls to `new Note()`: */
-      IT.on('myevent', function(note) {
+      itk.on('myevent', function(note) {
         info('^992-72^', note);
         return note.n ** 2;
       });
-      help('^992-73^', (await IT.emit('myevent', {
+      help('^992-73^', (await itk.emit('myevent', {
         n: 16
       })));
       return null;
@@ -540,10 +558,11 @@
 
   //===========================================================================================================
   demo_3 = function() {
-    var IT;
-    IT = require('../../../apps/intertalk');
+    var Intertalk, itk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
     //.........................................................................................................
-    IT.on('abc', {});
+    itk.on('abc', {});
     //.........................................................................................................
     return null;
   };
@@ -555,6 +574,7 @@
       // await demo_2()
       // await demo_3()
       // await test @WeakMap_replacement
+      // await test @interface
       return (await test(this));
     })();
   }
