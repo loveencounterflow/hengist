@@ -114,7 +114,7 @@
       T.ok(((await itk.emit('what'))) instanceof INTERTALK.Results);
     }
     if (T != null) {
-      T.eq(INTERTALK._extras.isa.function(itk.on('foo', (function(note) {}))), true);
+      T.eq(INTERTALK._extras.isa.null(itk.on('foo', (function(note) {}))), true);
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -370,6 +370,96 @@
       }
       return null;
     })();
+    await (async function() {      //.........................................................................................................
+      var itk, matcher, results;
+      itk = new Intertalk();
+      matcher = [['any1', 'any2', 'any3', 1], ['any1', 'any2', 'any3', 2], ['any1', 'any2', 'any3', 3]];
+      results = [];
+      itk.on('d1', function(note) {
+        return 1;
+      });
+      itk.on('d2', function(note) {
+        return 2;
+      });
+      itk.on('d3', function(note) {
+        return 3;
+      });
+      itk.on_any(function(note) {
+        return 'any1';
+      });
+      itk.on_any(function(note) {
+        return 'any2';
+      });
+      itk.on_any(function(note) {
+        return 'any3';
+      });
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //===========================================================================================================
+  this.unsubscribing = async function(T, done) {
+    var Intertalk, a1, d1, d2, d3, itk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    //.........................................................................................................
+    itk = new Intertalk();
+    itk.on_any(a1 = function(note) {
+      return 'any';
+    });
+    itk.on('d1', d1 = function(note) {
+      return 1;
+    });
+    itk.on('d2', d2 = function(note) {
+      return 2;
+    });
+    itk.on('d3', d3 = function(note) {
+      return 3;
+    });
+    await (async() => {      //.........................................................................................................
+      var results;
+      results = [];
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      return T != null ? T.eq(results, [['any', 1], ['any', 2], ['any', 3]]) : void 0;
+    })();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(itk.off(d2), 1);
+    }
+    if (T != null) {
+      T.eq(itk.off(d2), 0);
+    }
+    await (async() => {      //.........................................................................................................
+      var results;
+      results = [];
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      return T != null ? T.eq(results, [['any', 1], ['any'], ['any', 3]]) : void 0;
+    })();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(itk.off(a1), 1);
+    }
+    if (T != null) {
+      T.eq(itk.off(a1), 0);
+    }
+    await (async() => {      //.........................................................................................................
+      var results;
+      results = [];
+      results.push(((await itk.emit('d1'))).results);
+      results.push(((await itk.emit('d2'))).results);
+      results.push(((await itk.emit('d3'))).results);
+      return T != null ? T.eq(results, [[1], [], [3]]) : void 0;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -574,7 +664,7 @@
       // await demo_2()
       // await demo_3()
       // await test @WeakMap_replacement
-      // await test @interface
+      // await test @unsubscribing
       return (await test(this));
     })();
   }
