@@ -79,7 +79,7 @@ try_and_show = ( T, f ) ->
   T?.eq ( INTERTALK._extras.isa.asyncfunction itk.emit     ), true
   T?.eq ( itk.emit 'what' )?.constructor?.name, 'Promise'
   T?.ok ( await itk.emit 'what' ) instanceof INTERTALK.Results
-  T?.eq ( INTERTALK._extras.isa.function itk.on 'foo', ( ( note ) -> )      ), true
+  T?.eq ( INTERTALK._extras.isa.null itk.on 'foo', ( ( note ) -> )      ), true
   #.........................................................................................................
   done?()
 
@@ -207,6 +207,61 @@ try_and_show = ( T, f ) ->
     T?.eq results, matcher
     return null
   #.........................................................................................................
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'any1', 'any2', 'any3', 1 ], [ 'any1', 'any2', 'any3', 2 ], [ 'any1', 'any2', 'any3', 3 ] ]
+    results = []
+    itk.on 'd1', ( note ) -> 1
+    itk.on 'd2', ( note ) -> 2
+    itk.on 'd3', ( note ) -> 3
+    itk.on_any ( note ) -> 'any1'
+    itk.on_any ( note ) -> 'any2'
+    itk.on_any ( note ) -> 'any3'
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, matcher
+    return null
+  #.........................................................................................................
+  done?()
+
+#===========================================================================================================
+@unsubscribing = ( T, done ) ->
+  { Intertalk } = require '../../../apps/intertalk'
+  #.........................................................................................................
+  itk = new Intertalk()
+  itk.on_any    a1 = ( note ) -> 'any'
+  itk.on 'd1',  d1 = ( note ) -> 1
+  itk.on 'd2',  d2 = ( note ) -> 2
+  itk.on 'd3',  d3 = ( note ) -> 3
+  #.........................................................................................................
+  await do =>
+    results = []
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, [ [ 'any', 1 ], [ 'any', 2 ], [ 'any', 3 ] ]
+  #.........................................................................................................
+  T?.eq ( itk.off d2 ), 1
+  T?.eq ( itk.off d2 ), 0
+  #.........................................................................................................
+  await do =>
+    results = []
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, [ [ 'any', 1 ], [ 'any' ], [ 'any', 3 ] ]
+  #.........................................................................................................
+  T?.eq ( itk.off a1 ), 1
+  T?.eq ( itk.off a1 ), 0
+  #.........................................................................................................
+  await do =>
+    results = []
+    results.push ( await itk.emit 'd1' ).results
+    results.push ( await itk.emit 'd2' ).results
+    results.push ( await itk.emit 'd3' ).results
+    T?.eq results, [ [ 1 ], [], [ 3 ] ]
+  #.........................................................................................................
   done?()
 
 #===========================================================================================================
@@ -317,7 +372,7 @@ if module is require.main then await do =>
   # await demo_2()
   # await demo_3()
   # await test @WeakMap_replacement
-  # await test @interface
+  # await test @unsubscribing
   await test @
 
 
