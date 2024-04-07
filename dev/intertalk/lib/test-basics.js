@@ -405,6 +405,98 @@
   };
 
   //===========================================================================================================
+  this.on_unhandled = async function(T, done) {
+    var Intertalk, after;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    ({after} = GUY.async);
+    await (async function() {      //.........................................................................................................
+      var itk, matcher, results, u1;
+      itk = new Intertalk();
+      matcher = [['u1'], ['u1'], ['u1']];
+      results = [];
+      itk.on_unhandled(u1 = function(note) {
+        return 'u1';
+      });
+      results.push(((await itk.emit('foo'))).results);
+      results.push(((await itk.emit('bar'))).results);
+      results.push(((await itk.emit('baz'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
+      }
+      return null;
+    })();
+    await (async function() {      //.........................................................................................................
+      var itk, k1, matcher, results, u1, u2;
+      itk = new Intertalk();
+      matcher = [['one:k1'], ['two:u1', 'two:u2'], ['three:u1', 'three:u2']];
+      results = [];
+      itk.on('one', k1 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:k1`);
+          return `${note.$key}:k1`;
+        });
+      });
+      itk.on_unhandled(u1 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:u1`);
+          return `${note.$key}:u1`;
+        });
+      });
+      itk.on_unhandled(u2 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:u2`);
+          return `${note.$key}:u2`;
+        });
+      });
+      results.push(((await itk.emit('one'))).results);
+      results.push(((await itk.emit('two'))).results);
+      results.push(((await itk.emit('three'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
+      }
+      return null;
+    })();
+    await (async function() {      //.........................................................................................................
+      var a2, itk, k1, matcher, results, u1, u2;
+      itk = new Intertalk();
+      matcher = [['one:a2', 'one:k1'], ['two:a2', 'two:u1', 'two:u2'], ['three:a2', 'three:u1', 'three:u2']];
+      results = [];
+      itk.on('one', k1 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:k1`);
+          return `${note.$key}:k1`;
+        });
+      });
+      itk.on_unhandled(u1 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:u1`);
+          return `${note.$key}:u1`;
+        });
+      });
+      itk.on_unhandled(u2 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:u2`);
+          return `${note.$key}:u2`;
+        });
+      });
+      itk.on_any(a2 = function(note) {
+        return after(0.05, function() {
+          help(`${note.$key}:a2`);
+          return `${note.$key}:a2`;
+        });
+      });
+      results.push(((await itk.emit('one'))).results);
+      results.push(((await itk.emit('two'))).results);
+      results.push(((await itk.emit('three'))).results);
+      if (T != null) {
+        T.eq(results, matcher);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //===========================================================================================================
   this.unsubscribing = async function(T, done) {
     var Intertalk, a1, d1, d2, d3, itk;
     ({Intertalk} = require('../../../apps/intertalk'));
@@ -665,9 +757,11 @@
       // await demo_3()
       // await test @WeakMap_replacement
       // await test @unsubscribing
-      return (await test(this));
+      return (await test(this.on_unhandled));
     })();
   }
+
+  // await test @
 
 }).call(this);
 
