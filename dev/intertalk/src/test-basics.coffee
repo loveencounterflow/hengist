@@ -226,6 +226,51 @@ try_and_show = ( T, f ) ->
   done?()
 
 #===========================================================================================================
+@on_unhandled = ( T, done ) ->
+  { Intertalk } = require '../../../apps/intertalk'
+  { after }     = GUY.async
+  #.........................................................................................................
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'u1', ], [ 'u1', ], [ 'u1', ] ]
+    results = []
+    itk.on_unhandled u1 = ( note ) -> 'u1'
+    results.push ( await itk.emit 'foo' ).results
+    results.push ( await itk.emit 'bar' ).results
+    results.push ( await itk.emit 'baz' ).results
+    T?.eq results, matcher
+    return null
+  #.........................................................................................................
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'one:k1' ], [ 'two:u1', 'two:u2' ], [ 'three:u1', 'three:u2' ] ]
+    results = []
+    itk.on 'one',     k1 = ( note ) -> after 0.05, -> help "#{note.$key}:k1"; "#{note.$key}:k1"
+    itk.on_unhandled  u1 = ( note ) -> after 0.05, -> help "#{note.$key}:u1"; "#{note.$key}:u1"
+    itk.on_unhandled  u2 = ( note ) -> after 0.05, -> help "#{note.$key}:u2"; "#{note.$key}:u2"
+    results.push ( await itk.emit 'one' ).results
+    results.push ( await itk.emit 'two' ).results
+    results.push ( await itk.emit 'three' ).results
+    T?.eq results, matcher
+    return null
+  #.........................................................................................................
+  await do ->
+    itk     = new Intertalk()
+    matcher = [ [ 'one:a2', 'one:k1' ], [ 'two:a2', 'two:u1', 'two:u2' ], [ 'three:a2', 'three:u1', 'three:u2' ] ]
+    results = []
+    itk.on 'one',     k1 = ( note ) -> after 0.05, -> help "#{note.$key}:k1"; "#{note.$key}:k1"
+    itk.on_unhandled  u1 = ( note ) -> after 0.05, -> help "#{note.$key}:u1"; "#{note.$key}:u1"
+    itk.on_unhandled  u2 = ( note ) -> after 0.05, -> help "#{note.$key}:u2"; "#{note.$key}:u2"
+    itk.on_any        a2 = ( note ) -> after 0.05, -> help "#{note.$key}:a2"; "#{note.$key}:a2"
+    results.push ( await itk.emit 'one'   ).results
+    results.push ( await itk.emit 'two'   ).results
+    results.push ( await itk.emit 'three' ).results
+    T?.eq results, matcher
+    return null
+  #.........................................................................................................
+  done?()
+
+#===========================================================================================================
 @unsubscribing = ( T, done ) ->
   { Intertalk } = require '../../../apps/intertalk'
   #.........................................................................................................
@@ -373,7 +418,8 @@ if module is require.main then await do =>
   # await demo_3()
   # await test @WeakMap_replacement
   # await test @unsubscribing
-  await test @
+  await test @on_unhandled
+  # await test @
 
 
 
