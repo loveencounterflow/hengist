@@ -757,11 +757,10 @@
       // await demo_3()
       // await test @WeakMap_replacement
       // await test @unsubscribing
-      return (await test(this.on_unhandled));
+      // await test @on_unhandled
+      return (await test(this));
     })();
   }
-
-  // await test @
 
 }).call(this);
 
