@@ -418,8 +418,8 @@ if module is require.main then await do =>
   # await demo_3()
   # await test @WeakMap_replacement
   # await test @unsubscribing
-  await test @on_unhandled
-  # await test @
+  # await test @on_unhandled
+  await test @
 
 
 
