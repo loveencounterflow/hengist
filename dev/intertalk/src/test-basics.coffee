@@ -41,6 +41,9 @@ ps                        = ( name ) -> Symbol      name
 #   done()
 #   return null
 
+
+############################################################################################################
+#
 #===========================================================================================================
 isa_object = ( x ) -> x? and ( typeof x is 'object' ) and ( ( Object::toString.call x ) is '[object Object]' )
 as_object = ( x ) ->
@@ -68,6 +71,113 @@ try_and_show = ( T, f ) ->
     T.fail "^992-3^ expected an error but none was thrown"
   return null
 
+
+############################################################################################################
+#
+#===========================================================================================================
+demo_1 = ->
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
+  #.........................................................................................................
+  receiver =
+    on_square:      ( note ) -> info '^992-23^', note; note.$value ** 2
+    on_cube:        ( note ) -> info '^992-24^', note; note.$value ** 3
+    on_double:      ( note ) -> info '^992-25^', note; note.$value *  2
+    on_any:         ( note ) -> info '^992-26^', note
+    on_cube_symbol: ( note ) -> info '^992-27^', note; note.$value ** 3
+  itk.on 'square',   receiver
+  itk.on 'double',   receiver
+  itk.on 'cube',     receiver.on_cube
+  itk.on s'cube',    receiver.on_cube
+  itk.on '*',        receiver.on_any
+  # urge '^992-28^', itk
+  # urge '^992-29^', itk.key_symbols[ 'square' ]
+  # urge '^992-30^', itk.listeners
+  # urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
+  urge '^992-32^', await itk.emit            'square', 11
+  urge '^992-33^', await itk.emit            'double', 12
+  urge '^992-34^', await itk.emit            'cube',   13
+  urge '^992-35^', await itk.emit new Note  'cube',   14
+  urge '^992-36^', await itk.emit new Note  s'cube',  14
+  ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
+  try ( urge '^992-37^', await itk.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
+  try ( urge '^992-39^', await itk.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
+  urge '^992-41^', await itk.emit 'foo', [ 3, 4, 5, 6, ]
+  return null
+
+#===========================================================================================================
+demo_2 = ->
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
+  #.........................................................................................................
+  class A
+  class B extends Object
+  urge '^992-42^', A
+  urge '^992-43^', A.freeze
+  urge '^992-44^', new A()
+  urge '^992-45^', B
+  urge '^992-46^', new B()
+  urge '^992-47^', isa.object A
+  urge '^992-48^', isa.object B
+  urge '^992-49^', isa.object new A()
+  urge '^992-50^', isa.object new B()
+  try new Datom()     catch e then warn '^992-51^', reverse e.message
+  try new Datom 5     catch e then warn '^992-52^', reverse e.message
+  try new Datom null  catch e then warn '^992-53^', reverse e.message
+  try new Datom {}    catch e then warn '^992-54^', reverse e.message
+  urge '^992-55^', new Datom 'foo'
+  urge '^992-56^', new Datom 'foo', null
+  urge '^992-57^', new Datom 'foo', undefined
+  urge '^992-58^', new Datom 'foo', 56
+  urge '^992-59^', new Datom 'foo', { bar: 56, }
+  urge '^992-60^', new Datom 'foo', { bar: 56, $key: 'other', }
+  urge '^992-61^', new Datom s'foo', { bar: 56, $key: 'other', }
+  urge '^992-62^', new Datom { bar: 56, $key: 'other', }
+  urge '^992-63^', new Datom { bar: 56, $key: 'other', $freeze: false, }
+  urge '^992-64^', new Datom { bar: 56, $key: 'other', $freeze: true, }
+  urge '^992-65^', new Datom { bar: 56, $key: 'other', $freeze: null, }
+  urge '^992-66^', new Datom 'something', { $freeze: false, }
+  urge '^992-67^', new Datom 'something', { $freeze: true,  }
+  urge '^992-68^', new Datom 'something', { $freeze: null,  }
+  #.........................................................................................................
+  ### must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: ###
+  do =>
+    d = new Datom 'o', { $freeze: false, }
+    d.p = 7
+    urge '^992-69^', d
+    return null
+  #.........................................................................................................
+  ### passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
+  of `d`: ###
+  do =>
+    d = new Datom 'o', { $freeze: false, }
+    e = new Datom d
+    urge '^992-70^', d, e, d is e
+    return null
+  #.........................................................................................................
+  ### events are just `Datom`s: ###
+  urge '^992-71^', new Note s'foo', { bar: 56, }
+  #.........................................................................................................
+  ### calls to `emit` are just calls to `new Note()`: ###
+  await do =>
+    itk.on 'myevent', ( note ) -> info '^992-72^', note; note.n ** 2
+    help '^992-73^', await itk.emit 'myevent', { n: 16, }
+    return null
+  #.........................................................................................................
+  return null
+
+#===========================================================================================================
+demo_3 = ->
+  { Intertalk } = require '../../../apps/intertalk'
+  itk           = new Intertalk()
+  #.........................................................................................................
+  itk.on 'abc', {}
+  #.........................................................................................................
+  return null
+
+
+############################################################################################################
+#
 #===========================================================================================================
 @interface = ( T, done ) ->
   INTERTALK     = require '../../../apps/intertalk'
@@ -270,145 +380,138 @@ try_and_show = ( T, f ) ->
   #.........................................................................................................
   done?()
 
+# #===========================================================================================================
+# @result_ordering = ( T, done ) ->
+#   { Intertalk } = require '../../../apps/intertalk'
+#   # { after }     = GUY.async
+#   { nameit }    = ( require '../../../apps/webguy' ).props
+#   #.........................................................................................................
+#   await do ->
+#     itk       = new Intertalk()
+#     matcher   = [ [ 'one:k1' ], [ 'two:u1', 'two:u2' ], [ 'three:u1', 'three:u2' ] ]
+#     results   = []
+#     #.......................................................................................................
+#     get_listener = ( idx ) ->
+#       dt      = parseInt Math.random() * 1000
+#       message = "dt:#{dt},k#{idx}"
+#       R       = ( note ) -> new Promise ( resolve ) ->
+#         setTimeout ( -> help message; resolve message ), dt
+#       nameit message, R
+#       return R
+#     #.......................................................................................................
+#     itk.on 'whatever', get_listener idx for idx in [ 1 .. 9 ]
+#     results.push await itk.emit 'whatever'
+#     help '^243-1^', results
+#     #.......................................................................................................
+#     T?.eq results, matcher
+#     return null
+#   #.........................................................................................................
+#   done?()
+
 #===========================================================================================================
 @unsubscribing = ( T, done ) ->
   { Intertalk } = require '../../../apps/intertalk'
+  { after }     = GUY.async
   #.........................................................................................................
   itk = new Intertalk()
-  itk.on_any    a1 = ( note ) -> 'any'
-  itk.on 'd1',  d1 = ( note ) -> 1
-  itk.on 'd2',  d2 = ( note ) -> 2
-  itk.on 'd3',  d3 = ( note ) -> 3
+  itk.on_any        a1 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "a1:#{note.$key}"; resolve "a1:#{note.$key}"
+  itk.on_unhandled  f1 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "f1:#{note.$key}"; resolve "f1:#{note.$key}"
+  itk.on 'n1',      n1 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "n1:#{note.$key}"; resolve "n1:#{note.$key}"
+  itk.on 'n2',      n2 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "n2:#{note.$key}"; resolve "n2:#{note.$key}"
+  itk.on 'n3',      n3 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "n3:#{note.$key}"; resolve "n3:#{note.$key}"
+  itk.on 'n3',      m3 = ( note ) -> new Promise ( resolve ) -> after 0.02, -> help "m3:#{note.$key}"; resolve "m3:#{note.$key}"
+  itk.on 'n1',      m3
+  itk.on 'n2',      m3
   #.........................................................................................................
   await do =>
     results = []
-    results.push ( await itk.emit 'd1' ).results
-    results.push ( await itk.emit 'd2' ).results
-    results.push ( await itk.emit 'd3' ).results
-    T?.eq results, [ [ 'any', 1 ], [ 'any', 2 ], [ 'any', 3 ] ]
+    results.push ( await itk.emit 'n1' ).results
+    results.push ( await itk.emit 'n2' ).results
+    results.push ( await itk.emit 'n3' ).results
+    T?.eq results, [ [ 'a1:n1', 'n1:n1', 'm3:n1' ], [ 'a1:n2', 'n2:n2', 'm3:n2' ], [ 'a1:n3', 'n3:n3', 'm3:n3' ] ]
   #.........................................................................................................
-  T?.eq ( itk.off d2 ), 1
-  T?.eq ( itk.off d2 ), 0
-  #.........................................................................................................
-  await do =>
-    results = []
-    results.push ( await itk.emit 'd1' ).results
-    results.push ( await itk.emit 'd2' ).results
-    results.push ( await itk.emit 'd3' ).results
-    T?.eq results, [ [ 'any', 1 ], [ 'any' ], [ 'any', 3 ] ]
-  #.........................................................................................................
-  T?.eq ( itk.off a1 ), 1
-  T?.eq ( itk.off a1 ), 0
+  T?.eq ( itk.unsubscribe n2 ), 1
+  T?.eq ( itk.unsubscribe n2 ), 0
   #.........................................................................................................
   await do =>
     results = []
-    results.push ( await itk.emit 'd1' ).results
-    results.push ( await itk.emit 'd2' ).results
-    results.push ( await itk.emit 'd3' ).results
-    T?.eq results, [ [ 1 ], [], [ 3 ] ]
+    results.push ( await itk.emit 'n1' ).results
+    results.push ( await itk.emit 'n2' ).results
+    results.push ( await itk.emit 'n3' ).results
+    T?.eq results, [ [ 'a1:n1', 'n1:n1', 'm3:n1' ], [ 'a1:n2', 'm3:n2' ], [ 'a1:n3', 'n3:n3', 'm3:n3' ] ]
+  #.........................................................................................................
+  T?.eq ( itk.unsubscribe a1 ), 1
+  T?.eq ( itk.unsubscribe a1 ), 0
+  #.........................................................................................................
+  await do =>
+    results = []
+    results.push ( await itk.emit 'n1' ).results
+    results.push ( await itk.emit 'n2' ).results
+    results.push ( await itk.emit 'n3' ).results
+    T?.eq results, [ [ 'n1:n1', 'm3:n1' ], [ 'm3:n2' ], [ 'n3:n3', 'm3:n3' ] ]
+  #.........................................................................................................
+  T?.eq ( itk.unsubscribe 'n1', m3 ), 1
+  T?.eq ( itk.unsubscribe 'n1', m3 ), 0
+  T?.eq ( itk.unsubscribe 'n2', m3 ), 1
+  T?.eq ( itk.unsubscribe 'n2', m3 ), 0
+  #.........................................................................................................
+  await do =>
+    results = []
+    results.push ( await itk.emit 'n1' ).results
+    results.push ( await itk.emit 'n2' ).results
+    results.push ( await itk.emit 'n3' ).results
+    T?.eq results, [ [ 'n1:n1', ], [ 'f1:n2', ], [ 'n3:n3', 'm3:n3', ] ]
   #.........................................................................................................
   done?()
 
 #===========================================================================================================
-demo_1 = ->
+@control_object = ( T, done ) ->
   { Intertalk } = require '../../../apps/intertalk'
-  itk           = new Intertalk()
+  { after }     = GUY.async
   #.........................................................................................................
-  receiver =
-    on_square:      ( note ) -> info '^992-23^', note; note.$value ** 2
-    on_cube:        ( note ) -> info '^992-24^', note; note.$value ** 3
-    on_double:      ( note ) -> info '^992-25^', note; note.$value *  2
-    on_any:         ( note ) -> info '^992-26^', note
-    on_cube_symbol: ( note ) -> info '^992-27^', note; note.$value ** 3
-  itk.on 'square',   receiver
-  itk.on 'double',   receiver
-  itk.on 'cube',     receiver.on_cube
-  itk.on s'cube',    receiver.on_cube
-  itk.on '*',        receiver.on_any
-  # urge '^992-28^', itk
-  # urge '^992-29^', itk.key_symbols[ 'square' ]
-  # urge '^992-30^', itk.listeners
-  # urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
-  urge '^992-32^', await itk.emit            'square', 11
-  urge '^992-33^', await itk.emit            'double', 12
-  urge '^992-34^', await itk.emit            'cube',   13
-  urge '^992-35^', await itk.emit new Note  'cube',   14
-  urge '^992-36^', await itk.emit new Note  s'cube',  14
-  ### TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: ###
-  try ( urge '^992-37^', await itk.emit 'double', 3, 4, 5, 6      ) catch e then warn '^992-38^', reverse e.message
-  try ( urge '^992-39^', await itk.emit 'foo', 3, [ 4, 5, 6, ] ) catch e then warn '^992-40^', reverse e.message
-  urge '^992-41^', await itk.emit 'foo', [ 3, 4, 5, 6, ]
-  return null
-
-#===========================================================================================================
-demo_2 = ->
-  { Intertalk } = require '../../../apps/intertalk'
-  itk           = new Intertalk()
+  itk   = new Intertalk()
+  count = 0
   #.........................................................................................................
-  class A
-  class B extends Object
-  urge '^992-42^', A
-  urge '^992-43^', A.freeze
-  urge '^992-44^', new A()
-  urge '^992-45^', B
-  urge '^992-46^', new B()
-  urge '^992-47^', isa.object A
-  urge '^992-48^', isa.object B
-  urge '^992-49^', isa.object new A()
-  urge '^992-50^', isa.object new B()
-  try new Datom()     catch e then warn '^992-51^', reverse e.message
-  try new Datom 5     catch e then warn '^992-52^', reverse e.message
-  try new Datom null  catch e then warn '^992-53^', reverse e.message
-  try new Datom {}    catch e then warn '^992-54^', reverse e.message
-  urge '^992-55^', new Datom 'foo'
-  urge '^992-56^', new Datom 'foo', null
-  urge '^992-57^', new Datom 'foo', undefined
-  urge '^992-58^', new Datom 'foo', 56
-  urge '^992-59^', new Datom 'foo', { bar: 56, }
-  urge '^992-60^', new Datom 'foo', { bar: 56, $key: 'other', }
-  urge '^992-61^', new Datom s'foo', { bar: 56, $key: 'other', }
-  urge '^992-62^', new Datom { bar: 56, $key: 'other', }
-  urge '^992-63^', new Datom { bar: 56, $key: 'other', $freeze: false, }
-  urge '^992-64^', new Datom { bar: 56, $key: 'other', $freeze: true, }
-  urge '^992-65^', new Datom { bar: 56, $key: 'other', $freeze: null, }
-  urge '^992-66^', new Datom 'something', { $freeze: false, }
-  urge '^992-67^', new Datom 'something', { $freeze: true,  }
-  urge '^992-68^', new Datom 'something', { $freeze: null,  }
+  itk.on 'one', k1 = ( note, ctl ) ->
+    T?.eq arguments.length, 2
+    #.......................................................................................................
+    return new Promise ( resolve ) ->
+      message = "#{note.$key}:k1"
+      after 0.05, ->
+        if note.$key is 'one'
+          ctl.unsubscribe_this()
+        else
+          count++
+          ctl.unsubscribe_all() if count > 1
+        help    message
+        resolve message
+      return null
   #.........................................................................................................
-  ### must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: ###
-  do =>
-    d = new Datom 'o', { $freeze: false, }
-    d.p = 7
-    urge '^992-69^', d
-    return null
+  itk.on 'two', k1
+  itk.on_any a1 = ( note ) -> "#{note.$key}:a1"
   #.........................................................................................................
-  ### passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
-  of `d`: ###
-  do =>
-    d = new Datom 'o', { $freeze: false, }
-    e = new Datom d
-    urge '^992-70^', d, e, d is e
-    return null
+  results = []
+  results.push ( await itk.emit 'one'   ).results
+  results.push ( await itk.emit 'two'   ).results
+  results.push ( await itk.emit 'three' ).results
+  results.push ( await itk.emit 'one'   ).results
+  results.push ( await itk.emit 'two'   ).results
+  results.push ( await itk.emit 'three' ).results
+  results.push ( await itk.emit 'one'   ).results
+  results.push ( await itk.emit 'two'   ).results
+  results.push ( await itk.emit 'three' ).results
+  T?.eq results, [
+    [ 'one:a1', 'one:k1' ],
+    [ 'two:a1', 'two:k1' ],
+    [ 'three:a1' ],
+    [ 'one:a1', ],
+    [ 'two:a1', 'two:k1' ],
+    [ 'three:a1' ],
+    [ 'one:a1', ],
+    [ 'two:a1', ],
+    [ 'three:a1' ] ]
   #.........................................................................................................
-  ### events are just `Datom`s: ###
-  urge '^992-71^', new Note s'foo', { bar: 56, }
-  #.........................................................................................................
-  ### calls to `emit` are just calls to `new Note()`: ###
-  await do =>
-    itk.on 'myevent', ( note ) -> info '^992-72^', note; note.n ** 2
-    help '^992-73^', await itk.emit 'myevent', { n: 16, }
-    return null
-  #.........................................................................................................
-  return null
-
-#===========================================================================================================
-demo_3 = ->
-  { Intertalk } = require '../../../apps/intertalk'
-  itk           = new Intertalk()
-  #.........................................................................................................
-  itk.on 'abc', {}
-  #.........................................................................................................
-  return null
+  done?()
 
 
 #===========================================================================================================
@@ -419,6 +522,7 @@ if module is require.main then await do =>
   # await test @WeakMap_replacement
   # await test @unsubscribing
   # await test @on_unhandled
+  # await test @control_object
   await test @
 
 
