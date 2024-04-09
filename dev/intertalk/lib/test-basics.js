@@ -37,6 +37,8 @@
   //   done()
   //   return null
 
+  //###########################################################################################################
+
   //===========================================================================================================
   isa_object = function(x) {
     return (x != null) && (typeof x === 'object') && ((Object.prototype.toString.call(x)) === '[object Object]');
@@ -90,6 +92,204 @@
     }
     return null;
   };
+
+  //###########################################################################################################
+
+  //===========================================================================================================
+  demo_1 = async function() {
+    var Intertalk, e, itk, receiver;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
+    //.........................................................................................................
+    receiver = {
+      on_square: function(note) {
+        info('^992-23^', note);
+        return note.$value ** 2;
+      },
+      on_cube: function(note) {
+        info('^992-24^', note);
+        return note.$value ** 3;
+      },
+      on_double: function(note) {
+        info('^992-25^', note);
+        return note.$value * 2;
+      },
+      on_any: function(note) {
+        return info('^992-26^', note);
+      },
+      on_cube_symbol: function(note) {
+        info('^992-27^', note);
+        return note.$value ** 3;
+      }
+    };
+    itk.on('square', receiver);
+    itk.on('double', receiver);
+    itk.on('cube', receiver.on_cube);
+    itk.on(s`cube`, receiver.on_cube);
+    itk.on('*', receiver.on_any);
+    // urge '^992-28^', itk
+    // urge '^992-29^', itk.key_symbols[ 'square' ]
+    // urge '^992-30^', itk.listeners
+    // urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
+    urge('^992-32^', (await itk.emit('square', 11)));
+    urge('^992-33^', (await itk.emit('double', 12)));
+    urge('^992-34^', (await itk.emit('cube', 13)));
+    urge('^992-35^', (await itk.emit(new Note('cube', 14))));
+    urge('^992-36^', (await itk.emit(new Note(s`cube`, 14))));
+    try {
+      /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
+      urge('^992-37^', (await itk.emit('double', 3, 4, 5, 6)));
+    } catch (error1) {
+      e = error1;
+      warn('^992-38^', reverse(e.message));
+    }
+    try {
+      urge('^992-39^', (await itk.emit('foo', 3, [4, 5, 6])));
+    } catch (error1) {
+      e = error1;
+      warn('^992-40^', reverse(e.message));
+    }
+    urge('^992-41^', (await itk.emit('foo', [3, 4, 5, 6])));
+    return null;
+  };
+
+  //===========================================================================================================
+  demo_2 = async function() {
+    var A, B, Intertalk, e, itk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
+    //.........................................................................................................
+    A = class A {};
+    B = class B extends Object {};
+    urge('^992-42^', A);
+    urge('^992-43^', A.freeze);
+    urge('^992-44^', new A());
+    urge('^992-45^', B);
+    urge('^992-46^', new B());
+    urge('^992-47^', isa.object(A));
+    urge('^992-48^', isa.object(B));
+    urge('^992-49^', isa.object(new A()));
+    urge('^992-50^', isa.object(new B()));
+    try {
+      new Datom();
+    } catch (error1) {
+      e = error1;
+      warn('^992-51^', reverse(e.message));
+    }
+    try {
+      new Datom(5);
+    } catch (error1) {
+      e = error1;
+      warn('^992-52^', reverse(e.message));
+    }
+    try {
+      new Datom(null);
+    } catch (error1) {
+      e = error1;
+      warn('^992-53^', reverse(e.message));
+    }
+    try {
+      new Datom({});
+    } catch (error1) {
+      e = error1;
+      warn('^992-54^', reverse(e.message));
+    }
+    urge('^992-55^', new Datom('foo'));
+    urge('^992-56^', new Datom('foo', null));
+    urge('^992-57^', new Datom('foo', void 0));
+    urge('^992-58^', new Datom('foo', 56));
+    urge('^992-59^', new Datom('foo', {
+      bar: 56
+    }));
+    urge('^992-60^', new Datom('foo', {
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-61^', new Datom(s`foo`, {
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-62^', new Datom({
+      bar: 56,
+      $key: 'other'
+    }));
+    urge('^992-63^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: false
+    }));
+    urge('^992-64^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: true
+    }));
+    urge('^992-65^', new Datom({
+      bar: 56,
+      $key: 'other',
+      $freeze: null
+    }));
+    urge('^992-66^', new Datom('something', {
+      $freeze: false
+    }));
+    urge('^992-67^', new Datom('something', {
+      $freeze: true
+    }));
+    urge('^992-68^', new Datom('something', {
+      $freeze: null
+    }));
+    (() => {      //.........................................................................................................
+      /* must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: */
+      var d;
+      d = new Datom('o', {
+        $freeze: false
+      });
+      d.p = 7;
+      urge('^992-69^', d);
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      /* passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
+       of `d`: */
+      var d;
+      d = new Datom('o', {
+        $freeze: false
+      });
+      e = new Datom(d);
+      urge('^992-70^', d, e, d === e);
+      return null;
+    })();
+    //.........................................................................................................
+    /* events are just `Datom`s: */
+    urge('^992-71^', new Note(s`foo`, {
+      bar: 56
+    }));
+    await (async() => {      //.........................................................................................................
+      /* calls to `emit` are just calls to `new Note()`: */
+      itk.on('myevent', function(note) {
+        info('^992-72^', note);
+        return note.n ** 2;
+      });
+      help('^992-73^', (await itk.emit('myevent', {
+        n: 16
+      })));
+      return null;
+    })();
+    //.........................................................................................................
+    return null;
+  };
+
+  //===========================================================================================================
+  demo_3 = function() {
+    var Intertalk, itk;
+    ({Intertalk} = require('../../../apps/intertalk'));
+    itk = new Intertalk();
+    //.........................................................................................................
+    itk.on('abc', {});
+    //.........................................................................................................
+    return null;
+  };
+
+  //###########################################################################################################
 
   //===========================================================================================================
   this.interface = async function(T, done) {
@@ -496,257 +696,205 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  // #===========================================================================================================
+  // @result_ordering = ( T, done ) ->
+  //   { Intertalk } = require '../../../apps/intertalk'
+  //   # { after }     = GUY.async
+  //   { nameit }    = ( require '../../../apps/webguy' ).props
+  //   #.........................................................................................................
+  //   await do ->
+  //     itk       = new Intertalk()
+  //     matcher   = [ [ 'one:k1' ], [ 'two:u1', 'two:u2' ], [ 'three:u1', 'three:u2' ] ]
+  //     results   = []
+  //     #.......................................................................................................
+  //     get_listener = ( idx ) ->
+  //       dt      = parseInt Math.random() * 1000
+  //       message = "dt:#{dt},k#{idx}"
+  //       R       = ( note ) -> new Promise ( resolve ) ->
+  //         setTimeout ( -> help message; resolve message ), dt
+  //       nameit message, R
+  //       return R
+  //     #.......................................................................................................
+  //     itk.on 'whatever', get_listener idx for idx in [ 1 .. 9 ]
+  //     results.push await itk.emit 'whatever'
+  //     help '^243-1^', results
+  //     #.......................................................................................................
+  //     T?.eq results, matcher
+  //     return null
+  //   #.........................................................................................................
+  //   done?()
+
   //===========================================================================================================
   this.unsubscribing = async function(T, done) {
-    var Intertalk, a1, d1, d2, d3, itk;
+    var Intertalk, a1, after, f1, itk, m3, n1, n2, n3;
     ({Intertalk} = require('../../../apps/intertalk'));
+    ({after} = GUY.async);
     //.........................................................................................................
     itk = new Intertalk();
     itk.on_any(a1 = function(note) {
-      return 'any';
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`a1:${note.$key}`);
+          return resolve(`a1:${note.$key}`);
+        });
+      });
     });
-    itk.on('d1', d1 = function(note) {
-      return 1;
+    itk.on_unhandled(f1 = function(note) {
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`f1:${note.$key}`);
+          return resolve(`f1:${note.$key}`);
+        });
+      });
     });
-    itk.on('d2', d2 = function(note) {
-      return 2;
+    itk.on('n1', n1 = function(note) {
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`n1:${note.$key}`);
+          return resolve(`n1:${note.$key}`);
+        });
+      });
     });
-    itk.on('d3', d3 = function(note) {
-      return 3;
+    itk.on('n2', n2 = function(note) {
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`n2:${note.$key}`);
+          return resolve(`n2:${note.$key}`);
+        });
+      });
     });
+    itk.on('n3', n3 = function(note) {
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`n3:${note.$key}`);
+          return resolve(`n3:${note.$key}`);
+        });
+      });
+    });
+    itk.on('n3', m3 = function(note) {
+      return new Promise(function(resolve) {
+        return after(0.02, function() {
+          help(`m3:${note.$key}`);
+          return resolve(`m3:${note.$key}`);
+        });
+      });
+    });
+    itk.on('n1', m3);
+    itk.on('n2', m3);
     await (async() => {      //.........................................................................................................
       var results;
       results = [];
-      results.push(((await itk.emit('d1'))).results);
-      results.push(((await itk.emit('d2'))).results);
-      results.push(((await itk.emit('d3'))).results);
-      return T != null ? T.eq(results, [['any', 1], ['any', 2], ['any', 3]]) : void 0;
+      results.push(((await itk.emit('n1'))).results);
+      results.push(((await itk.emit('n2'))).results);
+      results.push(((await itk.emit('n3'))).results);
+      return T != null ? T.eq(results, [['a1:n1', 'n1:n1', 'm3:n1'], ['a1:n2', 'n2:n2', 'm3:n2'], ['a1:n3', 'n3:n3', 'm3:n3']]) : void 0;
     })();
     //.........................................................................................................
     if (T != null) {
-      T.eq(itk.off(d2), 1);
+      T.eq(itk.unsubscribe(n2), 1);
     }
     if (T != null) {
-      T.eq(itk.off(d2), 0);
+      T.eq(itk.unsubscribe(n2), 0);
     }
     await (async() => {      //.........................................................................................................
       var results;
       results = [];
-      results.push(((await itk.emit('d1'))).results);
-      results.push(((await itk.emit('d2'))).results);
-      results.push(((await itk.emit('d3'))).results);
-      return T != null ? T.eq(results, [['any', 1], ['any'], ['any', 3]]) : void 0;
+      results.push(((await itk.emit('n1'))).results);
+      results.push(((await itk.emit('n2'))).results);
+      results.push(((await itk.emit('n3'))).results);
+      return T != null ? T.eq(results, [['a1:n1', 'n1:n1', 'm3:n1'], ['a1:n2', 'm3:n2'], ['a1:n3', 'n3:n3', 'm3:n3']]) : void 0;
     })();
     //.........................................................................................................
     if (T != null) {
-      T.eq(itk.off(a1), 1);
+      T.eq(itk.unsubscribe(a1), 1);
     }
     if (T != null) {
-      T.eq(itk.off(a1), 0);
+      T.eq(itk.unsubscribe(a1), 0);
     }
     await (async() => {      //.........................................................................................................
       var results;
       results = [];
-      results.push(((await itk.emit('d1'))).results);
-      results.push(((await itk.emit('d2'))).results);
-      results.push(((await itk.emit('d3'))).results);
-      return T != null ? T.eq(results, [[1], [], [3]]) : void 0;
+      results.push(((await itk.emit('n1'))).results);
+      results.push(((await itk.emit('n2'))).results);
+      results.push(((await itk.emit('n3'))).results);
+      return T != null ? T.eq(results, [['n1:n1', 'm3:n1'], ['m3:n2'], ['n3:n3', 'm3:n3']]) : void 0;
+    })();
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(itk.unsubscribe('n1', m3), 1);
+    }
+    if (T != null) {
+      T.eq(itk.unsubscribe('n1', m3), 0);
+    }
+    if (T != null) {
+      T.eq(itk.unsubscribe('n2', m3), 1);
+    }
+    if (T != null) {
+      T.eq(itk.unsubscribe('n2', m3), 0);
+    }
+    await (async() => {      //.........................................................................................................
+      var results;
+      results = [];
+      results.push(((await itk.emit('n1'))).results);
+      results.push(((await itk.emit('n2'))).results);
+      results.push(((await itk.emit('n3'))).results);
+      return T != null ? T.eq(results, [['n1:n1'], ['f1:n2'], ['n3:n3', 'm3:n3']]) : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
-  demo_1 = async function() {
-    var Intertalk, e, itk, receiver;
+  this.control_object = async function(T, done) {
+    var Intertalk, a1, after, count, itk, k1, results;
     ({Intertalk} = require('../../../apps/intertalk'));
-    itk = new Intertalk();
+    ({after} = GUY.async);
     //.........................................................................................................
-    receiver = {
-      on_square: function(note) {
-        info('^992-23^', note);
-        return note.$value ** 2;
-      },
-      on_cube: function(note) {
-        info('^992-24^', note);
-        return note.$value ** 3;
-      },
-      on_double: function(note) {
-        info('^992-25^', note);
-        return note.$value * 2;
-      },
-      on_any: function(note) {
-        return info('^992-26^', note);
-      },
-      on_cube_symbol: function(note) {
-        info('^992-27^', note);
-        return note.$value ** 3;
+    itk = new Intertalk();
+    count = 0;
+    //.........................................................................................................
+    itk.on('one', k1 = function(note, ctl) {
+      if (T != null) {
+        T.eq(arguments.length, 2);
       }
-    };
-    itk.on('square', receiver);
-    itk.on('double', receiver);
-    itk.on('cube', receiver.on_cube);
-    itk.on(s`cube`, receiver.on_cube);
-    itk.on('*', receiver.on_any);
-    // urge '^992-28^', itk
-    // urge '^992-29^', itk.key_symbols[ 'square' ]
-    // urge '^992-30^', itk.listeners
-    // urge '^992-31^', itk.listeners.get itk.key_symbols[ 'square' ]
-    urge('^992-32^', (await itk.emit('square', 11)));
-    urge('^992-33^', (await itk.emit('double', 12)));
-    urge('^992-34^', (await itk.emit('cube', 13)));
-    urge('^992-35^', (await itk.emit(new Note('cube', 14))));
-    urge('^992-36^', (await itk.emit(new Note(s`cube`, 14))));
-    try {
-      /* TAINT should not be accepted, emit 1 object or 1 key plus 0-1 data: */
-      urge('^992-37^', (await itk.emit('double', 3, 4, 5, 6)));
-    } catch (error1) {
-      e = error1;
-      warn('^992-38^', reverse(e.message));
-    }
-    try {
-      urge('^992-39^', (await itk.emit('foo', 3, [4, 5, 6])));
-    } catch (error1) {
-      e = error1;
-      warn('^992-40^', reverse(e.message));
-    }
-    urge('^992-41^', (await itk.emit('foo', [3, 4, 5, 6])));
-    return null;
-  };
-
-  //===========================================================================================================
-  demo_2 = async function() {
-    var A, B, Intertalk, e, itk;
-    ({Intertalk} = require('../../../apps/intertalk'));
-    itk = new Intertalk();
-    //.........................................................................................................
-    A = class A {};
-    B = class B extends Object {};
-    urge('^992-42^', A);
-    urge('^992-43^', A.freeze);
-    urge('^992-44^', new A());
-    urge('^992-45^', B);
-    urge('^992-46^', new B());
-    urge('^992-47^', isa.object(A));
-    urge('^992-48^', isa.object(B));
-    urge('^992-49^', isa.object(new A()));
-    urge('^992-50^', isa.object(new B()));
-    try {
-      new Datom();
-    } catch (error1) {
-      e = error1;
-      warn('^992-51^', reverse(e.message));
-    }
-    try {
-      new Datom(5);
-    } catch (error1) {
-      e = error1;
-      warn('^992-52^', reverse(e.message));
-    }
-    try {
-      new Datom(null);
-    } catch (error1) {
-      e = error1;
-      warn('^992-53^', reverse(e.message));
-    }
-    try {
-      new Datom({});
-    } catch (error1) {
-      e = error1;
-      warn('^992-54^', reverse(e.message));
-    }
-    urge('^992-55^', new Datom('foo'));
-    urge('^992-56^', new Datom('foo', null));
-    urge('^992-57^', new Datom('foo', void 0));
-    urge('^992-58^', new Datom('foo', 56));
-    urge('^992-59^', new Datom('foo', {
-      bar: 56
-    }));
-    urge('^992-60^', new Datom('foo', {
-      bar: 56,
-      $key: 'other'
-    }));
-    urge('^992-61^', new Datom(s`foo`, {
-      bar: 56,
-      $key: 'other'
-    }));
-    urge('^992-62^', new Datom({
-      bar: 56,
-      $key: 'other'
-    }));
-    urge('^992-63^', new Datom({
-      bar: 56,
-      $key: 'other',
-      $freeze: false
-    }));
-    urge('^992-64^', new Datom({
-      bar: 56,
-      $key: 'other',
-      $freeze: true
-    }));
-    urge('^992-65^', new Datom({
-      bar: 56,
-      $key: 'other',
-      $freeze: null
-    }));
-    urge('^992-66^', new Datom('something', {
-      $freeze: false
-    }));
-    urge('^992-67^', new Datom('something', {
-      $freeze: true
-    }));
-    urge('^992-68^', new Datom('something', {
-      $freeze: null
-    }));
-    (() => {      //.........................................................................................................
-      /* must set `{ $freeze: false, }` explicitly else datom will be (superficially) frozen: */
-      var d;
-      d = new Datom('o', {
-        $freeze: false
+      //.......................................................................................................
+      return new Promise(function(resolve) {
+        var message;
+        message = `${note.$key}:k1`;
+        after(0.05, function() {
+          if (note.$key === 'one') {
+            ctl.unsubscribe_this();
+          } else {
+            count++;
+            if (count > 1) {
+              ctl.unsubscribe_all();
+            }
+          }
+          help(message);
+          return resolve(message);
+        });
+        return null;
       });
-      d.p = 7;
-      urge('^992-69^', d);
-      return null;
-    })();
-    (() => {      //.........................................................................................................
-      /* passing in an existing datom (or note) `d` into `new Datom d` (or `new Note d`) results in a copy
-       of `d`: */
-      var d;
-      d = new Datom('o', {
-        $freeze: false
-      });
-      e = new Datom(d);
-      urge('^992-70^', d, e, d === e);
-      return null;
-    })();
+    });
     //.........................................................................................................
-    /* events are just `Datom`s: */
-    urge('^992-71^', new Note(s`foo`, {
-      bar: 56
-    }));
-    await (async() => {      //.........................................................................................................
-      /* calls to `emit` are just calls to `new Note()`: */
-      itk.on('myevent', function(note) {
-        info('^992-72^', note);
-        return note.n ** 2;
-      });
-      help('^992-73^', (await itk.emit('myevent', {
-        n: 16
-      })));
-      return null;
-    })();
+    itk.on('two', k1);
+    itk.on_any(a1 = function(note) {
+      return `${note.$key}:a1`;
+    });
     //.........................................................................................................
-    return null;
-  };
-
-  //===========================================================================================================
-  demo_3 = function() {
-    var Intertalk, itk;
-    ({Intertalk} = require('../../../apps/intertalk'));
-    itk = new Intertalk();
-    //.........................................................................................................
-    itk.on('abc', {});
-    //.........................................................................................................
-    return null;
+    results = [];
+    results.push(((await itk.emit('one'))).results);
+    results.push(((await itk.emit('two'))).results);
+    results.push(((await itk.emit('three'))).results);
+    results.push(((await itk.emit('one'))).results);
+    results.push(((await itk.emit('two'))).results);
+    results.push(((await itk.emit('three'))).results);
+    results.push(((await itk.emit('one'))).results);
+    results.push(((await itk.emit('two'))).results);
+    results.push(((await itk.emit('three'))).results);
+    if (T != null) {
+      T.eq(results, [['one:a1', 'one:k1'], ['two:a1', 'two:k1'], ['three:a1'], ['one:a1'], ['two:a1', 'two:k1'], ['three:a1'], ['one:a1'], ['two:a1'], ['three:a1']]);
+    }
+    return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
@@ -758,6 +906,7 @@
       // await test @WeakMap_replacement
       // await test @unsubscribing
       // await test @on_unhandled
+      // await test @control_object
       return (await test(this));
     })();
   }
