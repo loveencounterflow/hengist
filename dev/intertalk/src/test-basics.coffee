@@ -190,6 +190,7 @@ demo_3 = ->
   T?.eq ( itk.emit 'what' )?.constructor?.name, 'Promise'
   T?.ok ( await itk.emit 'what' ) instanceof INTERTALK.Results
   T?.eq ( INTERTALK._extras.isa.null itk.on 'foo', ( ( note ) -> )      ), true
+  T?.eq ( INTERTALK._extras.isa.text INTERTALK.version     ), true
   #.........................................................................................................
   done?()
 
@@ -522,10 +523,7 @@ if module is require.main then await do =>
   # await test @WeakMap_replacement
   # await test @unsubscribing
   # await test @on_unhandled
-  # await test @control_object
-  await test @
-
-
-
+  await test @control_object
+  # await test @
 
 
