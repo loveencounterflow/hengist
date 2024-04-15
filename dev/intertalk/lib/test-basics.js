@@ -316,6 +316,9 @@
     if (T != null) {
       T.eq(INTERTALK._extras.isa.null(itk.on('foo', (function(note) {}))), true);
     }
+    if (T != null) {
+      T.eq(INTERTALK._extras.isa.text(INTERTALK.version), true);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -906,10 +909,11 @@
       // await test @WeakMap_replacement
       // await test @unsubscribing
       // await test @on_unhandled
-      // await test @control_object
-      return (await test(this));
+      return (await test(this.control_object));
     })();
   }
+
+  // await test @
 
 }).call(this);
 
