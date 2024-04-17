@@ -5,7 +5,7 @@
   //###########################################################################################################
   GUY = require('guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('DJEHUTI/TESTS/MAIN'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('intertype'));
 
   ({rpr, inspect, echo, log} = GUY.trm);
 
