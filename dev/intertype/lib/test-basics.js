@@ -46,21 +46,6 @@
 
   //===========================================================================================================
   sample_declarations = {
-    anything: function(x) {
-      return true;
-    },
-    nothing: function(x) {
-      return x == null;
-    },
-    something: function(x) {
-      return x != null;
-    },
-    null: function(x) {
-      return x === null;
-    },
-    undefined: function(x) {
-      return x === void 0;
-    },
     boolean: function(x) {
       return (x === true) || (x === false);
     },
@@ -90,9 +75,6 @@
     },
     trinary: function(x) {
       return (x != null) && ((x.length === 3) || (x.size === 3));
-    },
-    unknown: function(x) {
-      return (this.type_of(x)) === 'unknown';
     }
   };
 
@@ -291,6 +273,7 @@
   //===========================================================================================================
   if (module === require.main) {
     await (async() => {
+      this.basic_functionality();
       return (await test(this));
     })();
   }
