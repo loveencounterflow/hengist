@@ -11,7 +11,7 @@ GUY                       = require 'guy'
   praise
   urge
   warn
-  whisper }               = GUY.trm.get_loggers 'intertype'
+  whisper }               = GUY.trm.get_loggers 'intertype/test-basics'
 { rpr
   inspect
   echo
@@ -59,6 +59,7 @@ sample_declarations =
   asyncfunction:          ( x ) -> ( Object::toString.call x ) is '[object AsyncFunction]'
   symbol:                 ( x ) -> ( typeof x ) is 'symbol'
   object:                 ( x ) -> x? and ( typeof x is 'object' ) and ( ( Object::toString.call x ) is '[object Object]' )
+  float:                  ( x ) -> Number.isFinite x
   text:                   ( x ) -> ( typeof x ) is 'string'
   nullary:                ( x ) -> x? and ( ( x.length is 0 ) or ( x.size is 0 ) )
   unary:                  ( x ) -> x? and ( ( x.length is 1 ) or ( x.size is 1 ) )
@@ -70,7 +71,6 @@ sample_declarations =
 throws = ( T, matcher, f ) ->
   await do =>
     error = null
-    debug '^992-56^', matcher, TMP_types.type_of matcher
     try await f() catch error
       switch matcher_type = TMP_types.type_of matcher
         when 'text'
@@ -123,7 +123,7 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@basic_functionality = ( T, done ) ->
+@basic_functionality_using_types_object = ( T, done ) ->
   # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
   types         = new INTERTYPE.Intertype sample_declarations
@@ -156,13 +156,75 @@ try_and_show = ( T, f ) ->
   T?.eq ( types.type_of +Infinity       ), 'unknown'
   T?.eq ( types.type_of -Infinity       ), 'unknown'
   #.........................................................................................................
+  T?.eq ( types.isa.asyncfunction.name               ), 'isa_asyncfunction'
+  T?.eq ( types.isa.optional.asyncfunction.name      ), 'isa_optional_asyncfunction'
+  T?.eq ( types.validate.asyncfunction.name          ), 'validate_asyncfunction'
+  T?.eq ( types.validate.optional.asyncfunction.name ), 'validate_optional_asyncfunction'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@basic_functionality_using_standalone_methods = ( T, done ) ->
+  # T?.halt_on_error()
+  INTERTYPE     = require '../../../apps/intertype'
+  { isa
+    validate
+    type_of   } = new INTERTYPE.Intertype sample_declarations
+  T?.eq ( isa.boolean           false               ), true
+  T?.eq ( isa.boolean           true                ), true
+  T?.eq ( isa.boolean           null                ), false
+  T?.eq ( isa.boolean           1                   ), false
+  T?.eq ( isa.unknown           1                   ), false
+  T?.eq ( isa.unknown           Infinity            ), true
+  T?.eq ( isa.optional.boolean  false               ), true
+  T?.eq ( isa.optional.boolean  true                ), true
+  T?.eq ( isa.optional.boolean  null                ), true
+  T?.eq ( isa.optional.boolean  1                   ), false
+  T?.eq ( isa.optional.unknown  1                   ), false
+  T?.eq ( isa.optional.unknown  Infinity            ), true
+  T?.eq ( isa.optional.unknown  undefined           ), true
+  T?.eq ( isa.optional.unknown  undefined           ), true
+  #.........................................................................................................
+  T?.eq ( validate.boolean               false      ), false
+  T?.eq ( validate.boolean               true       ), true
+  T?.eq ( validate.optional.boolean      true       ), true
+  T?.eq ( validate.optional.boolean      false      ), false
+  T?.eq ( validate.optional.boolean      undefined  ), undefined
+  T?.eq ( validate.optional.boolean      null       ), null
+  try_and_show T,                           -> validate.boolean           1
+  try_and_show T,                           -> validate.optional.boolean  1
+  throws T, /expected a boolean/,           -> validate.boolean           1
+  throws T, /expected an optional boolean/, -> validate.optional.boolean  1
+  #.........................................................................................................
+  T?.eq ( type_of null            ), 'null'
+  T?.eq ( type_of undefined       ), 'undefined'
+  T?.eq ( type_of false           ), 'boolean'
+  T?.eq ( type_of Symbol 'p'      ), 'symbol'
+  T?.eq ( type_of {}              ), 'object'
+  T?.eq ( type_of NaN             ), 'unknown'
+  T?.eq ( type_of +Infinity       ), 'unknown'
+  T?.eq ( type_of -Infinity       ), 'unknown'
+  #.........................................................................................................
+  T?.eq ( isa.asyncfunction.name               ), 'isa_asyncfunction'
+  T?.eq ( isa.optional.asyncfunction.name      ), 'isa_optional_asyncfunction'
+  T?.eq ( validate.asyncfunction.name          ), 'validate_asyncfunction'
+  T?.eq ( validate.optional.asyncfunction.name ), 'validate_optional_asyncfunction'
+  #.........................................................................................................
   done?()
 
 
 
 #===========================================================================================================
 if module is require.main then await do =>
-  @basic_functionality()
+  # @basic_functionality_using_types_object()
   await test @
+
+  # do =>
+  #   INTERTYPE     = require '../../../apps/intertype'
+  #   types         = new INTERTYPE.Intertype sample_declarations
+  #   debug '^345^', types.type_of 1
+  #   debug '^345^', types.type_of Infinity
+  #   debug '^345^', types.isa.unknown 1
+  #   debug '^345^', types.isa.unknown Infinity
 
 
