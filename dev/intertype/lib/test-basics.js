@@ -4,7 +4,7 @@
 
   GUY = require('guy');
 
-  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('intertype'));
+  ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('intertype/test-basics'));
 
   ({rpr, inspect, echo, reverse, log} = GUY.trm);
 
@@ -61,6 +61,9 @@
     object: function(x) {
       return (x != null) && (typeof x === 'object') && ((Object.prototype.toString.call(x)) === '[object Object]');
     },
+    float: function(x) {
+      return Number.isFinite(x);
+    },
     text: function(x) {
       return (typeof x) === 'string';
     },
@@ -83,7 +86,6 @@
     await (async() => {
       var error, matcher_type, message;
       error = null;
-      debug('^992-56^', matcher, TMP_types.type_of(matcher));
       try {
         await f();
       } catch (error1) {
@@ -182,7 +184,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.basic_functionality = function(T, done) {
+  this.basic_functionality_using_types_object = function(T, done) {
     var INTERTYPE, types;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
@@ -267,16 +269,157 @@
     if (T != null) {
       T.eq(types.type_of(-2e308), 'unknown');
     }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(types.isa.asyncfunction.name, 'isa_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(types.isa.optional.asyncfunction.name, 'isa_optional_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(types.validate.asyncfunction.name, 'validate_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(types.validate.optional.asyncfunction.name, 'validate_optional_asyncfunction');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.basic_functionality_using_standalone_methods = function(T, done) {
+    var INTERTYPE, isa, type_of, validate;
+    // T?.halt_on_error()
+    INTERTYPE = require('../../../apps/intertype');
+    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    if (T != null) {
+      T.eq(isa.boolean(false), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(null), false);
+    }
+    if (T != null) {
+      T.eq(isa.boolean(1), false);
+    }
+    if (T != null) {
+      T.eq(isa.unknown(1), false);
+    }
+    if (T != null) {
+      T.eq(isa.unknown(2e308), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.boolean(false), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.boolean(null), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.boolean(1), false);
+    }
+    if (T != null) {
+      T.eq(isa.optional.unknown(1), false);
+    }
+    if (T != null) {
+      T.eq(isa.optional.unknown(2e308), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.unknown(void 0), true);
+    }
+    if (T != null) {
+      T.eq(isa.optional.unknown(void 0), true);
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(validate.boolean(false), false);
+    }
+    if (T != null) {
+      T.eq(validate.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(validate.optional.boolean(true), true);
+    }
+    if (T != null) {
+      T.eq(validate.optional.boolean(false), false);
+    }
+    if (T != null) {
+      T.eq(validate.optional.boolean(void 0), void 0);
+    }
+    if (T != null) {
+      T.eq(validate.optional.boolean(null), null);
+    }
+    try_and_show(T, function() {
+      return validate.boolean(1);
+    });
+    try_and_show(T, function() {
+      return validate.optional.boolean(1);
+    });
+    throws(T, /expected a boolean/, function() {
+      return validate.boolean(1);
+    });
+    throws(T, /expected an optional boolean/, function() {
+      return validate.optional.boolean(1);
+    });
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(type_of(null), 'null');
+    }
+    if (T != null) {
+      T.eq(type_of(void 0), 'undefined');
+    }
+    if (T != null) {
+      T.eq(type_of(false), 'boolean');
+    }
+    if (T != null) {
+      T.eq(type_of(Symbol('p')), 'symbol');
+    }
+    if (T != null) {
+      T.eq(type_of({}), 'object');
+    }
+    if (T != null) {
+      T.eq(type_of(0/0), 'unknown');
+    }
+    if (T != null) {
+      T.eq(type_of(+2e308), 'unknown');
+    }
+    if (T != null) {
+      T.eq(type_of(-2e308), 'unknown');
+    }
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.asyncfunction.name, 'isa_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(isa.optional.asyncfunction.name, 'isa_optional_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(validate.asyncfunction.name, 'validate_asyncfunction');
+    }
+    if (T != null) {
+      T.eq(validate.optional.asyncfunction.name, 'validate_optional_asyncfunction');
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
   //===========================================================================================================
   if (module === require.main) {
     await (async() => {
-      this.basic_functionality();
+      // @basic_functionality_using_types_object()
       return (await test(this));
     })();
   }
+
+  // do =>
+//   INTERTYPE     = require '../../../apps/intertype'
+//   types         = new INTERTYPE.Intertype sample_declarations
+//   debug '^345^', types.type_of 1
+//   debug '^345^', types.type_of Infinity
+//   debug '^345^', types.isa.unknown 1
+//   debug '^345^', types.isa.unknown Infinity
 
 }).call(this);
 
