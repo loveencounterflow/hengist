@@ -54,11 +54,6 @@ TMP_types                 = new ( require 'intertype' ).Intertype()
 
 #===========================================================================================================
 sample_declarations =
-  anything:               ( x ) -> true
-  nothing:                ( x ) -> not x?
-  something:              ( x ) -> x?
-  null:                   ( x ) -> x is null
-  undefined:              ( x ) -> x is undefined
   boolean:                ( x ) -> ( x is true ) or ( x is false )
   function:               ( x ) -> ( Object::toString.call x ) is '[object Function]'
   asyncfunction:          ( x ) -> ( Object::toString.call x ) is '[object AsyncFunction]'
@@ -69,7 +64,6 @@ sample_declarations =
   unary:                  ( x ) -> x? and ( ( x.length is 1 ) or ( x.size is 1 ) )
   binary:                 ( x ) -> x? and ( ( x.length is 2 ) or ( x.size is 2 ) )
   trinary:                ( x ) -> x? and ( ( x.length is 3 ) or ( x.size is 3 ) )
-  unknown:                ( x ) -> ( @type_of x ) is 'unknown'
 
 
 #===========================================================================================================
@@ -168,6 +162,7 @@ try_and_show = ( T, f ) ->
 
 #===========================================================================================================
 if module is require.main then await do =>
+  @basic_functionality()
   await test @
 
 
