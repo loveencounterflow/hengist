@@ -119,6 +119,9 @@ try_and_show = ( T, f ) ->
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.optional.boolean          ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.validate.boolean              ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.validate.optional.boolean     ), true
+  T?.eq ( TMP_types.isa.object    INTERTYPE.types.create                        ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.text                      ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types.create.text                   ), true
   #.........................................................................................................
   done?()
 
@@ -210,6 +213,154 @@ try_and_show = ( T, f ) ->
   T?.eq ( validate.asyncfunction.name          ), 'validate_asyncfunction'
   T?.eq ( validate.optional.asyncfunction.name ), 'validate_optional_asyncfunction'
   #.........................................................................................................
+  throws T, /expected 1 arguments, got 2/, -> isa.float 3, 4
+  throws T, /expected 1 arguments, got 0/, -> isa.float()
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@methods_check_arity = ( T, done ) ->
+  # T?.halt_on_error()
+  INTERTYPE     = require '../../../apps/intertype'
+  { isa
+    validate
+    type_of   } = new INTERTYPE.Intertype sample_declarations
+  #.........................................................................................................
+  throws T, /expected 1 arguments, got 2/, -> isa.float 3, 4
+  throws T, /expected 1 arguments, got 0/, -> isa.float()
+  throws T, /expected 1 arguments, got 2/, -> isa.optional.float 3, 4
+  throws T, /expected 1 arguments, got 0/, -> isa.optional.float()
+  throws T, /expected 1 arguments, got 2/, -> validate.float 3, 4
+  throws T, /expected 1 arguments, got 0/, -> validate.float()
+  throws T, /expected 1 arguments, got 2/, -> validate.optional.float 3, 4
+  throws T, /expected 1 arguments, got 0/, -> validate.optional.float()
+  throws T, /expected 1 arguments, got 2/, -> type_of 3, 4
+  throws T, /expected 1 arguments, got 0/, -> type_of()
+  try_and_show T, -> isa.float 3, 4
+  try_and_show T, -> isa.float()
+  try_and_show T, -> isa.optional.float 3, 4
+  try_and_show T, -> isa.optional.float()
+  try_and_show T, -> validate.float 3, 4
+  try_and_show T, -> validate.float()
+  try_and_show T, -> validate.optional.float 3, 4
+  try_and_show T, -> validate.optional.float()
+  try_and_show T, -> type_of 3, 4
+  try_and_show T, -> type_of()
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@throw_instructive_error_on_missing_type = ( T, done ) ->
+  # T?.halt_on_error()
+  INTERTYPE     = require '../../../apps/intertype'
+  { isa
+    validate
+    type_of   } = new INTERTYPE.Intertype sample_declarations
+  #.........................................................................................................
+  try_and_show T, -> isa.quux
+  try_and_show T, -> isa.quux()
+  try_and_show T, -> isa.quux 3
+  try_and_show T, -> isa.quux 3, 4
+  try_and_show T, -> isa.optional.quux
+  try_and_show T, -> isa.optional.quux()
+  try_and_show T, -> isa.optional.quux 3
+  try_and_show T, -> isa.optional.quux 3, 4
+  try_and_show T, -> validate.quux
+  try_and_show T, -> validate.quux()
+  try_and_show T, -> validate.quux 3
+  try_and_show T, -> validate.quux 3, 4
+  try_and_show T, -> validate.optional.quux
+  try_and_show T, -> validate.optional.quux()
+  try_and_show T, -> validate.optional.quux 3
+  try_and_show T, -> validate.optional.quux 3, 4
+  #.........................................................................................................
+  throws T, /unknown type 'quux'/, -> isa.quux
+  throws T, /unknown type 'quux'/, -> isa.quux()
+  throws T, /unknown type 'quux'/, -> isa.quux 3
+  throws T, /unknown type 'quux'/, -> isa.quux 3, 4
+  throws T, /unknown type 'quux'/, -> isa.optional.quux
+  throws T, /unknown type 'quux'/, -> isa.optional.quux()
+  throws T, /unknown type 'quux'/, -> isa.optional.quux 3
+  throws T, /unknown type 'quux'/, -> isa.optional.quux 3, 4
+  throws T, /unknown type 'quux'/, -> validate.quux
+  throws T, /unknown type 'quux'/, -> validate.quux()
+  throws T, /unknown type 'quux'/, -> validate.quux 3
+  throws T, /unknown type 'quux'/, -> validate.quux 3, 4
+  throws T, /unknown type 'quux'/, -> validate.optional.quux
+  throws T, /unknown type 'quux'/, -> validate.optional.quux()
+  throws T, /unknown type 'quux'/, -> validate.optional.quux 3
+  throws T, /unknown type 'quux'/, -> validate.optional.quux 3, 4
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@throw_instructive_error_when_optional_is_declared = ( T, done ) ->
+  # T?.halt_on_error()
+  INTERTYPE     = require '../../../apps/intertype'
+  declarations  = { sample_declarations..., }
+  declarations.optional = ( x ) -> true
+  #.........................................................................................................
+  try_and_show T, -> new INTERTYPE.Intertype declarations
+  throws T, /unable to re-declare type 'optional'/, -> new INTERTYPE.Intertype declarations
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@throw_instructive_error_when_wrong_type_of_isa_test_declared = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  try_and_show T, -> new Intertype { foo: ( -> ), }
+  try_and_show T, -> new Intertype { foo: ( ( a, b ) -> ), }
+  try_and_show T, -> new Intertype { foo: true, }
+  throws T, /expected function with 1 parameters, got one with 0/, -> new Intertype { foo: ( -> ), }
+  throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: ( ( a, b ) -> ), }
+  throws T, /expected function or object, got a boolean/, -> new Intertype { foo: true, }
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@allow_declaration_objects = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    declarations  = { sample_declarations..., }
+    declarations.integer =
+      test:     ( x ) -> Number.isInteger x
+      template: 0
+    types = new Intertype declarations
+    T?.eq ( TMP_types.isa.function types.isa.integer  ), true
+    T?.eq ( types.isa.integer.length                  ), 1
+    T?.eq ( types.isa.integer 123                     ), true
+    T?.eq ( types.isa.integer 123.456                 ), false
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_create_types_with_templates = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    declarations  = { sample_declarations..., }
+    declarations.integer =
+      test:     ( x ) -> Number.isInteger x
+      template: 0
+    declarations.text = { template: '', test: ( ( x ) -> ( typeof x ) is 'string' ), }
+    types = new Intertype declarations
+    #.......................................................................................................
+    try_and_show T, -> types.create.boolean()
+    throws T, /type declaration of 'boolean' has no `create` and no `template` entries, cannot be created/, \
+      -> types.create.boolean()
+    try_and_show T, -> types.create.text 'foo'
+    throws T, /expected 0 arguments, got 1/, -> types.create.text 'foo'
+    #.......................................................................................................
+    T?.eq types.create.text(), ''
+    T?.eq types.create.integer(), 0
+    #.......................................................................................................
+    return null
+  #.........................................................................................................
   done?()
 
 
@@ -217,6 +368,7 @@ try_and_show = ( T, f ) ->
 #===========================================================================================================
 if module is require.main then await do =>
   # @basic_functionality_using_types_object()
+  @allow_declaration_objects()
   await test @
 
   # do =>
