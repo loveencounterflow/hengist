@@ -180,6 +180,15 @@
     if (T != null) {
       T.eq(TMP_types.isa.function(INTERTYPE.types.validate.optional.boolean), true);
     }
+    if (T != null) {
+      T.eq(TMP_types.isa.object(INTERTYPE.types.create), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types.isa.text), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types.create.text), true);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -402,6 +411,327 @@
     if (T != null) {
       T.eq(validate.optional.asyncfunction.name, 'validate_optional_asyncfunction');
     }
+    //.........................................................................................................
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return isa.float(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return isa.float();
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.methods_check_arity = function(T, done) {
+    var INTERTYPE, isa, type_of, validate;
+    // T?.halt_on_error()
+    INTERTYPE = require('../../../apps/intertype');
+    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    //.........................................................................................................
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return isa.float(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return isa.float();
+    });
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return isa.optional.float(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return isa.optional.float();
+    });
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return validate.float(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return validate.float();
+    });
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return validate.optional.float(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return validate.optional.float();
+    });
+    throws(T, /expected 1 arguments, got 2/, function() {
+      return type_of(3, 4);
+    });
+    throws(T, /expected 1 arguments, got 0/, function() {
+      return type_of();
+    });
+    try_and_show(T, function() {
+      return isa.float(3, 4);
+    });
+    try_and_show(T, function() {
+      return isa.float();
+    });
+    try_and_show(T, function() {
+      return isa.optional.float(3, 4);
+    });
+    try_and_show(T, function() {
+      return isa.optional.float();
+    });
+    try_and_show(T, function() {
+      return validate.float(3, 4);
+    });
+    try_and_show(T, function() {
+      return validate.float();
+    });
+    try_and_show(T, function() {
+      return validate.optional.float(3, 4);
+    });
+    try_and_show(T, function() {
+      return validate.optional.float();
+    });
+    try_and_show(T, function() {
+      return type_of(3, 4);
+    });
+    try_and_show(T, function() {
+      return type_of();
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.throw_instructive_error_on_missing_type = function(T, done) {
+    var INTERTYPE, isa, type_of, validate;
+    // T?.halt_on_error()
+    INTERTYPE = require('../../../apps/intertype');
+    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    //.........................................................................................................
+    try_and_show(T, function() {
+      return isa.quux;
+    });
+    try_and_show(T, function() {
+      return isa.quux();
+    });
+    try_and_show(T, function() {
+      return isa.quux(3);
+    });
+    try_and_show(T, function() {
+      return isa.quux(3, 4);
+    });
+    try_and_show(T, function() {
+      return isa.optional.quux;
+    });
+    try_and_show(T, function() {
+      return isa.optional.quux();
+    });
+    try_and_show(T, function() {
+      return isa.optional.quux(3);
+    });
+    try_and_show(T, function() {
+      return isa.optional.quux(3, 4);
+    });
+    try_and_show(T, function() {
+      return validate.quux;
+    });
+    try_and_show(T, function() {
+      return validate.quux();
+    });
+    try_and_show(T, function() {
+      return validate.quux(3);
+    });
+    try_and_show(T, function() {
+      return validate.quux(3, 4);
+    });
+    try_and_show(T, function() {
+      return validate.optional.quux;
+    });
+    try_and_show(T, function() {
+      return validate.optional.quux();
+    });
+    try_and_show(T, function() {
+      return validate.optional.quux(3);
+    });
+    try_and_show(T, function() {
+      return validate.optional.quux(3, 4);
+    });
+    //.........................................................................................................
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.quux;
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.quux();
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.quux(3);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.quux(3, 4);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.optional.quux;
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.optional.quux();
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.optional.quux(3);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return isa.optional.quux(3, 4);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.quux;
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.quux();
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.quux(3);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.quux(3, 4);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.optional.quux;
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.optional.quux();
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.optional.quux(3);
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return validate.optional.quux(3, 4);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.throw_instructive_error_when_optional_is_declared = function(T, done) {
+    var INTERTYPE, declarations;
+    // T?.halt_on_error()
+    INTERTYPE = require('../../../apps/intertype');
+    declarations = {...sample_declarations};
+    declarations.optional = function(x) {
+      return true;
+    };
+    //.........................................................................................................
+    try_and_show(T, function() {
+      return new INTERTYPE.Intertype(declarations);
+    });
+    throws(T, /unable to re-declare type 'optional'/, function() {
+      return new INTERTYPE.Intertype(declarations);
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.throw_instructive_error_when_wrong_type_of_isa_test_declared = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: (function() {})
+      });
+    });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: (function(a, b) {})
+      });
+    });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: true
+      });
+    });
+    throws(T, /expected function with 1 parameters, got one with 0/, function() {
+      return new Intertype({
+        foo: (function() {})
+      });
+    });
+    throws(T, /expected function with 1 parameters, got one with 2/, function() {
+      return new Intertype({
+        foo: (function(a, b) {})
+      });
+    });
+    throws(T, /expected function or object, got a boolean/, function() {
+      return new Intertype({
+        foo: true
+      });
+    });
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.allow_declaration_objects = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations, types;
+      declarations = {...sample_declarations};
+      declarations.integer = {
+        test: function(x) {
+          return Number.isInteger(x);
+        },
+        template: 0
+      };
+      types = new Intertype(declarations);
+      if (T != null) {
+        T.eq(TMP_types.isa.function(types.isa.integer), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.integer.length, 1);
+      }
+      if (T != null) {
+        T.eq(types.isa.integer(123), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.integer(123.456), false);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_create_types_with_templates = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations, types;
+      declarations = {...sample_declarations};
+      declarations.integer = {
+        test: function(x) {
+          return Number.isInteger(x);
+        },
+        template: 0
+      };
+      declarations.text = {
+        template: '',
+        test: (function(x) {
+          return (typeof x) === 'string';
+        })
+      };
+      types = new Intertype(declarations);
+      //.......................................................................................................
+      try_and_show(T, function() {
+        return types.create.boolean();
+      });
+      throws(T, /type declaration of 'boolean' has no `create` and no `template` entries, cannot be created/, function() {
+        return types.create.boolean();
+      });
+      try_and_show(T, function() {
+        return types.create.text('foo');
+      });
+      throws(T, /expected 0 arguments, got 1/, function() {
+        return types.create.text('foo');
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(types.create.text(), '');
+      }
+      if (T != null) {
+        T.eq(types.create.integer(), 0);
+      }
+      //.......................................................................................................
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -409,6 +739,7 @@
   if (module === require.main) {
     await (async() => {
       // @basic_functionality_using_types_object()
+      this.allow_declaration_objects();
       return (await test(this));
     })();
   }
