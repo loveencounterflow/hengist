@@ -122,6 +122,8 @@ try_and_show = ( T, f ) ->
   T?.eq ( TMP_types.isa.object    INTERTYPE.types.create                        ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.text                      ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.create.text                   ), true
+  T?.eq ( TMP_types.isa.object    INTERTYPE.types.declarations                  ), true
+  T?.eq ( TMP_types.isa.object    INTERTYPE.types.declarations.text             ), true
   #.........................................................................................................
   done?()
 
@@ -338,7 +340,7 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@can_create_types_with_templates = ( T, done ) ->
+@can_create_types_with_templates_and_create = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
@@ -348,7 +350,16 @@ try_and_show = ( T, f ) ->
       test:     ( x ) -> Number.isInteger x
       template: 0
     declarations.text = { template: '', test: ( ( x ) -> ( typeof x ) is 'string' ), }
+    declarations.float =
+      test:     ( x ) -> Number.isFinite x
+      create:   ( p = null ) -> parseFloat p ? @declarations.float.template
+      template: 0
+    declarations.nan = ( x ) -> Number.isNaN x
+    #.......................................................................................................
     types = new Intertype declarations
+    T?.eq ( TMP_types.isa.object types.declarations       ), true
+    T?.eq ( TMP_types.isa.object types.declarations.float ), true
+    T?.eq ( TMP_types.isa.object types.declarations.text  ), true
     #.......................................................................................................
     try_and_show T, -> types.create.boolean()
     throws T, /type declaration of 'boolean' has no `create` and no `template` entries, cannot be created/, \
@@ -358,6 +369,10 @@ try_and_show = ( T, f ) ->
     #.......................................................................................................
     T?.eq types.create.text(), ''
     T?.eq types.create.integer(), 0
+    T?.eq types.create.float(), 0
+    T?.eq ( types.create.float '123.45' ), 123.45
+    try_and_show T, -> types.create.float '***'
+    throws T, /expected `create\(\)` to return a float but it returned a nan/, -> types.create.float '***'
     #.......................................................................................................
     return null
   #.........................................................................................................
