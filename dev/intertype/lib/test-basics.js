@@ -189,6 +189,12 @@
     if (T != null) {
       T.eq(TMP_types.isa.function(INTERTYPE.types.create.text), true);
     }
+    if (T != null) {
+      T.eq(TMP_types.isa.object(INTERTYPE.types.declarations), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.object(INTERTYPE.types.declarations.text), true);
+    }
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -689,7 +695,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.can_create_types_with_templates = function(T, done) {
+  this.can_create_types_with_templates_and_create = function(T, done) {
     var Intertype;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
@@ -708,7 +714,29 @@
           return (typeof x) === 'string';
         })
       };
+      declarations.float = {
+        test: function(x) {
+          return Number.isFinite(x);
+        },
+        create: function(p = null) {
+          return parseFloat(p != null ? p : this.declarations.float.template);
+        },
+        template: 0
+      };
+      declarations.nan = function(x) {
+        return Number.isNaN(x);
+      };
+      //.......................................................................................................
       types = new Intertype(declarations);
+      if (T != null) {
+        T.eq(TMP_types.isa.object(types.declarations), true);
+      }
+      if (T != null) {
+        T.eq(TMP_types.isa.object(types.declarations.float), true);
+      }
+      if (T != null) {
+        T.eq(TMP_types.isa.object(types.declarations.text), true);
+      }
       //.......................................................................................................
       try_and_show(T, function() {
         return types.create.boolean();
@@ -729,6 +757,18 @@
       if (T != null) {
         T.eq(types.create.integer(), 0);
       }
+      if (T != null) {
+        T.eq(types.create.float(), 0);
+      }
+      if (T != null) {
+        T.eq(types.create.float('123.45'), 123.45);
+      }
+      try_and_show(T, function() {
+        return types.create.float('***');
+      });
+      throws(T, /expected `create\(\)` to return a float but it returned a nan/, function() {
+        return types.create.float('***');
+      });
       //.......................................................................................................
       return null;
     })();
