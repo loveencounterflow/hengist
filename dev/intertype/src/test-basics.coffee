@@ -372,18 +372,42 @@ try_and_show = ( T, f ) ->
     T?.eq types.create.float(), 0
     T?.eq ( types.create.float '123.45' ), 123.45
     try_and_show T, -> types.create.float '***'
-    throws T, /expected `create\(\)` to return a float but it returned a nan/, -> types.create.float '***'
+    throws T, /expected `create\.float\(\)` to return a float but it returned a nan/, -> types.create.float '***'
     #.......................................................................................................
     return null
   #.........................................................................................................
   done?()
 
+#-----------------------------------------------------------------------------------------------------------
+demo_1 = ->
+  # T?.halt_on_error()
+  { Intertype, } = require '../../../apps/intertype'
+  #.........................................................................................................
+  declarations  =
+    integer:
+      test:     ( x ) -> Number.isInteger x
+      template: 0
+    text:
+      template: ''
+      test:     ( ( x ) -> ( typeof x ) is 'string' )
+    float:
+      test:     ( x ) -> Number.isFinite x
+      create:   ( p = null ) -> parseFloat p ? @declarations.float.template
+      template: 0
+  #.........................................................................................................
+  declarations = { sample_declarations..., declarations..., }
+  types = new Intertype declarations
+  #.........................................................................................................
+  types.create.float '***'
+  #.........................................................................................................
+  return null
 
 
 #===========================================================================================================
 if module is require.main then await do =>
   # @basic_functionality_using_types_object()
   @allow_declaration_objects()
+  demo_1()
   await test @
 
   # do =>
