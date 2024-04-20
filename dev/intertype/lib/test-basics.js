@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, TMP_types, alert, debug, echo, help, info, inspect, log, plain, praise, reverse, rpr, sample_declarations, test, throws, try_and_show, urge, warn, whisper;
+  var GUY, TMP_types, alert, debug, demo_1, echo, help, info, inspect, log, plain, praise, reverse, rpr, sample_declarations, test, throws, try_and_show, urge, warn, whisper;
 
   GUY = require('guy');
 
@@ -766,7 +766,7 @@
       try_and_show(T, function() {
         return types.create.float('***');
       });
-      throws(T, /expected `create\(\)` to return a float but it returned a nan/, function() {
+      throws(T, /expected `create\.float\(\)` to return a float but it returned a nan/, function() {
         return types.create.float('***');
       });
       //.......................................................................................................
@@ -775,11 +775,50 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_1 = function() {
+    var Intertype, declarations, types;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    declarations = {
+      integer: {
+        test: function(x) {
+          return Number.isInteger(x);
+        },
+        template: 0
+      },
+      text: {
+        template: '',
+        test: (function(x) {
+          return (typeof x) === 'string';
+        })
+      },
+      float: {
+        test: function(x) {
+          return Number.isFinite(x);
+        },
+        create: function(p = null) {
+          return parseFloat(p != null ? p : this.declarations.float.template);
+        },
+        template: 0
+      }
+    };
+    //.........................................................................................................
+    declarations = {...sample_declarations, ...declarations};
+    types = new Intertype(declarations);
+    //.........................................................................................................
+    types.create.float('***');
+    //.........................................................................................................
+    return null;
+  };
+
   //===========================================================================================================
   if (module === require.main) {
     await (async() => {
       // @basic_functionality_using_types_object()
       this.allow_declaration_objects();
+      demo_1();
       return (await test(this));
     })();
   }
