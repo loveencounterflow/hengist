@@ -670,6 +670,11 @@
         }
       });
     });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: 'quux'
+      });
+    });
     throws(T, /expected function with 1 parameters, got one with 0/, function() {
       return new Intertype({
         foo: (function() {})
@@ -680,12 +685,12 @@
         foo: (function(a, b) {})
       });
     });
-    throws(T, /expected function or object, got a boolean/, function() {
+    throws(T, /expected type name, function or object, got a boolean/, function() {
       return new Intertype({
         foo: true
       });
     });
-    throws(T, /expected function or object, got a null/, function() {
+    throws(T, /expected type name, function or object, got a null/, function() {
       return new Intertype({
         foo: null
       });
@@ -707,6 +712,11 @@
         foo: {
           test: (function(a, b) {})
         }
+      });
+    });
+    throws(T, /unknown type 'quux'/, function() {
+      return new Intertype({
+        foo: 'quux'
       });
     });
     return typeof done === "function" ? done() : void 0;
@@ -1024,6 +1034,226 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.intertype_minimal_has_only_base_types = function(T, done) {
+    var Intertype_minimal, types;
+    // T?.halt_on_error()
+    ({Intertype_minimal} = require('../../../apps/intertype'));
+    types = new Intertype_minimal();
+    if (T != null) {
+      T.eq((Object.keys(types.declarations)).sort(), ['anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown']);
+    }
+    types.declare({
+      z: (function(x) {})
+    });
+    if (T != null) {
+      T.eq((Object.keys(types.declarations)).sort(), ['anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown', 'z']);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_type_name_for_test = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      try_and_show(T, function() {
+        return types.declare({
+          z: 'quux'
+        });
+      });
+      throws(T, /unknown type 'quux'/, function() {
+        return types.declare({
+          z: 'quux'
+        });
+      });
+      types.declare({
+        z: 'float'
+      });
+      if (T != null) {
+        T.eq(types.isa.z(12), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.float.name, 'isa_float');
+      }
+      if (T != null) {
+        T.eq(types.declarations.float.type, 'float');
+      }
+      if (T != null) {
+        T.eq(types.declarations.float.test.name, 'float');
+      }
+      if (T != null) {
+        T.eq(types.isa.z.name, 'isa_z');
+      }
+      if (T != null) {
+        T.eq(types.declarations.z.type, 'z');
+      }
+      return T != null ? T.eq(types.declarations.z.test.name, 'float') : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      try_and_show(T, function() {
+        return types.declare({
+          z: {
+            test: 'quux'
+          }
+        });
+      });
+      throws(T, /unknown type 'quux'/, function() {
+        return types.declare({
+          z: {
+            test: 'quux'
+          }
+        });
+      });
+      types.declare({
+        z: {
+          test: 'float'
+        }
+      });
+      if (T != null) {
+        T.eq(types.isa.z(12), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.float.name, 'isa_float');
+      }
+      if (T != null) {
+        T.eq(types.declarations.float.type, 'float');
+      }
+      if (T != null) {
+        T.eq(types.declarations.float.test.name, 'float');
+      }
+      if (T != null) {
+        T.eq(types.isa.z.name, 'isa_z');
+      }
+      if (T != null) {
+        T.eq(types.declarations.z.type, 'z');
+      }
+      return T != null ? T.eq(types.declarations.z.test.name, 'float') : void 0;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_use_namespaces = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations;
+      declarations = {
+        'foo.bar': function(x) {
+          return x === 'foo.bar';
+        },
+        'foo.bar.baz': function(x) {
+          return x === 'foo.bar.baz';
+        }
+      };
+      try_and_show(T, function() {
+        var types;
+        return types = new Intertype(declarations);
+      });
+      throws(T, /unknown type 'foo'/, function() {
+        var types;
+        return types = new Intertype(declarations);
+      });
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var declarations;
+      declarations = {
+        'foo': 'object',
+        'foo.bar': function(x) {
+          return x === 'foo.bar';
+        },
+        'foo.bar.baz': function(x) {
+          return x === 'foo.bar.baz';
+        }
+      };
+      try_and_show(T, function() {
+        var types;
+        return types = new Intertype(declarations);
+      });
+      throws(T, /must be object/, function() {
+        var types;
+        return types = new Intertype(declarations);
+      });
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var declarations, types;
+      declarations = {
+        'foo': 'object',
+        'foo.bar': 'object',
+        'foo.bar.baz': function(x) {
+          return x === 'foo.bar.baz';
+        }
+      };
+      types = new Intertype(declarations);
+      if (T != null) {
+        T.eq(types.isa.foo({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo({
+          bar: {}
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo({
+          bar: {
+            baz: 'foo.bar.baz'
+          }
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo({
+          bar: {
+            baz: '??'
+          }
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar({
+          baz: 'foo.bar.baz'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz('foo.bar.baz'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz('??'), false);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this._________________can_use_fields = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype({
+        quantity: {
+          fields: {
+            q: ''
+          }
+        }
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     var Intertype_minimal, declarations, types;
     // T?.halt_on_error()
@@ -1077,6 +1307,8 @@
       // @basic_functionality_using_types_object()
       // @allow_declaration_objects()
       // demo_1()
+      // @can_use_type_name_for_test()
+      // test @can_use_type_name_for_test
       // await test @create_entries_must_be_sync_functions
       // await test @template_methods_must_be_nullary
       // @throw_instructive_error_on_missing_type()
