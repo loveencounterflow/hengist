@@ -93,8 +93,8 @@ try_and_show = ( T, f ) ->
   e = null
   try ( urge '^992-2^', f() ) catch e then help '^992-3^', reverse "try_and_show: #{rpr e.message}"
   unless e?
-    warn '^992-4^', reverse message = "expected an error but none was thrown"
-    T.fail "^992-5^ expected an error but none was thrown"
+    warn '^992-4^', reverse message = "try_and_show: expected an error but none was thrown"
+    T?.fail "^992-5^ try_and_show: expected an error but none was thrown"
   return null
 
 
@@ -131,7 +131,7 @@ try_and_show = ( T, f ) ->
 @basic_functionality_using_types_object = ( T, done ) ->
   # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
-  types         = new INTERTYPE.Intertype sample_declarations
+  types         = new INTERTYPE.Intertype_minimal sample_declarations
   T?.eq ( types.isa.boolean           false               ), true
   T?.eq ( types.isa.boolean           true                ), true
   T?.eq ( types.isa.boolean           null                ), false
@@ -174,7 +174,7 @@ try_and_show = ( T, f ) ->
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
-    type_of   } = new INTERTYPE.Intertype sample_declarations
+    type_of   } = new INTERTYPE.Intertype_minimal sample_declarations
   T?.eq ( isa.boolean           false               ), true
   T?.eq ( isa.boolean           true                ), true
   T?.eq ( isa.boolean           null                ), false
@@ -225,7 +225,7 @@ try_and_show = ( T, f ) ->
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
-    type_of   } = new INTERTYPE.Intertype sample_declarations
+    type_of   } = new INTERTYPE.Intertype_minimal sample_declarations
   #.........................................................................................................
   throws T, /expected 1 arguments, got 2/, -> isa.float 3, 4
   throws T, /expected 1 arguments, got 0/, -> isa.float()
@@ -256,7 +256,7 @@ try_and_show = ( T, f ) ->
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
-    type_of   } = new INTERTYPE.Intertype sample_declarations
+    type_of   } = new INTERTYPE.Intertype()
   #.........................................................................................................
   try_and_show T, -> isa.quux
   try_and_show T, -> isa.quux()
@@ -301,8 +301,8 @@ try_and_show = ( T, f ) ->
   declarations  = { sample_declarations..., }
   declarations.optional = ( x ) -> true
   #.........................................................................................................
-  try_and_show T, -> new INTERTYPE.Intertype declarations
-  throws T, /unable to re-declare type 'optional'/, -> new INTERTYPE.Intertype declarations
+  try_and_show T, -> new INTERTYPE.Intertype_minimal declarations
+  throws T, /'optional' is a built-in base type and may not be overridden/, -> new INTERTYPE.Intertype_minimal declarations
   #.........................................................................................................
   done?()
 
@@ -314,23 +314,31 @@ try_and_show = ( T, f ) ->
   try_and_show T, -> new Intertype { foo: ( -> ), }
   try_and_show T, -> new Intertype { foo: ( ( a, b ) -> ), }
   try_and_show T, -> new Intertype { foo: true, }
+  try_and_show T, -> new Intertype { foo: null, }
+  try_and_show T, -> new Intertype { foo: {}, }
+  try_and_show T, -> new Intertype { foo: { test: null, }, }
+  try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
   throws T, /expected function with 1 parameters, got one with 0/, -> new Intertype { foo: ( -> ), }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: ( ( a, b ) -> ), }
   throws T, /expected function or object, got a boolean/, -> new Intertype { foo: true, }
+  throws T, /expected function or object, got a null/, -> new Intertype { foo: null, }
+  throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: {}, }
+  throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: { test: null, }, }
+  throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @allow_declaration_objects = ( T, done ) ->
   # T?.halt_on_error()
-  { Intertype } = require '../../../apps/intertype'
+  { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
     declarations  = { sample_declarations..., }
     declarations.integer =
       test:     ( x ) -> Number.isInteger x
       template: 0
-    types = new Intertype declarations
+    types = new Intertype_minimal declarations
     T?.eq ( TMP_types.isa.function types.isa.integer  ), true
     T?.eq ( types.isa.integer.length                  ), 1
     T?.eq ( types.isa.integer 123                     ), true
@@ -340,9 +348,114 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@can_create_types_with_templates_and_create = ( T, done ) ->
+@create_entries_must_be_sync_functions = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype_minimal } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    declarations  = { sample_declarations..., }
+    declarations.integer =
+      test:     ( x ) -> Number.isInteger x
+      create:   -> await 0
+    try_and_show T, -> new Intertype_minimal declarations
+    throws T, /expected a function for `create` entry of type 'integer', got a asyncfunction/, -> new Intertype_minimal declarations
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@template_methods_must_be_nullary = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype_minimal } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    declarations  = { sample_declarations..., }
+    declarations.foolist =
+      test:     ( x ) -> true
+      template: ( n ) -> [ n, ]
+    try_and_show T, -> new Intertype_minimal declarations
+    throws T, /template method for type 'foolist' has arity 1 but must be nullary/, -> new Intertype_minimal declarations
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@intertype_knows_its_base_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { isa } = require '../../../apps/intertype'
+  #.........................................................................................................
+  T?.eq ( isa.basetype 'optional'   ), true
+  T?.eq ( isa.basetype 'anything'   ), true
+  T?.eq ( isa.basetype 'nothing'    ), true
+  T?.eq ( isa.basetype 'something'  ), true
+  T?.eq ( isa.basetype 'null'       ), true
+  T?.eq ( isa.basetype 'undefined'  ), true
+  T?.eq ( isa.basetype 'unknown'    ), true
+  T?.eq ( isa.basetype 'integer'    ), false
+  T?.eq ( isa.basetype 'float'      ), false
+  T?.eq ( isa.basetype 'basetype'   ), false
+  T?.eq ( isa.basetype 'quux'       ), false
+  T?.eq ( isa.basetype null         ), false
+  T?.eq ( isa.basetype undefined    ), false
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@allows_licensed_overrides = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    T?.eq ( types.isa.float 4 ), true
+    #.......................................................................................................
+    overrides     =
+      float:
+        test:       ( x ) -> x is 'float'
+    try_and_show T, -> ( types.declare overrides )
+    throws T, /type 'float' has already been declared/, -> ( types.declare overrides )
+    #.......................................................................................................
+    ### pre-existing declaration remains valid: ###
+    T?.eq ( types.isa.float 4       ), true
+    T?.eq ( types.isa.float 'float' ), false
+    return null
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    T?.eq ( types.isa.float 4 ), true
+    #.......................................................................................................
+    overrides     =
+      float:
+        override:   true
+        test:       ( x ) -> x is 'float'
+    T?.eq ( types.declare overrides ), null
+    #.......................................................................................................
+    T?.eq ( types.isa.float 4       ), false
+    T?.eq ( types.isa.float 'float' ), true
+    return null
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    T?.eq ( types.isa.float 4 ), true
+    #.......................................................................................................
+    overrides     =
+      anything:
+        override:   true
+        test:       ( x ) -> true
+    try_and_show T, -> ( types.declare overrides )
+    throws T, /'anything' is a built-in base type and may not be overridden/, -> ( types.declare overrides )
+    #.......................................................................................................
+    ### pre-existing declaration remains valid: ###
+    T?.eq ( types.isa.anything 4       ), true
+    T?.eq ( types.isa.anything 'float' ), true
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_create_types_with_templates_and_create = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
     declarations  = { sample_declarations..., }
@@ -356,7 +469,7 @@ try_and_show = ( T, f ) ->
       template: 0
     declarations.nan = ( x ) -> Number.isNaN x
     #.......................................................................................................
-    types = new Intertype declarations
+    types = new Intertype_minimal declarations
     T?.eq ( TMP_types.isa.object types.declarations       ), true
     T?.eq ( TMP_types.isa.object types.declarations.float ), true
     T?.eq ( TMP_types.isa.object types.declarations.text  ), true
@@ -381,11 +494,12 @@ try_and_show = ( T, f ) ->
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   # T?.halt_on_error()
-  { Intertype, } = require '../../../apps/intertype'
+  { Intertype_minimal, } = require '../../../apps/intertype'
   #.........................................................................................................
   declarations  =
     integer:
       test:     ( x ) -> Number.isInteger x
+      create:   ( p = null ) -> parseInt ( p ? @declarations.integer.template ), 10
       template: 0
     text:
       template: ''
@@ -396,9 +510,12 @@ demo_1 = ->
       template: 0
   #.........................................................................................................
   declarations = { sample_declarations..., declarations..., }
-  types = new Intertype declarations
+  types = new Intertype_minimal declarations
   #.........................................................................................................
-  types.create.float '***'
+  debug '^233-1^', types.create.float '345.678'
+  debug '^233-1^', types.create.integer '345.678'
+  try_and_show null, -> types.create.float '***'
+  try_and_show null, -> types.create.integer '***'
   #.........................................................................................................
   return null
 
@@ -406,8 +523,14 @@ demo_1 = ->
 #===========================================================================================================
 if module is require.main then await do =>
   # @basic_functionality_using_types_object()
-  @allow_declaration_objects()
-  demo_1()
+  # @allow_declaration_objects()
+  # demo_1()
+  # await test @create_entries_must_be_sync_functions
+  # await test @template_methods_must_be_nullary
+  # @throw_instructive_error_on_missing_type()
+  # @allows_licensed_overrides()
+  # await test @allows_licensed_overrides
+  # await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
   await test @
 
   # do =>
