@@ -318,13 +318,15 @@ try_and_show = ( T, f ) ->
   try_and_show T, -> new Intertype { foo: {}, }
   try_and_show T, -> new Intertype { foo: { test: null, }, }
   try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
+  try_and_show T, -> new Intertype { foo: 'quux', }
   throws T, /expected function with 1 parameters, got one with 0/, -> new Intertype { foo: ( -> ), }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: ( ( a, b ) -> ), }
-  throws T, /expected function or object, got a boolean/, -> new Intertype { foo: true, }
-  throws T, /expected function or object, got a null/, -> new Intertype { foo: null, }
+  throws T, /expected type name, function or object, got a boolean/, -> new Intertype { foo: true, }
+  throws T, /expected type name, function or object, got a null/, -> new Intertype { foo: null, }
   throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: {}, }
   throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: { test: null, }, }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
+  throws T, /unknown type 'quux'/, -> new Intertype { foo: 'quux', }
   #.........................................................................................................
   done?()
 
@@ -492,6 +494,104 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@intertype_minimal_has_only_base_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype_minimal } = require '../../../apps/intertype'
+  types = new Intertype_minimal()
+  T?.eq ( Object.keys types.declarations ).sort(), [ 'anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown' ]
+  types.declare { z: ( ( x ) -> ), }
+  T?.eq ( Object.keys types.declarations ).sort(), [ 'anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown', 'z' ]
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_use_type_name_for_test = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    try_and_show T, -> types.declare { z: 'quux', }
+    throws T, /unknown type 'quux'/, -> types.declare { z: 'quux', }
+    types.declare { z: 'float', }
+    T?.eq ( types.isa.z 12 ), true
+    T?.eq types.isa.float.name, 'isa_float'
+    T?.eq types.declarations.float.type, 'float'
+    T?.eq types.declarations.float.test.name, 'float'
+    T?.eq types.isa.z.name, 'isa_z'
+    T?.eq types.declarations.z.type, 'z'
+    T?.eq types.declarations.z.test.name, 'float'
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    try_and_show T, -> types.declare { z: { test: 'quux', }, }
+    throws T, /unknown type 'quux'/, -> types.declare { z: { test: 'quux', }, }
+    types.declare { z: { test: 'float', }, }
+    T?.eq ( types.isa.z 12 ), true
+    T?.eq types.isa.float.name, 'isa_float'
+    T?.eq types.declarations.float.type, 'float'
+    T?.eq types.declarations.float.test.name, 'float'
+    T?.eq types.isa.z.name, 'isa_z'
+    T?.eq types.declarations.z.type, 'z'
+    T?.eq types.declarations.z.test.name, 'float'
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_use_namespaces = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    declarations =
+      'foo.bar':      ( x ) -> x is 'foo.bar'
+      'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
+    try_and_show T, -> types = new Intertype declarations
+    throws T, /unknown type 'foo'/, -> types = new Intertype declarations
+    return null
+  #.........................................................................................................
+  do =>
+    declarations =
+      'foo':          'object'
+      'foo.bar':      ( x ) -> x is 'foo.bar'
+      'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
+    try_and_show T, -> types = new Intertype declarations
+    throws T, /must be object/, -> types = new Intertype declarations
+    return null
+  #.........................................................................................................
+  do =>
+    declarations =
+      'foo':          'object'
+      'foo.bar':      'object'
+      'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
+    types = new Intertype declarations
+    T?.eq ( types.isa.foo {}                                ), false
+    T?.eq ( types.isa.foo { bar: {} }                       ), false
+    T?.eq ( types.isa.foo { bar: { baz: 'foo.bar.baz', } }  ), true
+    T?.eq ( types.isa.foo { bar: { baz: '??', } }           ), false
+    T?.eq ( types.isa.foo.bar { baz: 'foo.bar.baz' }        ), true
+    T?.eq ( types.isa.foo.bar {}                            ), false
+    T?.eq ( types.isa.foo.bar.baz 'foo.bar.baz'             ), true
+    T?.eq ( types.isa.foo.bar.baz '??'                      ), false
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@_________________can_use_fields = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types = new Intertype
+      quantity:
+        fields:
+          q:    ''
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   # T?.halt_on_error()
   { Intertype_minimal, } = require '../../../apps/intertype'
@@ -525,6 +625,8 @@ if module is require.main then await do =>
   # @basic_functionality_using_types_object()
   # @allow_declaration_objects()
   # demo_1()
+  # @can_use_type_name_for_test()
+  # test @can_use_type_name_for_test
   # await test @create_entries_must_be_sync_functions
   # await test @template_methods_must_be_nullary
   # @throw_instructive_error_on_missing_type()
