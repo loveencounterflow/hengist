@@ -126,8 +126,10 @@
       help('^992-3^', reverse(`try_and_show: ${rpr(e.message)}`));
     }
     if (e == null) {
-      warn('^992-4^', reverse(message = "expected an error but none was thrown"));
-      T.fail("^992-5^ expected an error but none was thrown");
+      warn('^992-4^', reverse(message = "try_and_show: expected an error but none was thrown"));
+      if (T != null) {
+        T.fail("^992-5^ try_and_show: expected an error but none was thrown");
+      }
     }
     return null;
   };
@@ -203,7 +205,7 @@
     var INTERTYPE, types;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
-    types = new INTERTYPE.Intertype(sample_declarations);
+    types = new INTERTYPE.Intertype_minimal(sample_declarations);
     if (T != null) {
       T.eq(types.isa.boolean(false), true);
     }
@@ -305,7 +307,7 @@
     var INTERTYPE, isa, type_of, validate;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
-    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
     if (T != null) {
       T.eq(isa.boolean(false), true);
     }
@@ -432,7 +434,7 @@
     var INTERTYPE, isa, type_of, validate;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
-    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
     //.........................................................................................................
     throws(T, /expected 1 arguments, got 2/, function() {
       return isa.float(3, 4);
@@ -502,7 +504,7 @@
     var INTERTYPE, isa, type_of, validate;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
-    ({isa, validate, type_of} = new INTERTYPE.Intertype(sample_declarations));
+    ({isa, validate, type_of} = new INTERTYPE.Intertype());
     //.........................................................................................................
     try_and_show(T, function() {
       return isa.quux;
@@ -615,10 +617,10 @@
     };
     //.........................................................................................................
     try_and_show(T, function() {
-      return new INTERTYPE.Intertype(declarations);
+      return new INTERTYPE.Intertype_minimal(declarations);
     });
-    throws(T, /unable to re-declare type 'optional'/, function() {
-      return new INTERTYPE.Intertype(declarations);
+    throws(T, /'optional' is a built-in base type and may not be overridden/, function() {
+      return new INTERTYPE.Intertype_minimal(declarations);
     });
     return typeof done === "function" ? done() : void 0;
   };
@@ -644,6 +646,30 @@
         foo: true
       });
     });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: null
+      });
+    });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: {}
+      });
+    });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: {
+          test: null
+        }
+      });
+    });
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: {
+          test: (function(a, b) {})
+        }
+      });
+    });
     throws(T, /expected function with 1 parameters, got one with 0/, function() {
       return new Intertype({
         foo: (function() {})
@@ -659,14 +685,38 @@
         foo: true
       });
     });
+    throws(T, /expected function or object, got a null/, function() {
+      return new Intertype({
+        foo: null
+      });
+    });
+    throws(T, /expected a function for `test` entry of type 'function', got a object/, function() {
+      return new Intertype({
+        foo: {}
+      });
+    });
+    throws(T, /expected a function for `test` entry of type 'function', got a object/, function() {
+      return new Intertype({
+        foo: {
+          test: null
+        }
+      });
+    });
+    throws(T, /expected function with 1 parameters, got one with 2/, function() {
+      return new Intertype({
+        foo: {
+          test: (function(a, b) {})
+        }
+      });
+    });
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.allow_declaration_objects = function(T, done) {
-    var Intertype;
+    var Intertype_minimal;
     // T?.halt_on_error()
-    ({Intertype} = require('../../../apps/intertype'));
+    ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, types;
       declarations = {...sample_declarations};
@@ -676,7 +726,7 @@
         },
         template: 0
       };
-      types = new Intertype(declarations);
+      types = new Intertype_minimal(declarations);
       if (T != null) {
         T.eq(TMP_types.isa.function(types.isa.integer), true);
       }
@@ -695,10 +745,208 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.can_create_types_with_templates_and_create = function(T, done) {
+  this.create_entries_must_be_sync_functions = function(T, done) {
+    var Intertype_minimal;
+    // T?.halt_on_error()
+    ({Intertype_minimal} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations;
+      declarations = {...sample_declarations};
+      declarations.integer = {
+        test: function(x) {
+          return Number.isInteger(x);
+        },
+        create: async function() {
+          return (await 0);
+        }
+      };
+      try_and_show(T, function() {
+        return new Intertype_minimal(declarations);
+      });
+      throws(T, /expected a function for `create` entry of type 'integer', got a asyncfunction/, function() {
+        return new Intertype_minimal(declarations);
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.template_methods_must_be_nullary = function(T, done) {
+    var Intertype_minimal;
+    // T?.halt_on_error()
+    ({Intertype_minimal} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations;
+      declarations = {...sample_declarations};
+      declarations.foolist = {
+        test: function(x) {
+          return true;
+        },
+        template: function(n) {
+          return [n];
+        }
+      };
+      try_and_show(T, function() {
+        return new Intertype_minimal(declarations);
+      });
+      throws(T, /template method for type 'foolist' has arity 1 but must be nullary/, function() {
+        return new Intertype_minimal(declarations);
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.intertype_knows_its_base_types = function(T, done) {
+    var isa;
+    // T?.halt_on_error()
+    ({isa} = require('../../../apps/intertype'));
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(isa.basetype('optional'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('anything'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('nothing'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('something'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('null'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('undefined'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('unknown'), true);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('integer'), false);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('float'), false);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('basetype'), false);
+    }
+    if (T != null) {
+      T.eq(isa.basetype('quux'), false);
+    }
+    if (T != null) {
+      T.eq(isa.basetype(null), false);
+    }
+    if (T != null) {
+      T.eq(isa.basetype(void 0), false);
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.allows_licensed_overrides = function(T, done) {
     var Intertype;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var overrides, types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(types.isa.float(4), true);
+      }
+      //.......................................................................................................
+      overrides = {
+        float: {
+          test: function(x) {
+            return x === 'float';
+          }
+        }
+      };
+      try_and_show(T, function() {
+        return types.declare(overrides);
+      });
+      throws(T, /type 'float' has already been declared/, function() {
+        return types.declare(overrides);
+      });
+      //.......................................................................................................
+      /* pre-existing declaration remains valid: */
+      if (T != null) {
+        T.eq(types.isa.float(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.float('float'), false);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var overrides, types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(types.isa.float(4), true);
+      }
+      //.......................................................................................................
+      overrides = {
+        float: {
+          override: true,
+          test: function(x) {
+            return x === 'float';
+          }
+        }
+      };
+      if (T != null) {
+        T.eq(types.declare(overrides), null);
+      }
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(types.isa.float(4), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.float('float'), true);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var overrides, types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(types.isa.float(4), true);
+      }
+      //.......................................................................................................
+      overrides = {
+        anything: {
+          override: true,
+          test: function(x) {
+            return true;
+          }
+        }
+      };
+      try_and_show(T, function() {
+        return types.declare(overrides);
+      });
+      throws(T, /'anything' is a built-in base type and may not be overridden/, function() {
+        return types.declare(overrides);
+      });
+      //.......................................................................................................
+      /* pre-existing declaration remains valid: */
+      if (T != null) {
+        T.eq(types.isa.anything(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.anything('float'), true);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.can_create_types_with_templates_and_create = function(T, done) {
+    var Intertype_minimal;
+    // T?.halt_on_error()
+    ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, types;
       declarations = {...sample_declarations};
@@ -727,7 +975,7 @@
         return Number.isNaN(x);
       };
       //.......................................................................................................
-      types = new Intertype(declarations);
+      types = new Intertype_minimal(declarations);
       if (T != null) {
         T.eq(TMP_types.isa.object(types.declarations), true);
       }
@@ -777,14 +1025,17 @@
 
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
-    var Intertype, declarations, types;
+    var Intertype_minimal, declarations, types;
     // T?.halt_on_error()
-    ({Intertype} = require('../../../apps/intertype'));
+    ({Intertype_minimal} = require('../../../apps/intertype'));
     //.........................................................................................................
     declarations = {
       integer: {
         test: function(x) {
           return Number.isInteger(x);
+        },
+        create: function(p = null) {
+          return parseInt(p != null ? p : this.declarations.integer.template, 10);
         },
         template: 0
       },
@@ -806,9 +1057,16 @@
     };
     //.........................................................................................................
     declarations = {...sample_declarations, ...declarations};
-    types = new Intertype(declarations);
+    types = new Intertype_minimal(declarations);
     //.........................................................................................................
-    types.create.float('***');
+    debug('^233-1^', types.create.float('345.678'));
+    debug('^233-1^', types.create.integer('345.678'));
+    try_and_show(null, function() {
+      return types.create.float('***');
+    });
+    try_and_show(null, function() {
+      return types.create.integer('***');
+    });
     //.........................................................................................................
     return null;
   };
@@ -817,8 +1075,14 @@
   if (module === require.main) {
     await (async() => {
       // @basic_functionality_using_types_object()
-      this.allow_declaration_objects();
-      demo_1();
+      // @allow_declaration_objects()
+      // demo_1()
+      // await test @create_entries_must_be_sync_functions
+      // await test @template_methods_must_be_nullary
+      // @throw_instructive_error_on_missing_type()
+      // @allows_licensed_overrides()
+      // await test @allows_licensed_overrides
+      // await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
       return (await test(this));
     })();
   }
