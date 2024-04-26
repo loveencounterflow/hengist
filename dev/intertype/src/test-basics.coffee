@@ -633,14 +633,59 @@ if module is require.main then await do =>
   # @allows_licensed_overrides()
   # await test @allows_licensed_overrides
   # await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
-  await test @
+  # @resolve_dotted_type()
+  # test @resolve_dotted_type
+  # @dotted_types_are_test_methods()
+  # test @dotted_types_are_test_methods
+  # await test @
 
-  # do =>
-  #   INTERTYPE     = require '../../../apps/intertype'
-  #   types         = new INTERTYPE.Intertype sample_declarations
-  #   debug '^345^', types.type_of 1
-  #   debug '^345^', types.type_of Infinity
-  #   debug '^345^', types.isa.unknown 1
-  #   debug '^345^', types.isa.unknown Infinity
+  # thx to https://medium.com/@adrien.za/creating-callable-objects-in-javascript-fbf88db9904c
+  do =>
+    f = ->
+    set = ( target, key, value ) -> Object.defineProperty f, key, { value, enumerable: true, }
+    debug '^342-1^', f
+    debug '^342-1^', f.name, f.length
+    set f, 'name',   'foo'
+    set f, 'length', 2
+    debug '^342-1^', f
+    debug '^342-1^', f.name, f.length
+    f.apply = null
+    f 1234
+  do =>
+    ```
+    class Callable extends Function {
+      constructor() {
+        super('...args', 'return this._bound._call(...args)')
+        // Or without the spread/rest operator:
+        // super('return this._bound._call.apply(this._bound, arguments)')
+        this._bound = this.bind(this)
 
+        return this._bound
+      }
 
+      _call(...args) {
+        console.log(this, args)
+      }
+    }
+    ```
+    f = new Callable()
+    set = ( target, key, value ) ->
+      ### NOTE: when `target` is a function and `key` is `name` or `length`, cache original values? ###
+      Object.defineProperty f, key, { value, enumerable: true, }
+    debug '^342-1^', f
+    debug '^342-1^', f.name, f.length
+    set f, 'name',   'foo'
+    set f, 'length', 2
+    debug '^342-1^', f
+    debug '^342-1^', f.name, f.length
+    f.apply = null
+    f 1234
+  do =>
+    class Callable extends Function
+      constructor: ->
+        super()
+        return new Proxy @,
+          apply: ( P... ) -> debug '^242^', P
+    f = new Callable()
+    f.apply = null
+    f 2
