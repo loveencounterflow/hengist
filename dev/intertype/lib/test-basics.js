@@ -1254,6 +1254,151 @@
       debug('^433-1^', types.declarations['quantity.u']);
       return null;
     })();
+    (() => {      //.........................................................................................................
+      var f, k, types;
+      types = new Intertype();
+      types.declare({
+        'person': 'object'
+      });
+      types.declare({
+        'person.name': 'text'
+      });
+      types.declare({
+        'person.address': 'object'
+      });
+      types.declare({
+        'person.address.city': 'object'
+      });
+      types.declare({
+        'person.address.city.name': 'text'
+      });
+      types.declare({
+        'person.address.city.postcode': 'text'
+      });
+      // T?.eq types.isa[ 'quantity.q' ], types.declarations[ 'quantity' ].sub_tests[ 'q' ]
+      // T?.eq types.isa[ 'quantity.q' ], types.isa.quantity.q
+      if (T != null) {
+        T.eq(types.isa.person.address.city.name('P'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city.name(1234), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person(1234), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person({
+          name: 'Bob'
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person({
+          name: 'Bob',
+          address: {}
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person({
+          name: 'Bob',
+          address: {
+            city: {}
+          }
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person({
+          name: 'Bob',
+          address: {
+            city: {
+              name: 'P'
+            }
+          }
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person({
+          name: 'Bob',
+          address: {
+            city: {
+              name: 'P',
+              postcode: 'SO36'
+            }
+          }
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city.name('P'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city.postcode('SO36'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P',
+          postcode: 'SO36'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address({
+          city: {
+            name: 'P',
+            postcode: 'SO36'
+          }
+        }), true);
+      }
+      help('^322-1^', (function() {
+        var ref, results;
+        ref = types.declarations['person'].sub_tests;
+        results = [];
+        for (k in ref) {
+          f = ref[k];
+          results.push({
+            [`${k}`]: f.name
+          });
+        }
+        return results;
+      })());
+      help('^322-2^', (function() {
+        var ref, results;
+        ref = types.declarations['person.address'].sub_tests;
+        results = [];
+        for (k in ref) {
+          f = ref[k];
+          results.push({
+            [`${k}`]: f.name
+          });
+        }
+        return results;
+      })());
+      help('^322-3^', (function() {
+        var ref, results;
+        ref = types.declarations['person.address.city'].sub_tests;
+        results = [];
+        for (k in ref) {
+          f = ref[k];
+          results.push({
+            [`${k}`]: f.name
+          });
+        }
+        return results;
+      })());
+      if (T != null) {
+        T.eq(Object.keys(types.declarations['person'].sub_tests), ['name', 'address']);
+      }
+      if (T != null) {
+        T.eq(Object.keys(types.declarations['person.address'].sub_tests), ['city']);
+      }
+      if (T != null) {
+        T.eq(Object.keys(types.declarations['person.address.city'].sub_tests), ['name', 'postcode']);
+      }
+      if (T != null) {
+        T.eq(types.declarations['person'].sub_tests !== types.declarations['person.address'].sub_tests, true);
+      }
+      if (T != null) {
+        T.eq(types.declarations['person'].sub_tests !== types.declarations['person.address.city'].sub_tests, true);
+      }
+      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
