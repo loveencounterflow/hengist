@@ -288,16 +288,16 @@
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(types.isa.asyncfunction.name, 'isa_asyncfunction');
+      T.eq(types.isa.asyncfunction.name, 'isa.asyncfunction');
     }
     if (T != null) {
-      T.eq(types.isa.optional.asyncfunction.name, 'isa_optional_asyncfunction');
+      T.eq(types.isa.optional.asyncfunction.name, 'isa.optional.asyncfunction');
     }
     if (T != null) {
-      T.eq(types.validate.asyncfunction.name, 'validate_asyncfunction');
+      T.eq(types.validate.asyncfunction.name, 'validate.asyncfunction');
     }
     if (T != null) {
-      T.eq(types.validate.optional.asyncfunction.name, 'validate_optional_asyncfunction');
+      T.eq(types.validate.optional.asyncfunction.name, 'validate.optional.asyncfunction');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -408,16 +408,16 @@
     }
     //.........................................................................................................
     if (T != null) {
-      T.eq(isa.asyncfunction.name, 'isa_asyncfunction');
+      T.eq(isa.asyncfunction.name, 'isa.asyncfunction');
     }
     if (T != null) {
-      T.eq(isa.optional.asyncfunction.name, 'isa_optional_asyncfunction');
+      T.eq(isa.optional.asyncfunction.name, 'isa.optional.asyncfunction');
     }
     if (T != null) {
-      T.eq(validate.asyncfunction.name, 'validate_asyncfunction');
+      T.eq(validate.asyncfunction.name, 'validate.asyncfunction');
     }
     if (T != null) {
-      T.eq(validate.optional.asyncfunction.name, 'validate_optional_asyncfunction');
+      T.eq(validate.optional.asyncfunction.name, 'validate.optional.asyncfunction');
     }
     //.........................................................................................................
     throws(T, /expected 1 arguments, got 2/, function() {
@@ -1076,7 +1076,7 @@
         T.eq(types.isa.z(12), true);
       }
       if (T != null) {
-        T.eq(types.isa.float.name, 'isa_float');
+        T.eq(types.isa.float.name, 'isa.float');
       }
       if (T != null) {
         T.eq(types.declarations.float.type, 'float');
@@ -1085,7 +1085,7 @@
         T.eq(types.declarations.float.test.name, 'float');
       }
       if (T != null) {
-        T.eq(types.isa.z.name, 'isa_z');
+        T.eq(types.isa.z.name, 'isa.z');
       }
       if (T != null) {
         T.eq(types.declarations.z.type, 'z');
@@ -1118,7 +1118,7 @@
         T.eq(types.isa.z(12), true);
       }
       if (T != null) {
-        T.eq(types.isa.float.name, 'isa_float');
+        T.eq(types.isa.float.name, 'isa.float');
       }
       if (T != null) {
         T.eq(types.declarations.float.type, 'float');
@@ -1127,7 +1127,7 @@
         T.eq(types.declarations.float.test.name, 'float');
       }
       if (T != null) {
-        T.eq(types.isa.z.name, 'isa_z');
+        T.eq(types.isa.z.name, 'isa.z');
       }
       if (T != null) {
         T.eq(types.declarations.z.type, 'z');
@@ -1205,24 +1205,53 @@
       types.declare({
         'quantity.u': 'text'
       });
+      if (T != null) {
+        T.eq(types.isa['quantity.q'], types.declarations['quantity'].sub_tests['q']);
+      }
+      if (T != null) {
+        T.eq(types.isa['quantity.q'], types.isa.quantity.q);
+      }
       // debug '^409-1^', types.declarations
-      debug('^409-2^', types.isa.quantity({}));
-      debug('^409-3^', types.isa.quantity({
-        q: {}
-      }));
-      debug('^409-4^', types.isa.quantity({
-        q: 3
-      }));
-      debug('^409-5^', types.isa.quantity({
-        q: 3,
-        u: 'm'
-      }));
-      debug('^409-10^', types.declarations.quantity);
-      debug('^409-6^', types.isa.quantity.q(3));
-      debug('^409-7^', types.isa.quantity.q(3.1));
-      debug('^409-8^', types.isa.quantity.q('3.1'));
-      debug('^409-9^', types.isa.quantity.u('m'));
-      debug('^409-10^', types.isa.quantity.u(null));
+      if (T != null) {
+        T.eq(types.isa.quantity({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: {}
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: 3
+        }), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: 3,
+          u: 'm'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.q(3), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.q(3.1), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.q('3.1'), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.u('m'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.u(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.u(3), false);
+      }
+      debug('^433-1^', types.declarations['quantity']);
+      debug('^433-1^', types.declarations['quantity.q']);
+      debug('^433-1^', types.declarations['quantity.u']);
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1247,7 +1276,7 @@
         var types;
         return types = new Intertype(declarations);
       });
-      throws(T, /unknown type 'foo'/, function() {
+      throws(T, /unknown partial type 'foo'/, function() {
         var types;
         return types = new Intertype(declarations);
       });
@@ -1261,16 +1290,27 @@
         'quantity.u': 'text'
       };
       types = new Intertype(declarations);
-      debug('^423423^', types.isa.quantity({}));
-      debug('^423423^', types.isa.quantity({
-        q: 12,
-        u: 'kg'
-      }));
-      debug('^423423^', types.isa['quantity.q'](12));
-      debug('^423423^', types.isa['quantity.u']('kg'));
-      debug('^423423^', types.isa.quantity.q(12));
-      debug('^423423^', types.isa.quantity.u('kg'));
-      debug('^423423^', types.declarations);
+      if (T != null) {
+        T.eq(types.isa.quantity({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity({
+          q: 12,
+          u: 'kg'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa['quantity.q'](12), true);
+      }
+      if (T != null) {
+        T.eq(types.isa['quantity.u']('kg'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.q(12), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.quantity.u('kg'), true);
+      }
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1345,7 +1385,7 @@
 
   //===========================================================================================================
   if (module === require.main) {
-    await (() => {
+    await (async() => {
       // @basic_functionality_using_types_object()
       // @allow_declaration_objects()
       // demo_1()
@@ -1359,12 +1399,11 @@
       // await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
       // @resolve_dotted_type()
       // test @resolve_dotted_type
-      return this.dotted_types_are_test_methods();
+      // @dotted_types_are_test_methods()
+      // test @dotted_types_are_test_methods
+      return (await test(this));
     })();
   }
-
-  // test @dotted_types_are_test_methods
-// await test @
 
 }).call(this);
 
