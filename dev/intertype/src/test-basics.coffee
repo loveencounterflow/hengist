@@ -161,10 +161,10 @@ try_and_show = ( T, f ) ->
   T?.eq ( types.type_of +Infinity       ), 'unknown'
   T?.eq ( types.type_of -Infinity       ), 'unknown'
   #.........................................................................................................
-  T?.eq ( types.isa.asyncfunction.name               ), 'isa_asyncfunction'
-  T?.eq ( types.isa.optional.asyncfunction.name      ), 'isa_optional_asyncfunction'
-  T?.eq ( types.validate.asyncfunction.name          ), 'validate_asyncfunction'
-  T?.eq ( types.validate.optional.asyncfunction.name ), 'validate_optional_asyncfunction'
+  T?.eq ( types.isa.asyncfunction.name               ), 'isa.asyncfunction'
+  T?.eq ( types.isa.optional.asyncfunction.name      ), 'isa.optional.asyncfunction'
+  T?.eq ( types.validate.asyncfunction.name          ), 'validate.asyncfunction'
+  T?.eq ( types.validate.optional.asyncfunction.name ), 'validate.optional.asyncfunction'
   #.........................................................................................................
   done?()
 
@@ -210,10 +210,10 @@ try_and_show = ( T, f ) ->
   T?.eq ( type_of +Infinity       ), 'unknown'
   T?.eq ( type_of -Infinity       ), 'unknown'
   #.........................................................................................................
-  T?.eq ( isa.asyncfunction.name               ), 'isa_asyncfunction'
-  T?.eq ( isa.optional.asyncfunction.name      ), 'isa_optional_asyncfunction'
-  T?.eq ( validate.asyncfunction.name          ), 'validate_asyncfunction'
-  T?.eq ( validate.optional.asyncfunction.name ), 'validate_optional_asyncfunction'
+  T?.eq ( isa.asyncfunction.name               ), 'isa.asyncfunction'
+  T?.eq ( isa.optional.asyncfunction.name      ), 'isa.optional.asyncfunction'
+  T?.eq ( validate.asyncfunction.name          ), 'validate.asyncfunction'
+  T?.eq ( validate.optional.asyncfunction.name ), 'validate.optional.asyncfunction'
   #.........................................................................................................
   throws T, /expected 1 arguments, got 2/, -> isa.float 3, 4
   throws T, /expected 1 arguments, got 0/, -> isa.float()
@@ -515,10 +515,10 @@ try_and_show = ( T, f ) ->
     throws T, /unknown type 'quux'/, -> types.declare { z: 'quux', }
     types.declare { z: 'float', }
     T?.eq ( types.isa.z 12 ), true
-    T?.eq types.isa.float.name, 'isa_float'
+    T?.eq types.isa.float.name, 'isa.float'
     T?.eq types.declarations.float.type, 'float'
     T?.eq types.declarations.float.test.name, 'float'
-    T?.eq types.isa.z.name, 'isa_z'
+    T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
     T?.eq types.declarations.z.test.name, 'float'
   #.........................................................................................................
@@ -528,10 +528,10 @@ try_and_show = ( T, f ) ->
     throws T, /unknown type 'quux'/, -> types.declare { z: { test: 'quux', }, }
     types.declare { z: { test: 'float', }, }
     T?.eq ( types.isa.z 12 ), true
-    T?.eq types.isa.float.name, 'isa_float'
+    T?.eq types.isa.float.name, 'isa.float'
     T?.eq types.declarations.float.type, 'float'
     T?.eq types.declarations.float.test.name, 'float'
-    T?.eq types.isa.z.name, 'isa_z'
+    T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
     T?.eq types.declarations.z.test.name, 'float'
   #.........................................................................................................
@@ -572,36 +572,23 @@ try_and_show = ( T, f ) ->
     types.declare { quantity: 'object', }
     types.declare { 'quantity.q': 'float', }
     types.declare { 'quantity.u': 'text', }
+    T?.eq types.isa[ 'quantity.q' ], types.declarations[ 'quantity' ].sub_tests[ 'q' ]
+    T?.eq types.isa[ 'quantity.q' ], types.isa.quantity.q
     # debug '^409-1^', types.declarations
-    debug '^409-2^', types.isa.quantity {}
-    debug '^409-3^', types.isa.quantity { q: {}, }
-    debug '^409-4^', types.isa.quantity { q: 3, }
-    debug '^409-5^', types.isa.quantity { q: 3, u: 'm', }
-    debug '^409-10^', types.declarations.quantity
-    debug '^409-6^', types.isa.quantity.q 3
-    debug '^409-7^', types.isa.quantity.q 3.1
-    debug '^409-8^', types.isa.quantity.q '3.1'
-    debug '^409-9^', types.isa.quantity.u 'm'
-    debug '^409-10^', types.isa.quantity.u null
+    T?.eq ( types.isa.quantity {}                 ), false
+    T?.eq ( types.isa.quantity { q: {}, }         ), false
+    T?.eq ( types.isa.quantity { q: 3, }          ), false
+    T?.eq ( types.isa.quantity { q: 3, u: 'm', }  ), true
+    T?.eq ( types.isa.quantity.q 3                ), true
+    T?.eq ( types.isa.quantity.q 3.1              ), true
+    T?.eq ( types.isa.quantity.q '3.1'            ), false
+    T?.eq ( types.isa.quantity.u 'm'              ), true
+    T?.eq ( types.isa.quantity.u null             ), false
+    T?.eq ( types.isa.quantity.u 3                ), false
+    debug '^433-1^', types.declarations[ 'quantity' ]
+    debug '^433-1^', types.declarations[ 'quantity.q' ]
+    debug '^433-1^', types.declarations[ 'quantity.u' ]
     return null
-  # #.........................................................................................................
-  # do =>
-  #   types = new Intertype()
-  #   types.declare { foo: 'object', }
-  #   types.declare { 'foo.bar': 'object', }
-  #   types.declare { 'foo.bar.baz': 'float', }
-  #   debug '^409-11^', types.declarations
-  #   debug '^409-12^', types.isa.foo {}
-  #   debug '^409-13^', types.isa.foo { bar: {}, }
-  #   debug '^409-14^', types.isa.foo { bar: { baz: '3', }, }
-  #   debug '^409-15^', types.isa.foo { bar: { baz: 3, }, }
-  #   debug '^409-16^', types.isa.foo.bar {}
-  #   debug '^409-17^', types.isa.foo.bar { baz: '3', }
-  #   debug '^409-18^', types.isa.foo.bar { baz: 3, }
-  #   debug '^409-19^', types.isa.foo.bar.baz 3
-  #   debug '^409-20^', types.isa.foo.bar.baz 3.14
-  #   debug '^409-21^', types.isa.foo.bar.baz '3.14'
-  #   return null
   #.........................................................................................................
   done?()
 
@@ -615,7 +602,7 @@ try_and_show = ( T, f ) ->
       'foo.bar':      ( x ) -> x is 'foo.bar'
       'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
     try_and_show T, -> types = new Intertype declarations
-    throws T, /unknown type 'foo'/, -> types = new Intertype declarations
+    throws T, /unknown partial type 'foo'/, -> types = new Intertype declarations
     return null
   #.........................................................................................................
   do =>
@@ -624,30 +611,13 @@ try_and_show = ( T, f ) ->
       'quantity.q':       'float'
       'quantity.u':       'text'
     types = new Intertype declarations
-    debug '^423423^', types.isa.quantity {}
-    debug '^423423^', types.isa.quantity { q: 12, u: 'kg', }
-    debug '^423423^', types.isa[ 'quantity.q' ] 12
-    debug '^423423^', types.isa[ 'quantity.u' ] 'kg'
-    debug '^423423^', types.isa.quantity.q 12
-    debug '^423423^', types.isa.quantity.u 'kg'
-    debug '^423423^', types.declarations
+    T?.eq ( types.isa.quantity {}                   ), false
+    T?.eq ( types.isa.quantity { q: 12, u: 'kg', }  ), true
+    T?.eq ( types.isa[ 'quantity.q' ] 12            ), true
+    T?.eq ( types.isa[ 'quantity.u' ] 'kg'          ), true
+    T?.eq ( types.isa.quantity.q 12                 ), true
+    T?.eq ( types.isa.quantity.u 'kg'               ), true
     return null
-  # #.........................................................................................................
-  # do =>
-  #   declarations =
-  #     'foo':          'object'
-  #     'foo.bar':      'object'
-  #     'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
-  #   types = new Intertype declarations
-  #   T?.eq ( types.isa.foo {}                                ), false
-  #   T?.eq ( types.isa.foo { bar: {} }                       ), false
-  #   T?.eq ( types.isa.foo { bar: { baz: 'foo.bar.baz', } }  ), true
-  #   T?.eq ( types.isa.foo { bar: { baz: '??', } }           ), false
-  #   T?.eq ( types.isa.foo.bar { baz: 'foo.bar.baz' }        ), true
-  #   T?.eq ( types.isa.foo.bar {}                            ), false
-  #   T?.eq ( types.isa.foo.bar.baz 'foo.bar.baz'             ), true
-  #   T?.eq ( types.isa.foo.bar.baz '??'                      ), false
-  #   return null
   #.........................................................................................................
   done?()
 
@@ -709,8 +679,8 @@ if module is require.main then await do =>
   # await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
   # @resolve_dotted_type()
   # test @resolve_dotted_type
-  @dotted_types_are_test_methods()
+  # @dotted_types_are_test_methods()
   # test @dotted_types_are_test_methods
-  # await test @
+  await test @
 
 
