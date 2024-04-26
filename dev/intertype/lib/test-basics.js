@@ -1138,6 +1138,90 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.resolve_dotted_type = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo'), false);
+      }
+      types.declare({
+        foo: 'object'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo'), true);
+      }
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar'), false);
+      }
+      types.declare({
+        'foo.bar': 'object'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar'), true);
+      }
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar.baz'), false);
+      }
+      types.declare({
+        'foo.bar.baz': 'float'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar.baz'), true);
+      }
+      if (T != null) {
+        T.eq(types.declarations['foo.bar.baz'].test, types.declarations.float.test);
+      }
+      try_and_show(T, function() {
+        return types.declare({
+          'foo.bar.baz.quux.dax.dux': 'float'
+        });
+      });
+      debug('^3234^', types.isa.foo);
+      debug('^3234^', types.isa['foo.bar']);
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.dotted_types_are_test_methods = function(T, done) {
+    var Intertype;
+    // T?.halt_on_error()
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      types.declare({
+        quantity: 'object'
+      });
+      types.declare({
+        'q': 'float'
+      });
+      types.declare({
+        'u': 'text'
+      });
+      // debug '^409-1^', types.declarations
+      debug('^409-2^', types.isa.quantity({}));
+      debug('^409-2^', types.isa.quantity({
+        q: {}
+      }));
+      debug('^409-2^', types.isa.quantity({
+        q: 3
+      }));
+      debug('^409-2^', types.isa.quantity({
+        q: 3,
+        u: 'm'
+      }));
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.can_use_namespaces = function(T, done) {
     var Intertype;
     // T?.halt_on_error()
@@ -1163,72 +1247,23 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var declarations;
-      declarations = {
-        'foo': 'object',
-        'foo.bar': function(x) {
-          return x === 'foo.bar';
-        },
-        'foo.bar.baz': function(x) {
-          return x === 'foo.bar.baz';
-        }
-      };
-      try_and_show(T, function() {
-        var types;
-        return types = new Intertype(declarations);
-      });
-      throws(T, /must be object/, function() {
-        var types;
-        return types = new Intertype(declarations);
-      });
-      return null;
-    })();
-    (() => {      //.........................................................................................................
       var declarations, types;
       declarations = {
-        'foo': 'object',
-        'foo.bar': 'object',
-        'foo.bar.baz': function(x) {
-          return x === 'foo.bar.baz';
-        }
+        'quantity': 'object',
+        'quantity.q': 'float',
+        'quantity.u': 'text'
       };
       types = new Intertype(declarations);
-      if (T != null) {
-        T.eq(types.isa.foo({}), false);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo({
-          bar: {}
-        }), false);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo({
-          bar: {
-            baz: 'foo.bar.baz'
-          }
-        }), true);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo({
-          bar: {
-            baz: '??'
-          }
-        }), false);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo.bar({
-          baz: 'foo.bar.baz'
-        }), true);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo.bar({}), false);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo.bar.baz('foo.bar.baz'), true);
-      }
-      if (T != null) {
-        T.eq(types.isa.foo.bar.baz('??'), false);
-      }
+      debug('^423423^', types.isa.quantity({}));
+      debug('^423423^', types.isa.quantity({
+        q: 12,
+        u: 'kg'
+      }));
+      debug('^423423^', types.isa['quantity.q'](12));
+      debug('^423423^', types.isa['quantity.u']('kg'));
+      debug('^423423^', types.isa.quantity.q(12));
+      debug('^423423^', types.isa.quantity.u('kg'));
+      debug('^423423^', types.declarations);
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1303,29 +1338,96 @@
 
   //===========================================================================================================
   if (module === require.main) {
-    await (async() => {
-      // @basic_functionality_using_types_object()
-      // @allow_declaration_objects()
-      // demo_1()
-      // @can_use_type_name_for_test()
-      // test @can_use_type_name_for_test
-      // await test @create_entries_must_be_sync_functions
-      // await test @template_methods_must_be_nullary
-      // @throw_instructive_error_on_missing_type()
-      // @allows_licensed_overrides()
-      // await test @allows_licensed_overrides
-      // await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
-      return (await test(this));
+    await (() => {
+      (() => {        // @basic_functionality_using_types_object()
+        // @allow_declaration_objects()
+        // demo_1()
+        // @can_use_type_name_for_test()
+        // test @can_use_type_name_for_test
+        // await test @create_entries_must_be_sync_functions
+        // await test @template_methods_must_be_nullary
+        // @throw_instructive_error_on_missing_type()
+        // @allows_licensed_overrides()
+        // await test @allows_licensed_overrides
+        // await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
+        // @resolve_dotted_type()
+        // test @resolve_dotted_type
+        // @dotted_types_are_test_methods()
+        // test @dotted_types_are_test_methods
+        // await test @
+
+        // thx to https://medium.com/@adrien.za/creating-callable-objects-in-javascript-fbf88db9904c
+        var f, set;
+        f = function() {};
+        set = function(target, key, value) {
+          return Object.defineProperty(f, key, {
+            value,
+            enumerable: true
+          });
+        };
+        debug('^342-1^', f);
+        debug('^342-1^', f.name, f.length);
+        set(f, 'name', 'foo');
+        set(f, 'length', 2);
+        debug('^342-1^', f);
+        debug('^342-1^', f.name, f.length);
+        f.apply = null;
+        return f(1234);
+      })();
+      (() => {
+        
+    class Callable extends Function {
+      constructor() {
+        super('...args', 'return this._bound._call(...args)')
+        // Or without the spread/rest operator:
+        // super('return this._bound._call.apply(this._bound, arguments)')
+        this._bound = this.bind(this)
+
+        return this._bound
+      }
+
+      _call(...args) {
+        console.log(this, args)
+      }
+    }
+    ;
+        var f, set;
+        f = new Callable();
+        set = function(target, key, value) {
+          /* NOTE: when `target` is a function and `key` is `name` or `length`, cache original values? */
+          return Object.defineProperty(f, key, {
+            value,
+            enumerable: true
+          });
+        };
+        debug('^342-1^', f);
+        debug('^342-1^', f.name, f.length);
+        set(f, 'name', 'foo');
+        set(f, 'length', 2);
+        debug('^342-1^', f);
+        debug('^342-1^', f.name, f.length);
+        f.apply = null;
+        return f(1234);
+      })();
+      return (() => {
+        var Callable, f;
+        Callable = class Callable extends Function {
+          constructor() {
+            super();
+            return new Proxy(this, {
+              apply: function(...P) {
+                return debug('^242^', P);
+              }
+            });
+          }
+
+        };
+        f = new Callable();
+        f.apply = null;
+        return f(2);
+      })();
     })();
   }
-
-  // do =>
-//   INTERTYPE     = require '../../../apps/intertype'
-//   types         = new INTERTYPE.Intertype sample_declarations
-//   debug '^345^', types.type_of 1
-//   debug '^345^', types.type_of Infinity
-//   debug '^345^', types.isa.unknown 1
-//   debug '^345^', types.isa.unknown Infinity
 
 }).call(this);
 
