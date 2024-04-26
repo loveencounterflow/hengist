@@ -554,6 +554,7 @@ try_and_show = ( T, f ) ->
     types.declare { 'foo.bar.baz': 'float', }
     T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), true
     T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
+    # types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
     try_and_show T, -> types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
     debug '^3234^', types.isa.foo
     debug '^3234^', types.isa[ 'foo.bar' ]
@@ -569,13 +570,19 @@ try_and_show = ( T, f ) ->
   do =>
     types = new Intertype()
     types.declare { quantity: 'object', }
-    types.declare { 'q': 'float', }
-    types.declare { 'u': 'text', }
+    types.declare { 'quantity.q': 'float', }
+    types.declare { 'quantity.u': 'text', }
     # debug '^409-1^', types.declarations
     debug '^409-2^', types.isa.quantity {}
-    debug '^409-2^', types.isa.quantity { q: {}, }
-    debug '^409-2^', types.isa.quantity { q: 3, }
-    debug '^409-2^', types.isa.quantity { q: 3, u: 'm', }
+    debug '^409-3^', types.isa.quantity { q: {}, }
+    debug '^409-4^', types.isa.quantity { q: 3, }
+    debug '^409-5^', types.isa.quantity { q: 3, u: 'm', }
+    debug '^409-10^', types.declarations.quantity
+    debug '^409-6^', types.isa.quantity.q 3
+    debug '^409-7^', types.isa.quantity.q 3.1
+    debug '^409-8^', types.isa.quantity.q '3.1'
+    debug '^409-9^', types.isa.quantity.u 'm'
+    debug '^409-10^', types.isa.quantity.u null
     return null
   # #.........................................................................................................
   # do =>
@@ -583,17 +590,17 @@ try_and_show = ( T, f ) ->
   #   types.declare { foo: 'object', }
   #   types.declare { 'foo.bar': 'object', }
   #   types.declare { 'foo.bar.baz': 'float', }
-  #   debug '^409-1^', types.declarations
-  #   debug '^409-2^', types.isa.foo {}
-  #   debug '^409-2^', types.isa.foo { bar: {}, }
-  #   debug '^409-2^', types.isa.foo { bar: { baz: '3', }, }
-  #   debug '^409-2^', types.isa.foo { bar: { baz: 3, }, }
-  #   debug '^409-3^', types.isa.foo.bar {}
-  #   debug '^409-4^', types.isa.foo.bar { baz: '3', }
-  #   debug '^409-4^', types.isa.foo.bar { baz: 3, }
-  #   debug '^409-5^', types.isa.foo.bar.baz 3
-  #   debug '^409-6^', types.isa.foo.bar.baz 3.14
-  #   debug '^409-7^', types.isa.foo.bar.baz '3.14'
+  #   debug '^409-11^', types.declarations
+  #   debug '^409-12^', types.isa.foo {}
+  #   debug '^409-13^', types.isa.foo { bar: {}, }
+  #   debug '^409-14^', types.isa.foo { bar: { baz: '3', }, }
+  #   debug '^409-15^', types.isa.foo { bar: { baz: 3, }, }
+  #   debug '^409-16^', types.isa.foo.bar {}
+  #   debug '^409-17^', types.isa.foo.bar { baz: '3', }
+  #   debug '^409-18^', types.isa.foo.bar { baz: 3, }
+  #   debug '^409-19^', types.isa.foo.bar.baz 3
+  #   debug '^409-20^', types.isa.foo.bar.baz 3.14
+  #   debug '^409-21^', types.isa.foo.bar.baz '3.14'
   #   return null
   #.........................................................................................................
   done?()
@@ -702,57 +709,8 @@ if module is require.main then await do =>
   # await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
   # @resolve_dotted_type()
   # test @resolve_dotted_type
-  # @dotted_types_are_test_methods()
+  @dotted_types_are_test_methods()
   # test @dotted_types_are_test_methods
   # await test @
 
-  # thx to https://medium.com/@adrien.za/creating-callable-objects-in-javascript-fbf88db9904c
-  do =>
-    f = ->
-    set = ( target, key, value ) -> Object.defineProperty f, key, { value, enumerable: true, }
-    debug '^342-1^', f
-    debug '^342-1^', f.name, f.length
-    set f, 'name',   'foo'
-    set f, 'length', 2
-    debug '^342-1^', f
-    debug '^342-1^', f.name, f.length
-    f.apply = null
-    f 1234
-  do =>
-    ```
-    class Callable extends Function {
-      constructor() {
-        super('...args', 'return this._bound._call(...args)')
-        // Or without the spread/rest operator:
-        // super('return this._bound._call.apply(this._bound, arguments)')
-        this._bound = this.bind(this)
 
-        return this._bound
-      }
-
-      _call(...args) {
-        console.log(this, args)
-      }
-    }
-    ```
-    f = new Callable()
-    set = ( target, key, value ) ->
-      ### NOTE: when `target` is a function and `key` is `name` or `length`, cache original values? ###
-      Object.defineProperty f, key, { value, enumerable: true, }
-    debug '^342-1^', f
-    debug '^342-1^', f.name, f.length
-    set f, 'name',   'foo'
-    set f, 'length', 2
-    debug '^342-1^', f
-    debug '^342-1^', f.name, f.length
-    f.apply = null
-    f 1234
-  do =>
-    class Callable extends Function
-      constructor: ->
-        super()
-        return new Proxy @,
-          apply: ( P... ) -> debug '^242^', P
-    f = new Callable()
-    f.apply = null
-    f 2
