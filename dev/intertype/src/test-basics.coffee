@@ -590,6 +590,38 @@ try_and_show = ( T, f ) ->
     debug '^433-1^', types.declarations[ 'quantity.u' ]
     return null
   #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'person':                       'object', }
+    types.declare { 'person.name':                  'text',   }
+    types.declare { 'person.address':               'object', }
+    types.declare { 'person.address.city':          'object', }
+    types.declare { 'person.address.city.name':     'text',   }
+    types.declare { 'person.address.city.postcode': 'text',   }
+    # T?.eq types.isa[ 'quantity.q' ], types.declarations[ 'quantity' ].sub_tests[ 'q' ]
+    # T?.eq types.isa[ 'quantity.q' ], types.isa.quantity.q
+    T?.eq ( types.isa.person.address.city.name 'P'  ), true
+    T?.eq ( types.isa.person.address.city.name 1234 ), false
+    T?.eq ( types.isa.person 1234 ), false
+    T?.eq ( types.isa.person { name: 'Bob', } ), false
+    T?.eq ( types.isa.person { name: 'Bob', address: {}, } ), false
+    T?.eq ( types.isa.person { name: 'Bob', address: { city: {}, }, } ), false
+    T?.eq ( types.isa.person { name: 'Bob', address: { city: { name: 'P', }, }, } ), false
+    T?.eq ( types.isa.person { name: 'Bob', address: { city: { name: 'P', postcode: 'SO36', }, }, } ), true
+    T?.eq ( types.isa.person.address.city.name     'P'                                ), true
+    T?.eq ( types.isa.person.address.city.postcode 'SO36'                             ), true
+    T?.eq ( types.isa.person.address.city {         name: 'P', postcode: 'SO36', }    ), true
+    T?.eq ( types.isa.person.address      { city: { name: 'P', postcode: 'SO36', }, } ), true
+    help '^322-1^', ( { "#{k}": f.name } for k, f of types.declarations[ 'person'               ].sub_tests )
+    help '^322-2^', ( { "#{k}": f.name } for k, f of types.declarations[ 'person.address'       ].sub_tests )
+    help '^322-3^', ( { "#{k}": f.name } for k, f of types.declarations[ 'person.address.city'  ].sub_tests )
+    T?.eq ( Object.keys types.declarations[ 'person'               ].sub_tests ), [ 'name', 'address', ]
+    T?.eq ( Object.keys types.declarations[ 'person.address'       ].sub_tests ), [ 'city', ]
+    T?.eq ( Object.keys types.declarations[ 'person.address.city'  ].sub_tests ), [ 'name', 'postcode', ]
+    T?.eq ( types.declarations[ 'person' ].sub_tests isnt types.declarations[ 'person.address'      ].sub_tests ), true
+    T?.eq ( types.declarations[ 'person' ].sub_tests isnt types.declarations[ 'person.address.city' ].sub_tests ), true
+    return null
+  #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
