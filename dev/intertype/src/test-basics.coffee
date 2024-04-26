@@ -538,6 +538,67 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@resolve_dotted_type = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    T?.eq ( Reflect.has types.declarations, 'foo'         ), false
+    types.declare { foo: 'object', }
+    T?.eq ( Reflect.has types.declarations, 'foo'         ), true
+    T?.eq ( Reflect.has types.declarations, 'foo.bar'     ), false
+    types.declare { 'foo.bar': 'object', }
+    T?.eq ( Reflect.has types.declarations, 'foo.bar'     ), true
+    T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), false
+    types.declare { 'foo.bar.baz': 'float', }
+    T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), true
+    T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
+    try_and_show T, -> types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
+    debug '^3234^', types.isa.foo
+    debug '^3234^', types.isa[ 'foo.bar' ]
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@dotted_types_are_test_methods = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { quantity: 'object', }
+    types.declare { 'q': 'float', }
+    types.declare { 'u': 'text', }
+    # debug '^409-1^', types.declarations
+    debug '^409-2^', types.isa.quantity {}
+    debug '^409-2^', types.isa.quantity { q: {}, }
+    debug '^409-2^', types.isa.quantity { q: 3, }
+    debug '^409-2^', types.isa.quantity { q: 3, u: 'm', }
+    return null
+  # #.........................................................................................................
+  # do =>
+  #   types = new Intertype()
+  #   types.declare { foo: 'object', }
+  #   types.declare { 'foo.bar': 'object', }
+  #   types.declare { 'foo.bar.baz': 'float', }
+  #   debug '^409-1^', types.declarations
+  #   debug '^409-2^', types.isa.foo {}
+  #   debug '^409-2^', types.isa.foo { bar: {}, }
+  #   debug '^409-2^', types.isa.foo { bar: { baz: '3', }, }
+  #   debug '^409-2^', types.isa.foo { bar: { baz: 3, }, }
+  #   debug '^409-3^', types.isa.foo.bar {}
+  #   debug '^409-4^', types.isa.foo.bar { baz: '3', }
+  #   debug '^409-4^', types.isa.foo.bar { baz: 3, }
+  #   debug '^409-5^', types.isa.foo.bar.baz 3
+  #   debug '^409-6^', types.isa.foo.bar.baz 3.14
+  #   debug '^409-7^', types.isa.foo.bar.baz '3.14'
+  #   return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @can_use_namespaces = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
@@ -552,28 +613,34 @@ try_and_show = ( T, f ) ->
   #.........................................................................................................
   do =>
     declarations =
-      'foo':          'object'
-      'foo.bar':      ( x ) -> x is 'foo.bar'
-      'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
-    try_and_show T, -> types = new Intertype declarations
-    throws T, /must be object/, -> types = new Intertype declarations
-    return null
-  #.........................................................................................................
-  do =>
-    declarations =
-      'foo':          'object'
-      'foo.bar':      'object'
-      'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
+      'quantity':         'object'
+      'quantity.q':       'float'
+      'quantity.u':       'text'
     types = new Intertype declarations
-    T?.eq ( types.isa.foo {}                                ), false
-    T?.eq ( types.isa.foo { bar: {} }                       ), false
-    T?.eq ( types.isa.foo { bar: { baz: 'foo.bar.baz', } }  ), true
-    T?.eq ( types.isa.foo { bar: { baz: '??', } }           ), false
-    T?.eq ( types.isa.foo.bar { baz: 'foo.bar.baz' }        ), true
-    T?.eq ( types.isa.foo.bar {}                            ), false
-    T?.eq ( types.isa.foo.bar.baz 'foo.bar.baz'             ), true
-    T?.eq ( types.isa.foo.bar.baz '??'                      ), false
+    debug '^423423^', types.isa.quantity {}
+    debug '^423423^', types.isa.quantity { q: 12, u: 'kg', }
+    debug '^423423^', types.isa[ 'quantity.q' ] 12
+    debug '^423423^', types.isa[ 'quantity.u' ] 'kg'
+    debug '^423423^', types.isa.quantity.q 12
+    debug '^423423^', types.isa.quantity.u 'kg'
+    debug '^423423^', types.declarations
     return null
+  # #.........................................................................................................
+  # do =>
+  #   declarations =
+  #     'foo':          'object'
+  #     'foo.bar':      'object'
+  #     'foo.bar.baz':  ( x ) -> x is 'foo.bar.baz'
+  #   types = new Intertype declarations
+  #   T?.eq ( types.isa.foo {}                                ), false
+  #   T?.eq ( types.isa.foo { bar: {} }                       ), false
+  #   T?.eq ( types.isa.foo { bar: { baz: 'foo.bar.baz', } }  ), true
+  #   T?.eq ( types.isa.foo { bar: { baz: '??', } }           ), false
+  #   T?.eq ( types.isa.foo.bar { baz: 'foo.bar.baz' }        ), true
+  #   T?.eq ( types.isa.foo.bar {}                            ), false
+  #   T?.eq ( types.isa.foo.bar.baz 'foo.bar.baz'             ), true
+  #   T?.eq ( types.isa.foo.bar.baz '??'                      ), false
+  #   return null
   #.........................................................................................................
   done?()
 
