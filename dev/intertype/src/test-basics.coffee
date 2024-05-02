@@ -302,7 +302,7 @@ try_and_show = ( T, f ) ->
   declarations.optional = ( x ) -> true
   #.........................................................................................................
   try_and_show T, -> new INTERTYPE.Intertype_minimal declarations
-  throws T, /'optional' is a built-in base type and may not be overridden/, -> new INTERTYPE.Intertype_minimal declarations
+  throws T, /not allowed to re-declare base type 'optional'/, -> new INTERTYPE.Intertype_minimal declarations
   #.........................................................................................................
   done?()
 
@@ -415,7 +415,7 @@ try_and_show = ( T, f ) ->
       float:
         test:       ( x ) -> x is 'float'
     try_and_show T, -> ( types.declare overrides )
-    throws T, /type 'float' has already been declared/, -> ( types.declare overrides )
+    throws T, /not allowed to re-declare type 'float'/, -> ( types.declare overrides )
     #.......................................................................................................
     ### pre-existing declaration remains valid: ###
     T?.eq ( types.isa.float 4       ), true
@@ -430,10 +430,7 @@ try_and_show = ( T, f ) ->
       float:
         override:   true
         test:       ( x ) -> x is 'float'
-    T?.eq ( types.declare overrides ), null
-    #.......................................................................................................
-    T?.eq ( types.isa.float 4       ), false
-    T?.eq ( types.isa.float 'float' ), true
+    throws T, /not allowed to re-declare type 'float'/, -> ( types.declare overrides )
     return null
   #.........................................................................................................
   do =>
@@ -445,7 +442,7 @@ try_and_show = ( T, f ) ->
         override:   true
         test:       ( x ) -> true
     try_and_show T, -> ( types.declare overrides )
-    throws T, /'anything' is a built-in base type and may not be overridden/, -> ( types.declare overrides )
+    throws T, /not allowed to re-declare base type 'anything'/, -> ( types.declare overrides )
     #.......................................................................................................
     ### pre-existing declaration remains valid: ###
     T?.eq ( types.isa.anything 4       ), true
@@ -511,7 +508,7 @@ try_and_show = ( T, f ) ->
   #.........................................................................................................
   do =>
     types = new Intertype()
-    try_and_show T, -> types.declare { z: 'quux', }
+    # try_and_show T, -> types.declare { z: 'quux', }
     throws T, /unknown type 'quux'/, -> types.declare { z: 'quux', }
     types.declare { z: 'float', }
     T?.eq ( types.isa.z 12 ), true
@@ -520,11 +517,12 @@ try_and_show = ( T, f ) ->
     T?.eq types.declarations.float.test.name, 'float'
     T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
-    T?.eq types.declarations.z.test.name, 'float'
+    T?.eq types.declarations.z.test.name, 'float' # ?
+    debug '^5345^', types.declarations.z
   #.........................................................................................................
   do =>
     types = new Intertype()
-    try_and_show T, -> types.declare { z: { test: 'quux', }, }
+    # try_and_show T, -> types.declare { z: { test: 'quux', }, }
     throws T, /unknown type 'quux'/, -> types.declare { z: { test: 'quux', }, }
     types.declare { z: { test: 'float', }, }
     T?.eq ( types.isa.z 12 ), true
@@ -534,6 +532,7 @@ try_and_show = ( T, f ) ->
     T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
     T?.eq types.declarations.z.test.name, 'float'
+    debug '^5345^', types.declarations.z
   #.........................................................................................................
   done?()
 
@@ -620,6 +619,143 @@ try_and_show = ( T, f ) ->
     T?.eq ( Object.keys types.declarations[ 'person.address.city'  ].sub_tests ), [ 'name', 'postcode', ]
     T?.eq ( types.declarations[ 'person' ].sub_tests isnt types.declarations[ 'person.address'      ].sub_tests ), true
     T?.eq ( types.declarations[ 'person' ].sub_tests isnt types.declarations[ 'person.address.city' ].sub_tests ), true
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'foo':      'float', }
+    types.declare { 'foo.bar':  'text',   }
+    do =>
+      d = 3
+      # d.bar = '?' # Cannot create property in strict mode, so can never satisfy test
+      T?.eq ( types.isa.foo d ), false
+      return null
+    do =>
+      d = new Number 3
+      d.bar = '?'
+      T?.eq ( d.bar ), '?'
+      # still won't work b/c `float` doesn't accept objects (which is a good thing):
+      T?.eq ( types.isa.foo d ), false
+      return null
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'foo':        'object', }
+    types.declare { 'foo.bind':   'float',   }
+    types.declare { 'foo.apply':  'float',   }
+    types.declare { 'foo.call':   'float',   }
+    types.declare { 'foo.name':   'float',   }
+    types.declare { 'foo.length': 'float',   }
+    T?.eq ( types.isa.foo {} ), false
+    T?.eq ( types.isa.foo { bind: 1, apply: 2, call: 3, name: 4, length: 5, } ), true
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'foo':        'object',           }
+    types.declare { 'foo.text':   ( ( x ) -> x is 1 ) }
+    types.declare { 'foo.float':  ( ( x ) -> x is 2 ) }
+    T?.eq ( types.isa.foo {} ), false
+    T?.eq ( types.isa.foo { text: 1, float: 2, } ), true
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@can_use_refs_to_dotted_types = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'person':                       'object', }
+    types.declare { 'person.name':                  'text',   }
+    types.declare { 'person.address':               'object', }
+    types.declare { 'person.address.city':          'object', }
+    types.declare { 'person.address.city.name':     'text',   }
+    types.declare { 'person.address.city.postcode': 'text',   }
+    types.declare { 'mycity':                       ( ( x ) -> @isa.person.address.city x ), }
+    debug '^434-1^', types.declarations[ 'person.address.city' ]
+    debug '^434-2^', types.declarations.mycity
+    T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'person':                       'object', }
+    types.declare { 'person.name':                  'text',   }
+    types.declare { 'person.address':               'object', }
+    types.declare { 'person.address.city':          'object', }
+    types.declare { 'person.address.city.name':     'text',   }
+    types.declare { 'person.address.city.postcode': 'text',   }
+    types.declare { 'mycity':                       'person.address.city', }
+    # debug '^434-3^', types.declarations[ 'person.address.city' ]
+    # debug '^434-4^', types.declarations.mycity
+    urge '^34234^', ( types.isa.mycity {} )
+    urge '^34234^', ( types.isa.mycity { name: 'P', postcode: 'SO36', } )
+    T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    types.declare { 'person':                       'object', }
+    types.declare { 'person.name':                  'text',   }
+    types.declare { 'person.address':               'object', }
+    types.declare { 'person.address.city':          'object', }
+    types.declare { 'person.address.city.name':     'text',   }
+    types.declare { 'person.address.city.postcode': 'text',   }
+    types.declare { 'mycity':                       ( ( x ) -> @isa.optional.person.address.city x ), }
+    # debug '^434-5^', types.declarations[ 'person.address.city' ]
+    # debug '^434-6^', types.declarations.mycity
+    T?.eq ( types.isa.mycity null ), true
+    T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
+    return null
+  # #.........................................................................................................
+  # do =>
+  #   types = new Intertype()
+  #   types.declare { 'person':                       'object', }
+  #   types.declare { 'person.name':                  'text',   }
+  #   types.declare { 'person.address':               'object', }
+  #   types.declare { 'person.address.city':          'object', }
+  #   types.declare { 'person.address.city.name':     'text',   }
+  #   types.declare { 'person.address.city.postcode': 'text',   }
+  #   source = """R.f = function(x) { return this.isa.optional.person.address.city(x); }"""
+  #   R = {}
+  #   debug '^3234^', source
+  #   debug '^3234^', f = eval source, { R, }
+  #   debug '^3234^', R.f is f
+  #   process.exit 111
+  #   types.declare { 'mycity':                       'optional.person.address.city', }
+  #   debug '^434-7^', types.declarations[ 'person.address.city' ]
+  #   debug '^434-8^', types.declarations.mycity
+  #   T?.eq ( types.isa.mycity null ), true
+  #   T?.eq ( types.isa.mycity {} ), false
+  #   T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
+  #   return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@validate_dotted_types = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    { validate }  = types
+    types.declare { 'person':                       'object', }
+    types.declare { 'person.name':                  'text',   }
+    types.declare { 'person.address':               'object', }
+    types.declare { 'person.address.city':          'object', }
+    types.declare { 'person.address.city.name':     'text',   }
+    types.declare { 'person.address.city.postcode': 'text',   }
+    try_and_show T, -> validate.person.address.city.postcode 3
+    throws T, /expected a person.address.city.postcode/, -> validate.person.address.city.postcode 3
+    try_and_show T, -> validate.person.address.city { name: 'P', }
+    throws T, /expected a person.address.city/, -> validate.person.address.city { name: 'P', }
     return null
   #.........................................................................................................
   done?()
@@ -713,6 +849,9 @@ if module is require.main then await do =>
   # test @resolve_dotted_type
   # @dotted_types_are_test_methods()
   # test @dotted_types_are_test_methods
+  # @can_use_refs_to_dotted_types()
+  # test @can_use_refs_to_dotted_types
+  # test @can_use_type_name_for_test
   await test @
 
 
