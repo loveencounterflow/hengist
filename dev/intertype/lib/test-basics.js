@@ -87,7 +87,7 @@
       var error, matcher_type, message;
       error = null;
       try {
-        await f();
+        urge('^992-1^', "`throws()` result of call:", (await f()));
       } catch (error1) {
         error = error1;
         switch (matcher_type = TMP_types.type_of(matcher)) {
@@ -101,34 +101,43 @@
             if (matcher.test(error.message)) {
               null;
             } else {
-              warn('^992-4^', reverse(message = `error ${rpr(error.message)} doesn't match ${rpr(matcher)}`));
-              T.fail(`^992-4^ ${message}`);
+              warn('^992-2^', reverse(message = `error ${rpr(error.message)} doesn't match ${rpr(matcher)}`));
+              if (T != null) {
+                T.fail(`^992-3^ ${message}`);
+              }
             }
             break;
           default:
-            warn(message = `^992-1^ expected a regex or a text, got a ${matcher_type}`);
-            T.fail(message);
+            warn(message = `^992-4^ expected a regex or a text, got a ${matcher_type}`);
+            if (T != null) {
+              T.fail(message);
+            }
         }
       }
-      return T != null ? T.ok(error != null) : void 0;
+      // T?.ok error?
+      // urge '^424243^', error?.message
+      if (error == null) {
+        warn('^992-5^', reverse(message = "`throws()`: expected an error but none was thrown"));
+        return T != null ? T.fail("^992-6^ `throws()`: expected an error but none was thrown") : void 0;
+      }
     })();
     return null;
   };
 
   //===========================================================================================================
-  try_and_show = function(T, f) {
-    var e, message;
-    e = null;
+  try_and_show = async function(T, f) {
+    var error, message;
+    error = null;
     try {
-      urge('^992-2^', f());
+      urge('^992-7^', "`try_and_show():` result of call:", (await f()));
     } catch (error1) {
-      e = error1;
-      help('^992-3^', reverse(`try_and_show: ${rpr(e.message)}`));
+      error = error1;
+      help('^992-8^', reverse(`\`try_and_show()\`: ${rpr(error.message)}`));
     }
-    if (e == null) {
-      warn('^992-4^', reverse(message = "try_and_show: expected an error but none was thrown"));
+    if (error == null) {
+      warn('^992-9^', reverse(message = "`try_and_show()`: expected an error but none was thrown"));
       if (T != null) {
-        T.fail("^992-5^ try_and_show: expected an error but none was thrown");
+        T.fail("^992-10^ `try_and_show()`: expected an error but none was thrown");
       }
     }
     return null;
@@ -202,7 +211,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_types_object = function(T, done) {
-    var INTERTYPE, types;
+    var INTERTYPE, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, types;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
     types = new INTERTYPE.Intertype_minimal(sample_declarations);
@@ -287,6 +296,29 @@
       T.eq(types.type_of(-2e308), 'unknown');
     }
     //.........................................................................................................
+    debug('^4324^', 'null           ', types.declarations.null);
+    debug('^4324^', 'function       ', types.declarations.function);
+    debug('^4324^', 'boolean        ', types.declarations.boolean);
+    debug('^4324^', 'text           ', types.declarations.text);
+    debug('^4324^', 'asyncfunction  ', types.declarations.asyncfunction);
+    debug('^4324^');
+    debug('^4324^', 'null           ', types.isa.null);
+    debug('^4324^', 'function       ', types.isa.function);
+    debug('^4324^', 'boolean        ', types.isa.boolean);
+    debug('^4324^', 'text           ', types.isa.text);
+    debug('^4324^', 'asyncfunction  ', types.isa.asyncfunction);
+    debug('^4324^');
+    debug('^4324^', 'null           ', types.isa.optional.null);
+    debug('^4324^', 'function       ', types.isa.optional.function);
+    debug('^4324^', 'boolean        ', types.isa.optional.boolean);
+    debug('^4324^', 'text           ', types.isa.optional.text);
+    debug('^4324^', 'asyncfunction  ', types.isa.optional.asyncfunction);
+    debug('^4324^');
+    debug('^4324^', 'null           ', types.validate.null);
+    debug('^4324^', 'function       ', types.validate.function);
+    debug('^4324^', 'boolean        ', types.validate.boolean);
+    debug('^4324^', 'text           ', types.validate.text);
+    debug('^4324^', 'asyncfunction  ', types.validate.asyncfunction);
     if (T != null) {
       T.eq(types.isa.asyncfunction.name, 'isa.asyncfunction');
     }
@@ -298,6 +330,36 @@
     }
     if (T != null) {
       T.eq(types.validate.optional.asyncfunction.name, 'validate.optional.asyncfunction');
+    }
+    if (T != null) {
+      T.eq((ref = types.declarations.null) != null ? ref.type : void 0, 'null');
+    }
+    if (T != null) {
+      T.eq((ref1 = types.declarations.function) != null ? ref1.type : void 0, 'function');
+    }
+    if (T != null) {
+      T.eq((ref2 = types.declarations.boolean) != null ? ref2.type : void 0, 'boolean');
+    }
+    if (T != null) {
+      T.eq((ref3 = types.declarations.text) != null ? ref3.type : void 0, 'text');
+    }
+    if (T != null) {
+      T.eq((ref4 = types.declarations.asyncfunction) != null ? ref4.type : void 0, 'asyncfunction');
+    }
+    if (T != null) {
+      T.eq((ref5 = types.isa.null) != null ? ref5.name : void 0, 'isa.null');
+    }
+    if (T != null) {
+      T.eq((ref6 = types.isa.function) != null ? ref6.name : void 0, 'isa.function');
+    }
+    if (T != null) {
+      T.eq((ref7 = types.isa.boolean) != null ? ref7.name : void 0, 'isa.boolean');
+    }
+    if (T != null) {
+      T.eq((ref8 = types.isa.text) != null ? ref8.name : void 0, 'isa.text');
+    }
+    if (T != null) {
+      T.eq((ref9 = types.isa.asyncfunction) != null ? ref9.name : void 0, 'isa.asyncfunction');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -631,31 +693,37 @@
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     //.........................................................................................................
+    debug('^509-1^');
     try_and_show(T, function() {
       return new Intertype({
         foo: (function() {})
       });
     });
+    debug('^509-2^');
     try_and_show(T, function() {
       return new Intertype({
         foo: (function(a, b) {})
       });
     });
+    debug('^509-3^');
     try_and_show(T, function() {
       return new Intertype({
         foo: true
       });
     });
+    debug('^509-4^');
     try_and_show(T, function() {
       return new Intertype({
         foo: null
       });
     });
+    debug('^509-5^');
     try_and_show(T, function() {
       return new Intertype({
         foo: {}
       });
     });
+    debug('^509-6^');
     try_and_show(T, function() {
       return new Intertype({
         foo: {
@@ -663,6 +731,7 @@
         }
       });
     });
+    debug('^509-7^');
     try_and_show(T, function() {
       return new Intertype({
         foo: {
@@ -670,6 +739,7 @@
         }
       });
     });
+    debug('^509-8^');
     try_and_show(T, function() {
       return new Intertype({
         foo: 'quux'
@@ -685,22 +755,22 @@
         foo: (function(a, b) {})
       });
     });
-    throws(T, /expected type name, function or object, got a boolean/, function() {
+    throws(T, /expected type name, test method, or object, got a boolean/, function() {
       return new Intertype({
         foo: true
       });
     });
-    throws(T, /expected type name, function or object, got a null/, function() {
+    throws(T, /expected type name, test method, or object, got a null/, function() {
       return new Intertype({
         foo: null
       });
     });
-    throws(T, /expected a function for `test` entry of type 'function', got a object/, function() {
+    throws(T, /expected a function for `test` entry of type 'foo', got a undefined/, function() {
       return new Intertype({
         foo: {}
       });
     });
-    throws(T, /expected a function for `test` entry of type 'function', got a object/, function() {
+    throws(T, /expected a function for `test` entry of type 'foo', got a null/, function() {
       return new Intertype({
         foo: {
           test: null
@@ -1079,10 +1149,7 @@
       if (T != null) {
         T.eq(types.declarations.z.type, 'z');
       }
-      if (T != null) {
-        T.eq(types.declarations.z.test.name, 'float'); // ?
-      }
-      return debug('^5345^', types.declarations.z);
+      return T != null ? T.eq(types.declarations.z.test.name, 'z') : void 0; // ?
     })();
     (() => {      //.........................................................................................................
       var types;
@@ -1118,10 +1185,7 @@
       if (T != null) {
         T.eq(types.declarations.z.type, 'z');
       }
-      if (T != null) {
-        T.eq(types.declarations.z.test.name, 'float');
-      }
-      return debug('^5345^', types.declarations.z);
+      return T != null ? T.eq(types.declarations.z.test.name, 'z') : void 0;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -1516,10 +1580,26 @@
           return this.isa.person.address.city(x);
         })
       });
-      debug('^434-1^', types.declarations['person.address.city']);
-      debug('^434-2^', types.declarations.mycity);
+      // debug '^434-1^', types.declarations[ 'person.address.city' ]
+      // debug '^434-2^', types.declarations.mycity
+      urge('^342-1^', types.declarations.mycity);
+      if (T != null) {
+        T.eq(types.isa.person.address.city({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P',
+          postcode: 'SO36'
+        }), true);
+      }
       if (T != null) {
         T.eq(types.isa.mycity({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.mycity(null), false);
       }
       if (T != null) {
         T.eq(types.isa.mycity({
@@ -1555,13 +1635,24 @@
       });
       // debug '^434-3^', types.declarations[ 'person.address.city' ]
       // debug '^434-4^', types.declarations.mycity
-      urge('^34234^', types.isa.mycity({}));
-      urge('^34234^', types.isa.mycity({
-        name: 'P',
-        postcode: 'SO36'
-      }));
+      urge('^342-2^', types.declarations.mycity);
+      if (T != null) {
+        T.eq(types.isa.person.address.city({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P',
+          postcode: 'SO36'
+        }), true);
+      }
       if (T != null) {
         T.eq(types.isa.mycity({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.mycity(null), false);
       }
       if (T != null) {
         T.eq(types.isa.mycity({
@@ -1599,17 +1690,84 @@
       });
       // debug '^434-5^', types.declarations[ 'person.address.city' ]
       // debug '^434-6^', types.declarations.mycity
+      urge('^342-3^', types.declarations.mycity);
       if (T != null) {
-        T.eq(types.isa.mycity(null), true);
+        T.eq(types.isa.person.address.city({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city(null), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P',
+          postcode: 'SO36'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.person.address.city({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.person.address.city(null), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.optional.person.address.city({
+          name: 'P',
+          postcode: 'SO36'
+        }), true);
       }
       if (T != null) {
         T.eq(types.isa.mycity({}), false);
+      }
+      if (T != null) {
+        T.eq(types.isa.mycity(null), true);
       }
       if (T != null) {
         T.eq(types.isa.mycity({
           name: 'P',
           postcode: 'SO36'
         }), true);
+      }
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.internal_type_of_method = function(T, done) {
+    var Intertype, declarations;
+    // T?.halt_on_error()
+    ({Intertype, declarations} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(types.__type_of(declarations, null), 'null');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, void 0), 'undefined');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, 4), 'float');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, function() {}), 'function');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, async function() {
+          return (await null);
+        }), 'asyncfunction');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, {}), 'object');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, []), 'list');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, +2e308), 'infinity');
+      }
+      if (T != null) {
+        T.eq(types.__type_of(declarations, -2e308), 'infinity');
       }
       return null;
     })();
@@ -1643,15 +1801,51 @@
       types.declare({
         'person.address.city.postcode': 'text'
       });
+      //.......................................................................................................
+      try_and_show(T, function() {
+        return validate.person(null);
+      });
+      try_and_show(T, function() {
+        return validate.person.address(null);
+      });
+      try_and_show(T, function() {
+        return validate.person.address.city(null);
+      });
+      try_and_show(T, function() {
+        return validate.person.address.city.postcode(null);
+      });
+      //.......................................................................................................
+      debug('^334-1^', types.isa.person.address.city.postcode(3));
+      if (T != null) {
+        T.eq(types.isa.person.address.city.postcode(3), false);
+      }
       try_and_show(T, function() {
         return validate.person.address.city.postcode(3);
       });
       throws(T, /expected a person.address.city.postcode/, function() {
         return validate.person.address.city.postcode(3);
       });
+      //.......................................................................................................
+      debug('^334-2^', types.isa.person.address.city({
+        name: 'P'
+      }));
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P'
+        }), false);
+      }
+      debug('^334-4^', validate.person.address.city({
+        name: 'P'
+      }));
+      debug('^334-4^', validate.person.address.city({
+        name: 'P'
+      }));
+      debug('^334-4^', validate.person.address.city({
+        name: 'P'
+      }));
       try_and_show(T, function() {
         return validate.person.address.city({
-          name: 'P'
+          name: 'P' // ??????????????????????????????????
         });
       });
       throws(T, /expected a person.address.city/, function() {
@@ -1659,6 +1853,26 @@
           name: 'P'
         });
       });
+      //.......................................................................................................
+      debug('^334-3^', types.isa.person.address.city({
+        name: 'P',
+        postcode: '3421'
+      }));
+      if (T != null) {
+        T.eq(types.isa.person.address.city({
+          name: 'P',
+          postcode: '3421'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(validate.person.address.city({
+          name: 'P',
+          postcode: '3421'
+        }), {
+          name: 'P',
+          postcode: '3421'
+        });
+      }
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1794,6 +2008,7 @@
   if (module === require.main) {
     await (async() => {
       // @basic_functionality_using_types_object()
+      // test @basic_functionality_using_types_object
       // @allow_declaration_objects()
       // demo_1()
       // @can_use_type_name_for_test()
@@ -1803,6 +2018,7 @@
       // @throw_instructive_error_on_missing_type()
       // @allows_licensed_overrides()
       // await test @allows_licensed_overrides
+      // @throw_instructive_error_when_wrong_type_of_isa_test_declared()
       // await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
       // @resolve_dotted_type()
       // test @resolve_dotted_type
@@ -1811,6 +2027,10 @@
       // @can_use_refs_to_dotted_types()
       // test @can_use_refs_to_dotted_types
       // test @can_use_type_name_for_test
+      // @internal_type_of_method()
+      // test @internal_type_of_method
+      // @validate_dotted_types()
+      // test @validate_dotted_types
       return (await test(this));
     })();
   }
