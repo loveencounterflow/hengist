@@ -166,10 +166,43 @@ try_and_show = ( T, f ) ->
   T?.eq ( types.type_of +Infinity       ), 'unknown'
   T?.eq ( types.type_of -Infinity       ), 'unknown'
   #.........................................................................................................
+  debug '^4324^', 'null           ', types.declarations.null
+  debug '^4324^', 'function       ', types.declarations.function
+  debug '^4324^', 'boolean        ', types.declarations.boolean
+  debug '^4324^', 'text           ', types.declarations.text
+  debug '^4324^', 'asyncfunction  ', types.declarations.asyncfunction
+  debug '^4324^'
+  debug '^4324^', 'null           ', types.isa.null
+  debug '^4324^', 'function       ', types.isa.function
+  debug '^4324^', 'boolean        ', types.isa.boolean
+  debug '^4324^', 'text           ', types.isa.text
+  debug '^4324^', 'asyncfunction  ', types.isa.asyncfunction
+  debug '^4324^'
+  debug '^4324^', 'null           ', types.isa.optional.null
+  debug '^4324^', 'function       ', types.isa.optional.function
+  debug '^4324^', 'boolean        ', types.isa.optional.boolean
+  debug '^4324^', 'text           ', types.isa.optional.text
+  debug '^4324^', 'asyncfunction  ', types.isa.optional.asyncfunction
+  debug '^4324^'
+  debug '^4324^', 'null           ', types.validate.null
+  debug '^4324^', 'function       ', types.validate.function
+  debug '^4324^', 'boolean        ', types.validate.boolean
+  debug '^4324^', 'text           ', types.validate.text
+  debug '^4324^', 'asyncfunction  ', types.validate.asyncfunction
   T?.eq ( types.isa.asyncfunction.name               ), 'isa.asyncfunction'
   T?.eq ( types.isa.optional.asyncfunction.name      ), 'isa.optional.asyncfunction'
   T?.eq ( types.validate.asyncfunction.name          ), 'validate.asyncfunction'
   T?.eq ( types.validate.optional.asyncfunction.name ), 'validate.optional.asyncfunction'
+  T?.eq types.declarations.null?.type,          'null'
+  T?.eq types.declarations.function?.type,      'function'
+  T?.eq types.declarations.boolean?.type,       'boolean'
+  T?.eq types.declarations.text?.type,          'text'
+  T?.eq types.declarations.asyncfunction?.type, 'asyncfunction'
+  T?.eq types.isa.null?.name,                   'isa.null'
+  T?.eq types.isa.function?.name,               'isa.function'
+  T?.eq types.isa.boolean?.name,                'isa.boolean'
+  T?.eq types.isa.text?.name,                   'isa.text'
+  T?.eq types.isa.asyncfunction?.name,          'isa.asyncfunction'
   #.........................................................................................................
   done?()
 
@@ -316,20 +349,20 @@ try_and_show = ( T, f ) ->
   # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
-  try_and_show T, -> new Intertype { foo: ( -> ), }
-  try_and_show T, -> new Intertype { foo: ( ( a, b ) -> ), }
-  try_and_show T, -> new Intertype { foo: true, }
-  try_and_show T, -> new Intertype { foo: null, }
-  try_and_show T, -> new Intertype { foo: {}, }
-  try_and_show T, -> new Intertype { foo: { test: null, }, }
-  try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
-  try_and_show T, -> new Intertype { foo: 'quux', }
+  debug '^509-1^'; try_and_show T, -> new Intertype { foo: ( -> ), }
+  debug '^509-2^'; try_and_show T, -> new Intertype { foo: ( ( a, b ) -> ), }
+  debug '^509-3^'; try_and_show T, -> new Intertype { foo: true, }
+  debug '^509-4^'; try_and_show T, -> new Intertype { foo: null, }
+  debug '^509-5^'; try_and_show T, -> new Intertype { foo: {}, }
+  debug '^509-6^'; try_and_show T, -> new Intertype { foo: { test: null, }, }
+  debug '^509-7^'; try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
+  debug '^509-8^'; try_and_show T, -> new Intertype { foo: 'quux', }
   throws T, /expected function with 1 parameters, got one with 0/, -> new Intertype { foo: ( -> ), }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: ( ( a, b ) -> ), }
-  throws T, /expected type name, function or object, got a boolean/, -> new Intertype { foo: true, }
-  throws T, /expected type name, function or object, got a null/, -> new Intertype { foo: null, }
-  throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: {}, }
-  throws T, /expected a function for `test` entry of type 'function', got a object/, -> new Intertype { foo: { test: null, }, }
+  throws T, /expected type name, test method, or object, got a boolean/, -> new Intertype { foo: true, }
+  throws T, /expected type name, test method, or object, got a null/, -> new Intertype { foo: null, }
+  throws T, /expected a function for `test` entry of type 'foo', got a undefined/, -> new Intertype { foo: {}, }
+  throws T, /expected a function for `test` entry of type 'foo', got a null/, -> new Intertype { foo: { test: null, }, }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
   throws T, /unknown type 'quux'/, -> new Intertype { foo: 'quux', }
   #.........................................................................................................
@@ -522,8 +555,7 @@ try_and_show = ( T, f ) ->
     T?.eq types.declarations.float.test.name, 'float'
     T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
-    T?.eq types.declarations.z.test.name, 'float' # ?
-    debug '^5345^', types.declarations.z
+    T?.eq types.declarations.z.test.name, 'z' # ?
   #.........................................................................................................
   do =>
     types = new Intertype()
@@ -536,8 +568,7 @@ try_and_show = ( T, f ) ->
     T?.eq types.declarations.float.test.name, 'float'
     T?.eq types.isa.z.name, 'isa.z'
     T?.eq types.declarations.z.type, 'z'
-    T?.eq types.declarations.z.test.name, 'float'
-    debug '^5345^', types.declarations.z
+    T?.eq types.declarations.z.test.name, 'z'
   #.........................................................................................................
   done?()
 
@@ -680,9 +711,14 @@ try_and_show = ( T, f ) ->
     types.declare { 'person.address.city.name':     'text',   }
     types.declare { 'person.address.city.postcode': 'text',   }
     types.declare { 'mycity':                       ( ( x ) -> @isa.person.address.city x ), }
-    debug '^434-1^', types.declarations[ 'person.address.city' ]
-    debug '^434-2^', types.declarations.mycity
+    # debug '^434-1^', types.declarations[ 'person.address.city' ]
+    # debug '^434-2^', types.declarations.mycity
+    urge '^342-1^', ( types.declarations.mycity )
+    T?.eq ( types.isa.person.address.city {} ), false
+    T?.eq ( types.isa.person.address.city null ), false
+    T?.eq ( types.isa.person.address.city { name: 'P', postcode: 'SO36', } ), true
     T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity null ), false
     T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
     return null
   #.........................................................................................................
@@ -697,9 +733,12 @@ try_and_show = ( T, f ) ->
     types.declare { 'mycity':                       'person.address.city', }
     # debug '^434-3^', types.declarations[ 'person.address.city' ]
     # debug '^434-4^', types.declarations.mycity
-    urge '^34234^', ( types.isa.mycity {} )
-    urge '^34234^', ( types.isa.mycity { name: 'P', postcode: 'SO36', } )
+    urge '^342-2^', ( types.declarations.mycity )
+    T?.eq ( types.isa.person.address.city {} ), false
+    T?.eq ( types.isa.person.address.city null ), false
+    T?.eq ( types.isa.person.address.city { name: 'P', postcode: 'SO36', } ), true
     T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity null ), false
     T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
     return null
   #.........................................................................................................
@@ -714,32 +753,38 @@ try_and_show = ( T, f ) ->
     types.declare { 'mycity':                       ( ( x ) -> @isa.optional.person.address.city x ), }
     # debug '^434-5^', types.declarations[ 'person.address.city' ]
     # debug '^434-6^', types.declarations.mycity
-    T?.eq ( types.isa.mycity null ), true
+    urge '^342-3^', ( types.declarations.mycity )
+    T?.eq ( types.isa.person.address.city {} ), false
+    T?.eq ( types.isa.person.address.city null ), false
+    T?.eq ( types.isa.person.address.city { name: 'P', postcode: 'SO36', } ), true
+    T?.eq ( types.isa.optional.person.address.city {} ), false
+    T?.eq ( types.isa.optional.person.address.city null ), true
+    T?.eq ( types.isa.optional.person.address.city { name: 'P', postcode: 'SO36', } ), true
     T?.eq ( types.isa.mycity {} ), false
+    T?.eq ( types.isa.mycity null ), true
     T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
     return null
-  # #.........................................................................................................
-  # do =>
-  #   types = new Intertype()
-  #   types.declare { 'person':                       'object', }
-  #   types.declare { 'person.name':                  'text',   }
-  #   types.declare { 'person.address':               'object', }
-  #   types.declare { 'person.address.city':          'object', }
-  #   types.declare { 'person.address.city.name':     'text',   }
-  #   types.declare { 'person.address.city.postcode': 'text',   }
-  #   source = """R.f = function(x) { return this.isa.optional.person.address.city(x); }"""
-  #   R = {}
-  #   debug '^3234^', source
-  #   debug '^3234^', f = eval source, { R, }
-  #   debug '^3234^', R.f is f
-  #   process.exit 111
-  #   types.declare { 'mycity':                       'optional.person.address.city', }
-  #   debug '^434-7^', types.declarations[ 'person.address.city' ]
-  #   debug '^434-8^', types.declarations.mycity
-  #   T?.eq ( types.isa.mycity null ), true
-  #   T?.eq ( types.isa.mycity {} ), false
-  #   T?.eq ( types.isa.mycity { name: 'P', postcode: 'SO36', } ), true
-  #   return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@internal_type_of_method = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype
+    declarations  } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types         = new Intertype()
+    T?.eq ( types.__type_of declarations, null          ), 'null'
+    T?.eq ( types.__type_of declarations, undefined     ), 'undefined'
+    T?.eq ( types.__type_of declarations, 4             ), 'float'
+    T?.eq ( types.__type_of declarations, ->            ), 'function'
+    T?.eq ( types.__type_of declarations, -> await null ), 'asyncfunction'
+    T?.eq ( types.__type_of declarations, {}            ), 'object'
+    T?.eq ( types.__type_of declarations, []            ), 'list'
+    T?.eq ( types.__type_of declarations, +Infinity     ), 'infinity'
+    T?.eq ( types.__type_of declarations, -Infinity     ), 'infinity'
+    return null
   #.........................................................................................................
   done?()
 
@@ -757,10 +802,28 @@ try_and_show = ( T, f ) ->
     types.declare { 'person.address.city':          'object', }
     types.declare { 'person.address.city.name':     'text',   }
     types.declare { 'person.address.city.postcode': 'text',   }
+    #.......................................................................................................
+    try_and_show T, -> validate.person null
+    try_and_show T, -> validate.person.address null
+    try_and_show T, -> validate.person.address.city null
+    try_and_show T, -> validate.person.address.city.postcode null
+    #.......................................................................................................
+    debug '^334-1^', types.isa.person.address.city.postcode 3
+    T?.eq ( types.isa.person.address.city.postcode 3 ), false
     try_and_show T, -> validate.person.address.city.postcode 3
     throws T, /expected a person.address.city.postcode/, -> validate.person.address.city.postcode 3
-    try_and_show T, -> validate.person.address.city { name: 'P', }
+    #.......................................................................................................
+    debug '^334-2^', types.isa.person.address.city { name: 'P', }
+    T?.eq ( types.isa.person.address.city { name: 'P', } ), false
+    debug '^334-4^', validate.person.address.city { name: 'P', }
+    debug '^334-4^', validate.person.address.city { name: 'P', }
+    debug '^334-4^', validate.person.address.city { name: 'P', }
+    try_and_show T, -> validate.person.address.city { name: 'P', } # ??????????????????????????????????
     throws T, /expected a person.address.city/, -> validate.person.address.city { name: 'P', }
+    #.......................................................................................................
+    debug '^334-3^', types.isa.person.address.city { name: 'P', postcode: '3421', }
+    T?.eq ( types.isa.person.address.city { name: 'P', postcode: '3421', } ), true
+    T?.eq ( validate.person.address.city { name: 'P', postcode: '3421', } ), { name: 'P', postcode: '3421', }
     return null
   #.........................................................................................................
   done?()
@@ -840,6 +903,7 @@ demo_1 = ->
 #===========================================================================================================
 if module is require.main then await do =>
   # @basic_functionality_using_types_object()
+  # test @basic_functionality_using_types_object
   # @allow_declaration_objects()
   # demo_1()
   # @can_use_type_name_for_test()
@@ -849,6 +913,7 @@ if module is require.main then await do =>
   # @throw_instructive_error_on_missing_type()
   # @allows_licensed_overrides()
   # await test @allows_licensed_overrides
+  # @throw_instructive_error_when_wrong_type_of_isa_test_declared()
   # await test @throw_instructive_error_when_wrong_type_of_isa_test_declared
   # @resolve_dotted_type()
   # test @resolve_dotted_type
@@ -857,6 +922,10 @@ if module is require.main then await do =>
   # @can_use_refs_to_dotted_types()
   # test @can_use_refs_to_dotted_types
   # test @can_use_type_name_for_test
+  # @internal_type_of_method()
+  # test @internal_type_of_method
+  # @validate_dotted_types()
+  # test @validate_dotted_types
   await test @
 
 
