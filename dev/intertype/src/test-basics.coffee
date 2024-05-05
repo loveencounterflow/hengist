@@ -71,7 +71,7 @@ sample_declarations =
 throws = ( T, matcher, f ) ->
   await do =>
     error = null
-    try await f() catch error
+    try ( urge '^992-1^', "`throws()` result of call:", await f() ) catch error
       switch matcher_type = TMP_types.type_of matcher
         when 'text'
           T?.eq error.message, matcher
@@ -80,21 +80,26 @@ throws = ( T, matcher, f ) ->
           if matcher.test error.message
             null
           else
-            warn '^992-4^', reverse message = "error #{rpr error.message} doesn't match #{rpr matcher}"
-            T.fail "^992-4^ #{message}"
+            warn '^992-2^', reverse message = "error #{rpr error.message} doesn't match #{rpr matcher}"
+            T?.fail "^992-3^ #{message}"
         else
-          warn message = "^992-1^ expected a regex or a text, got a #{matcher_type}"
-          T.fail message
-    T?.ok error?
+          warn message = "^992-4^ expected a regex or a text, got a #{matcher_type}"
+          T?.fail message
+    # T?.ok error?
+    # urge '^424243^', error?.message
+    unless error?
+      warn '^992-5^', reverse message = "`throws()`: expected an error but none was thrown"
+      T?.fail "^992-6^ `throws()`: expected an error but none was thrown"
   return null
 
 #===========================================================================================================
 try_and_show = ( T, f ) ->
-  e = null
-  try ( urge '^992-2^', f() ) catch e then help '^992-3^', reverse "try_and_show: #{rpr e.message}"
-  unless e?
-    warn '^992-4^', reverse message = "try_and_show: expected an error but none was thrown"
-    T?.fail "^992-5^ try_and_show: expected an error but none was thrown"
+  error = null
+  try ( urge '^992-7^', "`try_and_show():` result of call:", await f() ) catch error
+    help '^992-8^', reverse "`try_and_show()`: #{rpr error.message}"
+  unless error?
+    warn '^992-9^', reverse message = "`try_and_show()`: expected an error but none was thrown"
+    T?.fail "^992-10^ `try_and_show()`: expected an error but none was thrown"
   return null
 
 
