@@ -110,15 +110,19 @@ try_and_show = ( T, f ) ->
 @interface = ( T, done ) ->
   INTERTYPE     = require '../../../apps/intertype'
   T?.eq ( TMP_types.isa.object    INTERTYPE.types                               ), true
-  T?.eq ( TMP_types.isa.function  INTERTYPE.types.get_isa                       ), true
-  T?.eq ( TMP_types.isa.function  INTERTYPE.types.get_isa_optional              ), true
-  T?.eq ( TMP_types.isa.function  INTERTYPE.types.get_validate                  ), true
-  T?.eq ( TMP_types.isa.function  INTERTYPE.types.get_validate_optional         ), true
+  T?.eq ( TMP_types.isa.undefined INTERTYPE.types.get_isa                       ), true
+  T?.eq ( TMP_types.isa.undefined INTERTYPE.types.get_isa_optional              ), true
+  T?.eq ( TMP_types.isa.undefined INTERTYPE.types.get_validate                  ), true
+  T?.eq ( TMP_types.isa.undefined INTERTYPE.types.get_validate_optional         ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types._get_isa                      ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types._get_isa_optional             ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types._get_validate                 ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types._get_validate_optional        ), true
   T?.eq ( TMP_types.isa.object    INTERTYPE.types                               ), true
   T?.eq ( TMP_types.isa.object    INTERTYPE.types.isa                           ), true
-  T?.eq ( TMP_types.isa.object    INTERTYPE.types.isa.optional                  ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.optional                  ), true
   T?.eq ( TMP_types.isa.object    INTERTYPE.types.validate                      ), true
-  T?.eq ( TMP_types.isa.object    INTERTYPE.types.validate.optional             ), true
+  T?.eq ( TMP_types.isa.function  INTERTYPE.types.validate.optional             ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.boolean                   ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.isa.optional.boolean          ), true
   T?.eq ( TMP_types.isa.function  INTERTYPE.types.validate.boolean              ), true
@@ -351,17 +355,21 @@ try_and_show = ( T, f ) ->
   debug '^509-1^'; try_and_show T, -> new Intertype { foo: ( -> ), }
   debug '^509-2^'; try_and_show T, -> new Intertype { foo: ( ( a, b ) -> ), }
   debug '^509-3^'; try_and_show T, -> new Intertype { foo: true, }
-  debug '^509-4^'; try_and_show T, -> new Intertype { foo: null, }
-  debug '^509-5^'; try_and_show T, -> new Intertype { foo: {}, }
-  debug '^509-6^'; try_and_show T, -> new Intertype { foo: { test: null, }, }
-  debug '^509-7^'; try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
-  debug '^509-8^'; try_and_show T, -> new Intertype { foo: 'quux', }
+  debug '^509-4^'; try_and_show T, -> new Intertype { foo: undefined, }
+  debug '^509-5^'; try_and_show T, -> new Intertype { foo: null, }
+  debug '^509-6^'; try_and_show T, -> new Intertype { foo: {}, }
+  debug '^509-7^'; try_and_show T, -> new Intertype { foo: { test: null, }, }
+  debug '^509-8^'; try_and_show T, -> new Intertype { foo: { test: false, }, }
+  debug '^509-9^'; try_and_show T, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
+  debug '^509-10^'; try_and_show T, -> new Intertype { foo: 'quux', }
   throws T, /expected function with 1 parameters, got one with 0/, -> new Intertype { foo: ( -> ), }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: ( ( a, b ) -> ), }
-  throws T, /expected type name, test method, or object, got a boolean/, -> new Intertype { foo: true, }
-  throws T, /expected type name, test method, or object, got a null/, -> new Intertype { foo: null, }
-  throws T, /expected a function for `test` entry of type 'foo', got a undefined/, -> new Intertype { foo: {}, }
-  throws T, /expected a function for `test` entry of type 'foo', got a null/, -> new Intertype { foo: { test: null, }, }
+  throws T, /expected type name, test method, or object, got a boolean/,    -> new Intertype { foo: true, }
+  throws T, /expected type name, test method, or object, got a undefined/,  -> new Intertype { foo: undefined, }
+  throws T, /expected type name, test method, or object, got a null/,       -> new Intertype { foo: null, }
+  throws T, /expected type name, test method, or object, got a undefined/,  -> new Intertype { foo: {}, }
+  throws T, /expected type name, test method, or object, got a null/,       -> new Intertype { foo: { test: null, }, }
+  throws T, /expected type name, test method, or object, got a boolean/,    -> new Intertype { foo: { test: false, }, }
   throws T, /expected function with 1 parameters, got one with 2/, -> new Intertype { foo: { test: ( ( a, b ) -> ), }, }
   throws T, /unknown type 'quux'/, -> new Intertype { foo: 'quux', }
   #.........................................................................................................
@@ -587,11 +595,31 @@ try_and_show = ( T, f ) ->
     T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), false
     types.declare { 'foo.bar.baz': 'float', }
     T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), true
-    T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
+    T?.eq ( types.isa.foo.bar.baz null ), false
+    T?.eq ( types.isa.foo.bar.baz 4 ), true
+    T?.eq ( types.isa.foo.bar.baz +Infinity ), false
+    # T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
     # types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
     try_and_show T, -> types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
-    debug '^3234^', types.isa.foo
-    debug '^3234^', types.isa[ 'foo.bar' ]
+    return null
+  #.........................................................................................................
+  do =>
+    types = new Intertype()
+    T?.eq ( Reflect.has types.declarations, 'foo'         ), false
+    types.declare { foo: 'object', }
+    T?.eq ( Reflect.has types.declarations, 'foo'         ), true
+    T?.eq ( Reflect.has types.declarations, 'foo.bar'     ), false
+    types.declare { 'foo.bar': 'object', }
+    T?.eq ( Reflect.has types.declarations, 'foo.bar'     ), true
+    T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), false
+    types.declare { 'foo.bar.baz': 'optional.float', }
+    T?.eq ( Reflect.has types.declarations, 'foo.bar.baz' ), true
+    T?.eq ( types.isa.foo.bar.baz null ), true
+    T?.eq ( types.isa.foo.bar.baz 4 ), true
+    T?.eq ( types.isa.foo.bar.baz +Infinity ), false
+    # T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
+    # types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
+    try_and_show T, -> types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
     return null
   #.........................................................................................................
   done?()
@@ -767,6 +795,122 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@can_use_optional_refs_to_dotted_types = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types   = new Intertype()
+    { declare
+      isa } = types
+    declare { maybefloat: 'optional.float', }
+    #.......................................................................................................
+    T?.eq ( isa.float       null  ), false
+    T?.eq ( isa.float       true  ), false
+    T?.eq ( isa.float       0     ), true
+    T?.eq ( isa.maybefloat  null  ), true
+    T?.eq ( isa.maybefloat  true  ), false
+    T?.eq ( isa.maybefloat  0     ), true
+    # #.......................................................................................................
+    return null
+  #.........................................................................................................
+  do =>
+    types   = new Intertype()
+    { declare
+      isa } = types
+    declare { 'q':            'object', }
+    declare { 'q.maybefloat': 'optional.float', }
+    #.......................................................................................................
+    T?.eq ( isa.q             null                  ), false
+    T?.eq ( isa.q             {}                    ), true
+    T?.eq ( isa.q             { maybefloat: null }  ), true
+    T?.eq ( isa.q             { maybefloat: false } ), false
+    T?.eq ( isa.q             { maybefloat: 3 }     ), true
+    T?.eq ( isa.q.maybefloat  null                  ), true
+    T?.eq ( isa.q.maybefloat  true                  ), false
+    T?.eq ( isa.q.maybefloat  0                     ), true
+    # #.......................................................................................................
+    return null
+  #.........................................................................................................
+  do =>
+    types   = new Intertype()
+    { declare
+      isa } = types
+    declare { 'q':            'optional.object', }
+    declare { 'q.maybefloat': 'optional.float', }
+    #.......................................................................................................
+    T?.eq ( isa.q             null                  ), true
+    T?.eq ( isa.q             {}                    ), true
+    T?.eq ( isa.q             { maybefloat: null }  ), true
+    T?.eq ( isa.q             { maybefloat: false } ), false
+    T?.eq ( isa.q             { maybefloat: 3 }     ), true
+    T?.eq ( isa.q.maybefloat  null                  ), true
+    T?.eq ( isa.q.maybefloat  true                  ), false
+    T?.eq ( isa.q.maybefloat  0                     ), true
+    # #.......................................................................................................
+    return null
+  #.........................................................................................................
+  do =>
+    types   = new Intertype()
+    { declare
+      validate
+      isa } = types
+    declare { 'person':                       'object', }
+    declare { 'person.name':                  'text',   }
+    declare { 'person.address':               'object', }
+    declare { 'person.address.city':          'object', }
+    declare { 'person.address.city.name':     'text',   }
+    declare { 'person.address.city.postcode': 'text',   }
+    declare { 'maybesomeone':                 'optional.person', }
+    declare { 'mycity':                       'optional.person.address.city', }
+    #.......................................................................................................
+    T?.eq ( isa.person        null                                                            ), false
+    T?.eq ( isa.person        {}                                                              ), false
+    T?.eq ( isa.person        { name: 'Fred',                                               } ), false
+    T?.eq ( isa.person        { name: 'Fred', address: {},                                  } ), false
+    T?.eq ( isa.person        { name: 'Fred', address: { city: 'Town', },                   } ), false
+    T?.eq ( isa.person        { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true # ???????????????????????
+    debug '^12434^', validate.person        { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  }
+    T?.eq ( isa.maybesomeone  null                                                            ), true
+    # T?.eq ( isa.maybesomeone  {}                                                              ), false
+    # T?.eq ( isa.maybesomeone  { name: 'Fred',                                               } ), false
+    # T?.eq ( isa.maybesomeone  { name: 'Fred', address: {},                                  } ), false
+    # T?.eq ( isa.maybesomeone  { name: 'Fred', address: { city: 'Town', },                   } ), false
+    # T?.eq ( isa.maybesomeone  { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true
+    # #.......................................................................................................
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@forbidden_to_define_fields_on_builtins = ( T, done ) ->
+  T?.halt_on_error()
+  { Intertype
+    declarations  } = require '../../../apps/intertype'
+  #.........................................................................................................
+  await do =>
+    types         = new Intertype()
+    { declare
+      validate
+      isa } = types
+    try_and_show T, -> types.declare { 'optional.d':    ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'anything.d':    ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'nothing.d':     ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'something.d':   ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'null.d':        ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'undefined.d':   ( ( x ) -> ), }
+    try_and_show T, -> types.declare { 'unknown.d':     ( ( x ) -> ), }
+    throws T, /illegal use of `optional` in declaration of type 'optional.d'/,             -> types.declare { 'optional.d':    ( ( x ) -> ), }
+    throws T, /illegal use of base type 'anything' in declaration of type 'anything.d'/,   -> types.declare { 'anything.d':    ( ( x ) -> ), }
+    throws T, /illegal use of base type 'nothing' in declaration of type 'nothing.d'/,     -> types.declare { 'nothing.d':     ( ( x ) -> ), }
+    throws T, /illegal use of base type 'something' in declaration of type 'something.d'/, -> types.declare { 'something.d':   ( ( x ) -> ), }
+    throws T, /illegal use of base type 'null' in declaration of type 'null.d'/,           -> types.declare { 'null.d':        ( ( x ) -> ), }
+    throws T, /illegal use of base type 'undefined' in declaration of type 'undefined.d'/, -> types.declare { 'undefined.d':   ( ( x ) -> ), }
+    throws T, /illegal use of base type 'unknown' in declaration of type 'unknown.d'/,     -> types.declare { 'unknown.d':     ( ( x ) -> ), }
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 @internal_type_of_method = ( T, done ) ->
   # T?.halt_on_error()
   { Intertype
@@ -871,6 +1015,62 @@ try_and_show = ( T, f ) ->
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
+@minimal_type_of_results = ( T, done ) ->
+  # T?.halt_on_error()
+  { Intertype_minimal } = require '../../../apps/intertype'
+  { isa
+    validate
+    create
+    declare
+    type_of           } = new Intertype_minimal()
+  #.........................................................................................................
+  do =>
+    T?.eq ( type_of null              ), 'null'
+    T?.eq ( type_of undefined         ), 'undefined'
+    T?.eq ( type_of +Infinity         ), 'unknown'
+    T?.eq ( type_of 4                 ), 'unknown'
+    return null
+  #.........................................................................................................
+  do =>
+    T?.eq ( isa.anything   1          ), true
+    T?.eq ( isa.nothing    1          ), false
+    T?.eq ( isa.something  1          ), true
+    T?.eq ( isa.unknown    1          ), true
+    return null
+  #.........................................................................................................
+  do =>
+    T?.eq ( isa.anything   null       ), true
+    T?.eq ( isa.nothing    null       ), true
+    T?.eq ( isa.something  null       ), false
+    T?.eq ( isa.unknown    null       ), false
+    return null
+  #.........................................................................................................
+  do =>
+    T?.eq ( isa.anything   undefined  ), true
+    T?.eq ( isa.nothing    undefined  ), true
+    T?.eq ( isa.something  undefined  ), false
+    T?.eq ( isa.unknown    undefined  ), false
+    return null
+  #.........................................................................................................
+  do =>
+    throws T, /`optional` is not a legal type for `isa` methods/,       -> isa.optional 1
+    throws T, /`optional` is not a legal type for `validate` methods/,  -> validate.optional 1
+    throws T, /`optional` is not a legal type for `create` methods/,    -> create.optional 1
+    return null
+  #.........................................................................................................
+  do =>
+    try_and_show T?, -> declare 'anything',   ( x ) ->
+    try_and_show T?, -> declare 'nothing',    ( x ) ->
+    try_and_show T?, -> declare 'something',  ( x ) ->
+    try_and_show T?, -> declare 'null',       ( x ) ->
+    try_and_show T?, -> declare 'undefined',  ( x ) ->
+    try_and_show T?, -> declare 'unknown',    ( x ) ->
+    try_and_show T?, -> declare 'optional',   ( x ) ->
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
   # T?.halt_on_error()
   { Intertype_minimal, } = require '../../../apps/intertype'
@@ -925,6 +1125,12 @@ if module is require.main then await do =>
   # test @internal_type_of_method
   # @validate_dotted_types()
   # test @validate_dotted_types
+  # @forbidden_to_define_fields_on_builtins()
+  # test @forbidden_to_define_fields_on_builtins
+  # @can_use_optional_refs_to_dotted_types()
+  # test @can_use_optional_refs_to_dotted_types
+  # @minimal_type_of_results()
+  # test @minimal_type_of_results
   await test @
 
 
