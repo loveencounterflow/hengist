@@ -82,62 +82,64 @@
   };
 
   //===========================================================================================================
-  throws = async function(T, matcher, f) {
-    await (async() => {
-      var error, matcher_type, message;
-      error = null;
-      try {
-        urge('^992-1^', "`throws()` result of call:", (await f()));
-      } catch (error1) {
-        error = error1;
-        switch (matcher_type = TMP_types.type_of(matcher)) {
-          case 'text':
+  throws = function(T, matcher, f) {
+    var error, matcher_type, message;
+    error = null;
+    try {
+      urge('^992-1^', "`throws()` result of call:", f());
+    } catch (error1) {
+      error = error1;
+      switch (matcher_type = TMP_types.type_of(matcher)) {
+        case 'text':
+          if (T != null) {
+            T.eq(error.message, matcher);
+          }
+          break;
+        case 'regex':
+          matcher.lastIndex = 0;
+          if (matcher.test(error.message)) {
             if (T != null) {
-              T.eq(error.message, matcher);
+              T.eq(matcher, matcher);
             }
-            break;
-          case 'regex':
-            matcher.lastIndex = 0;
-            if (matcher.test(error.message)) {
-              null;
-            } else {
-              warn('^992-2^', reverse(message = `error ${rpr(error.message)} doesn't match ${rpr(matcher)}`));
-              if (T != null) {
-                T.fail(`^992-3^ ${message}`);
-              }
-            }
-            break;
-          default:
-            warn(message = `^992-4^ expected a regex or a text, got a ${matcher_type}`);
+          } else {
+            warn('^992-2^', reverse(message = `error ${rpr(error.message)} doesn't match ${rpr(matcher)}`));
             if (T != null) {
-              T.fail(message);
+              T.fail(`^992-3^ ${message}`);
             }
-        }
+          }
+          break;
+        default:
+          warn(message = `^992-4^ expected a regex or a text, got a ${matcher_type}`);
+          if (T != null) {
+            T.fail(message);
+          }
       }
-      // T?.ok error?
-      // urge '^424243^', error?.message
-      if (error == null) {
-        warn('^992-5^', reverse(message = "`throws()`: expected an error but none was thrown"));
-        return T != null ? T.fail("^992-6^ `throws()`: expected an error but none was thrown") : void 0;
+    }
+    // T?.ok error?
+    // urge '^424243^', error?.message
+    if (error == null) {
+      warn('^992-5^', reverse(message = "`throws()`: expected an error but none was thrown"));
+      if (T != null) {
+        T.fail("^992-6^ `throws()`: expected an error but none was thrown");
       }
-    })();
+    }
     return null;
   };
 
   //===========================================================================================================
-  try_and_show = async function(T, f) {
+  try_and_show = function(T, f) {
     var error, message;
     error = null;
     try {
-      urge('^992-7^', "`try_and_show():` result of call:", (await f()));
+      urge('^992-8^', "`try_and_show():` result of call:", f());
     } catch (error1) {
       error = error1;
-      help('^992-8^', reverse(`\`try_and_show()\`: ${rpr(error.message)}`));
+      help('^992-9^', reverse(`\`try_and_show()\`: ${rpr(error.message)}`));
     }
     if (error == null) {
-      warn('^992-9^', reverse(message = "`try_and_show()`: expected an error but none was thrown"));
+      warn('^992-11^', reverse(message = "`try_and_show()`: expected an error but none was thrown"));
       if (T != null) {
-        T.fail("^992-10^ `try_and_show()`: expected an error but none was thrown");
+        T.fail("^992-12^ `try_and_show()`: expected an error but none was thrown");
       }
     }
     return null;
@@ -153,16 +155,28 @@
       T.eq(TMP_types.isa.object(INTERTYPE.types), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.function(INTERTYPE.types.get_isa), true);
+      T.eq(TMP_types.isa.undefined(INTERTYPE.types.get_isa), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.function(INTERTYPE.types.get_isa_optional), true);
+      T.eq(TMP_types.isa.undefined(INTERTYPE.types.get_isa_optional), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.function(INTERTYPE.types.get_validate), true);
+      T.eq(TMP_types.isa.undefined(INTERTYPE.types.get_validate), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.function(INTERTYPE.types.get_validate_optional), true);
+      T.eq(TMP_types.isa.undefined(INTERTYPE.types.get_validate_optional), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types._get_isa), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types._get_isa_optional), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types._get_validate), true);
+    }
+    if (T != null) {
+      T.eq(TMP_types.isa.function(INTERTYPE.types._get_validate_optional), true);
     }
     if (T != null) {
       T.eq(TMP_types.isa.object(INTERTYPE.types), true);
@@ -171,13 +185,13 @@
       T.eq(TMP_types.isa.object(INTERTYPE.types.isa), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.object(INTERTYPE.types.isa.optional), true);
+      T.eq(TMP_types.isa.function(INTERTYPE.types.isa.optional), true);
     }
     if (T != null) {
       T.eq(TMP_types.isa.object(INTERTYPE.types.validate), true);
     }
     if (T != null) {
-      T.eq(TMP_types.isa.object(INTERTYPE.types.validate.optional), true);
+      T.eq(TMP_types.isa.function(INTERTYPE.types.validate.optional), true);
     }
     if (T != null) {
       T.eq(TMP_types.isa.function(INTERTYPE.types.isa.boolean), true);
@@ -714,16 +728,22 @@
     debug('^509-4^');
     try_and_show(T, function() {
       return new Intertype({
-        foo: null
+        foo: void 0
       });
     });
     debug('^509-5^');
     try_and_show(T, function() {
       return new Intertype({
-        foo: {}
+        foo: null
       });
     });
     debug('^509-6^');
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: {}
+      });
+    });
+    debug('^509-7^');
     try_and_show(T, function() {
       return new Intertype({
         foo: {
@@ -731,7 +751,15 @@
         }
       });
     });
-    debug('^509-7^');
+    debug('^509-8^');
+    try_and_show(T, function() {
+      return new Intertype({
+        foo: {
+          test: false
+        }
+      });
+    });
+    debug('^509-9^');
     try_and_show(T, function() {
       return new Intertype({
         foo: {
@@ -739,7 +767,7 @@
         }
       });
     });
-    debug('^509-8^');
+    debug('^509-10^');
     try_and_show(T, function() {
       return new Intertype({
         foo: 'quux'
@@ -760,20 +788,32 @@
         foo: true
       });
     });
+    throws(T, /expected type name, test method, or object, got a undefined/, function() {
+      return new Intertype({
+        foo: void 0
+      });
+    });
     throws(T, /expected type name, test method, or object, got a null/, function() {
       return new Intertype({
         foo: null
       });
     });
-    throws(T, /expected a function for `test` entry of type 'foo', got a undefined/, function() {
+    throws(T, /expected type name, test method, or object, got a undefined/, function() {
       return new Intertype({
         foo: {}
       });
     });
-    throws(T, /expected a function for `test` entry of type 'foo', got a null/, function() {
+    throws(T, /expected type name, test method, or object, got a null/, function() {
       return new Intertype({
         foo: {
           test: null
+        }
+      });
+    });
+    throws(T, /expected type name, test method, or object, got a boolean/, function() {
+      return new Intertype({
+        foo: {
+          test: false
         }
       });
     });
@@ -1226,16 +1266,69 @@
         T.eq(Reflect.has(types.declarations, 'foo.bar.baz'), true);
       }
       if (T != null) {
-        T.eq(types.declarations['foo.bar.baz'].test, types.declarations.float.test);
+        T.eq(types.isa.foo.bar.baz(null), false);
       }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz(+2e308), false);
+      }
+      // T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
       // types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
       try_and_show(T, function() {
         return types.declare({
           'foo.bar.baz.quux.dax.dux': 'float'
         });
       });
-      debug('^3234^', types.isa.foo);
-      debug('^3234^', types.isa['foo.bar']);
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var types;
+      types = new Intertype();
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo'), false);
+      }
+      types.declare({
+        foo: 'object'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo'), true);
+      }
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar'), false);
+      }
+      types.declare({
+        'foo.bar': 'object'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar'), true);
+      }
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar.baz'), false);
+      }
+      types.declare({
+        'foo.bar.baz': 'optional.float'
+      });
+      if (T != null) {
+        T.eq(Reflect.has(types.declarations, 'foo.bar.baz'), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz(null), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz(4), true);
+      }
+      if (T != null) {
+        T.eq(types.isa.foo.bar.baz(+2e308), false);
+      }
+      // T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
+      // types.declare { 'foo.bar.baz.quux.dax.dux': 'float', }
+      try_and_show(T, function() {
+        return types.declare({
+          'foo.bar.baz.quux.dax.dux': 'float'
+        });
+      });
       return null;
     })();
     return typeof done === "function" ? done() : void 0;
@@ -1733,6 +1826,297 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.can_use_optional_refs_to_dotted_types = function(T, done) {
+    var Intertype;
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declare, isa, types;
+      types = new Intertype();
+      ({declare, isa} = types);
+      declare({
+        maybefloat: 'optional.float'
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(isa.float(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.float(true), false);
+      }
+      if (T != null) {
+        T.eq(isa.float(0), true);
+      }
+      if (T != null) {
+        T.eq(isa.maybefloat(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.maybefloat(true), false);
+      }
+      if (T != null) {
+        T.eq(isa.maybefloat(0), true);
+      }
+      // #.......................................................................................................
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var declare, isa, types;
+      types = new Intertype();
+      ({declare, isa} = types);
+      declare({
+        'q': 'object'
+      });
+      declare({
+        'q.maybefloat': 'optional.float'
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(isa.q(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.q({}), true);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: null
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: false
+        }), false);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: 3
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(true), false);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(0), true);
+      }
+      // #.......................................................................................................
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var declare, isa, types;
+      types = new Intertype();
+      ({declare, isa} = types);
+      declare({
+        'q': 'optional.object'
+      });
+      declare({
+        'q.maybefloat': 'optional.float'
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(isa.q(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.q({}), true);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: null
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: false
+        }), false);
+      }
+      if (T != null) {
+        T.eq(isa.q({
+          maybefloat: 3
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(true), false);
+      }
+      if (T != null) {
+        T.eq(isa.q.maybefloat(0), true);
+      }
+      // #.......................................................................................................
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      var declare, isa, types, validate;
+      types = new Intertype();
+      ({declare, validate, isa} = types);
+      declare({
+        'person': 'object'
+      });
+      declare({
+        'person.name': 'text'
+      });
+      declare({
+        'person.address': 'object'
+      });
+      declare({
+        'person.address.city': 'object'
+      });
+      declare({
+        'person.address.city.name': 'text'
+      });
+      declare({
+        'person.address.city.postcode': 'text'
+      });
+      declare({
+        'maybesomeone': 'optional.person'
+      });
+      declare({
+        'mycity': 'optional.person.address.city'
+      });
+      //.......................................................................................................
+      if (T != null) {
+        T.eq(isa.person(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.person({}), false);
+      }
+      if (T != null) {
+        T.eq(isa.person({
+          name: 'Fred'
+        }), false);
+      }
+      if (T != null) {
+        T.eq(isa.person({
+          name: 'Fred',
+          address: {}
+        }), false);
+      }
+      if (T != null) {
+        T.eq(isa.person({
+          name: 'Fred',
+          address: {
+            city: 'Town'
+          }
+        }), false);
+      }
+      if (T != null) {
+        T.eq(isa.person({
+          name: 'Fred',
+          address: {
+            city: 'Town',
+            postcode: 'W23'
+          }
+        }), true); // ???????????????????????
+      }
+      debug('^12434^', validate.person({
+        name: 'Fred',
+        address: {
+          city: 'Town',
+          postcode: 'W23'
+        }
+      }));
+      if (T != null) {
+        T.eq(isa.maybesomeone(null), true);
+      }
+      // T?.eq ( isa.maybesomeone  {}                                                              ), false
+      // T?.eq ( isa.maybesomeone  { name: 'Fred',                                               } ), false
+      // T?.eq ( isa.maybesomeone  { name: 'Fred', address: {},                                  } ), false
+      // T?.eq ( isa.maybesomeone  { name: 'Fred', address: { city: 'Town', },                   } ), false
+      // T?.eq ( isa.maybesomeone  { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true
+      // #.......................................................................................................
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.forbidden_to_define_fields_on_builtins = async function(T, done) {
+    var Intertype, declarations;
+    if (T != null) {
+      T.halt_on_error();
+    }
+    ({Intertype, declarations} = require('../../../apps/intertype'));
+    await (() => {      //.........................................................................................................
+      var declare, isa, types, validate;
+      types = new Intertype();
+      ({declare, validate, isa} = types);
+      try_and_show(T, function() {
+        return types.declare({
+          'optional.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'anything.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'nothing.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'something.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'null.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'undefined.d': (function(x) {})
+        });
+      });
+      try_and_show(T, function() {
+        return types.declare({
+          'unknown.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of `optional` in declaration of type 'optional.d'/, function() {
+        return types.declare({
+          'optional.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'anything' in declaration of type 'anything.d'/, function() {
+        return types.declare({
+          'anything.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'nothing' in declaration of type 'nothing.d'/, function() {
+        return types.declare({
+          'nothing.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'something' in declaration of type 'something.d'/, function() {
+        return types.declare({
+          'something.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'null' in declaration of type 'null.d'/, function() {
+        return types.declare({
+          'null.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'undefined' in declaration of type 'undefined.d'/, function() {
+        return types.declare({
+          'undefined.d': (function(x) {})
+        });
+      });
+      throws(T, /illegal use of base type 'unknown' in declaration of type 'unknown.d'/, function() {
+        return types.declare({
+          'unknown.d': (function(x) {})
+        });
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.internal_type_of_method = function(T, done) {
     var Intertype, declarations;
     // T?.halt_on_error()
@@ -1957,6 +2341,111 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.minimal_type_of_results = function(T, done) {
+    var Intertype_minimal, create, declare, isa, type_of, validate;
+    // T?.halt_on_error()
+    ({Intertype_minimal} = require('../../../apps/intertype'));
+    ({isa, validate, create, declare, type_of} = new Intertype_minimal());
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.eq(type_of(null), 'null');
+      }
+      if (T != null) {
+        T.eq(type_of(void 0), 'undefined');
+      }
+      if (T != null) {
+        T.eq(type_of(+2e308), 'unknown');
+      }
+      if (T != null) {
+        T.eq(type_of(4), 'unknown');
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.eq(isa.anything(1), true);
+      }
+      if (T != null) {
+        T.eq(isa.nothing(1), false);
+      }
+      if (T != null) {
+        T.eq(isa.something(1), true);
+      }
+      if (T != null) {
+        T.eq(isa.unknown(1), true);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.eq(isa.anything(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.nothing(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.something(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.unknown(null), false);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      if (T != null) {
+        T.eq(isa.anything(void 0), true);
+      }
+      if (T != null) {
+        T.eq(isa.nothing(void 0), true);
+      }
+      if (T != null) {
+        T.eq(isa.something(void 0), false);
+      }
+      if (T != null) {
+        T.eq(isa.unknown(void 0), false);
+      }
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      throws(T, /`optional` is not a legal type for `isa` methods/, function() {
+        return isa.optional(1);
+      });
+      throws(T, /`optional` is not a legal type for `validate` methods/, function() {
+        return validate.optional(1);
+      });
+      throws(T, /`optional` is not a legal type for `create` methods/, function() {
+        return create.optional(1);
+      });
+      return null;
+    })();
+    (() => {      //.........................................................................................................
+      try_and_show(T != null, function() {
+        return declare('anything', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('nothing', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('something', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('null', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('undefined', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('unknown', function(x) {});
+      });
+      try_and_show(T != null, function() {
+        return declare('optional', function(x) {});
+      });
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     var Intertype_minimal, declarations, types;
     // T?.halt_on_error()
@@ -2031,6 +2520,12 @@
       // test @internal_type_of_method
       // @validate_dotted_types()
       // test @validate_dotted_types
+      // @forbidden_to_define_fields_on_builtins()
+      // test @forbidden_to_define_fields_on_builtins
+      // @can_use_optional_refs_to_dotted_types()
+      // test @can_use_optional_refs_to_dotted_types
+      // @minimal_type_of_results()
+      // test @minimal_type_of_results
       return (await test(this));
     })();
   }
