@@ -1072,6 +1072,31 @@ safeguard = ( T, f ) ->
     throws T, /expected an optional normalfloat, got a text/,   -> validate.optional.normalfloat  '?'
     return null
   #.........................................................................................................
+  do =>
+    { isa
+      validate  } = new Intertype
+        'quantity':   'object'
+        'quantity.q': 'float'
+        'quantity.u': 'text'
+    T?.eq ( isa.quantity                     { q: 1, u: 'm', }  ), true
+    T?.eq ( isa.quantity                     null               ), false
+    T?.eq ( isa.quantity                     -1                 ), false
+    T?.eq ( isa.quantity                     '?'                ), false
+    T?.eq ( isa.optional.quantity            { q: 1, u: 'm', }  ), true
+    T?.eq ( isa.optional.quantity            null               ), true
+    T?.eq ( isa.optional.quantity            -1                 ), false
+    T?.eq ( isa.optional.quantity            '?'                ), false
+    T?.eq ( validate.quantity                { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
+    T?.eq ( validate.optional.quantity       { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
+    T?.eq ( validate.optional.quantity       null               ), null
+    throws T, /expected a quantity, got a null/,              -> validate.quantity           null
+    throws T, /expected a quantity, got a float/,             -> validate.quantity           -1
+    throws T, /expected a quantity, got a text/,              -> validate.quantity           '?'
+    throws T, /expected a quantity, got a object/,            -> validate.quantity           { q: 1, } ### TAINT message should be more specific ###
+    throws T, /expected an optional quantity, got a float/,   -> validate.optional.quantity  -1
+    throws T, /expected an optional quantity, got a object/,  -> validate.optional.quantity  { q: 1, } ### TAINT message should be more specific ###
+    return null
+  #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
@@ -1208,7 +1233,7 @@ if module is require.main then await do =>
   # @disallow_rhs_optional()
   # test @disallow_rhs_optional
   @parallel_behavior_of_isa_validate_mandatory_and_optional()
-  test @parallel_behavior_of_isa_validate_mandatory_and_optional
+  # test @parallel_behavior_of_isa_validate_mandatory_and_optional
   await test @
 
 
