@@ -2298,6 +2298,88 @@
       });
       return null;
     })();
+    (() => {      //.........................................................................................................
+      var isa, validate;
+      ({isa, validate} = new Intertype({
+        'quantity': 'object',
+        'quantity.q': 'float',
+        'quantity.u': 'text'
+      }));
+      if (T != null) {
+        T.eq(isa.quantity({
+          q: 1,
+          u: 'm'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.quantity(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.quantity(-1), false);
+      }
+      if (T != null) {
+        T.eq(isa.quantity('?'), false);
+      }
+      if (T != null) {
+        T.eq(isa.optional.quantity({
+          q: 1,
+          u: 'm'
+        }), true);
+      }
+      if (T != null) {
+        T.eq(isa.optional.quantity(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.optional.quantity(-1), false);
+      }
+      if (T != null) {
+        T.eq(isa.optional.quantity('?'), false);
+      }
+      if (T != null) {
+        T.eq(validate.quantity({
+          q: 1,
+          u: 'm'
+        }), {
+          q: 1,
+          u: 'm'
+        });
+      }
+      if (T != null) {
+        T.eq(validate.optional.quantity({
+          q: 1,
+          u: 'm'
+        }), {
+          q: 1,
+          u: 'm'
+        });
+      }
+      if (T != null) {
+        T.eq(validate.optional.quantity(null), null);
+      }
+      throws(T, /expected a quantity, got a null/, function() {
+        return validate.quantity(null);
+      });
+      throws(T, /expected a quantity, got a float/, function() {
+        return validate.quantity(-1);
+      });
+      throws(T, /expected a quantity, got a text/, function() {
+        return validate.quantity('?');
+      });
+      throws(T, /expected a quantity, got a object/, function() {
+        return validate.quantity({
+          q: 1
+        });
+      });
+      /* TAINT message should be more specific */      throws(T, /expected an optional quantity, got a float/, function() {
+        return validate.optional.quantity(-1);
+      });
+      throws(T, /expected an optional quantity, got a object/, function() {
+        return validate.optional.quantity({
+          q: 1
+        });
+      });
+/* TAINT message should be more specific */      return null;
+    })();
     return typeof done === "function" ? done() : void 0;
   };
 
@@ -2509,7 +2591,7 @@
       // @disallow_rhs_optional()
       // test @disallow_rhs_optional
       this.parallel_behavior_of_isa_validate_mandatory_and_optional();
-      test(this.parallel_behavior_of_isa_validate_mandatory_and_optional);
+      // test @parallel_behavior_of_isa_validate_mandatory_and_optional
       return (await test(this));
     })();
   }
