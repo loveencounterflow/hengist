@@ -68,37 +68,66 @@ sample_declarations =
 
 
 #===========================================================================================================
+###
+
+Method to replace `T.throws()` and `try_and_show()`; takes 2, 3, or 4 arguments; with 4 arguments, second
+argument should be error class
+
+###
 throws = ( T, matcher, f ) ->
-  error = null
+  switch arity = arguments.length
+    when 2 then [ T, matcher, f, ] = [ T, null, matcher, ]
+    when 3 then null
+    else throw new Error "`throws()` needs 2 or 3 arguments, got #{arity}"
+  #.........................................................................................................
+  error       = null
+  is_matching = null
+  #.........................................................................................................
   try ( urge '^992-1^', "`throws()` result of call:", f() ) catch error
-    switch matcher_type = TMP_types.type_of matcher
-      when 'text'
-        T?.eq error.message, matcher
-      when 'regex'
-        matcher.lastIndex = 0
-        if matcher.test error.message
-          T?.eq matcher, matcher
+    #.......................................................................................................
+    if matcher?
+      is_matching = false
+      switch matcher_type = TMP_types.type_of matcher
+        when 'text'
+          is_matching = error.message is matcher
+        when 'regex'
+          matcher.lastIndex = 0
+          is_matching = matcher.test error.message
         else
-          warn '^992-2^', reverse message = "error #{rpr error.message} doesn't match #{rpr matcher}"
-          T?.fail "^992-3^ #{message}"
+          throw new Error "^992-2^ expected a regex or a text, got a #{matcher_type}"
+      if is_matching
+        help '^992-3^', "OK           ", reverse error.message
       else
-        warn message = "^992-4^ expected a regex or a text, got a #{matcher_type}"
-        T?.fail message
-  # T?.ok error?
-  # urge '^424243^', error?.message
+        urge '^992-4^', "error        ", reverse error.message
+        warn '^992-5^', "doesn't match", reverse rpr matcher
+        T?.fail "^992-6^ error #{rpr error.message} doesn't match #{rpr matcher}"
+    #.......................................................................................................
+    else
+      help '^992-7^', "error        ", reverse error.message
+  #.........................................................................................................
   unless error?
-    warn '^992-5^', reverse message = "`throws()`: expected an error but none was thrown"
-    T?.fail "^992-6^ `throws()`: expected an error but none was thrown"
+    warn '^992-8^', reverse message = "`throws()`: expected an error but none was thrown"
+    T?.fail "^992-9^ `throws()`: expected an error but none was thrown"
+  #.........................................................................................................
   return null
 
 #===========================================================================================================
 try_and_show = ( T, f ) ->
   error = null
-  try ( urge '^992-8^', "`try_and_show():` result of call:", f() ) catch error
-    help '^992-9^', reverse "`try_and_show()`: #{rpr error.message}"
+  try ( urge '^992-10^', "`try_and_show():` result of call:", f() ) catch error
+    help '^992-11^', reverse "`try_and_show()`: #{rpr error.message}"
   unless error?
-    warn '^992-11^', reverse message = "`try_and_show()`: expected an error but none was thrown"
-    T?.fail "^992-12^ `try_and_show()`: expected an error but none was thrown"
+    warn '^992-12^', reverse message = "`try_and_show()`: expected an error but none was thrown"
+    T?.fail "^992-13^ `try_and_show()`: expected an error but none was thrown"
+  return null
+
+#===========================================================================================================
+safeguard = ( T, f ) ->
+  error = null
+  try f() catch error
+    throw error unless T?
+    warn '^992-14^', reverse message = "`safeguard()`: #{rpr error.message}"
+    T?.fail message
   return null
 
 
