@@ -2395,15 +2395,7 @@
           q: 1
         });
       });
-      /* TAINT message should be more specific */      debug('^830-1^', (function() {
-        var results;
-        results = [];
-        for (k in isa) {
-          results.push(k);
-        }
-        return results;
-      })());
-      return null;
+/* TAINT message should be more specific */      return null;
     })();
     return typeof done === "function" ? done() : void 0;
   };
