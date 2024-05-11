@@ -18,6 +18,7 @@ GUY                       = require 'guy'
   reverse
   log     }               = GUY.trm
 test                      = require '../../../apps/guy-test'
+equals                    = require '../../../apps/guy-test/node_modules/intertype/deps/jkroso-equals'
 TMP_types                 = new ( require 'intertype' ).Intertype()
 #-----------------------------------------------------------------------------------------------------------
 # s                         = ( name ) -> Symbol.for  name
@@ -109,6 +110,20 @@ throws = ( T, matcher, f ) ->
     warn '^992-8^', reverse message = "`throws()`: expected an error but none was thrown"
     T?.fail "^992-9^ `throws()`: expected an error but none was thrown"
   #.........................................................................................................
+  return null
+
+#===========================================================================================================
+eq = ( ref, T, result, matcher ) ->
+  ref = ref.padEnd 15
+  if T?
+    T.eq result, matcher
+  else
+    if equals result, matcher
+      help ref, "EQ OK"
+    else
+      warn ref, "not equal: "
+      warn ref, "result:    ", rpr result
+      warn ref, "matcher:   ", rpr matcher
   return null
 
 #===========================================================================================================
