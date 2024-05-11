@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, TMP_types, alert, debug, demo_1, echo, help, info, inspect, log, plain, praise, reverse, rpr, safeguard, sample_declarations, test, throws, try_and_show, urge, warn, whisper;
+  var GUY, TMP_types, alert, debug, demo_1, echo, eq, equals, help, info, inspect, log, plain, praise, reverse, rpr, safeguard, sample_declarations, test, throws, try_and_show, urge, warn, whisper;
 
   GUY = require('guy');
 
@@ -9,6 +9,8 @@
   ({rpr, inspect, echo, reverse, log} = GUY.trm);
 
   test = require('../../../apps/guy-test');
+
+  equals = require('../../../apps/guy-test/node_modules/intertype/deps/jkroso-equals');
 
   TMP_types = new (require('intertype')).Intertype();
 
@@ -148,6 +150,23 @@
   };
 
   //===========================================================================================================
+  eq = function(ref, T, result, matcher) {
+    ref = ref.padEnd(15);
+    if (T != null) {
+      T.eq(result, matcher);
+    } else {
+      if (equals(result, matcher)) {
+        help(ref, "EQ OK");
+      } else {
+        warn(ref, "not equal: ");
+        warn(ref, "result:    ", rpr(result));
+        warn(ref, "matcher:   ", rpr(matcher));
+      }
+    }
+    return null;
+  };
+
+  //===========================================================================================================
   try_and_show = function(T, f) {
     var error, message;
     error = null;
@@ -265,7 +284,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_types_object = function(T, done) {
-    var INTERTYPE, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, types;
+    var INTERTYPE, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, types;
     // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
     types = new INTERTYPE.Intertype_minimal(sample_declarations);
@@ -386,34 +405,34 @@
       T.eq(types.validate.optional.asyncfunction.name, 'validate.optional.asyncfunction');
     }
     if (T != null) {
-      T.eq((ref = types.declarations.null) != null ? ref.type : void 0, 'null');
+      T.eq((ref1 = types.declarations.null) != null ? ref1.type : void 0, 'null');
     }
     if (T != null) {
-      T.eq((ref1 = types.declarations.function) != null ? ref1.type : void 0, 'function');
+      T.eq((ref2 = types.declarations.function) != null ? ref2.type : void 0, 'function');
     }
     if (T != null) {
-      T.eq((ref2 = types.declarations.boolean) != null ? ref2.type : void 0, 'boolean');
+      T.eq((ref3 = types.declarations.boolean) != null ? ref3.type : void 0, 'boolean');
     }
     if (T != null) {
-      T.eq((ref3 = types.declarations.text) != null ? ref3.type : void 0, 'text');
+      T.eq((ref4 = types.declarations.text) != null ? ref4.type : void 0, 'text');
     }
     if (T != null) {
-      T.eq((ref4 = types.declarations.asyncfunction) != null ? ref4.type : void 0, 'asyncfunction');
+      T.eq((ref5 = types.declarations.asyncfunction) != null ? ref5.type : void 0, 'asyncfunction');
     }
     if (T != null) {
-      T.eq((ref5 = types.isa.null) != null ? ref5.name : void 0, 'isa.null');
+      T.eq((ref6 = types.isa.null) != null ? ref6.name : void 0, 'isa.null');
     }
     if (T != null) {
-      T.eq((ref6 = types.isa.function) != null ? ref6.name : void 0, 'isa.function');
+      T.eq((ref7 = types.isa.function) != null ? ref7.name : void 0, 'isa.function');
     }
     if (T != null) {
-      T.eq((ref7 = types.isa.boolean) != null ? ref7.name : void 0, 'isa.boolean');
+      T.eq((ref8 = types.isa.boolean) != null ? ref8.name : void 0, 'isa.boolean');
     }
     if (T != null) {
-      T.eq((ref8 = types.isa.text) != null ? ref8.name : void 0, 'isa.text');
+      T.eq((ref9 = types.isa.text) != null ? ref9.name : void 0, 'isa.text');
     }
     if (T != null) {
-      T.eq((ref9 = types.isa.asyncfunction) != null ? ref9.name : void 0, 'isa.asyncfunction');
+      T.eq((ref10 = types.isa.asyncfunction) != null ? ref10.name : void 0, 'isa.asyncfunction');
     }
     return typeof done === "function" ? done() : void 0;
   };
@@ -1487,11 +1506,11 @@
         }), true);
       }
       help('^322-1^', (function() {
-        var ref, results;
-        ref = types.declarations['person'].sub_tests;
+        var ref1, results;
+        ref1 = types.declarations['person'].sub_tests;
         results = [];
-        for (k in ref) {
-          f = ref[k];
+        for (k in ref1) {
+          f = ref1[k];
           results.push({
             [`${k}`]: f.name
           });
@@ -1499,11 +1518,11 @@
         return results;
       })());
       help('^322-2^', (function() {
-        var ref, results;
-        ref = types.declarations['person.address'].sub_tests;
+        var ref1, results;
+        ref1 = types.declarations['person.address'].sub_tests;
         results = [];
-        for (k in ref) {
-          f = ref[k];
+        for (k in ref1) {
+          f = ref1[k];
           results.push({
             [`${k}`]: f.name
           });
@@ -1511,11 +1530,11 @@
         return results;
       })());
       help('^322-3^', (function() {
-        var ref, results;
-        ref = types.declarations['person.address.city'].sub_tests;
+        var ref1, results;
+        ref1 = types.declarations['person.address.city'].sub_tests;
         results = [];
-        for (k in ref) {
-          f = ref[k];
+        for (k in ref1) {
+          f = ref1[k];
           results.push({
             [`${k}`]: f.name
           });
@@ -2241,100 +2260,98 @@
     var Intertype;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
-    (() => {      //.........................................................................................................
-      var isa, validate;
-      ({isa, validate} = new Intertype({
-        normalfloat: (function(x) {
-          return (this.isa.float(x)) && ((0 <= x && x <= 1));
-        })
-      }));
-      if (T != null) {
-        T.eq(isa.normalfloat(0), true);
-      }
-      if (T != null) {
-        T.eq(isa.normalfloat(null), false);
-      }
-      if (T != null) {
-        T.eq(isa.normalfloat(-1), false);
-      }
-      if (T != null) {
-        T.eq(isa.normalfloat('?'), false);
-      }
-      if (T != null) {
-        T.eq(isa.optional.normalfloat(0), true);
-      }
-      if (T != null) {
-        T.eq(isa.optional.normalfloat(null), true);
-      }
-      if (T != null) {
-        T.eq(isa.optional.normalfloat(-1), false);
-      }
-      if (T != null) {
-        T.eq(isa.optional.normalfloat('?'), false);
-      }
-      if (T != null) {
-        T.eq(validate.normalfloat(0), 0);
-      }
-      if (T != null) {
-        T.eq(validate.optional.normalfloat(0), 0);
-      }
-      if (T != null) {
-        T.eq(validate.optional.normalfloat(null), null);
-      }
-      throws(T, /expected a normalfloat, got a null/, function() {
-        return validate.normalfloat(null);
-      });
-      throws(T, /expected a normalfloat, got a float/, function() {
-        return validate.normalfloat(-1);
-      });
-      throws(T, /expected a normalfloat, got a text/, function() {
-        return validate.normalfloat('?');
-      });
-      throws(T, /expected an optional normalfloat, got a float/, function() {
-        return validate.optional.normalfloat(-1);
-      });
-      throws(T, /expected an optional normalfloat, got a text/, function() {
-        return validate.optional.normalfloat('?');
-      });
-      return null;
-    })();
-    (() => {      //.........................................................................................................
-      var isa, validate;
-      ({isa, validate} = new Intertype({
+    (() => {      // #.........................................................................................................
+      // do =>
+      //   { isa
+      //     validate  } = new Intertype
+      //       normalfloat: ( ( x ) -> ( @isa.float x ) and ( 0 <= x <= 1 ) )
+      //   T?.eq ( isa.normalfloat                     0     ), true
+      //   T?.eq ( isa.normalfloat                     null  ), false
+      //   T?.eq ( isa.normalfloat                     -1    ), false
+      //   T?.eq ( isa.normalfloat                     '?'   ), false
+      //   T?.eq ( isa.optional.normalfloat            0     ), true
+      //   T?.eq ( isa.optional.normalfloat            null  ), true
+      //   T?.eq ( isa.optional.normalfloat            -1    ), false
+      //   T?.eq ( isa.optional.normalfloat            '?'   ), false
+      //   T?.eq ( validate.normalfloat                0     ), 0
+      //   T?.eq ( validate.optional.normalfloat       0     ), 0
+      //   T?.eq ( validate.optional.normalfloat       null  ), null
+      //   throws T, /expected a normalfloat, got a null/,             -> validate.normalfloat           null
+      //   throws T, /expected a normalfloat, got a float/,            -> validate.normalfloat           -1
+      //   throws T, /expected a normalfloat, got a text/,             -> validate.normalfloat           '?'
+      //   throws T, /expected an optional normalfloat, got a float/,  -> validate.optional.normalfloat  -1
+      //   throws T, /expected an optional normalfloat, got a text/,   -> validate.optional.normalfloat  '?'
+      //   return null
+      // #.........................................................................................................
+      var isa, k, my_types, types, validate;
+      my_types = {
         'quantity': 'object',
         'quantity.q': 'float',
-        'quantity.u': 'text'
-      }));
-      if (T != null) {
-        T.eq(isa.quantity({
-          q: 1,
-          u: 'm'
-        }), true);
-      }
-      if (T != null) {
-        T.eq(isa.quantity(null), false);
-      }
-      if (T != null) {
-        T.eq(isa.quantity(-1), false);
-      }
-      if (T != null) {
-        T.eq(isa.quantity('?'), false);
-      }
-      if (T != null) {
-        T.eq(isa.optional.quantity({
-          q: 1,
-          u: 'm'
-        }), true);
-      }
-      if (T != null) {
-        T.eq(isa.optional.quantity(null), true);
-      }
-      if (T != null) {
-        T.eq(isa.optional.quantity(-1), false);
-      }
-      if (T != null) {
-        T.eq(isa.optional.quantity('?'), false);
-      }
+        'quantity.u': 'text',
+        'foo': 'object',
+        'foo.bar': 'object',
+        'foo.bar.baz': 'float'
+      };
+      ({isa, validate} = types = new Intertype(my_types));
+      debug('^234244^', (function() {
+        var results;
+        results = [];
+        for (k in isa) {
+          results.push(k);
+        }
+        return results;
+      })());
+      debug('^234244^', (function() {
+        var results;
+        results = [];
+        for (k in isa.optional) {
+          results.push(k);
+        }
+        return results;
+      })());
+      eq('^t1^', T, isa.quantity({
+        q: 1,
+        u: 'm'
+      }), true);
+      eq('^t2^', T, isa.quantity(null), false);
+      eq('^t3^', T, isa.optional.quantity({
+        q: 2,
+        u: 'm'
+      }), true);
+      eq('^t4^', T, isa.optional.quantity(null), true);
+      eq('^t5^', T, validate.quantity({
+        q: 3,
+        u: 'm'
+      }), {
+        q: 3,
+        u: 'm'
+      });
+      eq('^t6^', T, validate.optional.quantity({
+        q: 4,
+        u: 'm'
+      }), {
+        q: 4,
+        u: 'm'
+      });
+      throws(T, function() {
+        return validate.quantity({
+          q: 5
+        });
+      });
+      // T?.eq ( isa.quantity                     null               ), false
+      // T?.eq ( isa.quantity                     -1                 ), false
+      // T?.eq ( isa.quantity                     '?'                ), false
+      // T?.eq ( isa.quantity.q                   '?'                ), false
+      // T?.eq ( isa.quantity.q                   3                  ), true
+      // T?.eq ( isa.optional.quantity            { q: 1, u: 'm', }  ), true
+      // T?.eq ( isa.optional.quantity            null               ), true
+      // T?.eq ( isa.optional.quantity            -1                 ), false
+      // T?.eq ( isa.optional.quantity            '?'                ), false
+      // T?.eq ( isa.optional.quantity.q          '?'                ), false
+      // T?.eq ( isa.optional.quantity.q          3                  ), true
+      // debug '^332-1^', isa.optional.quantity.q is Reflect.get isa, 'quantity.q'
+      // debug '^332-1^', isa.optional.quantity.q is isa[ 'optional.quantity.q' ]
+      // process.exit 111 #########################################################################################################
       if (T != null) {
         T.eq(validate.quantity({
           q: 1,
@@ -2378,7 +2395,15 @@
           q: 1
         });
       });
-/* TAINT message should be more specific */      return null;
+      /* TAINT message should be more specific */      debug('^830-1^', (function() {
+        var results;
+        results = [];
+        for (k in isa) {
+          results.push(k);
+        }
+        return results;
+      })());
+      return null;
     })();
     return typeof done === "function" ? done() : void 0;
   };
