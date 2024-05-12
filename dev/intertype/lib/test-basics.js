@@ -2260,29 +2260,64 @@
     var Intertype;
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
-    (() => {      // #.........................................................................................................
-      // do =>
-      //   { isa
-      //     validate  } = new Intertype
-      //       normalfloat: ( ( x ) -> ( @isa.float x ) and ( 0 <= x <= 1 ) )
-      //   T?.eq ( isa.normalfloat                     0     ), true
-      //   T?.eq ( isa.normalfloat                     null  ), false
-      //   T?.eq ( isa.normalfloat                     -1    ), false
-      //   T?.eq ( isa.normalfloat                     '?'   ), false
-      //   T?.eq ( isa.optional.normalfloat            0     ), true
-      //   T?.eq ( isa.optional.normalfloat            null  ), true
-      //   T?.eq ( isa.optional.normalfloat            -1    ), false
-      //   T?.eq ( isa.optional.normalfloat            '?'   ), false
-      //   T?.eq ( validate.normalfloat                0     ), 0
-      //   T?.eq ( validate.optional.normalfloat       0     ), 0
-      //   T?.eq ( validate.optional.normalfloat       null  ), null
-      //   throws T, /expected a normalfloat, got a null/,             -> validate.normalfloat           null
-      //   throws T, /expected a normalfloat, got a float/,            -> validate.normalfloat           -1
-      //   throws T, /expected a normalfloat, got a text/,             -> validate.normalfloat           '?'
-      //   throws T, /expected an optional normalfloat, got a float/,  -> validate.optional.normalfloat  -1
-      //   throws T, /expected an optional normalfloat, got a text/,   -> validate.optional.normalfloat  '?'
-      //   return null
-      // #.........................................................................................................
+    (() => {      //.........................................................................................................
+      var isa, validate;
+      ({isa, validate} = new Intertype({
+        normalfloat: (function(x) {
+          return (this.isa.float(x)) && ((0 <= x && x <= 1));
+        })
+      }));
+      if (T != null) {
+        T.eq(isa.normalfloat(0), true);
+      }
+      if (T != null) {
+        T.eq(isa.normalfloat(null), false);
+      }
+      if (T != null) {
+        T.eq(isa.normalfloat(-1), false);
+      }
+      if (T != null) {
+        T.eq(isa.normalfloat('?'), false);
+      }
+      if (T != null) {
+        T.eq(isa.optional.normalfloat(0), true);
+      }
+      if (T != null) {
+        T.eq(isa.optional.normalfloat(null), true);
+      }
+      if (T != null) {
+        T.eq(isa.optional.normalfloat(-1), false);
+      }
+      if (T != null) {
+        T.eq(isa.optional.normalfloat('?'), false);
+      }
+      if (T != null) {
+        T.eq(validate.normalfloat(0), 0);
+      }
+      if (T != null) {
+        T.eq(validate.optional.normalfloat(0), 0);
+      }
+      if (T != null) {
+        T.eq(validate.optional.normalfloat(null), null);
+      }
+      throws(T, /expected a normalfloat, got a null/, function() {
+        return validate.normalfloat(null);
+      });
+      throws(T, /expected a normalfloat, got a float/, function() {
+        return validate.normalfloat(-1);
+      });
+      throws(T, /expected a normalfloat, got a text/, function() {
+        return validate.normalfloat('?');
+      });
+      throws(T, /expected an optional normalfloat, got a float/, function() {
+        return validate.optional.normalfloat(-1);
+      });
+      throws(T, /expected an optional normalfloat, got a text/, function() {
+        return validate.optional.normalfloat('?');
+      });
+      return null;
+    })();
+    (() => {      //.........................................................................................................
       var isa, k, my_types, types, validate;
       my_types = {
         'quantity': 'object',
@@ -2333,6 +2368,8 @@
         q: 4,
         u: 'm'
       });
+      eq('^t6^', T, validate.optional.quantity.q(null));
+      eq('^t6^', T, validate.optional.quantity.q(111));
       throws(T, function() {
         return validate.quantity({
           q: 5
@@ -2395,7 +2432,15 @@
           q: 1
         });
       });
-/* TAINT message should be more specific */      return null;
+      /* TAINT message should be more specific */      throws(T, /expected an optional quantity.q, got a object/, function() {
+        return validate.optional.quantity.q({
+          q: 1
+        });
+      });
+      throws(T, /method 'validate.optional.quantity.q' expects 1 arguments, got 3/, function() {
+        return validate.optional.quantity.q(3, 4, 5);
+      });
+      return null;
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -2574,7 +2619,7 @@
 
   //===========================================================================================================
   if (module === require.main) {
-    await (async() => {
+    await (() => {
       // @basic_functionality_using_types_object()
       // test @basic_functionality_using_types_object
       // @allow_declaration_objects()
@@ -2607,11 +2652,12 @@
       // test @minimal_type_of_results
       // @disallow_rhs_optional()
       // test @disallow_rhs_optional
-      this.parallel_behavior_of_isa_validate_mandatory_and_optional();
-      // test @parallel_behavior_of_isa_validate_mandatory_and_optional
-      return (await test(this));
+      return this.parallel_behavior_of_isa_validate_mandatory_and_optional();
     })();
   }
+
+  // test @parallel_behavior_of_isa_validate_mandatory_and_optional
+// await test @
 
 }).call(this);
 
