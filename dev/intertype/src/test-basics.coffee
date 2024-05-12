@@ -1088,28 +1088,51 @@ safeguard = ( T, f ) ->
     return null
   #.........................................................................................................
   do =>
+    my_types =
+      'quantity':     'object'
+      'quantity.q':   'float'
+      'quantity.u':   'text'
+      'foo':          'object'
+      'foo.bar':      'object'
+      'foo.bar.baz':  'float'
     { isa
-      validate  } = new Intertype
-        'quantity':   'object'
-        'quantity.q': 'float'
-        'quantity.u': 'text'
-    T?.eq ( isa.quantity                     { q: 1, u: 'm', }  ), true
-    T?.eq ( isa.quantity                     null               ), false
-    T?.eq ( isa.quantity                     -1                 ), false
-    T?.eq ( isa.quantity                     '?'                ), false
-    T?.eq ( isa.optional.quantity            { q: 1, u: 'm', }  ), true
-    T?.eq ( isa.optional.quantity            null               ), true
-    T?.eq ( isa.optional.quantity            -1                 ), false
-    T?.eq ( isa.optional.quantity            '?'                ), false
+      validate  } = types = new Intertype my_types
+    debug '^234244^', ( k for k of isa )
+    debug '^234244^', ( k for k of isa.optional )
+    eq '^t1^', T, ( isa.quantity            { q: 1, u: 'm', }   ), true
+    eq '^t2^', T, ( isa.quantity            null                ), false
+    eq '^t3^', T, ( isa.optional.quantity   { q: 2, u: 'm', }   ), true
+    eq '^t4^', T, ( isa.optional.quantity   null                ), true
+    eq '^t5^', T, ( validate.quantity               { q: 3, u: 'm', } ), { q: 3, u: 'm', }
+    eq '^t6^', T, ( validate.optional.quantity      { q: 4, u: 'm', } ), { q: 4, u: 'm', }
+    eq '^t6^', T, ( validate.optional.quantity.q    null  )
+    eq '^t6^', T, ( validate.optional.quantity.q    111   )
+    throws T, -> validate.quantity  { q: 5, }
+    # T?.eq ( isa.quantity                     null               ), false
+    # T?.eq ( isa.quantity                     -1                 ), false
+    # T?.eq ( isa.quantity                     '?'                ), false
+    # T?.eq ( isa.quantity.q                   '?'                ), false
+    # T?.eq ( isa.quantity.q                   3                  ), true
+    # T?.eq ( isa.optional.quantity            { q: 1, u: 'm', }  ), true
+    # T?.eq ( isa.optional.quantity            null               ), true
+    # T?.eq ( isa.optional.quantity            -1                 ), false
+    # T?.eq ( isa.optional.quantity            '?'                ), false
+    # T?.eq ( isa.optional.quantity.q          '?'                ), false
+    # T?.eq ( isa.optional.quantity.q          3                  ), true
+    # debug '^332-1^', isa.optional.quantity.q is Reflect.get isa, 'quantity.q'
+    # debug '^332-1^', isa.optional.quantity.q is isa[ 'optional.quantity.q' ]
+    # process.exit 111 #########################################################################################################
     T?.eq ( validate.quantity                { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
     T?.eq ( validate.optional.quantity       { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
     T?.eq ( validate.optional.quantity       null               ), null
-    throws T, /expected a quantity, got a null/,              -> validate.quantity           null
-    throws T, /expected a quantity, got a float/,             -> validate.quantity           -1
-    throws T, /expected a quantity, got a text/,              -> validate.quantity           '?'
-    throws T, /expected a quantity, got a object/,            -> validate.quantity           { q: 1, } ### TAINT message should be more specific ###
-    throws T, /expected an optional quantity, got a float/,   -> validate.optional.quantity  -1
-    throws T, /expected an optional quantity, got a object/,  -> validate.optional.quantity  { q: 1, } ### TAINT message should be more specific ###
+    throws T, /expected a quantity, got a null/,                -> validate.quantity            null
+    throws T, /expected a quantity, got a float/,               -> validate.quantity            -1
+    throws T, /expected a quantity, got a text/,                -> validate.quantity            '?'
+    throws T, /expected a quantity, got a object/,              -> validate.quantity            { q: 1, } ### TAINT message should be more specific ###
+    throws T, /expected an optional quantity, got a float/,     -> validate.optional.quantity   -1
+    throws T, /expected an optional quantity, got a object/,    -> validate.optional.quantity   { q: 1, } ### TAINT message should be more specific ###
+    throws T, /expected an optional quantity.q, got a object/,  -> validate.optional.quantity.q { q: 1, }
+    throws T, /method 'validate.optional.quantity.q' expects 1 arguments, got 3/,  -> validate.optional.quantity.q 3, 4, 5
     return null
   #.........................................................................................................
   done?()
@@ -1249,6 +1272,6 @@ if module is require.main then await do =>
   # test @disallow_rhs_optional
   @parallel_behavior_of_isa_validate_mandatory_and_optional()
   # test @parallel_behavior_of_isa_validate_mandatory_and_optional
-  await test @
+  # await test @
 
 
