@@ -289,7 +289,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @basic_functionality_using_types_object = ( T, done ) ->
-  # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
   types         = new INTERTYPE.Intertype_minimal sample_declarations
   eq2 T, ( Ω_intertype_30 = -> types.isa.boolean           false               ), true
@@ -348,22 +347,21 @@ safeguard = ( T, f ) ->
   eq2 T, ( Ω_intertype_53 = -> types.isa.optional.asyncfunction.name      ), 'isa.optional.asyncfunction'
   eq2 T, ( Ω_intertype_54 = -> types.validate.asyncfunction.name          ), 'validate.asyncfunction'
   eq2 T, ( Ω_intertype_55 = -> types.validate.optional.asyncfunction.name ), 'validate.optional.asyncfunction'
-  T?.eq types.declarations.null?.type,          'null'
-  T?.eq types.declarations.function?.type,      'function'
-  T?.eq types.declarations.boolean?.type,       'boolean'
-  T?.eq types.declarations.text?.type,          'text'
-  T?.eq types.declarations.asyncfunction?.type, 'asyncfunction'
-  T?.eq types.isa.null?.name,                   'isa.null'
-  T?.eq types.isa.function?.name,               'isa.function'
-  T?.eq types.isa.boolean?.name,                'isa.boolean'
-  T?.eq types.isa.text?.name,                   'isa.text'
-  T?.eq types.isa.asyncfunction?.name,          'isa.asyncfunction'
+  eq2 T, ( Ω_intertype_27 = -> types.declarations.null?.type              ), 'null'
+  eq2 T, ( Ω_intertype_27 = -> types.declarations.function?.type          ), 'function'
+  eq2 T, ( Ω_intertype_27 = -> types.declarations.boolean?.type           ), 'boolean'
+  eq2 T, ( Ω_intertype_27 = -> types.declarations.text?.type              ), 'text'
+  eq2 T, ( Ω_intertype_27 = -> types.declarations.asyncfunction?.type     ), 'asyncfunction'
+  eq2 T, ( Ω_intertype_27 = -> types.isa.null?.name                       ), 'isa.null'
+  eq2 T, ( Ω_intertype_27 = -> types.isa.function?.name                   ), 'isa.function'
+  eq2 T, ( Ω_intertype_27 = -> types.isa.boolean?.name                    ), 'isa.boolean'
+  eq2 T, ( Ω_intertype_27 = -> types.isa.text?.name                       ), 'isa.text'
+  eq2 T, ( Ω_intertype_27 = -> types.isa.asyncfunction?.name              ), 'isa.asyncfunction'
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @basic_functionality_using_standalone_methods = ( T, done ) ->
-  # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
@@ -391,8 +389,8 @@ safeguard = ( T, f ) ->
   eq2 T, ( Ω_intertype_75 = -> validate.optional.boolean      null       ), null
   try_and_show T,                           -> validate.boolean           1
   try_and_show T,                           -> validate.optional.boolean  1
-  throws T, /expected a boolean/,           -> validate.boolean           1
-  throws T, /expected an optional boolean/, -> validate.optional.boolean  1
+  throws2 T, ( Ω_intertype_27 = -> validate.boolean           1  ), /expected a boolean/
+  throws2 T, ( Ω_intertype_27 = -> validate.optional.boolean  1  ), /expected an optional boolean/
   #.........................................................................................................
   eq2 T, ( Ω_intertype_76 = -> type_of null            ), 'null'
   eq2 T, ( Ω_intertype_77 = -> type_of undefined       ), 'undefined'
@@ -408,13 +406,12 @@ safeguard = ( T, f ) ->
   eq2 T, ( Ω_intertype_86 = -> validate.asyncfunction.name          ), 'validate.asyncfunction'
   eq2 T, ( Ω_intertype_87 = -> validate.optional.asyncfunction.name ), 'validate.optional.asyncfunction'
   #.........................................................................................................
-  throws T, /method 'isa.float' expects 1 arguments, got 2/, -> isa.float 3, 4
-  throws T, /method 'isa.float' expects 1 arguments, got 0/, -> isa.float()
+  throws2 T, ( Ω_intertype_27 = -> isa.float 3, 4 ), /method 'isa.float' expects 1 arguments, got 2/
+  throws2 T, ( Ω_intertype_27 = -> isa.float()    ), /method 'isa.float' expects 1 arguments, got 0/
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @methods_check_arity = ( T, done ) ->
-  # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
@@ -445,7 +442,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @same_basic_types = ( T, done ) ->
-  # T?.halt_on_error()
   { isa
     validate
     type_of   } = require '../../../apps/intertype'
@@ -490,7 +486,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @throw_instructive_error_on_missing_type = ( T, done ) ->
-  # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
   { isa
     validate
@@ -534,16 +529,13 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @throw_instructive_error_when_optional_is_declared = ( T, done ) ->
-  # T?.halt_on_error()
   INTERTYPE     = require '../../../apps/intertype'
-  throws T, /not allowed to re-declare type 'optional'/, -> new INTERTYPE.Intertype_minimal \
-    { optional: ( ( x ) -> true ), }
+  throws2 T, ( Ω_intertype_27 = -> new INTERTYPE.Intertype_minimal { optional: ( ( x ) -> true ), } ), /not allowed to re-declare type 'optional'/
   #.........................................................................................................
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
 @throw_instructive_error_when_wrong_type_of_isa_test_declared = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   throws2 T, ( Ω_intertype_138 = -> new Intertype { foo: ( -> ), }                      ), /expected function with 1 parameters, got one with 0/
@@ -561,7 +553,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @allow_declaration_objects = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -580,7 +571,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @create_entries_must_be_sync_functions = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -595,7 +585,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @template_methods_must_be_nullary = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -610,7 +599,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @intertype_knows_its_base_types = ( T, done ) ->
-  # T?.halt_on_error()
   { isa } = require '../../../apps/intertype'
   #.........................................................................................................
   eq2 T, ( Ω_intertype_154 = -> isa.basetype 'optional'   ), false
@@ -633,7 +621,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @disallow_licensed_overrides = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -681,7 +668,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_create_types_with_templates_and_create = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype
     Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
@@ -751,7 +737,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @builtin_types_support_create = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -776,7 +761,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @template_functions_are_called_in_template_fields = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -826,7 +810,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @type_object_assumed_if_fields_present = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -853,7 +836,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @intertype_minimal_has_only_base_types = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype_minimal } = require '../../../apps/intertype'
   types = new Intertype_minimal()
   eq2 T, ( Ω_intertype_216 = -> ( Object.keys types.declarations ).sort() ), [ 'anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown' ]
@@ -864,7 +846,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_type_name_for_test = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -897,7 +878,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @resolve_dotted_type = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -942,7 +922,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @dotted_types_are_test_methods = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1200,7 +1179,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @forbidden_to_define_fields_on_basetypes = ( T, done ) ->
-  T?.halt_on_error()
   { Intertype
     declarations  } = require '../../../apps/intertype'
   #.........................................................................................................
@@ -1222,7 +1200,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @internal_type_of_method = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype
     declarations
     __type_of     } = require '../../../apps/intertype'
@@ -1246,7 +1223,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @deepmerge = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype
     declarations
     deepmerge   } = require '../../../apps/intertype'
@@ -1291,7 +1267,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @validate_dotted_types = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1329,7 +1304,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @use_evaluate = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1403,7 +1377,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @walk_prefixes = ( T, done ) ->
-  # T?.halt_on_error()
   { walk_prefixes
     isa
     type_of                     } = require '../../../apps/intertype'
@@ -1422,7 +1395,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_namespaces = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1451,7 +1423,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_qualifiers = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1534,7 +1505,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @disallow_rhs_optional = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1552,7 +1522,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @parallel_behavior_of_isa_validate_mandatory_and_optional = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1624,7 +1593,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @declaration_role_field = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1641,7 +1609,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @_________________can_use_fields = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
@@ -1655,7 +1622,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @minimal_type_of_results = ( T, done ) ->
-  # T?.halt_on_error()
   { Intertype_minimal } = require '../../../apps/intertype'
   { isa
     validate
@@ -1711,7 +1677,6 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 demo_1 = ->
-  # T?.halt_on_error()
   { Intertype_minimal, } = require '../../../apps/intertype'
   #.........................................................................................................
   declarations  =
