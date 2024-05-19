@@ -446,8 +446,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_types_object = function(T, done) {
-    var INTERTYPE, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, types, Ω_intertype_27, Ω_intertype_30, Ω_intertype_31, Ω_intertype_32, Ω_intertype_33, Ω_intertype_34, Ω_intertype_35, Ω_intertype_36, Ω_intertype_37, Ω_intertype_38, Ω_intertype_39, Ω_intertype_40, Ω_intertype_41, Ω_intertype_42, Ω_intertype_43, Ω_intertype_44, Ω_intertype_45, Ω_intertype_46, Ω_intertype_47, Ω_intertype_48, Ω_intertype_49, Ω_intertype_50, Ω_intertype_51, Ω_intertype_52, Ω_intertype_53, Ω_intertype_54, Ω_intertype_55;
-    // T?.halt_on_error()
+    var INTERTYPE, types, Ω_intertype_27, Ω_intertype_30, Ω_intertype_31, Ω_intertype_32, Ω_intertype_33, Ω_intertype_34, Ω_intertype_35, Ω_intertype_36, Ω_intertype_37, Ω_intertype_38, Ω_intertype_39, Ω_intertype_40, Ω_intertype_41, Ω_intertype_42, Ω_intertype_43, Ω_intertype_44, Ω_intertype_45, Ω_intertype_46, Ω_intertype_47, Ω_intertype_48, Ω_intertype_49, Ω_intertype_50, Ω_intertype_51, Ω_intertype_52, Ω_intertype_53, Ω_intertype_54, Ω_intertype_55;
     INTERTYPE = require('../../../apps/intertype');
     types = new INTERTYPE.Intertype_minimal(sample_declarations);
     eq2(T, (Ω_intertype_30 = function() {
@@ -566,43 +565,52 @@
     eq2(T, (Ω_intertype_55 = function() {
       return types.validate.optional.asyncfunction.name;
     }), 'validate.optional.asyncfunction');
-    if (T != null) {
-      T.eq((ref1 = types.declarations.null) != null ? ref1.type : void 0, 'null');
-    }
-    if (T != null) {
-      T.eq((ref2 = types.declarations.function) != null ? ref2.type : void 0, 'function');
-    }
-    if (T != null) {
-      T.eq((ref3 = types.declarations.boolean) != null ? ref3.type : void 0, 'boolean');
-    }
-    if (T != null) {
-      T.eq((ref4 = types.declarations.text) != null ? ref4.type : void 0, 'text');
-    }
-    if (T != null) {
-      T.eq((ref5 = types.declarations.asyncfunction) != null ? ref5.type : void 0, 'asyncfunction');
-    }
-    if (T != null) {
-      T.eq((ref6 = types.isa.null) != null ? ref6.name : void 0, 'isa.null');
-    }
-    if (T != null) {
-      T.eq((ref7 = types.isa.function) != null ? ref7.name : void 0, 'isa.function');
-    }
-    if (T != null) {
-      T.eq((ref8 = types.isa.boolean) != null ? ref8.name : void 0, 'isa.boolean');
-    }
-    if (T != null) {
-      T.eq((ref9 = types.isa.text) != null ? ref9.name : void 0, 'isa.text');
-    }
-    if (T != null) {
-      T.eq((ref10 = types.isa.asyncfunction) != null ? ref10.name : void 0, 'isa.asyncfunction');
-    }
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.declarations.null) != null ? ref1.type : void 0;
+    }), 'null');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.declarations.function) != null ? ref1.type : void 0;
+    }), 'function');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.declarations.boolean) != null ? ref1.type : void 0;
+    }), 'boolean');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.declarations.text) != null ? ref1.type : void 0;
+    }), 'text');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.declarations.asyncfunction) != null ? ref1.type : void 0;
+    }), 'asyncfunction');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.isa.null) != null ? ref1.name : void 0;
+    }), 'isa.null');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.isa.function) != null ? ref1.name : void 0;
+    }), 'isa.function');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.isa.boolean) != null ? ref1.name : void 0;
+    }), 'isa.boolean');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.isa.text) != null ? ref1.name : void 0;
+    }), 'isa.text');
+    eq2(T, (Ω_intertype_27 = function() {
+      var ref1;
+      return (ref1 = types.isa.asyncfunction) != null ? ref1.name : void 0;
+    }), 'isa.asyncfunction');
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_standalone_methods = function(T, done) {
-    var INTERTYPE, isa, type_of, validate, Ω_intertype_56, Ω_intertype_57, Ω_intertype_58, Ω_intertype_59, Ω_intertype_60, Ω_intertype_61, Ω_intertype_62, Ω_intertype_63, Ω_intertype_64, Ω_intertype_65, Ω_intertype_66, Ω_intertype_67, Ω_intertype_68, Ω_intertype_69, Ω_intertype_70, Ω_intertype_71, Ω_intertype_72, Ω_intertype_73, Ω_intertype_74, Ω_intertype_75, Ω_intertype_76, Ω_intertype_77, Ω_intertype_78, Ω_intertype_79, Ω_intertype_80, Ω_intertype_81, Ω_intertype_82, Ω_intertype_83, Ω_intertype_84, Ω_intertype_85, Ω_intertype_86, Ω_intertype_87;
-    // T?.halt_on_error()
+    var INTERTYPE, isa, type_of, validate, Ω_intertype_27, Ω_intertype_56, Ω_intertype_57, Ω_intertype_58, Ω_intertype_59, Ω_intertype_60, Ω_intertype_61, Ω_intertype_62, Ω_intertype_63, Ω_intertype_64, Ω_intertype_65, Ω_intertype_66, Ω_intertype_67, Ω_intertype_68, Ω_intertype_69, Ω_intertype_70, Ω_intertype_71, Ω_intertype_72, Ω_intertype_73, Ω_intertype_74, Ω_intertype_75, Ω_intertype_76, Ω_intertype_77, Ω_intertype_78, Ω_intertype_79, Ω_intertype_80, Ω_intertype_81, Ω_intertype_82, Ω_intertype_83, Ω_intertype_84, Ω_intertype_85, Ω_intertype_86, Ω_intertype_87;
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
     eq2(T, (Ω_intertype_56 = function() {
@@ -672,12 +680,12 @@
     try_and_show(T, function() {
       return validate.optional.boolean(1);
     });
-    throws(T, /expected a boolean/, function() {
+    throws2(T, (Ω_intertype_27 = function() {
       return validate.boolean(1);
-    });
-    throws(T, /expected an optional boolean/, function() {
+    }), /expected a boolean/);
+    throws2(T, (Ω_intertype_27 = function() {
       return validate.optional.boolean(1);
-    });
+    }), /expected an optional boolean/);
     //.........................................................................................................
     eq2(T, (Ω_intertype_76 = function() {
       return type_of(null);
@@ -717,19 +725,18 @@
       return validate.optional.asyncfunction.name;
     }), 'validate.optional.asyncfunction');
     //.........................................................................................................
-    throws(T, /method 'isa.float' expects 1 arguments, got 2/, function() {
+    throws2(T, (Ω_intertype_27 = function() {
       return isa.float(3, 4);
-    });
-    throws(T, /method 'isa.float' expects 1 arguments, got 0/, function() {
+    }), /method 'isa.float' expects 1 arguments, got 2/);
+    throws2(T, (Ω_intertype_27 = function() {
       return isa.float();
-    });
+    }), /method 'isa.float' expects 1 arguments, got 0/);
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.methods_check_arity = function(T, done) {
     var INTERTYPE, isa, type_of, validate, Ω_intertype_88, Ω_intertype_89, Ω_intertype_90, Ω_intertype_91, Ω_intertype_92, Ω_intertype_93, Ω_intertype_94, Ω_intertype_95, Ω_intertype_96, Ω_intertype_97;
-    // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
     //.........................................................................................................
@@ -769,7 +776,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.same_basic_types = function(T, done) {
     var $function, asyncfunction, asyncgenerator, asyncgeneratorfunction, boolean, generator, generatorfunction, isa, symbol, type_of, validate, Ω_intertype_100, Ω_intertype_101, Ω_intertype_102, Ω_intertype_103, Ω_intertype_104, Ω_intertype_105, Ω_intertype_106, Ω_intertype_107, Ω_intertype_108, Ω_intertype_109, Ω_intertype_110, Ω_intertype_111, Ω_intertype_112, Ω_intertype_113, Ω_intertype_114, Ω_intertype_115, Ω_intertype_116, Ω_intertype_117, Ω_intertype_118, Ω_intertype_119, Ω_intertype_120, Ω_intertype_121, Ω_intertype_98, Ω_intertype_99;
-    // T?.halt_on_error()
     ({isa, validate, type_of} = require('../../../apps/intertype'));
     //.........................................................................................................
     boolean = false;
@@ -871,7 +877,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_on_missing_type = function(T, done) {
     var INTERTYPE, isa, type_of, validate, Ω_intertype_122, Ω_intertype_123, Ω_intertype_124, Ω_intertype_125, Ω_intertype_126, Ω_intertype_127, Ω_intertype_128, Ω_intertype_129, Ω_intertype_130, Ω_intertype_131, Ω_intertype_132, Ω_intertype_133, Ω_intertype_134, Ω_intertype_135, Ω_intertype_136, Ω_intertype_137;
-    // T?.halt_on_error()
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype());
     //.........................................................................................................
@@ -945,23 +950,21 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_when_optional_is_declared = function(T, done) {
-    var INTERTYPE;
-    // T?.halt_on_error()
+    var INTERTYPE, Ω_intertype_27;
     INTERTYPE = require('../../../apps/intertype');
-    throws(T, /not allowed to re-declare type 'optional'/, function() {
+    throws2(T, (Ω_intertype_27 = function() {
       return new INTERTYPE.Intertype_minimal({
         optional: (function(x) {
           return true;
         })
       });
-    });
+    }), /not allowed to re-declare type 'optional'/);
     return typeof done === "function" ? done() : void 0;
   };
 
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_when_wrong_type_of_isa_test_declared = function(T, done) {
     var Intertype, Ω_intertype_138, Ω_intertype_139, Ω_intertype_140, Ω_intertype_141, Ω_intertype_142, Ω_intertype_143, Ω_intertype_144, Ω_intertype_145, Ω_intertype_146, Ω_intertype_147;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     //.........................................................................................................
     throws2(T, (Ω_intertype_138 = function() {
@@ -1026,7 +1029,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.allow_declaration_objects = function(T, done) {
     var Intertype_minimal;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, types, Ω_intertype_148, Ω_intertype_149, Ω_intertype_150, Ω_intertype_151;
@@ -1058,7 +1060,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.create_entries_must_be_sync_functions = function(T, done) {
     var Intertype_minimal;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, Ω_intertype_152;
@@ -1082,7 +1083,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.template_methods_must_be_nullary = function(T, done) {
     var Intertype_minimal;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, Ω_intertype_153;
@@ -1106,7 +1106,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_knows_its_base_types = function(T, done) {
     var isa, Ω_intertype_154, Ω_intertype_155, Ω_intertype_156, Ω_intertype_157, Ω_intertype_158, Ω_intertype_159, Ω_intertype_160, Ω_intertype_161, Ω_intertype_162, Ω_intertype_163, Ω_intertype_164, Ω_intertype_165, Ω_intertype_166, Ω_intertype_167, Ω_intertype_168;
-    // T?.halt_on_error()
     ({isa} = require('../../../apps/intertype'));
     //.........................................................................................................
     eq2(T, (Ω_intertype_154 = function() {
@@ -1160,7 +1159,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.disallow_licensed_overrides = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var overrides, types, Ω_intertype_169, Ω_intertype_170, Ω_intertype_171, Ω_intertype_172;
@@ -1246,7 +1244,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.can_create_types_with_templates_and_create = function(T, done) {
     var Intertype, Intertype_minimal;
-    // T?.halt_on_error()
     ({Intertype, Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, types, Ω_intertype_179, Ω_intertype_180, Ω_intertype_181, Ω_intertype_182, Ω_intertype_183, Ω_intertype_184, Ω_intertype_185, Ω_intertype_186, Ω_intertype_187, Ω_intertype_188;
@@ -1390,7 +1387,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.builtin_types_support_create = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var create, type_of, types, Ω_intertype_194, Ω_intertype_195, Ω_intertype_196, Ω_intertype_197, Ω_intertype_198, Ω_intertype_199, Ω_intertype_200, Ω_intertype_201, Ω_intertype_202, Ω_intertype_203, Ω_intertype_204, Ω_intertype_205;
@@ -1440,7 +1436,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.template_functions_are_called_in_template_fields = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var create, declarations, declare, isa, type_of, types, Ω_intertype_206, Ω_intertype_207, Ω_intertype_208, Ω_intertype_209;
@@ -1524,7 +1519,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.type_object_assumed_if_fields_present = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var create, declarations, declare, isa, type_of, types, Ω_intertype_211, Ω_intertype_212, Ω_intertype_213, Ω_intertype_214, Ω_intertype_215;
@@ -1568,7 +1562,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_minimal_has_only_base_types = function(T, done) {
     var Intertype_minimal, types, Ω_intertype_216, Ω_intertype_217;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     types = new Intertype_minimal();
     eq2(T, (Ω_intertype_216 = function() {
@@ -1586,7 +1579,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_type_name_for_test = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var types, Ω_intertype_218, Ω_intertype_219, Ω_intertype_220, Ω_intertype_221, Ω_intertype_222, Ω_intertype_223, Ω_intertype_224, Ω_intertype_225;
@@ -1666,7 +1658,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.resolve_dotted_type = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var types, Ω_intertype_234, Ω_intertype_235, Ω_intertype_236, Ω_intertype_237, Ω_intertype_238, Ω_intertype_239, Ω_intertype_240, Ω_intertype_241, Ω_intertype_242;
@@ -1722,7 +1713,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.dotted_types_are_test_methods = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var types, Ω_intertype_252, Ω_intertype_253, Ω_intertype_254, Ω_intertype_255, Ω_intertype_256, Ω_intertype_257, Ω_intertype_258, Ω_intertype_259, Ω_intertype_260, Ω_intertype_261, Ω_intertype_262, Ω_intertype_263;
@@ -2301,9 +2291,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.forbidden_to_define_fields_on_basetypes = async function(T, done) {
     var Intertype, declarations;
-    if (T != null) {
-      T.halt_on_error();
-    }
     ({Intertype, declarations} = require('../../../apps/intertype'));
     await (() => {      //.........................................................................................................
       var declare, isa, types, validate, Ω_intertype_343, Ω_intertype_344, Ω_intertype_345, Ω_intertype_346, Ω_intertype_347, Ω_intertype_348, Ω_intertype_349;
@@ -2352,7 +2339,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.internal_type_of_method = function(T, done) {
     var Intertype, __type_of, _isa, declaration, declarations, type;
-    // T?.halt_on_error()
     ({Intertype, declarations, __type_of} = require('../../../apps/intertype'));
     //.........................................................................................................
     _isa = Object.fromEntries((function() {
@@ -2404,7 +2390,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.deepmerge = function(T, done) {
     var Intertype, declarations, deepmerge;
-    // T?.halt_on_error()
     ({Intertype, declarations, deepmerge} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var probe, result, sub, Ω_intertype_359, Ω_intertype_360, Ω_intertype_361, Ω_intertype_362, Ω_intertype_363, Ω_intertype_364;
@@ -2489,7 +2474,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.validate_dotted_types = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var types, validate, Ω_intertype_371, Ω_intertype_372, Ω_intertype_373, Ω_intertype_374, Ω_intertype_375, Ω_intertype_376, Ω_intertype_377, Ω_intertype_378, Ω_intertype_379, Ω_intertype_380, Ω_intertype_381, Ω_intertype_382, Ω_intertype_383, Ω_intertype_384, Ω_intertype_385;
@@ -2588,7 +2572,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.use_evaluate = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var evaluate, isa, types, validate, Ω_intertype_386, Ω_intertype_387, Ω_intertype_388, Ω_intertype_389, Ω_intertype_390, Ω_intertype_391, Ω_intertype_392, Ω_intertype_393, Ω_intertype_394, Ω_intertype_395, Ω_intertype_396, Ω_intertype_397, Ω_intertype_398, Ω_intertype_399;
@@ -2938,7 +2921,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.walk_prefixes = function(T, done) {
     var isa, type_of, walk_prefixes;
-    // T?.halt_on_error()
     ({walk_prefixes, isa, type_of} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var Ω_intertype_415, Ω_intertype_416, Ω_intertype_417, Ω_intertype_418, Ω_intertype_419, Ω_intertype_420;
@@ -2969,7 +2951,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_namespaces = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, Ω_intertype_421;
@@ -3028,7 +3009,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.can_use_qualifiers = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, isa, types, Ω_intertype_428, Ω_intertype_429, Ω_intertype_430, Ω_intertype_431, Ω_intertype_432, Ω_intertype_433, Ω_intertype_434, Ω_intertype_435, Ω_intertype_436, Ω_intertype_437, Ω_intertype_438, Ω_intertype_439, Ω_intertype_440;
@@ -3239,7 +3219,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.disallow_rhs_optional = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var Ω_intertype_471, Ω_intertype_472, Ω_intertype_473, Ω_intertype_474, Ω_intertype_475, Ω_intertype_476;
@@ -3283,7 +3262,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.parallel_behavior_of_isa_validate_mandatory_and_optional = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var isa, validate, Ω_intertype_477, Ω_intertype_478, Ω_intertype_479, Ω_intertype_480, Ω_intertype_481, Ω_intertype_482, Ω_intertype_483, Ω_intertype_484, Ω_intertype_485, Ω_intertype_486, Ω_intertype_487, Ω_intertype_488, Ω_intertype_489, Ω_intertype_490, Ω_intertype_491, Ω_intertype_492;
@@ -3495,7 +3473,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.declaration_role_field = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var declarations, Ω_intertype_523, Ω_intertype_524, Ω_intertype_525, Ω_intertype_526, Ω_intertype_527;
@@ -3524,7 +3501,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this._________________can_use_fields = function(T, done) {
     var Intertype;
-    // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
       var types;
@@ -3543,7 +3519,6 @@
   //-----------------------------------------------------------------------------------------------------------
   this.minimal_type_of_results = function(T, done) {
     var Intertype_minimal, create, declare, isa, type_of, validate;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     ({isa, validate, create, declare, type_of} = new Intertype_minimal());
     (() => {      //.........................................................................................................
@@ -3653,7 +3628,6 @@
   //-----------------------------------------------------------------------------------------------------------
   demo_1 = function() {
     var Intertype_minimal, declarations, types;
-    // T?.halt_on_error()
     ({Intertype_minimal} = require('../../../apps/intertype'));
     //.........................................................................................................
     declarations = {
