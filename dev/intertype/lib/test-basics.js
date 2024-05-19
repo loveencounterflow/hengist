@@ -1,6 +1,6 @@
 (async function() {
   'use strict';
-  var GUY, TMP_types, _equals, _set_contains, alert, debug, demo_1, echo, eq, equals, help, info, inspect, log, plain, praise, reverse, rpr, safeguard, sample_declarations, test, test_set_equality_by_value, throws, try_and_show, urge, warn, whisper;
+  var GUY, TMP_types, _equals, _match_error, _set_contains, alert, debug, demo_1, echo, eq, eq2, equals, help, info, inspect, log, plain, praise, reverse, rpr, safeguard, sample_declarations, test, test_mode, test_set_equality_by_value, throws, throws2, try_and_show, urge, warn, whisper;
 
   GUY = require('guy');
 
@@ -17,6 +17,11 @@
   // equals                    = require '/home/flow/jzr/intertype-legacy/deps/jkroso-equals.js'
   // equals                    = require '/home/flow/jzr/hengist/dev/intertype-2024-04-15/src/basics.test.coffee'
   // equals                    = require ( require 'util' ).isDeepStrictEqual
+  test_mode = 'throw_failures';
+
+  test_mode = 'throw_errors';
+
+  test_mode = 'failsafe';
 
   //===========================================================================================================
   // IMPLEMENT SET EQUALITY
@@ -34,22 +39,22 @@
   //-----------------------------------------------------------------------------------------------------------
   equals = function(a, b) {
     var element;
-    if (TMP_types.isa.set(a)) {
-      if (!TMP_types.isa.set(b)) {
-        return false;
-      }
-      if (a.size !== b.size) {
-        return false;
-      }
-      for (element of a) {
-        if (!_set_contains(b, element)) {
+    switch (true) {
+      case TMP_types.isa.set(a):
+        if (!TMP_types.isa.set(b)) {
           return false;
         }
-      }
-      return true;
-    } else {
-      return _equals(a, b);
+        if (a.size !== b.size) {
+          return false;
+        }
+        for (element of a) {
+          if (!_set_contains(b, element)) {
+            return false;
+          }
+        }
+        return true;
     }
+    return _equals(a, b);
   };
 
   //-----------------------------------------------------------------------------------------------------------
@@ -210,6 +215,73 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  _match_error = function(error, matcher) {
+    var matcher_type;
+    switch (matcher_type = TMP_types.type_of(matcher)) {
+      case 'text':
+        return error.message === matcher;
+      case 'regex':
+        matcher.lastIndex = 0;
+        return matcher.test(error.message);
+    }
+    return matcher_type;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  throws2 = function(T, f, matcher) {
+    var error, matcher_type, message, ref;
+    if ((ref = f.name) === '') {
+      throw new Error(`^992-1^ test method should be named, got ${rpr(f)}`);
+    }
+    error = null;
+    try {
+      //.........................................................................................................
+      urge(`^${ref}^ \`throws()\` result of call:`, f());
+    } catch (error1) {
+      error = error1;
+      if (matcher == null) {
+        help(`^${ref} ◀ throw2@1^ error        `, reverse(error.message));
+        if (T != null) {
+          T.ok(true);
+        }
+        return null;
+      }
+      //.......................................................................................................
+      switch (matcher_type = _match_error(error, matcher)) {
+        case true:
+          help(`^${ref} ◀ throw2@2^ OK           `, reverse(error.message));
+          if (T != null) {
+            T.ok(true);
+          }
+          break;
+        case false:
+          urge(`^${ref} ◀ throw2@3^ error        `, reverse(error.message));
+          warn(`^${ref} ◀ throw2@4^ doesn't match`, reverse(rpr(matcher)));
+          if (T != null) {
+            T.fail(`^${ref} ◀ throw2@5^ error ${rpr(error.message)} doesn't match ${rpr(matcher)}`);
+          }
+          break;
+        default:
+          message = `expected a regex or a text, got a ${matcher_type}`;
+          warn(`^${ref} ◀ throw2@6^`, reverse(message));
+          if (T != null) {
+            T.fail(`^${ref} ◀ throw2@7^ ${message}`);
+          }
+      }
+    }
+    //.........................................................................................................
+    if (error == null) {
+      message = "`throws()`: expected an error but none was thrown";
+      warn(`^${ref} ◀ throw2@8^`, reverse(message));
+      if (T != null) {
+        T.fail(`^${ref} ◀ throw2@9^ ${message}`);
+      }
+    }
+    //.........................................................................................................
+    return null;
+  };
+
   //===========================================================================================================
   eq = function(ref, T, result, matcher) {
     ref = ref.padEnd(15);
@@ -219,14 +291,36 @@
         T.ok(true);
       }
     } else {
-      warn(ref, "not equal: ");
-      warn(ref, "result:    ", rpr(result));
-      warn(ref, "matcher:   ", rpr(matcher));
+      warn(ref, reverse(' neq '), "result:     ", reverse(' ' + (rpr(result)) + ' '));
+      warn(ref, reverse(' neq '), "matcher:    ", reverse(' ' + (rpr(matcher)) + ' '));
       if (T != null) {
         T.ok(false);
       }
     }
     return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  eq2 = function(T, f, matcher) {
+    var error, message, ref, result;
+    if ((ref = f.name) === '') {
+      throw new Error(`^992-1^ test method should be named, got ${rpr(f)}`);
+    }
+    try {
+      (result = f());
+    } catch (error1) {
+      error = error1;
+      message = `\`eq2()\`: ^${ref}^ expected a result but got an an error: ${error.message}`;
+      warn('^992-12^', reverse(message));
+      if (T != null) {
+        T.fail(`^992-13^ ${message}`);
+      }
+      debug('^25235234^', {test_mode});
+      if (test_mode === 'throw_errors') {
+        throw new Error(message);
+      }
+    }
+    return eq(ref, T, result, matcher);
   };
 
   //===========================================================================================================
@@ -2835,7 +2929,7 @@
     // T?.halt_on_error()
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, isa, types;
+      var declarations, isa, types, Ω_intertype_1, Ω_intertype_10, Ω_intertype_11, Ω_intertype_12, Ω_intertype_13, Ω_intertype_2, Ω_intertype_3, Ω_intertype_4, Ω_intertype_5, Ω_intertype_6, Ω_intertype_7, Ω_intertype_8, Ω_intertype_9;
       declarations = {
         'empty': {
           test: 'object',
@@ -2866,28 +2960,54 @@
       };
       types = new Intertype(declarations);
       ({isa} = types);
-      eq('^intertype-t137^', T, isa.empty.list([]), true);
-      eq('^intertype-t138^', T, isa.empty.list(['A']), false);
-      eq('^intertype-t139^', T, isa.empty.list(4), false);
-      eq('^intertype-t140^', T, isa.nonempty.list([]), false);
-      eq('^intertype-t141^', T, isa.nonempty.list(['A']), true);
-      eq('^intertype-t142^', T, isa.nonempty.list(4), false);
-      eq('^intertype-t143^', T, isa.empty.text(''), true);
-      eq('^intertype-t144^', T, isa.empty.text('A'), false);
-      eq('^intertype-t145^', T, isa.empty.text(4), false);
-      eq('^intertype-t146^', T, isa.nonempty.text(''), false);
-      eq('^intertype-t147^', T, isa.nonempty.text('A'), true);
-      eq('^intertype-t148^', T, isa.nonempty.text(4), false);
+      eq2(T, (Ω_intertype_1 = function() {
+        return isa.empty.list([]);
+      }), true);
+      eq2(T, (Ω_intertype_2 = function() {
+        return isa.empty.list(['A']);
+      }), false);
+      eq2(T, (Ω_intertype_3 = function() {
+        return isa.empty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_4 = function() {
+        return isa.nonempty.list([]);
+      }), false);
+      eq2(T, (Ω_intertype_5 = function() {
+        return isa.nonempty.list(['A']);
+      }), true);
+      eq2(T, (Ω_intertype_6 = function() {
+        return isa.nonempty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_7 = function() {
+        return isa.empty.text('');
+      }), true);
+      eq2(T, (Ω_intertype_8 = function() {
+        return isa.empty.text('A');
+      }), false);
+      eq2(T, (Ω_intertype_9 = function() {
+        return isa.empty.text(4);
+      }), false);
+      eq2(T, (Ω_intertype_10 = function() {
+        return isa.nonempty.text('');
+      }), false);
+      eq2(T, (Ω_intertype_11 = function() {
+        return isa.nonempty.text('A');
+      }), true);
+      eq2(T, (Ω_intertype_12 = function() {
+        return isa.nonempty.text(4);
+      }), false);
       /* this doesn't make a terrible lot of sense: */
-      eq('^intertype-t149^', T, isa.empty({
-        list: [],
-        text: '',
-        set: new Set()
+      eq2(T, (Ω_intertype_13 = function() {
+        return isa.empty({
+          list: [],
+          text: '',
+          set: new Set()
+        });
       }), false);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var declarations, isa, types, validate;
+      var declarations, isa, types, validate, Ω_intertype_14, Ω_intertype_15, Ω_intertype_16, Ω_intertype_17, Ω_intertype_18, Ω_intertype_19, Ω_intertype_20, Ω_intertype_21, Ω_intertype_22, Ω_intertype_23, Ω_intertype_24, Ω_intertype_25, Ω_intertype_26, Ω_intertype_27, Ω_intertype_28, Ω_intertype_29, Ω_intertype_30, Ω_intertype_31, Ω_intertype_32, Ω_intertype_33, Ω_intertype_34, Ω_intertype_35, Ω_intertype_36, Ω_intertype_37, Ω_intertype_38, Ω_intertype_39, Ω_intertype_40, Ω_intertype_40Ü, Ω_intertype_41, Ω_intertype_42, Ω_intertype_43, Ω_intertype_44, Ω_intertype_45, Ω_intertype_46;
       declarations = {
         'empty': {
           role: 'qualifier'
@@ -2916,46 +3036,118 @@
       };
       types = new Intertype(declarations);
       ({isa, validate} = types);
-      eq('^intertype-t150^', T, isa.empty.list([]), true);
-      eq('^intertype-t151^', T, isa.empty.list(['A']), false);
-      eq('^intertype-t152^', T, isa.empty.list(4), false);
-      eq('^intertype-t153^', T, isa.nonempty.list([]), false);
-      eq('^intertype-t154^', T, isa.nonempty.list(['A']), true);
-      eq('^intertype-t155^', T, isa.nonempty.list(4), false);
-      eq('^intertype-t156^', T, isa.empty.text(''), true);
-      eq('^intertype-t157^', T, isa.empty.text('A'), false);
-      eq('^intertype-t158^', T, isa.empty.text(4), false);
-      eq('^intertype-t159^', T, isa.nonempty.text(''), false);
-      eq('^intertype-t160^', T, isa.nonempty.text('A'), true);
-      eq('^intertype-t161^', T, isa.nonempty.text(4), false);
+      eq2(T, (Ω_intertype_14 = function() {
+        return isa.empty.list([]);
+      }), true);
+      eq2(T, (Ω_intertype_15 = function() {
+        return isa.empty.list(['A']);
+      }), false);
+      eq2(T, (Ω_intertype_16 = function() {
+        return isa.empty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_17 = function() {
+        return isa.nonempty.list([]);
+      }), false);
+      eq2(T, (Ω_intertype_18 = function() {
+        return isa.nonempty.list(['A']);
+      }), true);
+      eq2(T, (Ω_intertype_19 = function() {
+        return isa.nonempty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_20 = function() {
+        return isa.empty.text('');
+      }), true);
+      eq2(T, (Ω_intertype_21 = function() {
+        return isa.empty.text('A');
+      }), false);
+      eq2(T, (Ω_intertype_22 = function() {
+        return isa.empty.text(4);
+      }), false);
+      eq2(T, (Ω_intertype_23 = function() {
+        return isa.nonempty.text('');
+      }), false);
+      eq2(T, (Ω_intertype_24 = function() {
+        return isa.nonempty.text('A');
+      }), true);
+      eq2(T, (Ω_intertype_25 = function() {
+        return isa.nonempty.text(4);
+      }), false);
       //.......................................................................................................
-      eq('^intertype-t162^', T, isa.empty([]), true);
-      eq('^intertype-t163^', T, isa.empty(''), true);
-      eq('^intertype-t164^', T, isa.empty(new Set()), true);
-      eq('^intertype-t165^', T, isa.empty([1]), false);
-      eq('^intertype-t166^', T, isa.empty('A'), false);
-      eq('^intertype-t167^', T, isa.empty(new Set('abc')), false);
+      eq2(T, (Ω_intertype_26 = function() {
+        return isa.empty([]);
+      }), true);
+      eq2(T, (Ω_intertype_27 = function() {
+        return isa.empty('');
+      }), true);
+      eq2(T, (Ω_intertype_28 = function() {
+        return isa.empty(new Set());
+      }), true);
+      eq2(T, (Ω_intertype_29 = function() {
+        return isa.empty([1]);
+      }), false);
+      eq2(T, (Ω_intertype_30 = function() {
+        return isa.empty('A');
+      }), false);
+      eq2(T, (Ω_intertype_31 = function() {
+        return isa.empty(new Set('abc'));
+      }), false);
       //.......................................................................................................
-      eq('^intertype-t162^', T, validate.empty([]), []);
-      eq('^intertype-t163^', T, validate.empty(''), '');
-      eq('^intertype-t164^', T, validate.empty(new Set()), new Set());
-      throws(T, /expected a empty, got a list/, function() {
+      eq2(T, (Ω_intertype_32 = function() {
+        return validate.empty([]);
+      }), []);
+      eq2(T, (Ω_intertype_33 = function() {
+        return validate.empty('');
+      }), '');
+      eq2(T, (Ω_intertype_34 = function() {
+        return validate.empty(new Set());
+      }), new Set());
+      // throws T, /expected a empty, got a list/, -> ( validate.empty [ 1, ]              )
+      // throws T, /expected a empty, got a text/, -> ( validate.empty 'A'                 )
+      // throws T, /expected a empty, got a set/,  -> ( validate.empty new Set 'abc'       )
+      throws2(T, (Ω_intertype_35 = function() {
         return validate.empty([1]);
-      });
-      throws(T, /expected a empty, got a text/, function() {
+      }), /expected a empty, got a list/);
+      throws2(T, (Ω_intertype_36 = function() {
         return validate.empty('A');
-      });
-      throws(T, /expected a empty, got a set/, function() {
+      }), /expected a empty, got a text/);
+      throws2(T, (Ω_intertype_37 = function() {
         return validate.empty(new Set('abc'));
-      });
+      }), /whatever/);
+      throws2(T, (Ω_intertype_40Ü = function() {
+        return validate.empty(new Set('abc'));
+      }), /expected a empty, got a set/);
+      throws2(T, (Ω_intertype_38 = function() {
+        return validate.empty(new Set('abc'));
+      }), 23453);
+      throws2(T, (Ω_intertype_40Ü = function() {
+        return validate.empty(new Set('abc'));
+      }), /expected a empty, got a set/);
+      throws2(T, (Ω_intertype_39 = function() {
+        return validate.empty(new Set('abc'));
+      }));
+      throws2(T, (Ω_intertype_40 = function() {
+        return validate.empty(new Set('abc'));
+      }), /expected a empty, got a set/);
       return null;
       //.......................................................................................................
-      eq('^intertype-t162^', T, isa.opttional.empty([]), true);
-      eq('^intertype-t163^', T, isa.opttional.empty(''), true);
-      eq('^intertype-t164^', T, isa.opttional.empty(new Set()), true);
-      eq('^intertype-t165^', T, isa.opttional.empty([1]), false);
-      eq('^intertype-t166^', T, isa.opttional.empty('A'), false);
-      return eq('^intertype-t167^', T, isa.opttional.empty(new Set('abc')), false);
+      eq2(T, (Ω_intertype_41 = function() {
+        return isa.opttional.empty([]);
+      }), true);
+      eq2(T, (Ω_intertype_42 = function() {
+        return isa.opttional.empty('');
+      }), true);
+      eq2(T, (Ω_intertype_43 = function() {
+        return isa.opttional.empty(new Set());
+      }), true);
+      eq2(T, (Ω_intertype_44 = function() {
+        return isa.opttional.empty([1]);
+      }), false);
+      eq2(T, (Ω_intertype_45 = function() {
+        return isa.opttional.empty('A');
+      }), false);
+      return eq2(T, (Ω_intertype_46 = function() {
+        return isa.opttional.empty(new Set('abc'));
+      }), false);
     })();
     return typeof done === "function" ? done() : void 0;
   };
@@ -3342,7 +3534,7 @@
 
   //===========================================================================================================
   if (module === require.main) {
-    await (async() => {
+    await (() => {
       // @basic_functionality_using_types_object()
       // test @basic_functionality_using_types_object
       // @allow_declaration_objects()
@@ -3392,10 +3584,11 @@
       // @interface()
       // test @interface
       // @can_use_qualifiers()
-      // test @can_use_qualifiers
-      return (await test(this));
+      return test(this.can_use_qualifiers);
     })();
   }
+
+  // await test @
 
 }).call(this);
 
