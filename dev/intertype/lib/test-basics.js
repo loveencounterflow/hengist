@@ -3122,6 +3122,9 @@
       throws2(T, (Ω_intertype_40Ü = function() {
         return validate.empty(new Set('abc'));
       }), /expected a empty, got a set/);
+      throws2(T, (Ω_intertype_40Ü = function() {
+        return validate.empty(new Set());
+      }), /expected a empty, got a set/);
       throws2(T, (Ω_intertype_39 = function() {
         return validate.empty(new Set('abc'));
       }));
