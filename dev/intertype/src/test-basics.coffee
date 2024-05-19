@@ -23,6 +23,9 @@ _equals                   = require '../../../apps/guy-test/node_modules/interty
 # equals                    = require '/home/flow/jzr/intertype-legacy/deps/jkroso-equals.js'
 # equals                    = require '/home/flow/jzr/hengist/dev/intertype-2024-04-15/src/basics.test.coffee'
 # equals                    = require ( require 'util' ).isDeepStrictEqual
+test_mode                 = 'throw_failures'
+test_mode                 = 'throw_errors'
+test_mode                 = 'failsafe'
 
 #===========================================================================================================
 # IMPLEMENT SET EQUALITY
@@ -34,14 +37,14 @@ _set_contains = ( set, value ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 equals = ( a, b ) ->
-  if TMP_types.isa.set a
-    return false unless TMP_types.isa.set b
-    return false unless a.size is b.size
-    for element from a
-      return false unless _set_contains b, element
-    return true
-  else
-    return _equals a, b
+  switch true
+    when TMP_types.isa.set a
+      return false unless TMP_types.isa.set b
+      return false unless a.size is b.size
+      for element from a
+        return false unless _set_contains b, element
+      return true
+  return _equals a, b
 
 #-----------------------------------------------------------------------------------------------------------
 test_set_equality_by_value = ->
@@ -158,6 +161,48 @@ throws = ( T, matcher, f ) ->
   #.........................................................................................................
   return null
 
+#-----------------------------------------------------------------------------------------------------------
+_match_error = ( error, matcher ) ->
+  switch matcher_type = TMP_types.type_of matcher
+    when 'text'
+      return error.message is matcher
+    when 'regex'
+      matcher.lastIndex = 0
+      return matcher.test error.message
+  return matcher_type
+
+#-----------------------------------------------------------------------------------------------------------
+throws2 = ( T, f, matcher ) ->
+  throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
+  error = null
+  #.........................................................................................................
+  try ( urge "^#{ref}^ `throws()` result of call:", f() ) catch error
+    unless matcher?
+      help "^#{ref} ◀ throw2@1^ error        ", reverse error.message
+      T?.ok true
+      return null
+    #.......................................................................................................
+    switch matcher_type = _match_error error, matcher
+      when true
+        help "^#{ref} ◀ throw2@2^ OK           ", reverse error.message
+        T?.ok true
+      when false
+        urge "^#{ref} ◀ throw2@3^ error        ", reverse error.message
+        warn "^#{ref} ◀ throw2@4^ doesn't match", reverse rpr matcher
+        T?.fail "^#{ref} ◀ throw2@5^ error #{rpr error.message} doesn't match #{rpr matcher}"
+      else
+        message = "expected a regex or a text, got a #{matcher_type}"
+        warn "^#{ref} ◀ throw2@6^", reverse message
+        T?.fail "^#{ref} ◀ throw2@7^ #{message}"
+  #.........................................................................................................
+  unless error?
+    message = "`throws()`: expected an error but none was thrown"
+    warn "^#{ref} ◀ throw2@8^", reverse message
+    T?.fail "^#{ref} ◀ throw2@9^ #{message}"
+  #.........................................................................................................
+  return null
+
+
 #===========================================================================================================
 eq = ( ref, T, result, matcher ) ->
   ref = ref.padEnd 15
@@ -165,11 +210,22 @@ eq = ( ref, T, result, matcher ) ->
     help ref, "EQ OK"
     T?.ok true
   else
-    warn ref, "not equal: "
-    warn ref, "result:    ", rpr result
-    warn ref, "matcher:   ", rpr matcher
+    warn ref, ( reverse ' neq ' ), "result:     ", ( reverse ' ' + ( rpr result   ) + ' ' )
+    warn ref, ( reverse ' neq ' ), "matcher:    ", ( reverse ' ' + ( rpr matcher  ) + ' ' )
     T?.ok false
   return null
+
+#-----------------------------------------------------------------------------------------------------------
+eq2 = ( T, f, matcher ) ->
+  throw new Error "^992-1^ test method should be named, got #{rpr f}" if ( ref = f.name ) is ''
+  try ( result = f() ) catch error
+    message = "`eq2()`: ^#{ref}^ expected a result but got an an error: #{error.message}"
+    warn '^992-12^', reverse message
+    T?.fail "^992-13^ #{message}"
+    debug '^25235234^', { test_mode}
+    if test_mode is 'throw_errors'
+      throw new Error message
+  return eq ref, T, result, matcher
 
 #===========================================================================================================
 try_and_show = ( T, f ) ->
@@ -1434,20 +1490,20 @@ safeguard = ( T, f ) ->
       'nonempty.set':     ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
     types   = new Intertype declarations
     { isa } = types
-    eq '^intertype-t137^', T, ( isa.empty.list    []          ), true
-    eq '^intertype-t138^', T, ( isa.empty.list    [ 'A', ]    ), false
-    eq '^intertype-t139^', T, ( isa.empty.list    4           ), false
-    eq '^intertype-t140^', T, ( isa.nonempty.list []          ), false
-    eq '^intertype-t141^', T, ( isa.nonempty.list [ 'A', ]    ), true
-    eq '^intertype-t142^', T, ( isa.nonempty.list 4           ), false
-    eq '^intertype-t143^', T, ( isa.empty.text    ''          ), true
-    eq '^intertype-t144^', T, ( isa.empty.text    'A'         ), false
-    eq '^intertype-t145^', T, ( isa.empty.text    4           ), false
-    eq '^intertype-t146^', T, ( isa.nonempty.text ''          ), false
-    eq '^intertype-t147^', T, ( isa.nonempty.text 'A'         ), true
-    eq '^intertype-t148^', T, ( isa.nonempty.text 4           ), false
+    eq2 T, ( Ω_intertype_1 = -> isa.empty.list    []          ), true
+    eq2 T, ( Ω_intertype_2 = -> isa.empty.list    [ 'A', ]    ), false
+    eq2 T, ( Ω_intertype_3 = -> isa.empty.list    4           ), false
+    eq2 T, ( Ω_intertype_4 = -> isa.nonempty.list []          ), false
+    eq2 T, ( Ω_intertype_5 = -> isa.nonempty.list [ 'A', ]    ), true
+    eq2 T, ( Ω_intertype_6 = -> isa.nonempty.list 4           ), false
+    eq2 T, ( Ω_intertype_7 = -> isa.empty.text    ''          ), true
+    eq2 T, ( Ω_intertype_8 = -> isa.empty.text    'A'         ), false
+    eq2 T, ( Ω_intertype_9 = -> isa.empty.text    4           ), false
+    eq2 T, ( Ω_intertype_10 = -> isa.nonempty.text ''          ), false
+    eq2 T, ( Ω_intertype_11 = -> isa.nonempty.text 'A'         ), true
+    eq2 T, ( Ω_intertype_12 = -> isa.nonempty.text 4           ), false
     ### this doesn't make a terrible lot of sense: ###
-    eq '^intertype-t149^', T, ( isa.empty { list: [], text: '', set: new Set() } ), false
+    eq2 T, ( Ω_intertype_13 = -> isa.empty { list: [], text: '', set: new Set() } ), false
     return null
   #.........................................................................................................
   do =>
@@ -1463,40 +1519,48 @@ safeguard = ( T, f ) ->
     types         = new Intertype declarations
     { isa
       validate  } = types
-    eq '^intertype-t150^', T, ( isa.empty.list    []          ), true
-    eq '^intertype-t151^', T, ( isa.empty.list    [ 'A', ]    ), false
-    eq '^intertype-t152^', T, ( isa.empty.list    4           ), false
-    eq '^intertype-t153^', T, ( isa.nonempty.list []          ), false
-    eq '^intertype-t154^', T, ( isa.nonempty.list [ 'A', ]    ), true
-    eq '^intertype-t155^', T, ( isa.nonempty.list 4           ), false
-    eq '^intertype-t156^', T, ( isa.empty.text    ''          ), true
-    eq '^intertype-t157^', T, ( isa.empty.text    'A'         ), false
-    eq '^intertype-t158^', T, ( isa.empty.text    4           ), false
-    eq '^intertype-t159^', T, ( isa.nonempty.text ''          ), false
-    eq '^intertype-t160^', T, ( isa.nonempty.text 'A'         ), true
-    eq '^intertype-t161^', T, ( isa.nonempty.text 4           ), false
+    eq2 T, ( Ω_intertype_14 = -> isa.empty.list    []          ), true
+    eq2 T, ( Ω_intertype_15 = -> isa.empty.list    [ 'A', ]    ), false
+    eq2 T, ( Ω_intertype_16 = -> isa.empty.list    4           ), false
+    eq2 T, ( Ω_intertype_17 = -> isa.nonempty.list []          ), false
+    eq2 T, ( Ω_intertype_18 = -> isa.nonempty.list [ 'A', ]    ), true
+    eq2 T, ( Ω_intertype_19 = -> isa.nonempty.list 4           ), false
+    eq2 T, ( Ω_intertype_20 = -> isa.empty.text    ''          ), true
+    eq2 T, ( Ω_intertype_21 = -> isa.empty.text    'A'         ), false
+    eq2 T, ( Ω_intertype_22 = -> isa.empty.text    4           ), false
+    eq2 T, ( Ω_intertype_23 = -> isa.nonempty.text ''          ), false
+    eq2 T, ( Ω_intertype_24 = -> isa.nonempty.text 'A'         ), true
+    eq2 T, ( Ω_intertype_25 = -> isa.nonempty.text 4           ), false
     #.......................................................................................................
-    eq '^intertype-t162^', T, ( isa.empty []                  ), true
-    eq '^intertype-t163^', T, ( isa.empty ''                  ), true
-    eq '^intertype-t164^', T, ( isa.empty new Set()           ), true
-    eq '^intertype-t165^', T, ( isa.empty [ 1, ]              ), false
-    eq '^intertype-t166^', T, ( isa.empty 'A'                 ), false
-    eq '^intertype-t167^', T, ( isa.empty new Set 'abc'       ), false
+    eq2 T, ( Ω_intertype_26 = -> isa.empty []                  ), true
+    eq2 T, ( Ω_intertype_27 = -> isa.empty ''                  ), true
+    eq2 T, ( Ω_intertype_28 = -> isa.empty new Set()           ), true
+    eq2 T, ( Ω_intertype_29 = -> isa.empty [ 1, ]              ), false
+    eq2 T, ( Ω_intertype_30 = -> isa.empty 'A'                 ), false
+    eq2 T, ( Ω_intertype_31 = -> isa.empty new Set 'abc'       ), false
     #.......................................................................................................
-    eq '^intertype-t162^', T, ( validate.empty []                  ), []
-    eq '^intertype-t163^', T, ( validate.empty ''                  ), ''
-    eq '^intertype-t164^', T, ( validate.empty new Set()           ), new Set()
-    throws T, /expected a empty, got a list/, -> ( validate.empty [ 1, ]              )
-    throws T, /expected a empty, got a text/, -> ( validate.empty 'A'                 )
-    throws T, /expected a empty, got a set/,  -> ( validate.empty new Set 'abc'       )
+    eq2 T, ( Ω_intertype_32 = -> validate.empty []                  ), []
+    eq2 T, ( Ω_intertype_33 = -> validate.empty ''                  ), ''
+    eq2 T, ( Ω_intertype_34 = -> validate.empty new Set()           ), new Set()
+    # throws T, /expected a empty, got a list/, -> ( validate.empty [ 1, ]              )
+    # throws T, /expected a empty, got a text/, -> ( validate.empty 'A'                 )
+    # throws T, /expected a empty, got a set/,  -> ( validate.empty new Set 'abc'       )
+    throws2 T, ( Ω_intertype_35 = -> validate.empty [ 1, ]              ), /expected a empty, got a list/
+    throws2 T, ( Ω_intertype_36 = -> validate.empty 'A'                 ), /expected a empty, got a text/
+    throws2 T, ( Ω_intertype_37 = -> validate.empty new Set 'abc'       ), /whatever/
+    throws2 T, ( Ω_intertype_40Ü = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
+    throws2 T, ( Ω_intertype_38 = -> validate.empty new Set 'abc'       ), 23453
+    throws2 T, ( Ω_intertype_40Ü = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
+    throws2 T, ( Ω_intertype_39 = -> validate.empty new Set 'abc'       )
+    throws2 T, ( Ω_intertype_40 = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
     return null
     #.......................................................................................................
-    eq '^intertype-t162^', T, ( isa.opttional.empty []                  ), true
-    eq '^intertype-t163^', T, ( isa.opttional.empty ''                  ), true
-    eq '^intertype-t164^', T, ( isa.opttional.empty new Set()           ), true
-    eq '^intertype-t165^', T, ( isa.opttional.empty [ 1, ]              ), false
-    eq '^intertype-t166^', T, ( isa.opttional.empty 'A'                 ), false
-    eq '^intertype-t167^', T, ( isa.opttional.empty new Set 'abc'       ), false
+    eq2 T, ( Ω_intertype_41 = -> isa.opttional.empty []                  ), true
+    eq2 T, ( Ω_intertype_42 = -> isa.opttional.empty ''                  ), true
+    eq2 T, ( Ω_intertype_43 = -> isa.opttional.empty new Set()           ), true
+    eq2 T, ( Ω_intertype_44 = -> isa.opttional.empty [ 1, ]              ), false
+    eq2 T, ( Ω_intertype_45 = -> isa.opttional.empty 'A'                 ), false
+    eq2 T, ( Ω_intertype_46 = -> isa.opttional.empty new Set 'abc'       ), false
   #.........................................................................................................
   done?()
 
@@ -1762,7 +1826,7 @@ if module is require.main then await do =>
   # @interface()
   # test @interface
   # @can_use_qualifiers()
-  # test @can_use_qualifiers
-  await test @
+  test @can_use_qualifiers
+  # await test @
 
 
