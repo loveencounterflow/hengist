@@ -1551,6 +1551,7 @@ safeguard = ( T, f ) ->
     throws2 T, ( Ω_intertype_40Ü = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
     throws2 T, ( Ω_intertype_38 = -> validate.empty new Set 'abc'       ), 23453
     throws2 T, ( Ω_intertype_40Ü = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
+    throws2 T, ( Ω_intertype_40Ü = -> validate.empty new Set()       ), /expected a empty, got a set/
     throws2 T, ( Ω_intertype_39 = -> validate.empty new Set 'abc'       )
     throws2 T, ( Ω_intertype_40 = -> validate.empty new Set 'abc'       ), /expected a empty, got a set/
     return null
