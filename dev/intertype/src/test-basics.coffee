@@ -115,6 +115,9 @@ sample_declarations =
   unary:                  ( x ) -> x? and ( ( x.length is 1 ) or ( x.size is 1 ) )
   binary:                 ( x ) -> x? and ( ( x.length is 2 ) or ( x.size is 2 ) )
   trinary:                ( x ) -> x? and ( ( x.length is 3 ) or ( x.size is 3 ) )
+  object:                 ( x ) -> x? and ( typeof x is 'object' ) and ( ( Object::toString.call x ) is '[object Object]' )
+  set:                    ( x ) -> x instanceof Set
+  list:                   ( x ) -> Array.isArray x
 
 
 #===========================================================================================================
@@ -1423,7 +1426,7 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_qualifiers = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
+  { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
     declarations =
@@ -1435,7 +1438,7 @@ safeguard = ( T, f ) ->
       'nonempty.list':    ( x ) -> ( @isa.list  x ) and ( x.length  >   0 )
       'nonempty.text':    ( x ) -> ( @isa.text  x ) and ( x.length  >   0 )
       'nonempty.set':     ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
-    types   = new Intertype declarations
+    types   = new Intertype_minimal sample_declarations, declarations
     { isa } = types
     eq2 T, ( Ω_intertype_0445 = -> isa.empty.list    []          ), true
     eq2 T, ( Ω_intertype_0446 = -> isa.empty.list    [ 'A', ]    ), false
@@ -1463,7 +1466,7 @@ safeguard = ( T, f ) ->
       'nonempty.list':    ( x ) -> ( @isa.list  x ) and ( x.length  >   0 )
       'nonempty.text':    ( x ) -> ( @isa.text  x ) and ( x.length  >   0 )
       'nonempty.set':     ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
-    types         = new Intertype declarations
+    types         = new Intertype_minimal sample_declarations, declarations
     { isa
       validate  } = types
     eq2 T, ( Ω_intertype_0458 = -> isa.empty.list    []          ), true
@@ -1498,7 +1501,7 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @can_use_optional_with_qualifiers = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
+  { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
     declarations =
@@ -1510,7 +1513,7 @@ safeguard = ( T, f ) ->
       'nonempty.list':    ( x ) -> ( @isa.list  x ) and ( x.length  >   0 )
       'nonempty.text':    ( x ) -> ( @isa.text  x ) and ( x.length  >   0 )
       'nonempty.set':     ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
-    types         = new Intertype declarations
+    types         = new Intertype_minimal sample_declarations, declarations
     { isa
       validate  } = types
     eq2 T, ( Ω_intertype_0482 = -> isa.optional.empty.list    []          ), true
@@ -1559,7 +1562,7 @@ safeguard = ( T, f ) ->
 
 #-----------------------------------------------------------------------------------------------------------
 @use_fields_to_declare_qualifiers = ( T, done ) ->
-  { Intertype } = require '../../../apps/intertype'
+  { Intertype_minimal } = require '../../../apps/intertype'
   #.........................................................................................................
   do =>
     declarations =
@@ -1576,7 +1579,7 @@ safeguard = ( T, f ) ->
           text:     ( x ) -> ( @isa.text  x ) and ( x.length  >   0 )
           set:      ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
     #.......................................................................................................
-    types         = new Intertype declarations
+    types         = new Intertype_minimal sample_declarations, declarations
     { isa
       validate  } = types
     #.......................................................................................................
@@ -1661,6 +1664,48 @@ safeguard = ( T, f ) ->
     eq2 T, ( Ω_intertype_0590 = -> validate.optional.empty.list  null           ), null
     eq2 T, ( Ω_intertype_0591 = -> validate.optional.empty.text  null           ), null
     eq2 T, ( Ω_intertype_0592 = -> validate.optional.empty.set   null           ), null
+    return null
+  #.........................................................................................................
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@builtin_qualifiers = ( T, done ) ->
+  { Intertype } = require '../../../apps/intertype'
+  #.........................................................................................................
+  do =>
+    types   = new Intertype()
+    { isa
+      validate
+      type_of   } = types
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0445 = -> isa.empty.list    []                             ), true
+    eq2 T, ( Ω_intertype_0446 = -> isa.empty.list    [ 'A', ]                       ), false
+    eq2 T, ( Ω_intertype_0447 = -> isa.empty.list    4                              ), false
+    eq2 T, ( Ω_intertype_0448 = -> isa.nonempty.list []                             ), false
+    eq2 T, ( Ω_intertype_0449 = -> isa.nonempty.list [ 'A', ]                       ), true
+    eq2 T, ( Ω_intertype_0450 = -> isa.nonempty.list 4                              ), false
+    eq2 T, ( Ω_intertype_0451 = -> isa.empty.text    ''                             ), true
+    eq2 T, ( Ω_intertype_0452 = -> isa.empty.text    'A'                            ), false
+    eq2 T, ( Ω_intertype_0453 = -> isa.empty.text    4                              ), false
+    eq2 T, ( Ω_intertype_0454 = -> isa.nonempty.text ''                             ), false
+    eq2 T, ( Ω_intertype_0455 = -> isa.nonempty.text 'A'                            ), true
+    eq2 T, ( Ω_intertype_0456 = -> isa.nonempty.text 4                              ), false
+    eq2 T, ( Ω_intertype_0457 = -> isa.empty { list: [], text: '', set: new Set() } ), false
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0470 = -> isa.empty []                                     ), true
+    eq2 T, ( Ω_intertype_0471 = -> isa.empty ''                                     ), true
+    eq2 T, ( Ω_intertype_0472 = -> isa.empty new Set()                              ), true
+    eq2 T, ( Ω_intertype_0472 = -> isa.empty /d/                                    ), false
+    eq2 T, ( Ω_intertype_0473 = -> isa.empty [ 1, ]                                 ), false
+    eq2 T, ( Ω_intertype_0474 = -> isa.empty 'A'                                    ), false
+    eq2 T, ( Ω_intertype_0475 = -> isa.empty new Set 'abc'                          ), false
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0476 = -> validate.empty []                                ), []
+    eq2 T, ( Ω_intertype_0477 = -> validate.empty ''                                ), ''
+    eq2 T, ( Ω_intertype_0478 = -> validate.empty new Set()                         ), new Set()
+    throws2 T, ( Ω_intertype_0479 = -> validate.empty [ 1, ]                        ), /expected a empty, got a list/
+    throws2 T, ( Ω_intertype_0480 = -> validate.empty 'A'                           ), /expected a empty, got a text/
+    throws2 T, ( Ω_intertype_0481 = -> validate.empty new Set 'abc'                 ), /expected a empty, got a set/
     return null
   #.........................................................................................................
   done?()
