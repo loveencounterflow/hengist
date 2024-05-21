@@ -1575,28 +1575,51 @@ safeguard = ( T, f ) ->
           list:     ( x ) -> ( @isa.list  x ) and ( x.length  >   0 )
           text:     ( x ) -> ( @isa.text  x ) and ( x.length  >   0 )
           set:      ( x ) -> ( @isa.set   x ) and ( x.size    >   0 )
+    #.......................................................................................................
     types         = new Intertype declarations
     { isa
       validate  } = types
-    eq2 T, ( Ω_intertype_0519 = -> isa.optional.empty.list    []          ), true
-    eq2 T, ( Ω_intertype_0520 = -> isa.optional.empty.list    [ 'A', ]    ), false
-    eq2 T, ( Ω_intertype_0521 = -> isa.optional.empty.list    4           ), false
-    eq2 T, ( Ω_intertype_0522 = -> isa.optional.nonempty.list []          ), false
-    eq2 T, ( Ω_intertype_0523 = -> isa.optional.nonempty.list [ 'A', ]    ), true
-    eq2 T, ( Ω_intertype_0524 = -> isa.optional.nonempty.list 4           ), false
-    eq2 T, ( Ω_intertype_0525 = -> isa.optional.empty.text    ''          ), true
-    eq2 T, ( Ω_intertype_0526 = -> isa.optional.empty.text    'A'         ), false
-    eq2 T, ( Ω_intertype_0527 = -> isa.optional.empty.text    4           ), false
-    eq2 T, ( Ω_intertype_0528 = -> isa.optional.nonempty.text ''          ), false
-    eq2 T, ( Ω_intertype_0529 = -> isa.optional.nonempty.text 'A'         ), true
-    eq2 T, ( Ω_intertype_0530 = -> isa.optional.nonempty.text 4           ), false
     #.......................................................................................................
-    eq2 T, ( Ω_intertype_0531 = -> isa.optional.empty []                  ), true
-    eq2 T, ( Ω_intertype_0532 = -> isa.optional.empty ''                  ), true
-    eq2 T, ( Ω_intertype_0533 = -> isa.optional.empty new Set()           ), true
-    eq2 T, ( Ω_intertype_0534 = -> isa.optional.empty [ 1, ]              ), false
-    eq2 T, ( Ω_intertype_0535 = -> isa.optional.empty 'A'                 ), false
-    eq2 T, ( Ω_intertype_0536 = -> isa.optional.empty new Set 'abc'       ), false
+    eq2 T, ( Ω_intertype_0519 = -> isa.empty.list    []          ), true
+    eq2 T, ( Ω_intertype_0520 = -> isa.empty.list    [ 'A', ]    ), false
+    eq2 T, ( Ω_intertype_0521 = -> isa.empty.list    4           ), false
+    eq2 T, ( Ω_intertype_0522 = -> isa.nonempty.list []          ), false
+    eq2 T, ( Ω_intertype_0523 = -> isa.nonempty.list [ 'A', ]    ), true
+    eq2 T, ( Ω_intertype_0524 = -> isa.nonempty.list 4           ), false
+    eq2 T, ( Ω_intertype_0525 = -> isa.empty.text    ''          ), true
+    eq2 T, ( Ω_intertype_0526 = -> isa.empty.text    'A'         ), false
+    eq2 T, ( Ω_intertype_0527 = -> isa.empty.text    4           ), false
+    eq2 T, ( Ω_intertype_0528 = -> isa.nonempty.text ''          ), false
+    eq2 T, ( Ω_intertype_0529 = -> isa.nonempty.text 'A'         ), true
+    eq2 T, ( Ω_intertype_0530 = -> isa.nonempty.text 4           ), false
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0531 = -> isa.empty []                  ), true
+    eq2 T, ( Ω_intertype_0532 = -> isa.empty ''                  ), true
+    eq2 T, ( Ω_intertype_0533 = -> isa.empty new Set()           ), true
+    eq2 T, ( Ω_intertype_0534 = -> isa.empty [ 1, ]              ), false
+    eq2 T, ( Ω_intertype_0535 = -> isa.empty 'A'                 ), false
+    eq2 T, ( Ω_intertype_0536 = -> isa.empty new Set 'abc'       ), false
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0537 = -> validate.empty []                   ), []
+    eq2 T, ( Ω_intertype_0538 = -> validate.empty ''                   ), ''
+    eq2 T, ( Ω_intertype_0539 = -> validate.empty new Set()            ), new Set()
+    eq2 T, ( Ω_intertype_0540 = -> validate.empty.list  []             ), []
+    eq2 T, ( Ω_intertype_0541 = -> validate.empty.text  ''             ), ''
+    eq2 T, ( Ω_intertype_0542 = -> validate.empty.set   new Set()      ), new Set()
+    throws2 T, ( Ω_intertype_0543 = -> validate.empty [ 1, ]           ), /expected a empty, got a list/
+    throws2 T, ( Ω_intertype_0544 = -> validate.empty 'A'              ), /expected a empty, got a text/
+    throws2 T, ( Ω_intertype_0545 = -> validate.empty new Set 'abc'    ), /expected a empty, got a set/
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0546 = -> isa.empty []                        ), true
+    eq2 T, ( Ω_intertype_0547 = -> isa.empty ''                        ), true
+    eq2 T, ( Ω_intertype_0548 = -> isa.empty new Set()                 ), true
+    eq2 T, ( Ω_intertype_0549 = -> isa.empty [ 1, ]                    ), false
+    eq2 T, ( Ω_intertype_0550 = -> isa.empty 'A'                       ), false
+    eq2 T, ( Ω_intertype_0551 = -> isa.empty new Set 'abc'             ), false
+    throws2 T, ( Ω_intertype_0552 = -> validate.empty       null           ), /expected a empty, got a null/
+    throws2 T, ( Ω_intertype_0553 = -> validate.empty.list  null           ), /expected a empty.list, got a null/
+    throws2 T, ( Ω_intertype_0554 = -> validate.empty.text  null           ), /expected a empty.text, got a null/
+    throws2 T, ( Ω_intertype_0555 = -> validate.empty.set   null           ), /expected a empty.set, got a null/
     #.......................................................................................................
     eq2 T, ( Ω_intertype_0556 = -> isa.optional.empty.list    []          ), true
     eq2 T, ( Ω_intertype_0557 = -> isa.optional.empty.list    [ 'A', ]    ), false
