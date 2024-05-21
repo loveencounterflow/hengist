@@ -1598,26 +1598,46 @@ safeguard = ( T, f ) ->
     eq2 T, ( Ω_intertype_0535 = -> isa.optional.empty 'A'                 ), false
     eq2 T, ( Ω_intertype_0536 = -> isa.optional.empty new Set 'abc'       ), false
     #.......................................................................................................
-    eq2 T, ( Ω_intertype_0537 = -> validate.optional.empty []                   ), []
-    eq2 T, ( Ω_intertype_0538 = -> validate.optional.empty ''                   ), ''
-    eq2 T, ( Ω_intertype_0539 = -> validate.optional.empty new Set()            ), new Set()
-    eq2 T, ( Ω_intertype_0540 = -> validate.optional.empty.list  []             ), []
-    eq2 T, ( Ω_intertype_0541 = -> validate.optional.empty.text  ''             ), ''
-    eq2 T, ( Ω_intertype_0542 = -> validate.optional.empty.set   new Set()      ), new Set()
-    throws2 T, ( Ω_intertype_0543 = -> validate.optional.empty [ 1, ]           ), /expected an optional empty, got a list/
-    throws2 T, ( Ω_intertype_0544 = -> validate.optional.empty 'A'              ), /expected an optional empty, got a text/
-    throws2 T, ( Ω_intertype_0545 = -> validate.optional.empty new Set 'abc'    ), /expected an optional empty, got a set/
+    eq2 T, ( Ω_intertype_0556 = -> isa.optional.empty.list    []          ), true
+    eq2 T, ( Ω_intertype_0557 = -> isa.optional.empty.list    [ 'A', ]    ), false
+    eq2 T, ( Ω_intertype_0558 = -> isa.optional.empty.list    4           ), false
+    eq2 T, ( Ω_intertype_0559 = -> isa.optional.nonempty.list []          ), false
+    eq2 T, ( Ω_intertype_0560 = -> isa.optional.nonempty.list [ 'A', ]    ), true
+    eq2 T, ( Ω_intertype_0561 = -> isa.optional.nonempty.list 4           ), false
+    eq2 T, ( Ω_intertype_0562 = -> isa.optional.empty.text    ''          ), true
+    eq2 T, ( Ω_intertype_0563 = -> isa.optional.empty.text    'A'         ), false
+    eq2 T, ( Ω_intertype_0564 = -> isa.optional.empty.text    4           ), false
+    eq2 T, ( Ω_intertype_0565 = -> isa.optional.nonempty.text ''          ), false
+    eq2 T, ( Ω_intertype_0566 = -> isa.optional.nonempty.text 'A'         ), true
+    eq2 T, ( Ω_intertype_0567 = -> isa.optional.nonempty.text 4           ), false
     #.......................................................................................................
-    eq2 T, ( Ω_intertype_0546 = -> isa.optional.empty []                        ), true
-    eq2 T, ( Ω_intertype_0547 = -> isa.optional.empty ''                        ), true
-    eq2 T, ( Ω_intertype_0548 = -> isa.optional.empty new Set()                 ), true
-    eq2 T, ( Ω_intertype_0549 = -> isa.optional.empty [ 1, ]                    ), false
-    eq2 T, ( Ω_intertype_0550 = -> isa.optional.empty 'A'                       ), false
-    eq2 T, ( Ω_intertype_0551 = -> isa.optional.empty new Set 'abc'             ), false
-    eq2 T, ( Ω_intertype_0552 = -> validate.optional.empty       null           ), null
-    eq2 T, ( Ω_intertype_0553 = -> validate.optional.empty.list  null           ), null
-    eq2 T, ( Ω_intertype_0554 = -> validate.optional.empty.text  null           ), null
-    eq2 T, ( Ω_intertype_0555 = -> validate.optional.empty.set   null           ), null
+    eq2 T, ( Ω_intertype_0568 = -> isa.optional.empty []                  ), true
+    eq2 T, ( Ω_intertype_0569 = -> isa.optional.empty ''                  ), true
+    eq2 T, ( Ω_intertype_0570 = -> isa.optional.empty new Set()           ), true
+    eq2 T, ( Ω_intertype_0571 = -> isa.optional.empty [ 1, ]              ), false
+    eq2 T, ( Ω_intertype_0572 = -> isa.optional.empty 'A'                 ), false
+    eq2 T, ( Ω_intertype_0573 = -> isa.optional.empty new Set 'abc'       ), false
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0574 = -> validate.optional.empty []                   ), []
+    eq2 T, ( Ω_intertype_0575 = -> validate.optional.empty ''                   ), ''
+    eq2 T, ( Ω_intertype_0576 = -> validate.optional.empty new Set()            ), new Set()
+    eq2 T, ( Ω_intertype_0577 = -> validate.optional.empty.list  []             ), []
+    eq2 T, ( Ω_intertype_0578 = -> validate.optional.empty.text  ''             ), ''
+    eq2 T, ( Ω_intertype_0579 = -> validate.optional.empty.set   new Set()      ), new Set()
+    throws2 T, ( Ω_intertype_0580 = -> validate.optional.empty [ 1, ]           ), /expected an optional empty, got a list/
+    throws2 T, ( Ω_intertype_0581 = -> validate.optional.empty 'A'              ), /expected an optional empty, got a text/
+    throws2 T, ( Ω_intertype_0582 = -> validate.optional.empty new Set 'abc'    ), /expected an optional empty, got a set/
+    #.......................................................................................................
+    eq2 T, ( Ω_intertype_0583 = -> isa.optional.empty []                        ), true
+    eq2 T, ( Ω_intertype_0584 = -> isa.optional.empty ''                        ), true
+    eq2 T, ( Ω_intertype_0585 = -> isa.optional.empty new Set()                 ), true
+    eq2 T, ( Ω_intertype_0586 = -> isa.optional.empty [ 1, ]                    ), false
+    eq2 T, ( Ω_intertype_0587 = -> isa.optional.empty 'A'                       ), false
+    eq2 T, ( Ω_intertype_0588 = -> isa.optional.empty new Set 'abc'             ), false
+    eq2 T, ( Ω_intertype_0589 = -> validate.optional.empty       null           ), null
+    eq2 T, ( Ω_intertype_0590 = -> validate.optional.empty.list  null           ), null
+    eq2 T, ( Ω_intertype_0591 = -> validate.optional.empty.text  null           ), null
+    eq2 T, ( Ω_intertype_0592 = -> validate.optional.empty.set   null           ), null
     return null
   #.........................................................................................................
   done?()
@@ -1628,13 +1648,13 @@ safeguard = ( T, f ) ->
   #.........................................................................................................
   do =>
     ### TAINT observe the out-comment messages would perhaps make more sense as they are more specific ###
-    eq2 T, ( Ω_intertype_0556 = -> ( new Intertype() ).declare { foo: 'float', } ), null
-    eq2 T, ( Ω_intertype_0557 = -> ( new Intertype() ).declare { foo: 'text',  } ), null
+    eq2 T, ( Ω_intertype_0593 = -> ( new Intertype() ).declare { foo: 'float', } ), null
+    eq2 T, ( Ω_intertype_0594 = -> ( new Intertype() ).declare { foo: 'text',  } ), null
     # ( new Intertype() ).declare { foo: 'optional', }
-    throws2 T, ( Ω_intertype_0558 = -> ( new Intertype() ).declare { foo: 'optional', }        ), /illegal use of 'optional' in declaration of type 'foo'/
-    throws2 T, ( Ω_intertype_0559 = -> ( new Intertype() ).declare { foo: 'qqq', }             ), /unknown type 'qqq'/
-    throws2 T, ( Ω_intertype_0560 = -> ( new Intertype() ).declare { foo: 'optional.float', }  ), /illegal use of 'optional' in declaration of type 'foo'/
-    throws2 T, ( Ω_intertype_0561 = -> ( new Intertype() ).declare { foo: 'anything.float', }  ), /illegal use of basetype 'anything' in declaration of type 'foo'/
+    throws2 T, ( Ω_intertype_0595 = -> ( new Intertype() ).declare { foo: 'optional', }        ), /illegal use of 'optional' in declaration of type 'foo'/
+    throws2 T, ( Ω_intertype_0596 = -> ( new Intertype() ).declare { foo: 'qqq', }             ), /unknown type 'qqq'/
+    throws2 T, ( Ω_intertype_0597 = -> ( new Intertype() ).declare { foo: 'optional.float', }  ), /illegal use of 'optional' in declaration of type 'foo'/
+    throws2 T, ( Ω_intertype_0598 = -> ( new Intertype() ).declare { foo: 'anything.float', }  ), /illegal use of basetype 'anything' in declaration of type 'foo'/
     return null
   #.........................................................................................................
   done?()
@@ -1647,22 +1667,22 @@ safeguard = ( T, f ) ->
     { isa
       validate  } = new Intertype
         normalfloat: ( ( x ) -> ( @isa.float x ) and ( 0 <= x <= 1 ) )
-    eq2 T, ( Ω_intertype_0562 = -> isa.normalfloat                     0     ), true
-    eq2 T, ( Ω_intertype_0563 = -> isa.normalfloat                     null  ), false
-    eq2 T, ( Ω_intertype_0564 = -> isa.normalfloat                     -1    ), false
-    eq2 T, ( Ω_intertype_0565 = -> isa.normalfloat                     '?'   ), false
-    eq2 T, ( Ω_intertype_0566 = -> isa.optional.normalfloat            0     ), true
-    eq2 T, ( Ω_intertype_0567 = -> isa.optional.normalfloat            null  ), true
-    eq2 T, ( Ω_intertype_0568 = -> isa.optional.normalfloat            -1    ), false
-    eq2 T, ( Ω_intertype_0569 = -> isa.optional.normalfloat            '?'   ), false
-    eq2 T, ( Ω_intertype_0570 = -> validate.normalfloat                0     ), 0
-    eq2 T, ( Ω_intertype_0571 = -> validate.optional.normalfloat       0     ), 0
-    eq2 T, ( Ω_intertype_0572 = -> validate.optional.normalfloat       null  ), null
-    throws2 T, ( Ω_intertype_0573 = -> validate.normalfloat           null ), /expected a normalfloat, got a null/
-    throws2 T, ( Ω_intertype_0574 = -> validate.normalfloat           -1   ), /expected a normalfloat, got a float/
-    throws2 T, ( Ω_intertype_0575 = -> validate.normalfloat           '?'  ), /expected a normalfloat, got a text/
-    throws2 T, ( Ω_intertype_0576 = -> validate.optional.normalfloat  -1   ), /expected an optional normalfloat, got a float/
-    throws2 T, ( Ω_intertype_0577 = -> validate.optional.normalfloat  '?'  ), /expected an optional normalfloat, got a text/
+    eq2 T, ( Ω_intertype_0599 = -> isa.normalfloat                     0     ), true
+    eq2 T, ( Ω_intertype_0600 = -> isa.normalfloat                     null  ), false
+    eq2 T, ( Ω_intertype_0601 = -> isa.normalfloat                     -1    ), false
+    eq2 T, ( Ω_intertype_0602 = -> isa.normalfloat                     '?'   ), false
+    eq2 T, ( Ω_intertype_0603 = -> isa.optional.normalfloat            0     ), true
+    eq2 T, ( Ω_intertype_0604 = -> isa.optional.normalfloat            null  ), true
+    eq2 T, ( Ω_intertype_0605 = -> isa.optional.normalfloat            -1    ), false
+    eq2 T, ( Ω_intertype_0606 = -> isa.optional.normalfloat            '?'   ), false
+    eq2 T, ( Ω_intertype_0607 = -> validate.normalfloat                0     ), 0
+    eq2 T, ( Ω_intertype_0608 = -> validate.optional.normalfloat       0     ), 0
+    eq2 T, ( Ω_intertype_0609 = -> validate.optional.normalfloat       null  ), null
+    throws2 T, ( Ω_intertype_0610 = -> validate.normalfloat           null ), /expected a normalfloat, got a null/
+    throws2 T, ( Ω_intertype_0611 = -> validate.normalfloat           -1   ), /expected a normalfloat, got a float/
+    throws2 T, ( Ω_intertype_0612 = -> validate.normalfloat           '?'  ), /expected a normalfloat, got a text/
+    throws2 T, ( Ω_intertype_0613 = -> validate.optional.normalfloat  -1   ), /expected an optional normalfloat, got a float/
+    throws2 T, ( Ω_intertype_0614 = -> validate.optional.normalfloat  '?'  ), /expected an optional normalfloat, got a text/
     return null
   #.........................................................................................................
   do =>
@@ -1675,37 +1695,37 @@ safeguard = ( T, f ) ->
       'foo.bar.baz':  'float'
     { isa
       validate  } = types = new Intertype my_types
-    eq2 T, ( Ω_intertype_0578 = -> isa.quantity            { q: 1, u: 'm', }   ), true
-    eq2 T, ( Ω_intertype_0579 = -> isa.quantity            null                ), false
-    eq2 T, ( Ω_intertype_0580 = -> isa.optional.quantity   { q: 2, u: 'm', }   ), true
-    eq2 T, ( Ω_intertype_0581 = -> isa.optional.quantity   null                ), true
-    eq2 T, ( Ω_intertype_0582 = -> validate.quantity               { q: 3, u: 'm', } ), { q: 3, u: 'm', }
-    eq2 T, ( Ω_intertype_0583 = -> validate.optional.quantity      { q: 4, u: 'm', } ), { q: 4, u: 'm', }
-    eq2 T, ( Ω_intertype_0584 = -> validate.optional.quantity.q    null  ), null
-    eq2 T, ( Ω_intertype_0585 = -> validate.optional.quantity.q    111   ), 111
-    eq2 T, ( Ω_intertype_0586 = -> isa.quantity                     null               ), false
-    eq2 T, ( Ω_intertype_0587 = -> isa.quantity                     -1                 ), false
-    eq2 T, ( Ω_intertype_0588 = -> isa.quantity                     '?'                ), false
-    eq2 T, ( Ω_intertype_0589 = -> isa.quantity.q                   '?'                ), false
-    eq2 T, ( Ω_intertype_0590 = -> isa.quantity.q                   3                  ), true
-    eq2 T, ( Ω_intertype_0591 = -> isa.optional.quantity            { q: 1, u: 'm', }  ), true
-    eq2 T, ( Ω_intertype_0592 = -> isa.optional.quantity            null               ), true
-    eq2 T, ( Ω_intertype_0593 = -> isa.optional.quantity            -1                 ), false
-    eq2 T, ( Ω_intertype_0594 = -> isa.optional.quantity            '?'                ), false
-    eq2 T, ( Ω_intertype_0595 = -> isa.optional.quantity.q          '?'                ), false
-    eq2 T, ( Ω_intertype_0596 = -> isa.optional.quantity.q          3                  ), true
-    eq2 T, ( Ω_intertype_0597 = -> validate.quantity                { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
-    eq2 T, ( Ω_intertype_0598 = -> validate.optional.quantity       { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
-    eq2 T, ( Ω_intertype_0599 = -> validate.optional.quantity       null               ), null
-    throws2 T, ( Ω_intertype_0600 = -> validate.quantity           { q: 5, }  ), /expected a quantity, got a object/ ### TAINT message should be more specific ###
-    throws2 T, ( Ω_intertype_0601 = -> validate.quantity            null      ), /expected a quantity, got a null/
-    throws2 T, ( Ω_intertype_0602 = -> validate.quantity            -1        ), /expected a quantity, got a float/
-    throws2 T, ( Ω_intertype_0603 = -> validate.quantity            '?'       ), /expected a quantity, got a text/
-    throws2 T, ( Ω_intertype_0604 = -> validate.quantity            { q: 1, } ), /expected a quantity, got a object/ ### TAINT message should be more specific ###
-    throws2 T, ( Ω_intertype_0605 = -> validate.optional.quantity   -1        ), /expected an optional quantity, got a float/
-    throws2 T, ( Ω_intertype_0606 = -> validate.optional.quantity   { q: 1, } ), /expected an optional quantity, got a object/ ### TAINT message should be more specific ###
-    throws2 T, ( Ω_intertype_0607 = -> validate.optional.quantity.q { q: 1, } ), /expected an optional quantity.q, got a object/
-    throws2 T, ( Ω_intertype_0608 = -> validate.optional.quantity.q 3, 4, 5   ), /method 'validate.optional.quantity.q' expects 1 arguments, got 3/
+    eq2 T, ( Ω_intertype_0615 = -> isa.quantity            { q: 1, u: 'm', }   ), true
+    eq2 T, ( Ω_intertype_0616 = -> isa.quantity            null                ), false
+    eq2 T, ( Ω_intertype_0617 = -> isa.optional.quantity   { q: 2, u: 'm', }   ), true
+    eq2 T, ( Ω_intertype_0618 = -> isa.optional.quantity   null                ), true
+    eq2 T, ( Ω_intertype_0619 = -> validate.quantity               { q: 3, u: 'm', } ), { q: 3, u: 'm', }
+    eq2 T, ( Ω_intertype_0620 = -> validate.optional.quantity      { q: 4, u: 'm', } ), { q: 4, u: 'm', }
+    eq2 T, ( Ω_intertype_0621 = -> validate.optional.quantity.q    null  ), null
+    eq2 T, ( Ω_intertype_0622 = -> validate.optional.quantity.q    111   ), 111
+    eq2 T, ( Ω_intertype_0623 = -> isa.quantity                     null               ), false
+    eq2 T, ( Ω_intertype_0624 = -> isa.quantity                     -1                 ), false
+    eq2 T, ( Ω_intertype_0625 = -> isa.quantity                     '?'                ), false
+    eq2 T, ( Ω_intertype_0626 = -> isa.quantity.q                   '?'                ), false
+    eq2 T, ( Ω_intertype_0627 = -> isa.quantity.q                   3                  ), true
+    eq2 T, ( Ω_intertype_0628 = -> isa.optional.quantity            { q: 1, u: 'm', }  ), true
+    eq2 T, ( Ω_intertype_0629 = -> isa.optional.quantity            null               ), true
+    eq2 T, ( Ω_intertype_0630 = -> isa.optional.quantity            -1                 ), false
+    eq2 T, ( Ω_intertype_0631 = -> isa.optional.quantity            '?'                ), false
+    eq2 T, ( Ω_intertype_0632 = -> isa.optional.quantity.q          '?'                ), false
+    eq2 T, ( Ω_intertype_0633 = -> isa.optional.quantity.q          3                  ), true
+    eq2 T, ( Ω_intertype_0634 = -> validate.quantity                { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
+    eq2 T, ( Ω_intertype_0635 = -> validate.optional.quantity       { q: 1, u: 'm', }  ), { q: 1, u: 'm', }
+    eq2 T, ( Ω_intertype_0636 = -> validate.optional.quantity       null               ), null
+    throws2 T, ( Ω_intertype_0637 = -> validate.quantity           { q: 5, }  ), /expected a quantity, got a object/ ### TAINT message should be more specific ###
+    throws2 T, ( Ω_intertype_0638 = -> validate.quantity            null      ), /expected a quantity, got a null/
+    throws2 T, ( Ω_intertype_0639 = -> validate.quantity            -1        ), /expected a quantity, got a float/
+    throws2 T, ( Ω_intertype_0640 = -> validate.quantity            '?'       ), /expected a quantity, got a text/
+    throws2 T, ( Ω_intertype_0641 = -> validate.quantity            { q: 1, } ), /expected a quantity, got a object/ ### TAINT message should be more specific ###
+    throws2 T, ( Ω_intertype_0642 = -> validate.optional.quantity   -1        ), /expected an optional quantity, got a float/
+    throws2 T, ( Ω_intertype_0643 = -> validate.optional.quantity   { q: 1, } ), /expected an optional quantity, got a object/ ### TAINT message should be more specific ###
+    throws2 T, ( Ω_intertype_0644 = -> validate.optional.quantity.q { q: 1, } ), /expected an optional quantity.q, got a object/
+    throws2 T, ( Ω_intertype_0645 = -> validate.optional.quantity.q 3, 4, 5   ), /method 'validate.optional.quantity.q' expects 1 arguments, got 3/
     return null
   #.........................................................................................................
   done?()
@@ -1716,11 +1736,11 @@ safeguard = ( T, f ) ->
   #.........................................................................................................
   do =>
     { declarations  } = new Intertype()
-    eq2 T, ( Ω_intertype_0609 = -> declarations.float.role     ), 'usertype'
-    eq2 T, ( Ω_intertype_0610 = -> declarations.null.role      ), 'basetype'
-    eq2 T, ( Ω_intertype_0611 = -> declarations.anything.role  ), 'basetype'
-    eq2 T, ( Ω_intertype_0612 = -> declarations.unknown.role   ), 'basetype'
-    eq2 T, ( Ω_intertype_0613 = -> declarations.optional.role  ), 'optional'
+    eq2 T, ( Ω_intertype_0646 = -> declarations.float.role     ), 'usertype'
+    eq2 T, ( Ω_intertype_0647 = -> declarations.null.role      ), 'basetype'
+    eq2 T, ( Ω_intertype_0648 = -> declarations.anything.role  ), 'basetype'
+    eq2 T, ( Ω_intertype_0649 = -> declarations.unknown.role   ), 'basetype'
+    eq2 T, ( Ω_intertype_0650 = -> declarations.optional.role  ), 'optional'
     # throws T, /expected a normalfloat, got a null/,             -> validate.normalfloat           null
     return null
   #.........................................................................................................
@@ -1749,37 +1769,37 @@ safeguard = ( T, f ) ->
     type_of           } = new Intertype_minimal()
   #.........................................................................................................
   do =>
-    eq2 T, ( Ω_intertype_0614 = -> type_of null              ), 'null'
-    eq2 T, ( Ω_intertype_0615 = -> type_of undefined         ), 'undefined'
-    eq2 T, ( Ω_intertype_0616 = -> type_of +Infinity         ), 'unknown'
-    eq2 T, ( Ω_intertype_0617 = -> type_of 4                 ), 'unknown'
+    eq2 T, ( Ω_intertype_0651 = -> type_of null              ), 'null'
+    eq2 T, ( Ω_intertype_0652 = -> type_of undefined         ), 'undefined'
+    eq2 T, ( Ω_intertype_0653 = -> type_of +Infinity         ), 'unknown'
+    eq2 T, ( Ω_intertype_0654 = -> type_of 4                 ), 'unknown'
     return null
   #.........................................................................................................
   do =>
-    eq2 T, ( Ω_intertype_0618 = -> isa.anything   1          ), true
-    eq2 T, ( Ω_intertype_0619 = -> isa.nothing    1          ), false
-    eq2 T, ( Ω_intertype_0620 = -> isa.something  1          ), true
-    eq2 T, ( Ω_intertype_0621 = -> isa.unknown    1          ), true
+    eq2 T, ( Ω_intertype_0655 = -> isa.anything   1          ), true
+    eq2 T, ( Ω_intertype_0656 = -> isa.nothing    1          ), false
+    eq2 T, ( Ω_intertype_0657 = -> isa.something  1          ), true
+    eq2 T, ( Ω_intertype_0658 = -> isa.unknown    1          ), true
     return null
   #.........................................................................................................
   do =>
-    eq2 T, ( Ω_intertype_0622 = -> isa.anything   null       ), true
-    eq2 T, ( Ω_intertype_0623 = -> isa.nothing    null       ), true
-    eq2 T, ( Ω_intertype_0624 = -> isa.something  null       ), false
-    eq2 T, ( Ω_intertype_0625 = -> isa.unknown    null       ), false
+    eq2 T, ( Ω_intertype_0659 = -> isa.anything   null       ), true
+    eq2 T, ( Ω_intertype_0660 = -> isa.nothing    null       ), true
+    eq2 T, ( Ω_intertype_0661 = -> isa.something  null       ), false
+    eq2 T, ( Ω_intertype_0662 = -> isa.unknown    null       ), false
     return null
   #.........................................................................................................
   do =>
-    eq2 T, ( Ω_intertype_0626 = -> isa.anything   undefined  ), true
-    eq2 T, ( Ω_intertype_0627 = -> isa.nothing    undefined  ), true
-    eq2 T, ( Ω_intertype_0628 = -> isa.something  undefined  ), false
-    eq2 T, ( Ω_intertype_0629 = -> isa.unknown    undefined  ), false
+    eq2 T, ( Ω_intertype_0663 = -> isa.anything   undefined  ), true
+    eq2 T, ( Ω_intertype_0664 = -> isa.nothing    undefined  ), true
+    eq2 T, ( Ω_intertype_0665 = -> isa.something  undefined  ), false
+    eq2 T, ( Ω_intertype_0666 = -> isa.unknown    undefined  ), false
     return null
   #.........................................................................................................
   do =>
-    throws2 T, ( Ω_intertype_0630 = -> isa.optional 1      ), /`optional` is not a legal type for `isa` methods/
-    throws2 T, ( Ω_intertype_0631 = -> validate.optional 1 ), /`optional` is not a legal type for `validate` methods/
-    throws2 T, ( Ω_intertype_0632 = -> create.optional 1   ), /`optional` is not a legal type for `create` methods/
+    throws2 T, ( Ω_intertype_0667 = -> isa.optional 1      ), /`optional` is not a legal type for `isa` methods/
+    throws2 T, ( Ω_intertype_0668 = -> validate.optional 1 ), /`optional` is not a legal type for `validate` methods/
+    throws2 T, ( Ω_intertype_0669 = -> create.optional 1   ), /`optional` is not a legal type for `create` methods/
     return null
   #.........................................................................................................
   do =>
