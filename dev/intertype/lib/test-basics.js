@@ -363,82 +363,82 @@
 
   //===========================================================================================================
   this.interface = function(T, done) {
-    var INTERTYPE, Ω_intertype_1000, Ω_intertype_1001, Ω_intertype_1002, Ω_intertype_1003, Ω_intertype_1004, Ω_intertype_1005, Ω_intertype_1006, Ω_intertype_1007, Ω_intertype_1008, Ω_intertype_1009, Ω_intertype_1010, Ω_intertype_1012, Ω_intertype_1014, Ω_intertype_1015, Ω_intertype_1016, Ω_intertype_1017, Ω_intertype_1018, Ω_intertype_1019, Ω_intertype_1020, Ω_intertype_1021, Ω_intertype_1022, Ω_intertype_1027, Ω_intertype_1028;
+    var INTERTYPE, Ω_intertype_0001, Ω_intertype_0002, Ω_intertype_0003, Ω_intertype_0004, Ω_intertype_0005, Ω_intertype_0006, Ω_intertype_0007, Ω_intertype_0008, Ω_intertype_0009, Ω_intertype_0010, Ω_intertype_0011, Ω_intertype_0013, Ω_intertype_0015, Ω_intertype_0016, Ω_intertype_0017, Ω_intertype_0018, Ω_intertype_0019, Ω_intertype_0020, Ω_intertype_0021, Ω_intertype_0022, Ω_intertype_0023, Ω_intertype_0028, Ω_intertype_0029;
     INTERTYPE = require('../../../apps/intertype');
-    eq2(T, (Ω_intertype_1000 = function() {
+    eq2(T, (Ω_intertype_0001 = function() {
       return TMP_types.isa.object(INTERTYPE.types);
     }), true);
-    eq2(T, (Ω_intertype_1001 = function() {
+    eq2(T, (Ω_intertype_0002 = function() {
       return TMP_types.isa.undefined(INTERTYPE.types.get_isa);
     }), true);
-    eq2(T, (Ω_intertype_1002 = function() {
+    eq2(T, (Ω_intertype_0003 = function() {
       return TMP_types.isa.undefined(INTERTYPE.types.get_isa_optional);
     }), true);
-    eq2(T, (Ω_intertype_1003 = function() {
+    eq2(T, (Ω_intertype_0004 = function() {
       return TMP_types.isa.undefined(INTERTYPE.types.get_validate);
     }), true);
-    eq2(T, (Ω_intertype_1004 = function() {
+    eq2(T, (Ω_intertype_0005 = function() {
       return TMP_types.isa.undefined(INTERTYPE.types.get_validate_optional);
     }), true);
-    eq2(T, (Ω_intertype_1005 = function() {
+    eq2(T, (Ω_intertype_0006 = function() {
       return TMP_types.isa.function(INTERTYPE.types._get_isa);
     }), true);
-    eq2(T, (Ω_intertype_1006 = function() {
+    eq2(T, (Ω_intertype_0007 = function() {
       return TMP_types.isa.function(INTERTYPE.types._get_isa_optional);
     }), true);
-    eq2(T, (Ω_intertype_1007 = function() {
+    eq2(T, (Ω_intertype_0008 = function() {
       return TMP_types.isa.function(INTERTYPE.types._get_validate);
     }), true);
-    eq2(T, (Ω_intertype_1008 = function() {
+    eq2(T, (Ω_intertype_0009 = function() {
       return TMP_types.isa.function(INTERTYPE.types._get_validate_optional);
     }), true);
-    eq2(T, (Ω_intertype_1009 = function() {
+    eq2(T, (Ω_intertype_0010 = function() {
       return TMP_types.isa.object(INTERTYPE.types);
     }), true);
-    eq2(T, (Ω_intertype_1010 = function() {
+    eq2(T, (Ω_intertype_0011 = function() {
       return TMP_types.isa.object(INTERTYPE.types.isa);
     }), true);
-    // eq2 T, ( Ω_intertype_1011 = -> TMP_types.isa.function  INTERTYPE.types.isa.optional                  ), true
-    eq2(T, (Ω_intertype_1012 = function() {
+    // eq2 T, ( Ω_intertype_0012 = -> TMP_types.isa.function  INTERTYPE.types.isa.optional                  ), true
+    eq2(T, (Ω_intertype_0013 = function() {
       return TMP_types.isa.object(INTERTYPE.types.validate);
     }), true);
-    // eq2 T, ( Ω_intertype_1013 = -> TMP_types.isa.function  INTERTYPE.types.validate.optional             ), true
-    eq2(T, (Ω_intertype_1014 = function() {
+    // eq2 T, ( Ω_intertype_0014 = -> TMP_types.isa.function  INTERTYPE.types.validate.optional             ), true
+    eq2(T, (Ω_intertype_0015 = function() {
       return TMP_types.isa.function(INTERTYPE.types.isa.boolean);
     }), true);
-    eq2(T, (Ω_intertype_1015 = function() {
+    eq2(T, (Ω_intertype_0016 = function() {
       return TMP_types.isa.function(INTERTYPE.types.isa.optional.boolean);
     }), true);
-    eq2(T, (Ω_intertype_1016 = function() {
+    eq2(T, (Ω_intertype_0017 = function() {
       return TMP_types.isa.function(INTERTYPE.types.validate.boolean);
     }), true);
-    eq2(T, (Ω_intertype_1017 = function() {
+    eq2(T, (Ω_intertype_0018 = function() {
       return TMP_types.isa.function(INTERTYPE.types.validate.optional.boolean);
     }), true);
-    eq2(T, (Ω_intertype_1018 = function() {
+    eq2(T, (Ω_intertype_0019 = function() {
       return TMP_types.isa.object(INTERTYPE.types.create);
     }), true);
-    eq2(T, (Ω_intertype_1019 = function() {
+    eq2(T, (Ω_intertype_0020 = function() {
       return TMP_types.isa.function(INTERTYPE.types.isa.text);
     }), true);
-    eq2(T, (Ω_intertype_1020 = function() {
+    eq2(T, (Ω_intertype_0021 = function() {
       return TMP_types.isa.function(INTERTYPE.types.create.text);
     }), true);
-    eq2(T, (Ω_intertype_1021 = function() {
+    eq2(T, (Ω_intertype_0022 = function() {
       return TMP_types.isa.object(INTERTYPE.types.declarations);
     }), true);
-    eq2(T, (Ω_intertype_1022 = function() {
+    eq2(T, (Ω_intertype_0023 = function() {
       return TMP_types.isa.object(INTERTYPE.types.declarations.text);
     }), true);
     //.........................................................................................................
-    // eq2 T, ( Ω_intertype_1023 = -> INTERTYPE.types.isa.name           ), 'isa'
-    // eq2 T, ( Ω_intertype_1024 = -> INTERTYPE.types.evaluate.name      ), 'evaluate'
-    // eq2 T, ( Ω_intertype_1025 = -> INTERTYPE.types.validate.name      ), 'validate'
-    // eq2 T, ( Ω_intertype_1026 = -> INTERTYPE.types.create.name        ), 'create'
-    eq2(T, (Ω_intertype_1027 = function() {
+    // eq2 T, ( Ω_intertype_0024 = -> INTERTYPE.types.isa.name           ), 'isa'
+    // eq2 T, ( Ω_intertype_0025 = -> INTERTYPE.types.evaluate.name      ), 'evaluate'
+    // eq2 T, ( Ω_intertype_0026 = -> INTERTYPE.types.validate.name      ), 'validate'
+    // eq2 T, ( Ω_intertype_0027 = -> INTERTYPE.types.create.name        ), 'create'
+    eq2(T, (Ω_intertype_0028 = function() {
       return INTERTYPE.types.declare.name;
     }), 'declare');
-    eq2(T, (Ω_intertype_1028 = function() {
+    eq2(T, (Ω_intertype_0029 = function() {
       return INTERTYPE.types.type_of.name;
     }), 'type_of');
     return typeof done === "function" ? done() : void 0;
@@ -446,50 +446,50 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_types_object = function(T, done) {
-    var INTERTYPE, types, Ω_intertype_1029, Ω_intertype_1030, Ω_intertype_1031, Ω_intertype_1032, Ω_intertype_1033, Ω_intertype_1034, Ω_intertype_1035, Ω_intertype_1036, Ω_intertype_1037, Ω_intertype_1038, Ω_intertype_1039, Ω_intertype_1040, Ω_intertype_1041, Ω_intertype_1042, Ω_intertype_1043, Ω_intertype_1044, Ω_intertype_1045, Ω_intertype_1046, Ω_intertype_1047, Ω_intertype_1048, Ω_intertype_1049, Ω_intertype_1050, Ω_intertype_1051, Ω_intertype_1052, Ω_intertype_1053, Ω_intertype_1054, Ω_intertype_1055, Ω_intertype_1056, Ω_intertype_1057, Ω_intertype_1058, Ω_intertype_1059, Ω_intertype_1060, Ω_intertype_1061, Ω_intertype_1062, Ω_intertype_1063, Ω_intertype_1064, Ω_intertype_1065, Ω_intertype_1066;
+    var INTERTYPE, types, Ω_intertype_0030, Ω_intertype_0031, Ω_intertype_0032, Ω_intertype_0033, Ω_intertype_0034, Ω_intertype_0035, Ω_intertype_0036, Ω_intertype_0037, Ω_intertype_0038, Ω_intertype_0039, Ω_intertype_0040, Ω_intertype_0041, Ω_intertype_0042, Ω_intertype_0043, Ω_intertype_0044, Ω_intertype_0045, Ω_intertype_0046, Ω_intertype_0047, Ω_intertype_0048, Ω_intertype_0049, Ω_intertype_0050, Ω_intertype_0051, Ω_intertype_0052, Ω_intertype_0053, Ω_intertype_0054, Ω_intertype_0055, Ω_intertype_0056, Ω_intertype_0057, Ω_intertype_0058, Ω_intertype_0059, Ω_intertype_0060, Ω_intertype_0061, Ω_intertype_0062, Ω_intertype_0063, Ω_intertype_0064, Ω_intertype_0065, Ω_intertype_0066, Ω_intertype_0067;
     INTERTYPE = require('../../../apps/intertype');
     types = new INTERTYPE.Intertype_minimal(sample_declarations);
-    eq2(T, (Ω_intertype_1029 = function() {
+    eq2(T, (Ω_intertype_0030 = function() {
       return types.isa.boolean(false);
     }), true);
-    eq2(T, (Ω_intertype_1030 = function() {
+    eq2(T, (Ω_intertype_0031 = function() {
       return types.isa.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1031 = function() {
+    eq2(T, (Ω_intertype_0032 = function() {
       return types.isa.boolean(null);
     }), false);
-    eq2(T, (Ω_intertype_1032 = function() {
+    eq2(T, (Ω_intertype_0033 = function() {
       return types.isa.boolean(1);
     }), false);
-    eq2(T, (Ω_intertype_1033 = function() {
+    eq2(T, (Ω_intertype_0034 = function() {
       return types.isa.optional.boolean(false);
     }), true);
-    eq2(T, (Ω_intertype_1034 = function() {
+    eq2(T, (Ω_intertype_0035 = function() {
       return types.isa.optional.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1035 = function() {
+    eq2(T, (Ω_intertype_0036 = function() {
       return types.isa.optional.boolean(null);
     }), true);
-    eq2(T, (Ω_intertype_1036 = function() {
+    eq2(T, (Ω_intertype_0037 = function() {
       return types.isa.optional.boolean(1);
     }), false);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1037 = function() {
+    eq2(T, (Ω_intertype_0038 = function() {
       return types.validate.boolean(false);
     }), false);
-    eq2(T, (Ω_intertype_1038 = function() {
+    eq2(T, (Ω_intertype_0039 = function() {
       return types.validate.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1039 = function() {
+    eq2(T, (Ω_intertype_0040 = function() {
       return types.validate.optional.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1040 = function() {
+    eq2(T, (Ω_intertype_0041 = function() {
       return types.validate.optional.boolean(false);
     }), false);
-    eq2(T, (Ω_intertype_1041 = function() {
+    eq2(T, (Ω_intertype_0042 = function() {
       return types.validate.optional.boolean(void 0);
     }), void 0);
-    eq2(T, (Ω_intertype_1042 = function() {
+    eq2(T, (Ω_intertype_0043 = function() {
       return types.validate.optional.boolean(null);
     }), null);
     try_and_show(T, function() {
@@ -498,35 +498,35 @@
     try_and_show(T, function() {
       return types.validate.optional.boolean(1);
     });
-    throws2(T, (Ω_intertype_1043 = function() {
+    throws2(T, (Ω_intertype_0044 = function() {
       return types.validate.boolean(1);
     }), /expected a boolean/);
-    throws2(T, (Ω_intertype_1044 = function() {
+    throws2(T, (Ω_intertype_0045 = function() {
       return types.validate.optional.boolean(1);
     }), /expected an optional boolean/);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1045 = function() {
+    eq2(T, (Ω_intertype_0046 = function() {
       return types.type_of(null);
     }), 'null');
-    eq2(T, (Ω_intertype_1046 = function() {
+    eq2(T, (Ω_intertype_0047 = function() {
       return types.type_of(void 0);
     }), 'undefined');
-    eq2(T, (Ω_intertype_1047 = function() {
+    eq2(T, (Ω_intertype_0048 = function() {
       return types.type_of(false);
     }), 'boolean');
-    eq2(T, (Ω_intertype_1048 = function() {
+    eq2(T, (Ω_intertype_0049 = function() {
       return types.type_of(Symbol('p'));
     }), 'symbol');
-    eq2(T, (Ω_intertype_1049 = function() {
+    eq2(T, (Ω_intertype_0050 = function() {
       return types.type_of({});
     }), 'object');
-    eq2(T, (Ω_intertype_1050 = function() {
+    eq2(T, (Ω_intertype_0051 = function() {
       return types.type_of(0/0);
     }), 'unknown');
-    eq2(T, (Ω_intertype_1051 = function() {
+    eq2(T, (Ω_intertype_0052 = function() {
       return types.type_of(+2e308);
     }), 'unknown');
-    eq2(T, (Ω_intertype_1052 = function() {
+    eq2(T, (Ω_intertype_0053 = function() {
       return types.type_of(-2e308);
     }), 'unknown');
     //.........................................................................................................
@@ -553,55 +553,55 @@
     debug('^4324^', 'boolean        ', types.validate.boolean);
     debug('^4324^', 'text           ', types.validate.text);
     debug('^4324^', 'asyncfunction  ', types.validate.asyncfunction);
-    eq2(T, (Ω_intertype_1053 = function() {
+    eq2(T, (Ω_intertype_0054 = function() {
       return types.isa.asyncfunction.name;
     }), 'isa.asyncfunction');
-    eq2(T, (Ω_intertype_1054 = function() {
+    eq2(T, (Ω_intertype_0055 = function() {
       return types.isa.optional.asyncfunction.name;
     }), 'isa.optional.asyncfunction');
-    eq2(T, (Ω_intertype_1055 = function() {
+    eq2(T, (Ω_intertype_0056 = function() {
       return types.validate.asyncfunction.name;
     }), 'validate.asyncfunction');
-    eq2(T, (Ω_intertype_1056 = function() {
+    eq2(T, (Ω_intertype_0057 = function() {
       return types.validate.optional.asyncfunction.name;
     }), 'validate.optional.asyncfunction');
-    eq2(T, (Ω_intertype_1057 = function() {
+    eq2(T, (Ω_intertype_0058 = function() {
       var ref1;
       return (ref1 = types.declarations.null) != null ? ref1.type : void 0;
     }), 'null');
-    eq2(T, (Ω_intertype_1058 = function() {
+    eq2(T, (Ω_intertype_0059 = function() {
       var ref1;
       return (ref1 = types.declarations.function) != null ? ref1.type : void 0;
     }), 'function');
-    eq2(T, (Ω_intertype_1059 = function() {
+    eq2(T, (Ω_intertype_0060 = function() {
       var ref1;
       return (ref1 = types.declarations.boolean) != null ? ref1.type : void 0;
     }), 'boolean');
-    eq2(T, (Ω_intertype_1060 = function() {
+    eq2(T, (Ω_intertype_0061 = function() {
       var ref1;
       return (ref1 = types.declarations.text) != null ? ref1.type : void 0;
     }), 'text');
-    eq2(T, (Ω_intertype_1061 = function() {
+    eq2(T, (Ω_intertype_0062 = function() {
       var ref1;
       return (ref1 = types.declarations.asyncfunction) != null ? ref1.type : void 0;
     }), 'asyncfunction');
-    eq2(T, (Ω_intertype_1062 = function() {
+    eq2(T, (Ω_intertype_0063 = function() {
       var ref1;
       return (ref1 = types.isa.null) != null ? ref1.name : void 0;
     }), 'isa.null');
-    eq2(T, (Ω_intertype_1063 = function() {
+    eq2(T, (Ω_intertype_0064 = function() {
       var ref1;
       return (ref1 = types.isa.function) != null ? ref1.name : void 0;
     }), 'isa.function');
-    eq2(T, (Ω_intertype_1064 = function() {
+    eq2(T, (Ω_intertype_0065 = function() {
       var ref1;
       return (ref1 = types.isa.boolean) != null ? ref1.name : void 0;
     }), 'isa.boolean');
-    eq2(T, (Ω_intertype_1065 = function() {
+    eq2(T, (Ω_intertype_0066 = function() {
       var ref1;
       return (ref1 = types.isa.text) != null ? ref1.name : void 0;
     }), 'isa.text');
-    eq2(T, (Ω_intertype_1066 = function() {
+    eq2(T, (Ω_intertype_0067 = function() {
       var ref1;
       return (ref1 = types.isa.asyncfunction) != null ? ref1.name : void 0;
     }), 'isa.asyncfunction');
@@ -610,68 +610,68 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.basic_functionality_using_standalone_methods = function(T, done) {
-    var INTERTYPE, isa, type_of, validate, Ω_intertype_1067, Ω_intertype_1068, Ω_intertype_1069, Ω_intertype_1070, Ω_intertype_1071, Ω_intertype_1072, Ω_intertype_1073, Ω_intertype_1074, Ω_intertype_1075, Ω_intertype_1076, Ω_intertype_1077, Ω_intertype_1078, Ω_intertype_1079, Ω_intertype_1080, Ω_intertype_1081, Ω_intertype_1082, Ω_intertype_1083, Ω_intertype_1084, Ω_intertype_1085, Ω_intertype_1086, Ω_intertype_1087, Ω_intertype_1088, Ω_intertype_1089, Ω_intertype_1090, Ω_intertype_1091, Ω_intertype_1092, Ω_intertype_1093, Ω_intertype_1094, Ω_intertype_1095, Ω_intertype_1096, Ω_intertype_1097, Ω_intertype_1098, Ω_intertype_1099, Ω_intertype_1100, Ω_intertype_1101, Ω_intertype_1102;
+    var INTERTYPE, isa, type_of, validate, Ω_intertype_0068, Ω_intertype_0069, Ω_intertype_0070, Ω_intertype_0071, Ω_intertype_0072, Ω_intertype_0073, Ω_intertype_0074, Ω_intertype_0075, Ω_intertype_0076, Ω_intertype_0077, Ω_intertype_0078, Ω_intertype_0079, Ω_intertype_0080, Ω_intertype_0081, Ω_intertype_0082, Ω_intertype_0083, Ω_intertype_0084, Ω_intertype_0085, Ω_intertype_0086, Ω_intertype_0087, Ω_intertype_0088, Ω_intertype_0089, Ω_intertype_0090, Ω_intertype_0091, Ω_intertype_0092, Ω_intertype_0093, Ω_intertype_0094, Ω_intertype_0095, Ω_intertype_0096, Ω_intertype_0097, Ω_intertype_0098, Ω_intertype_0099, Ω_intertype_0100, Ω_intertype_0101, Ω_intertype_0102, Ω_intertype_0103;
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
-    eq2(T, (Ω_intertype_1067 = function() {
+    eq2(T, (Ω_intertype_0068 = function() {
       return isa.boolean(false);
     }), true);
-    eq2(T, (Ω_intertype_1068 = function() {
+    eq2(T, (Ω_intertype_0069 = function() {
       return isa.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1069 = function() {
+    eq2(T, (Ω_intertype_0070 = function() {
       return isa.boolean(null);
     }), false);
-    eq2(T, (Ω_intertype_1070 = function() {
+    eq2(T, (Ω_intertype_0071 = function() {
       return isa.boolean(1);
     }), false);
-    eq2(T, (Ω_intertype_1071 = function() {
+    eq2(T, (Ω_intertype_0072 = function() {
       return isa.unknown(1);
     }), false);
-    eq2(T, (Ω_intertype_1072 = function() {
+    eq2(T, (Ω_intertype_0073 = function() {
       return isa.unknown(2e308);
     }), true);
-    eq2(T, (Ω_intertype_1073 = function() {
+    eq2(T, (Ω_intertype_0074 = function() {
       return isa.optional.boolean(false);
     }), true);
-    eq2(T, (Ω_intertype_1074 = function() {
+    eq2(T, (Ω_intertype_0075 = function() {
       return isa.optional.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1075 = function() {
+    eq2(T, (Ω_intertype_0076 = function() {
       return isa.optional.boolean(null);
     }), true);
-    eq2(T, (Ω_intertype_1076 = function() {
+    eq2(T, (Ω_intertype_0077 = function() {
       return isa.optional.boolean(1);
     }), false);
-    eq2(T, (Ω_intertype_1077 = function() {
+    eq2(T, (Ω_intertype_0078 = function() {
       return isa.optional.unknown(1);
     }), false);
-    eq2(T, (Ω_intertype_1078 = function() {
+    eq2(T, (Ω_intertype_0079 = function() {
       return isa.optional.unknown(2e308);
     }), true);
-    eq2(T, (Ω_intertype_1079 = function() {
+    eq2(T, (Ω_intertype_0080 = function() {
       return isa.optional.unknown(void 0);
     }), true);
-    eq2(T, (Ω_intertype_1080 = function() {
+    eq2(T, (Ω_intertype_0081 = function() {
       return isa.optional.unknown(void 0);
     }), true);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1081 = function() {
+    eq2(T, (Ω_intertype_0082 = function() {
       return validate.boolean(false);
     }), false);
-    eq2(T, (Ω_intertype_1082 = function() {
+    eq2(T, (Ω_intertype_0083 = function() {
       return validate.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1083 = function() {
+    eq2(T, (Ω_intertype_0084 = function() {
       return validate.optional.boolean(true);
     }), true);
-    eq2(T, (Ω_intertype_1084 = function() {
+    eq2(T, (Ω_intertype_0085 = function() {
       return validate.optional.boolean(false);
     }), false);
-    eq2(T, (Ω_intertype_1085 = function() {
+    eq2(T, (Ω_intertype_0086 = function() {
       return validate.optional.boolean(void 0);
     }), void 0);
-    eq2(T, (Ω_intertype_1086 = function() {
+    eq2(T, (Ω_intertype_0087 = function() {
       return validate.optional.boolean(null);
     }), null);
     try_and_show(T, function() {
@@ -680,55 +680,55 @@
     try_and_show(T, function() {
       return validate.optional.boolean(1);
     });
-    throws2(T, (Ω_intertype_1087 = function() {
+    throws2(T, (Ω_intertype_0088 = function() {
       return validate.boolean(1);
     }), /expected a boolean/);
-    throws2(T, (Ω_intertype_1088 = function() {
+    throws2(T, (Ω_intertype_0089 = function() {
       return validate.optional.boolean(1);
     }), /expected an optional boolean/);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1089 = function() {
+    eq2(T, (Ω_intertype_0090 = function() {
       return type_of(null);
     }), 'null');
-    eq2(T, (Ω_intertype_1090 = function() {
+    eq2(T, (Ω_intertype_0091 = function() {
       return type_of(void 0);
     }), 'undefined');
-    eq2(T, (Ω_intertype_1091 = function() {
+    eq2(T, (Ω_intertype_0092 = function() {
       return type_of(false);
     }), 'boolean');
-    eq2(T, (Ω_intertype_1092 = function() {
+    eq2(T, (Ω_intertype_0093 = function() {
       return type_of(Symbol('p'));
     }), 'symbol');
-    eq2(T, (Ω_intertype_1093 = function() {
+    eq2(T, (Ω_intertype_0094 = function() {
       return type_of({});
     }), 'object');
-    eq2(T, (Ω_intertype_1094 = function() {
+    eq2(T, (Ω_intertype_0095 = function() {
       return type_of(0/0);
     }), 'unknown');
-    eq2(T, (Ω_intertype_1095 = function() {
+    eq2(T, (Ω_intertype_0096 = function() {
       return type_of(+2e308);
     }), 'unknown');
-    eq2(T, (Ω_intertype_1096 = function() {
+    eq2(T, (Ω_intertype_0097 = function() {
       return type_of(-2e308);
     }), 'unknown');
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1097 = function() {
+    eq2(T, (Ω_intertype_0098 = function() {
       return isa.asyncfunction.name;
     }), 'isa.asyncfunction');
-    eq2(T, (Ω_intertype_1098 = function() {
+    eq2(T, (Ω_intertype_0099 = function() {
       return isa.optional.asyncfunction.name;
     }), 'isa.optional.asyncfunction');
-    eq2(T, (Ω_intertype_1099 = function() {
+    eq2(T, (Ω_intertype_0100 = function() {
       return validate.asyncfunction.name;
     }), 'validate.asyncfunction');
-    eq2(T, (Ω_intertype_1100 = function() {
+    eq2(T, (Ω_intertype_0101 = function() {
       return validate.optional.asyncfunction.name;
     }), 'validate.optional.asyncfunction');
     //.........................................................................................................
-    throws2(T, (Ω_intertype_1101 = function() {
+    throws2(T, (Ω_intertype_0102 = function() {
       return isa.float(3, 4);
     }), /method 'isa.float' expects 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1102 = function() {
+    throws2(T, (Ω_intertype_0103 = function() {
       return isa.float();
     }), /method 'isa.float' expects 1 arguments, got 0/);
     return typeof done === "function" ? done() : void 0;
@@ -736,38 +736,38 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.methods_check_arity = function(T, done) {
-    var INTERTYPE, isa, type_of, validate, Ω_intertype_1103, Ω_intertype_1104, Ω_intertype_1105, Ω_intertype_1106, Ω_intertype_1107, Ω_intertype_1108, Ω_intertype_1109, Ω_intertype_1110, Ω_intertype_1111, Ω_intertype_1112;
+    var INTERTYPE, isa, type_of, validate, Ω_intertype_0104, Ω_intertype_0105, Ω_intertype_0106, Ω_intertype_0107, Ω_intertype_0108, Ω_intertype_0109, Ω_intertype_0110, Ω_intertype_0111, Ω_intertype_0112, Ω_intertype_0113;
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype_minimal(sample_declarations));
     //.........................................................................................................
-    throws2(T, (Ω_intertype_1103 = function() {
+    throws2(T, (Ω_intertype_0104 = function() {
       return isa.float(3, 4);
     }), /method 'isa.float' expects 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1104 = function() {
+    throws2(T, (Ω_intertype_0105 = function() {
       return isa.float();
     }), /method 'isa.float' expects 1 arguments, got 0/);
-    throws2(T, (Ω_intertype_1105 = function() {
+    throws2(T, (Ω_intertype_0106 = function() {
       return isa.optional.float(3, 4);
     }), /method 'isa.optional.float' expects 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1106 = function() {
+    throws2(T, (Ω_intertype_0107 = function() {
       return isa.optional.float();
     }), /method 'isa.optional.float' expects 1 arguments, got 0/);
-    throws2(T, (Ω_intertype_1107 = function() {
+    throws2(T, (Ω_intertype_0108 = function() {
       return validate.float(3, 4);
     }), /method 'validate.float' expects 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1108 = function() {
+    throws2(T, (Ω_intertype_0109 = function() {
       return validate.float();
     }), /method 'validate.float' expects 1 arguments, got 0/);
-    throws2(T, (Ω_intertype_1109 = function() {
+    throws2(T, (Ω_intertype_0110 = function() {
       return validate.optional.float(3, 4);
     }), /method 'validate.optional.float' expects 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1110 = function() {
+    throws2(T, (Ω_intertype_0111 = function() {
       return validate.optional.float();
     }), /method 'validate.optional.float' expects 1 arguments, got 0/);
-    throws2(T, (Ω_intertype_1111 = function() {
+    throws2(T, (Ω_intertype_0112 = function() {
       return type_of(3, 4);
     }), /expected 1 arguments, got 2/);
-    throws2(T, (Ω_intertype_1112 = function() {
+    throws2(T, (Ω_intertype_0113 = function() {
       return type_of();
     }), /expected 1 arguments, got 0/);
     return typeof done === "function" ? done() : void 0;
@@ -775,7 +775,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.same_basic_types = function(T, done) {
-    var $function, asyncfunction, asyncgenerator, asyncgeneratorfunction, boolean, generator, generatorfunction, isa, symbol, type_of, validate, Ω_intertype_1113, Ω_intertype_1114, Ω_intertype_1115, Ω_intertype_1116, Ω_intertype_1117, Ω_intertype_1118, Ω_intertype_1119, Ω_intertype_1120, Ω_intertype_1121, Ω_intertype_1122, Ω_intertype_1123, Ω_intertype_1124, Ω_intertype_1125, Ω_intertype_1126, Ω_intertype_1127, Ω_intertype_1128, Ω_intertype_1129, Ω_intertype_1130, Ω_intertype_1131, Ω_intertype_1132, Ω_intertype_1133, Ω_intertype_1134, Ω_intertype_1135, Ω_intertype_1136;
+    var $function, asyncfunction, asyncgenerator, asyncgeneratorfunction, boolean, generator, generatorfunction, isa, symbol, type_of, validate, Ω_intertype_0114, Ω_intertype_0115, Ω_intertype_0116, Ω_intertype_0117, Ω_intertype_0118, Ω_intertype_0119, Ω_intertype_0120, Ω_intertype_0121, Ω_intertype_0122, Ω_intertype_0123, Ω_intertype_0124, Ω_intertype_0125, Ω_intertype_0126, Ω_intertype_0127, Ω_intertype_0128, Ω_intertype_0129, Ω_intertype_0130, Ω_intertype_0131, Ω_intertype_0132, Ω_intertype_0133, Ω_intertype_0134, Ω_intertype_0135, Ω_intertype_0136, Ω_intertype_0137;
     ({isa, validate, type_of} = require('../../../apps/intertype'));
     //.........................................................................................................
     boolean = false;
@@ -797,78 +797,78 @@
     })();
     symbol = Symbol('what');
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1113 = function() {
+    eq2(T, (Ω_intertype_0114 = function() {
       return isa.boolean(boolean);
     }), true);
-    eq2(T, (Ω_intertype_1114 = function() {
+    eq2(T, (Ω_intertype_0115 = function() {
       return isa.function($function);
     }), true);
-    eq2(T, (Ω_intertype_1115 = function() {
+    eq2(T, (Ω_intertype_0116 = function() {
       return isa.asyncfunction(asyncfunction);
     }), true);
-    eq2(T, (Ω_intertype_1116 = function() {
+    eq2(T, (Ω_intertype_0117 = function() {
       return isa.generatorfunction(generatorfunction);
     }), true);
-    eq2(T, (Ω_intertype_1117 = function() {
+    eq2(T, (Ω_intertype_0118 = function() {
       return isa.asyncgeneratorfunction(asyncgeneratorfunction);
     }), true);
-    eq2(T, (Ω_intertype_1118 = function() {
+    eq2(T, (Ω_intertype_0119 = function() {
       return isa.asyncgenerator(asyncgenerator);
     }), true);
-    eq2(T, (Ω_intertype_1119 = function() {
+    eq2(T, (Ω_intertype_0120 = function() {
       return isa.generator(generator);
     }), true);
-    eq2(T, (Ω_intertype_1120 = function() {
+    eq2(T, (Ω_intertype_0121 = function() {
       return isa.symbol(symbol);
     }), true);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1121 = function() {
+    eq2(T, (Ω_intertype_0122 = function() {
       return validate.boolean(boolean);
     }), boolean);
-    eq2(T, (Ω_intertype_1122 = function() {
+    eq2(T, (Ω_intertype_0123 = function() {
       return validate.function($function);
     }), $function);
-    eq2(T, (Ω_intertype_1123 = function() {
+    eq2(T, (Ω_intertype_0124 = function() {
       return validate.asyncfunction(asyncfunction);
     }), asyncfunction);
-    eq2(T, (Ω_intertype_1124 = function() {
+    eq2(T, (Ω_intertype_0125 = function() {
       return validate.generatorfunction(generatorfunction);
     }), generatorfunction);
-    eq2(T, (Ω_intertype_1125 = function() {
+    eq2(T, (Ω_intertype_0126 = function() {
       return validate.asyncgeneratorfunction(asyncgeneratorfunction);
     }), asyncgeneratorfunction);
-    eq2(T, (Ω_intertype_1126 = function() {
+    eq2(T, (Ω_intertype_0127 = function() {
       return validate.asyncgenerator(asyncgenerator);
     }), asyncgenerator);
-    eq2(T, (Ω_intertype_1127 = function() {
+    eq2(T, (Ω_intertype_0128 = function() {
       return validate.generator(generator);
     }), generator);
-    eq2(T, (Ω_intertype_1128 = function() {
+    eq2(T, (Ω_intertype_0129 = function() {
       return validate.symbol(symbol);
     }), symbol);
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1129 = function() {
+    eq2(T, (Ω_intertype_0130 = function() {
       return type_of(boolean);
     }), 'boolean');
-    eq2(T, (Ω_intertype_1130 = function() {
+    eq2(T, (Ω_intertype_0131 = function() {
       return type_of($function);
     }), 'function');
-    eq2(T, (Ω_intertype_1131 = function() {
+    eq2(T, (Ω_intertype_0132 = function() {
       return type_of(asyncfunction);
     }), 'asyncfunction');
-    eq2(T, (Ω_intertype_1132 = function() {
+    eq2(T, (Ω_intertype_0133 = function() {
       return type_of(generatorfunction);
     }), 'generatorfunction');
-    eq2(T, (Ω_intertype_1133 = function() {
+    eq2(T, (Ω_intertype_0134 = function() {
       return type_of(asyncgeneratorfunction);
     }), 'asyncgeneratorfunction');
-    eq2(T, (Ω_intertype_1134 = function() {
+    eq2(T, (Ω_intertype_0135 = function() {
       return type_of(asyncgenerator);
     }), 'asyncgenerator');
-    eq2(T, (Ω_intertype_1135 = function() {
+    eq2(T, (Ω_intertype_0136 = function() {
       return type_of(generator);
     }), 'generator');
-    eq2(T, (Ω_intertype_1136 = function() {
+    eq2(T, (Ω_intertype_0137 = function() {
       return type_of(symbol);
     }), 'symbol');
     return typeof done === "function" ? done() : void 0;
@@ -876,7 +876,7 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_on_missing_type = function(T, done) {
-    var INTERTYPE, isa, type_of, validate, Ω_intertype_1137, Ω_intertype_1138, Ω_intertype_1139, Ω_intertype_1140, Ω_intertype_1141, Ω_intertype_1142, Ω_intertype_1143, Ω_intertype_1144, Ω_intertype_1145, Ω_intertype_1146, Ω_intertype_1147, Ω_intertype_1148, Ω_intertype_1149, Ω_intertype_1150, Ω_intertype_1151, Ω_intertype_1152;
+    var INTERTYPE, isa, type_of, validate, Ω_intertype_0138, Ω_intertype_0139, Ω_intertype_0140, Ω_intertype_0141, Ω_intertype_0142, Ω_intertype_0143, Ω_intertype_0144, Ω_intertype_0145, Ω_intertype_0146, Ω_intertype_0147, Ω_intertype_0148, Ω_intertype_0149, Ω_intertype_0150, Ω_intertype_0151, Ω_intertype_0152, Ω_intertype_0153;
     INTERTYPE = require('../../../apps/intertype');
     ({isa, validate, type_of} = new INTERTYPE.Intertype());
     //.........................................................................................................
@@ -897,52 +897,52 @@
     // try_and_show T, -> validate.optional.quux 3
     // try_and_show T, -> validate.optional.quux 3, 4
     //.........................................................................................................
-    throws2(T, (Ω_intertype_1137 = function() {
+    throws2(T, (Ω_intertype_0138 = function() {
       return isa.quux;
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1138 = function() {
+    throws2(T, (Ω_intertype_0139 = function() {
       return isa.quux();
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1139 = function() {
+    throws2(T, (Ω_intertype_0140 = function() {
       return isa.quux(3);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1140 = function() {
+    throws2(T, (Ω_intertype_0141 = function() {
       return isa.quux(3, 4);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1141 = function() {
+    throws2(T, (Ω_intertype_0142 = function() {
       return isa.optional.quux;
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1142 = function() {
+    throws2(T, (Ω_intertype_0143 = function() {
       return isa.optional.quux();
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1143 = function() {
+    throws2(T, (Ω_intertype_0144 = function() {
       return isa.optional.quux(3);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1144 = function() {
+    throws2(T, (Ω_intertype_0145 = function() {
       return isa.optional.quux(3, 4);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1145 = function() {
+    throws2(T, (Ω_intertype_0146 = function() {
       return validate.quux;
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1146 = function() {
+    throws2(T, (Ω_intertype_0147 = function() {
       return validate.quux();
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1147 = function() {
+    throws2(T, (Ω_intertype_0148 = function() {
       return validate.quux(3);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1148 = function() {
+    throws2(T, (Ω_intertype_0149 = function() {
       return validate.quux(3, 4);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1149 = function() {
+    throws2(T, (Ω_intertype_0150 = function() {
       return validate.optional.quux;
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1150 = function() {
+    throws2(T, (Ω_intertype_0151 = function() {
       return validate.optional.quux();
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1151 = function() {
+    throws2(T, (Ω_intertype_0152 = function() {
       return validate.optional.quux(3);
     }), /unknown type 'quux'/);
-    throws2(T, (Ω_intertype_1152 = function() {
+    throws2(T, (Ω_intertype_0153 = function() {
       return validate.optional.quux(3, 4);
     }), /unknown type 'quux'/);
     return typeof done === "function" ? done() : void 0;
@@ -950,9 +950,9 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_when_optional_is_declared = function(T, done) {
-    var INTERTYPE, Ω_intertype_1153;
+    var INTERTYPE, Ω_intertype_0154;
     INTERTYPE = require('../../../apps/intertype');
-    throws2(T, (Ω_intertype_1153 = function() {
+    throws2(T, (Ω_intertype_0154 = function() {
       return new INTERTYPE.Intertype_minimal({
         optional: (function(x) {
           return true;
@@ -964,61 +964,61 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.throw_instructive_error_when_wrong_type_of_isa_test_declared = function(T, done) {
-    var Intertype, Ω_intertype_1154, Ω_intertype_1155, Ω_intertype_1156, Ω_intertype_1157, Ω_intertype_1158, Ω_intertype_1159, Ω_intertype_1160, Ω_intertype_1161, Ω_intertype_1162, Ω_intertype_1163;
+    var Intertype, Ω_intertype_0155, Ω_intertype_0156, Ω_intertype_0157, Ω_intertype_0158, Ω_intertype_0159, Ω_intertype_0160, Ω_intertype_0161, Ω_intertype_0162, Ω_intertype_0163, Ω_intertype_0164;
     ({Intertype} = require('../../../apps/intertype'));
     //.........................................................................................................
-    throws2(T, (Ω_intertype_1154 = function() {
+    throws2(T, (Ω_intertype_0155 = function() {
       return new Intertype({
         foo: (function() {})
       });
     }), /expected function with 1 parameters, got one with 0/);
-    throws2(T, (Ω_intertype_1155 = function() {
+    throws2(T, (Ω_intertype_0156 = function() {
       return new Intertype({
         foo: (function(a, b) {})
       });
     }), /expected function with 1 parameters, got one with 2/);
-    throws2(T, (Ω_intertype_1156 = function() {
+    throws2(T, (Ω_intertype_0157 = function() {
       return new Intertype({
         foo: true
       });
     }), /expected type name, method, or object to indicate test method, got a boolean/);
-    throws2(T, (Ω_intertype_1157 = function() {
+    throws2(T, (Ω_intertype_0158 = function() {
       return new Intertype({
         foo: void 0
       });
     }), /expected type name, method, or object to indicate test method, got a undefined/);
-    throws2(T, (Ω_intertype_1158 = function() {
+    throws2(T, (Ω_intertype_0159 = function() {
       return new Intertype({
         foo: null
       });
     }), /expected type name, method, or object to indicate test method, got a null/);
-    throws2(T, (Ω_intertype_1159 = function() {
+    throws2(T, (Ω_intertype_0160 = function() {
       return new Intertype({
         foo: {}
       });
     }), /expected type name, method, or object to indicate test method, got a undefined/);
-    throws2(T, (Ω_intertype_1160 = function() {
+    throws2(T, (Ω_intertype_0161 = function() {
       return new Intertype({
         foo: {
           test: null
         }
       });
     }), /expected type name, method, or object to indicate test method, got a null/);
-    throws2(T, (Ω_intertype_1161 = function() {
+    throws2(T, (Ω_intertype_0162 = function() {
       return new Intertype({
         foo: {
           test: false
         }
       });
     }), /expected type name, method, or object to indicate test method, got a boolean/);
-    throws2(T, (Ω_intertype_1162 = function() {
+    throws2(T, (Ω_intertype_0163 = function() {
       return new Intertype({
         foo: {
           test: (function(a, b) {})
         }
       });
     }), /expected function with 1 parameters, got one with 2/);
-    throws2(T, (Ω_intertype_1163 = function() {
+    throws2(T, (Ω_intertype_0164 = function() {
       return new Intertype({
         foo: 'quux'
       });
@@ -1031,7 +1031,7 @@
     var Intertype_minimal;
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, types, Ω_intertype_1164, Ω_intertype_1165, Ω_intertype_1166, Ω_intertype_1167;
+      var declarations, types, Ω_intertype_0165, Ω_intertype_0166, Ω_intertype_0167, Ω_intertype_0168;
       declarations = {...sample_declarations};
       declarations.integer = {
         test: function(x) {
@@ -1040,16 +1040,16 @@
         template: 0
       };
       types = new Intertype_minimal(declarations);
-      eq2(T, (Ω_intertype_1164 = function() {
+      eq2(T, (Ω_intertype_0165 = function() {
         return TMP_types.isa.function(types.isa.integer);
       }), true);
-      eq2(T, (Ω_intertype_1165 = function() {
+      eq2(T, (Ω_intertype_0166 = function() {
         return types.isa.integer.length;
       }), 1);
-      eq2(T, (Ω_intertype_1166 = function() {
+      eq2(T, (Ω_intertype_0167 = function() {
         return types.isa.integer(123);
       }), true);
-      eq2(T, (Ω_intertype_1167 = function() {
+      eq2(T, (Ω_intertype_0168 = function() {
         return types.isa.integer(123.456);
       }), false);
       return null;
@@ -1062,7 +1062,7 @@
     var Intertype_minimal;
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, Ω_intertype_1168;
+      var declarations, Ω_intertype_0169;
       declarations = {...sample_declarations};
       declarations.integer = {
         test: function(x) {
@@ -1072,7 +1072,7 @@
           return (await 0);
         }
       };
-      throws2(T, (Ω_intertype_1168 = function() {
+      throws2(T, (Ω_intertype_0169 = function() {
         return new Intertype_minimal(declarations);
       }), /expected a function for `create` entry of type 'integer', got a asyncfunction/);
       return null;
@@ -1085,7 +1085,7 @@
     var Intertype_minimal;
     ({Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, Ω_intertype_1169;
+      var declarations, Ω_intertype_0170;
       declarations = {...sample_declarations};
       declarations.foolist = {
         test: function(x) {
@@ -1095,7 +1095,7 @@
           return [n];
         }
       };
-      throws2(T, (Ω_intertype_1169 = function() {
+      throws2(T, (Ω_intertype_0170 = function() {
         return new Intertype_minimal(declarations);
       }), /template method for type 'foolist' has arity 1 but must be nullary/);
       return null;
@@ -1105,52 +1105,52 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_knows_its_base_types = function(T, done) {
-    var isa, Ω_intertype_1170, Ω_intertype_1171, Ω_intertype_1172, Ω_intertype_1173, Ω_intertype_1174, Ω_intertype_1175, Ω_intertype_1176, Ω_intertype_1177, Ω_intertype_1178, Ω_intertype_1179, Ω_intertype_1180, Ω_intertype_1181, Ω_intertype_1182, Ω_intertype_1183, Ω_intertype_1184;
+    var isa, Ω_intertype_0171, Ω_intertype_0172, Ω_intertype_0173, Ω_intertype_0174, Ω_intertype_0175, Ω_intertype_0176, Ω_intertype_0177, Ω_intertype_0178, Ω_intertype_0179, Ω_intertype_0180, Ω_intertype_0181, Ω_intertype_0182, Ω_intertype_0183, Ω_intertype_0184, Ω_intertype_0185;
     ({isa} = require('../../../apps/intertype'));
     //.........................................................................................................
-    eq2(T, (Ω_intertype_1170 = function() {
+    eq2(T, (Ω_intertype_0171 = function() {
       return isa.basetype('optional');
     }), false);
-    eq2(T, (Ω_intertype_1171 = function() {
+    eq2(T, (Ω_intertype_0172 = function() {
       return isa.basetype('anything');
     }), true);
-    eq2(T, (Ω_intertype_1172 = function() {
+    eq2(T, (Ω_intertype_0173 = function() {
       return isa.basetype('nothing');
     }), true);
-    eq2(T, (Ω_intertype_1173 = function() {
+    eq2(T, (Ω_intertype_0174 = function() {
       return isa.basetype('something');
     }), true);
-    eq2(T, (Ω_intertype_1174 = function() {
+    eq2(T, (Ω_intertype_0175 = function() {
       return isa.basetype('null');
     }), true);
-    eq2(T, (Ω_intertype_1175 = function() {
+    eq2(T, (Ω_intertype_0176 = function() {
       return isa.basetype('undefined');
     }), true);
-    eq2(T, (Ω_intertype_1176 = function() {
+    eq2(T, (Ω_intertype_0177 = function() {
       return isa.basetype('unknown');
     }), true);
-    eq2(T, (Ω_intertype_1177 = function() {
+    eq2(T, (Ω_intertype_0178 = function() {
       return isa.basetype('integer');
     }), false);
-    eq2(T, (Ω_intertype_1178 = function() {
+    eq2(T, (Ω_intertype_0179 = function() {
       return isa.basetype('float');
     }), false);
-    eq2(T, (Ω_intertype_1179 = function() {
+    eq2(T, (Ω_intertype_0180 = function() {
       return isa.basetype('basetype');
     }), false);
-    eq2(T, (Ω_intertype_1180 = function() {
+    eq2(T, (Ω_intertype_0181 = function() {
       return isa.basetype('quux');
     }), false);
-    eq2(T, (Ω_intertype_1181 = function() {
+    eq2(T, (Ω_intertype_0182 = function() {
       return isa.basetype('toString');
     }), false);
-    eq2(T, (Ω_intertype_1182 = function() {
+    eq2(T, (Ω_intertype_0183 = function() {
       return isa.basetype(null);
     }), false);
-    eq2(T, (Ω_intertype_1183 = function() {
+    eq2(T, (Ω_intertype_0184 = function() {
       return isa.basetype(void 0);
     }), false);
-    eq2(T, (Ω_intertype_1184 = function() {
+    eq2(T, (Ω_intertype_0185 = function() {
       return isa.basetype(4);
     }), false);
     return typeof done === "function" ? done() : void 0;
@@ -1161,9 +1161,9 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var overrides, types, Ω_intertype_1185, Ω_intertype_1186, Ω_intertype_1187, Ω_intertype_1188;
+      var overrides, types, Ω_intertype_0186, Ω_intertype_0187, Ω_intertype_0188, Ω_intertype_0189;
       types = new Intertype();
-      eq2(T, (Ω_intertype_1185 = function() {
+      eq2(T, (Ω_intertype_0186 = function() {
         return types.isa.float(4);
       }), true);
       //.......................................................................................................
@@ -1177,23 +1177,23 @@
       try_and_show(T, function() {
         return types.declare(overrides);
       });
-      throws2(T, (Ω_intertype_1186 = function() {
+      throws2(T, (Ω_intertype_0187 = function() {
         return types.declare(overrides);
       }), /not allowed to re-declare type 'float'/);
       //.......................................................................................................
       /* pre-existing declaration remains valid: */
-      eq2(T, (Ω_intertype_1187 = function() {
+      eq2(T, (Ω_intertype_0188 = function() {
         return types.isa.float(4);
       }), true);
-      eq2(T, (Ω_intertype_1188 = function() {
+      eq2(T, (Ω_intertype_0189 = function() {
         return types.isa.float('float');
       }), false);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var overrides, types, Ω_intertype_1189, Ω_intertype_1190;
+      var overrides, types, Ω_intertype_0190, Ω_intertype_0191;
       types = new Intertype();
-      eq2(T, (Ω_intertype_1189 = function() {
+      eq2(T, (Ω_intertype_0190 = function() {
         return types.isa.float(4);
       }), true);
       //.......................................................................................................
@@ -1205,15 +1205,15 @@
           }
         }
       };
-      throws2(T, (Ω_intertype_1190 = function() {
+      throws2(T, (Ω_intertype_0191 = function() {
         return types.declare(overrides);
       }), /not allowed to re-declare type 'float'/);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var overrides, types, Ω_intertype_1191, Ω_intertype_1192, Ω_intertype_1193, Ω_intertype_1194;
+      var overrides, types, Ω_intertype_0192, Ω_intertype_0193, Ω_intertype_0194, Ω_intertype_0195;
       types = new Intertype();
-      eq2(T, (Ω_intertype_1191 = function() {
+      eq2(T, (Ω_intertype_0192 = function() {
         return types.isa.float(4);
       }), true);
       //.......................................................................................................
@@ -1225,15 +1225,15 @@
           }
         }
       };
-      throws2(T, (Ω_intertype_1192 = function() {
+      throws2(T, (Ω_intertype_0193 = function() {
         return types.declare(overrides);
       }), /not allowed to re-declare basetype 'anything'/);
       //.......................................................................................................
       /* pre-existing declaration remains valid: */
-      eq2(T, (Ω_intertype_1193 = function() {
+      eq2(T, (Ω_intertype_0194 = function() {
         return types.isa.anything(4);
       }), true);
-      eq2(T, (Ω_intertype_1194 = function() {
+      eq2(T, (Ω_intertype_0195 = function() {
         return types.isa.anything('float');
       }), true);
       return null;
@@ -1246,7 +1246,7 @@
     var Intertype, Intertype_minimal;
     ({Intertype, Intertype_minimal} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, types, Ω_intertype_1195, Ω_intertype_1196, Ω_intertype_1197, Ω_intertype_1198, Ω_intertype_1199, Ω_intertype_1200, Ω_intertype_1201, Ω_intertype_1202, Ω_intertype_1203, Ω_intertype_1204;
+      var declarations, types, Ω_intertype_0196, Ω_intertype_0197, Ω_intertype_0198, Ω_intertype_0199, Ω_intertype_0200, Ω_intertype_0201, Ω_intertype_0202, Ω_intertype_0203, Ω_intertype_0204, Ω_intertype_0205;
       declarations = {...sample_declarations};
       declarations.integer = {
         test: function(x) {
@@ -1274,43 +1274,43 @@
       };
       //.......................................................................................................
       types = new Intertype_minimal(declarations);
-      eq2(T, (Ω_intertype_1195 = function() {
+      eq2(T, (Ω_intertype_0196 = function() {
         return TMP_types.isa.object(types.declarations);
       }), true);
-      eq2(T, (Ω_intertype_1196 = function() {
+      eq2(T, (Ω_intertype_0197 = function() {
         return TMP_types.isa.object(types.declarations.float);
       }), true);
-      eq2(T, (Ω_intertype_1197 = function() {
+      eq2(T, (Ω_intertype_0198 = function() {
         return TMP_types.isa.object(types.declarations.text);
       }), true);
       //.......................................................................................................
-      throws2(T, (Ω_intertype_1198 = function() {
+      throws2(T, (Ω_intertype_0199 = function() {
         return types.create.boolean();
       }), /type declaration of 'boolean' has no `create` and no `template` entries, cannot be created/);
-      throws2(T, (Ω_intertype_1199 = function() {
+      throws2(T, (Ω_intertype_0200 = function() {
         return types.create.text('foo');
       }), /expected 0 arguments, got 1/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1200 = function() {
+      eq2(T, (Ω_intertype_0201 = function() {
         return types.create.text();
       }), '');
-      eq2(T, (Ω_intertype_1201 = function() {
+      eq2(T, (Ω_intertype_0202 = function() {
         return types.create.integer();
       }), 0);
-      eq2(T, (Ω_intertype_1202 = function() {
+      eq2(T, (Ω_intertype_0203 = function() {
         return types.create.float();
       }), 0);
-      eq2(T, (Ω_intertype_1203 = function() {
+      eq2(T, (Ω_intertype_0204 = function() {
         return types.create.float('123.45');
       }), 123.45);
-      throws2(T, (Ω_intertype_1204 = function() {
+      throws2(T, (Ω_intertype_0205 = function() {
         return types.create.float('***');
       }), /expected `create\.float\(\)` to return a float but it returned a nan/);
       //.......................................................................................................
       return null;
     })();
     (() => {      //.........................................................................................................
-      var create, declarations, isa, validate, Ω_intertype_1205;
+      var create, declarations, isa, validate, Ω_intertype_0206;
       declarations = {
         quantity: {
           test: 'object',
@@ -1323,7 +1323,7 @@
         'quantity.u': 'text'
       };
       ({isa, validate, create} = new Intertype(declarations));
-      eq2(T, (Ω_intertype_1205 = function() {
+      eq2(T, (Ω_intertype_0206 = function() {
         return create.quantity();
       }), {
         q: 0,
@@ -1332,7 +1332,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var create, declarations, isa, validate, Ω_intertype_1206, Ω_intertype_1207, Ω_intertype_1208, Ω_intertype_1209;
+      var create, declarations, isa, validate, Ω_intertype_0207, Ω_intertype_0208, Ω_intertype_0209, Ω_intertype_0210;
       declarations = {
         quantity: {
           test: 'object',
@@ -1347,13 +1347,13 @@
         }
       };
       ({isa, validate, create} = new Intertype(declarations));
-      eq2(T, (Ω_intertype_1206 = function() {
+      eq2(T, (Ω_intertype_0207 = function() {
         return create.quantity();
       }), {
         q: 0,
         u: 'u'
       });
-      eq2(T, (Ω_intertype_1207 = function() {
+      eq2(T, (Ω_intertype_0208 = function() {
         return create.quantity({
           q: 123
         });
@@ -1361,7 +1361,7 @@
         q: 123,
         u: 'u'
       });
-      eq2(T, (Ω_intertype_1208 = function() {
+      eq2(T, (Ω_intertype_0209 = function() {
         return create.quantity({
           u: 'kg'
         });
@@ -1369,7 +1369,7 @@
         q: 0,
         u: 'kg'
       });
-      eq2(T, (Ω_intertype_1209 = function() {
+      eq2(T, (Ω_intertype_0210 = function() {
         return create.quantity({
           u: 'kg',
           foo: 'bar'
@@ -1389,43 +1389,43 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var create, type_of, types, Ω_intertype_1210, Ω_intertype_1211, Ω_intertype_1212, Ω_intertype_1213, Ω_intertype_1214, Ω_intertype_1215, Ω_intertype_1216, Ω_intertype_1217, Ω_intertype_1218, Ω_intertype_1219, Ω_intertype_1220, Ω_intertype_1221;
+      var create, type_of, types, Ω_intertype_0211, Ω_intertype_0212, Ω_intertype_0213, Ω_intertype_0214, Ω_intertype_0215, Ω_intertype_0216, Ω_intertype_0217, Ω_intertype_0218, Ω_intertype_0219, Ω_intertype_0220, Ω_intertype_0221, Ω_intertype_0222;
       types = new Intertype();
       ({create, type_of} = types);
-      eq2(T, (Ω_intertype_1210 = function() {
+      eq2(T, (Ω_intertype_0211 = function() {
         return create.float();
       }), 0);
-      eq2(T, (Ω_intertype_1211 = function() {
+      eq2(T, (Ω_intertype_0212 = function() {
         return create.boolean();
       }), false);
-      eq2(T, (Ω_intertype_1212 = function() {
+      eq2(T, (Ω_intertype_0213 = function() {
         return create.object();
       }), {});
-      eq2(T, (Ω_intertype_1213 = function() {
+      eq2(T, (Ω_intertype_0214 = function() {
         return create.float();
       }), 0);
-      eq2(T, (Ω_intertype_1214 = function() {
+      eq2(T, (Ω_intertype_0215 = function() {
         return create.infinity();
       }), 2e308);
-      eq2(T, (Ω_intertype_1215 = function() {
+      eq2(T, (Ω_intertype_0216 = function() {
         return create.text();
       }), '');
-      eq2(T, (Ω_intertype_1216 = function() {
+      eq2(T, (Ω_intertype_0217 = function() {
         return create.list();
       }), []);
-      eq2(T, (Ω_intertype_1217 = function() {
+      eq2(T, (Ω_intertype_0218 = function() {
         return create.regex();
       }), new RegExp());
-      eq2(T, (Ω_intertype_1218 = function() {
+      eq2(T, (Ω_intertype_0219 = function() {
         return type_of(create.function());
       }), 'function');
-      eq2(T, (Ω_intertype_1219 = function() {
+      eq2(T, (Ω_intertype_0220 = function() {
         return type_of(create.asyncfunction());
       }), 'asyncfunction');
-      eq2(T, (Ω_intertype_1220 = function() {
+      eq2(T, (Ω_intertype_0221 = function() {
         return type_of(create.symbol());
       }), 'symbol');
-      throws2(T, (Ω_intertype_1221 = function() {
+      throws2(T, (Ω_intertype_0222 = function() {
         return create.basetype();
       }), /type declaration of 'basetype' has no `create` and no `template` entries, cannot be created/);
       return null;
@@ -1438,7 +1438,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var create, declarations, declare, isa, type_of, types, Ω_intertype_1222, Ω_intertype_1223, Ω_intertype_1224, Ω_intertype_1225;
+      var create, declarations, declare, isa, type_of, types, Ω_intertype_0223, Ω_intertype_0224, Ω_intertype_0225, Ω_intertype_0226;
       types = new Intertype();
       ({declare, create, isa, type_of, declarations} = types);
       declare({
@@ -1460,27 +1460,27 @@
       });
       debug('^3234^', create.quantity());
       debug('^3234^', declarations.quantity);
-      eq2(T, (Ω_intertype_1222 = function() {
+      eq2(T, (Ω_intertype_0223 = function() {
         return create.quantity();
       }), {
         q: 0,
         u: 'u'
       });
-      eq2(T, (Ω_intertype_1223 = function() {
+      eq2(T, (Ω_intertype_0224 = function() {
         return isa.quantity({
           q: 9
         });
       }), false);
-      eq2(T, (Ω_intertype_1224 = function() {
+      eq2(T, (Ω_intertype_0225 = function() {
         return type_of(declarations.quantity.sub_tests.q);
       }), 'function');
-      eq2(T, (Ω_intertype_1225 = function() {
+      eq2(T, (Ω_intertype_0226 = function() {
         return type_of(declarations.quantity.sub_tests.u);
       }), 'function');
       return null;
     })();
     (() => {      //.........................................................................................................
-      var create, declare, type_of, types, Ω_intertype_1226;
+      var create, declare, type_of, types, Ω_intertype_0227;
       types = new Intertype();
       ({declare, create, type_of} = types);
       declare({
@@ -1504,7 +1504,7 @@
         }
       });
       debug('^3234^', create.foo());
-      eq2(T, (Ω_intertype_1226 = function() {
+      eq2(T, (Ω_intertype_0227 = function() {
         return create.foo();
       }), {
         foo: {
@@ -1521,7 +1521,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var create, declarations, declare, isa, type_of, types, Ω_intertype_1227, Ω_intertype_1228, Ω_intertype_1229, Ω_intertype_1230, Ω_intertype_1231;
+      var create, declarations, declare, isa, type_of, types, Ω_intertype_0228, Ω_intertype_0229, Ω_intertype_0230, Ω_intertype_0231, Ω_intertype_0232;
       types = new Intertype();
       ({declare, declarations, create, type_of, isa} = types);
       declare({
@@ -1533,23 +1533,23 @@
           }
         }
       });
-      eq2(T, (Ω_intertype_1227 = function() {
+      eq2(T, (Ω_intertype_0228 = function() {
         return type_of(declarations.quantity.test);
       }), 'function');
       debug('^342342^', declarations.quantity);
-      eq2(T, (Ω_intertype_1228 = function() {
+      eq2(T, (Ω_intertype_0229 = function() {
         return type_of(declarations.quantity.sub_tests.q);
       }), 'function');
-      eq2(T, (Ω_intertype_1229 = function() {
+      eq2(T, (Ω_intertype_0230 = function() {
         return type_of(declarations.quantity.sub_tests.u);
       }), 'function');
-      eq2(T, (Ω_intertype_1230 = function() {
+      eq2(T, (Ω_intertype_0231 = function() {
         return isa.quantity({
           q: 987,
           u: 's'
         });
       }), true);
-      eq2(T, (Ω_intertype_1231 = function() {
+      eq2(T, (Ω_intertype_0232 = function() {
         return isa.quantity({
           q: 987
         });
@@ -1561,16 +1561,16 @@
 
   //-----------------------------------------------------------------------------------------------------------
   this.intertype_minimal_has_only_base_types = function(T, done) {
-    var Intertype_minimal, types, Ω_intertype_1232, Ω_intertype_1233;
+    var Intertype_minimal, types, Ω_intertype_0233, Ω_intertype_0234;
     ({Intertype_minimal} = require('../../../apps/intertype'));
     types = new Intertype_minimal();
-    eq2(T, (Ω_intertype_1232 = function() {
+    eq2(T, (Ω_intertype_0233 = function() {
       return (Object.keys(types.declarations)).sort();
     }), ['anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown']);
     types.declare({
       z: (function(x) {})
     });
-    eq2(T, (Ω_intertype_1233 = function() {
+    eq2(T, (Ω_intertype_0234 = function() {
       return (Object.keys(types.declarations)).sort();
     }), ['anything', 'nothing', 'null', 'optional', 'something', 'undefined', 'unknown', 'z']);
     return typeof done === "function" ? done() : void 0;
@@ -1581,10 +1581,10 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1234, Ω_intertype_1235, Ω_intertype_1236, Ω_intertype_1237, Ω_intertype_1238, Ω_intertype_1239, Ω_intertype_1240, Ω_intertype_1241;
+      var types, Ω_intertype_0235, Ω_intertype_0236, Ω_intertype_0237, Ω_intertype_0238, Ω_intertype_0239, Ω_intertype_0240, Ω_intertype_0241, Ω_intertype_0242;
       types = new Intertype();
       // try_and_show T, -> types.declare { z: 'quux', }
-      throws2(T, (Ω_intertype_1234 = function() {
+      throws2(T, (Ω_intertype_0235 = function() {
         return types.declare({
           z: 'quux'
         });
@@ -1592,33 +1592,33 @@
       types.declare({
         z: 'float'
       });
-      eq2(T, (Ω_intertype_1235 = function() {
+      eq2(T, (Ω_intertype_0236 = function() {
         return types.isa.z(12);
       }), true);
-      eq2(T, (Ω_intertype_1236 = function() {
+      eq2(T, (Ω_intertype_0237 = function() {
         return types.isa.float.name;
       }), 'isa.float');
-      eq2(T, (Ω_intertype_1237 = function() {
+      eq2(T, (Ω_intertype_0238 = function() {
         return types.declarations.float.type;
       }), 'float');
-      eq2(T, (Ω_intertype_1238 = function() {
+      eq2(T, (Ω_intertype_0239 = function() {
         return types.declarations.float.test.name;
       }), 'float');
-      eq2(T, (Ω_intertype_1239 = function() {
+      eq2(T, (Ω_intertype_0240 = function() {
         return types.isa.z.name;
       }), 'isa.z');
-      eq2(T, (Ω_intertype_1240 = function() {
+      eq2(T, (Ω_intertype_0241 = function() {
         return types.declarations.z.type;
       }), 'z');
-      return eq2(T, (Ω_intertype_1241 = function() {
+      return eq2(T, (Ω_intertype_0242 = function() {
         return types.declarations.z.test.name;
       }), 'z'); // ?
     })();
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1242, Ω_intertype_1243, Ω_intertype_1244, Ω_intertype_1245, Ω_intertype_1246, Ω_intertype_1247, Ω_intertype_1248, Ω_intertype_1249;
+      var types, Ω_intertype_0243, Ω_intertype_0244, Ω_intertype_0245, Ω_intertype_0246, Ω_intertype_0247, Ω_intertype_0248, Ω_intertype_0249, Ω_intertype_0250;
       types = new Intertype();
       // try_and_show T, -> types.declare { z: { test: 'quux', }, }
-      throws2(T, (Ω_intertype_1242 = function() {
+      throws2(T, (Ω_intertype_0243 = function() {
         return types.declare({
           z: {
             test: 'quux'
@@ -1630,25 +1630,25 @@
           test: 'float'
         }
       });
-      eq2(T, (Ω_intertype_1243 = function() {
+      eq2(T, (Ω_intertype_0244 = function() {
         return types.isa.z(12);
       }), true);
-      eq2(T, (Ω_intertype_1244 = function() {
+      eq2(T, (Ω_intertype_0245 = function() {
         return types.isa.float.name;
       }), 'isa.float');
-      eq2(T, (Ω_intertype_1245 = function() {
+      eq2(T, (Ω_intertype_0246 = function() {
         return types.declarations.float.type;
       }), 'float');
-      eq2(T, (Ω_intertype_1246 = function() {
+      eq2(T, (Ω_intertype_0247 = function() {
         return types.declarations.float.test.name;
       }), 'float');
-      eq2(T, (Ω_intertype_1247 = function() {
+      eq2(T, (Ω_intertype_0248 = function() {
         return types.isa.z.name;
       }), 'isa.z');
-      eq2(T, (Ω_intertype_1248 = function() {
+      eq2(T, (Ω_intertype_0249 = function() {
         return types.declarations.z.type;
       }), 'z');
-      return eq2(T, (Ω_intertype_1249 = function() {
+      return eq2(T, (Ω_intertype_0250 = function() {
         return types.declarations.z.test.name;
       }), 'z');
     })();
@@ -1660,42 +1660,42 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1250, Ω_intertype_1251, Ω_intertype_1252, Ω_intertype_1253, Ω_intertype_1254, Ω_intertype_1255, Ω_intertype_1256, Ω_intertype_1257, Ω_intertype_1258;
+      var types, Ω_intertype_0251, Ω_intertype_0252, Ω_intertype_0253, Ω_intertype_0254, Ω_intertype_0255, Ω_intertype_0256, Ω_intertype_0257, Ω_intertype_0258, Ω_intertype_0259;
       types = new Intertype();
-      eq2(T, (Ω_intertype_1250 = function() {
+      eq2(T, (Ω_intertype_0251 = function() {
         return Reflect.has(types.declarations, 'foo');
       }), false);
       types.declare({
         foo: 'object'
       });
-      eq2(T, (Ω_intertype_1251 = function() {
+      eq2(T, (Ω_intertype_0252 = function() {
         return Reflect.has(types.declarations, 'foo');
       }), true);
-      eq2(T, (Ω_intertype_1252 = function() {
+      eq2(T, (Ω_intertype_0253 = function() {
         return Reflect.has(types.declarations, 'foo.bar');
       }), false);
       types.declare({
         'foo.bar': 'object'
       });
-      eq2(T, (Ω_intertype_1253 = function() {
+      eq2(T, (Ω_intertype_0254 = function() {
         return Reflect.has(types.declarations, 'foo.bar');
       }), true);
-      eq2(T, (Ω_intertype_1254 = function() {
+      eq2(T, (Ω_intertype_0255 = function() {
         return Reflect.has(types.declarations, 'foo.bar.baz');
       }), false);
       types.declare({
         'foo.bar.baz': 'float'
       });
-      eq2(T, (Ω_intertype_1255 = function() {
+      eq2(T, (Ω_intertype_0256 = function() {
         return Reflect.has(types.declarations, 'foo.bar.baz');
       }), true);
-      eq2(T, (Ω_intertype_1256 = function() {
+      eq2(T, (Ω_intertype_0257 = function() {
         return types.isa.foo.bar.baz(null);
       }), false);
-      eq2(T, (Ω_intertype_1257 = function() {
+      eq2(T, (Ω_intertype_0258 = function() {
         return types.isa.foo.bar.baz(4);
       }), true);
-      eq2(T, (Ω_intertype_1258 = function() {
+      eq2(T, (Ω_intertype_0259 = function() {
         return types.isa.foo.bar.baz(+2e308);
       }), false);
       // T?.eq types.declarations[ 'foo.bar.baz' ].test, types.declarations.float.test
@@ -1715,7 +1715,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1268, Ω_intertype_1269, Ω_intertype_1270, Ω_intertype_1271, Ω_intertype_1272, Ω_intertype_1273, Ω_intertype_1274, Ω_intertype_1275, Ω_intertype_1276, Ω_intertype_1277, Ω_intertype_1278, Ω_intertype_1279;
+      var types, Ω_intertype_0269, Ω_intertype_0270, Ω_intertype_0271, Ω_intertype_0272, Ω_intertype_0273, Ω_intertype_0274, Ω_intertype_0275, Ω_intertype_0276, Ω_intertype_0277, Ω_intertype_0278, Ω_intertype_0279, Ω_intertype_0280;
       types = new Intertype();
       types.declare({
         quantity: 'object'
@@ -1726,48 +1726,48 @@
       types.declare({
         'quantity.u': 'text'
       });
-      eq2(T, (Ω_intertype_1268 = function() {
+      eq2(T, (Ω_intertype_0269 = function() {
         return types.isa['quantity.q'];
       }), types.declarations['quantity'].sub_tests['q']);
-      eq2(T, (Ω_intertype_1269 = function() {
+      eq2(T, (Ω_intertype_0270 = function() {
         return types.isa['quantity.q'];
       }), types.isa.quantity.q);
       // debug '^409-1^', types.declarations
-      eq2(T, (Ω_intertype_1270 = function() {
+      eq2(T, (Ω_intertype_0271 = function() {
         return types.isa.quantity({});
       }), false);
-      eq2(T, (Ω_intertype_1271 = function() {
+      eq2(T, (Ω_intertype_0272 = function() {
         return types.isa.quantity({
           q: {}
         });
       }), false);
-      eq2(T, (Ω_intertype_1272 = function() {
+      eq2(T, (Ω_intertype_0273 = function() {
         return types.isa.quantity({
           q: 3
         });
       }), false);
-      eq2(T, (Ω_intertype_1273 = function() {
+      eq2(T, (Ω_intertype_0274 = function() {
         return types.isa.quantity({
           q: 3,
           u: 'm'
         });
       }), true);
-      eq2(T, (Ω_intertype_1274 = function() {
+      eq2(T, (Ω_intertype_0275 = function() {
         return types.isa.quantity.q(3);
       }), true);
-      eq2(T, (Ω_intertype_1275 = function() {
+      eq2(T, (Ω_intertype_0276 = function() {
         return types.isa.quantity.q(3.1);
       }), true);
-      eq2(T, (Ω_intertype_1276 = function() {
+      eq2(T, (Ω_intertype_0277 = function() {
         return types.isa.quantity.q('3.1');
       }), false);
-      eq2(T, (Ω_intertype_1277 = function() {
+      eq2(T, (Ω_intertype_0278 = function() {
         return types.isa.quantity.u('m');
       }), true);
-      eq2(T, (Ω_intertype_1278 = function() {
+      eq2(T, (Ω_intertype_0279 = function() {
         return types.isa.quantity.u(null);
       }), false);
-      eq2(T, (Ω_intertype_1279 = function() {
+      eq2(T, (Ω_intertype_0280 = function() {
         return types.isa.quantity.u(3);
       }), false);
       debug('^433-1^', types.declarations['quantity']);
@@ -1776,7 +1776,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var f, k, types, Ω_intertype_1280, Ω_intertype_1281, Ω_intertype_1282, Ω_intertype_1283, Ω_intertype_1284, Ω_intertype_1285, Ω_intertype_1286, Ω_intertype_1287, Ω_intertype_1288, Ω_intertype_1289, Ω_intertype_1290, Ω_intertype_1291, Ω_intertype_1292, Ω_intertype_1293, Ω_intertype_1294, Ω_intertype_1295, Ω_intertype_1296;
+      var f, k, types, Ω_intertype_0281, Ω_intertype_0282, Ω_intertype_0283, Ω_intertype_0284, Ω_intertype_0285, Ω_intertype_0286, Ω_intertype_0287, Ω_intertype_0288, Ω_intertype_0289, Ω_intertype_0290, Ω_intertype_0291, Ω_intertype_0292, Ω_intertype_0293, Ω_intertype_0294, Ω_intertype_0295, Ω_intertype_0296, Ω_intertype_0297;
       types = new Intertype();
       types.declare({
         'person': 'object'
@@ -1798,27 +1798,27 @@
       });
       // T?.eq types.isa[ 'quantity.q' ], types.declarations[ 'quantity' ].sub_tests[ 'q' ]
       // T?.eq types.isa[ 'quantity.q' ], types.isa.quantity.q
-      eq2(T, (Ω_intertype_1280 = function() {
+      eq2(T, (Ω_intertype_0281 = function() {
         return types.isa.person.address.city.name('P');
       }), true);
-      eq2(T, (Ω_intertype_1281 = function() {
+      eq2(T, (Ω_intertype_0282 = function() {
         return types.isa.person.address.city.name(1234);
       }), false);
-      eq2(T, (Ω_intertype_1282 = function() {
+      eq2(T, (Ω_intertype_0283 = function() {
         return types.isa.person(1234);
       }), false);
-      eq2(T, (Ω_intertype_1283 = function() {
+      eq2(T, (Ω_intertype_0284 = function() {
         return types.isa.person({
           name: 'Bob'
         });
       }), false);
-      eq2(T, (Ω_intertype_1284 = function() {
+      eq2(T, (Ω_intertype_0285 = function() {
         return types.isa.person({
           name: 'Bob',
           address: {}
         });
       }), false);
-      eq2(T, (Ω_intertype_1285 = function() {
+      eq2(T, (Ω_intertype_0286 = function() {
         return types.isa.person({
           name: 'Bob',
           address: {
@@ -1826,7 +1826,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1286 = function() {
+      eq2(T, (Ω_intertype_0287 = function() {
         return types.isa.person({
           name: 'Bob',
           address: {
@@ -1836,7 +1836,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1287 = function() {
+      eq2(T, (Ω_intertype_0288 = function() {
         return types.isa.person({
           name: 'Bob',
           address: {
@@ -1847,19 +1847,19 @@
           }
         });
       }), true);
-      eq2(T, (Ω_intertype_1288 = function() {
+      eq2(T, (Ω_intertype_0289 = function() {
         return types.isa.person.address.city.name('P');
       }), true);
-      eq2(T, (Ω_intertype_1289 = function() {
+      eq2(T, (Ω_intertype_0290 = function() {
         return types.isa.person.address.city.postcode('SO36');
       }), true);
-      eq2(T, (Ω_intertype_1290 = function() {
+      eq2(T, (Ω_intertype_0291 = function() {
         return types.isa.person.address.city({
           name: 'P',
           postcode: 'SO36'
         });
       }), true);
-      eq2(T, (Ω_intertype_1291 = function() {
+      eq2(T, (Ω_intertype_0292 = function() {
         return types.isa.person.address({
           city: {
             name: 'P',
@@ -1903,19 +1903,19 @@
         }
         return results;
       })());
-      eq2(T, (Ω_intertype_1292 = function() {
+      eq2(T, (Ω_intertype_0293 = function() {
         return Object.keys(types.declarations['person'].sub_tests);
       }), ['name', 'address']);
-      eq2(T, (Ω_intertype_1293 = function() {
+      eq2(T, (Ω_intertype_0294 = function() {
         return Object.keys(types.declarations['person.address'].sub_tests);
       }), ['city']);
-      eq2(T, (Ω_intertype_1294 = function() {
+      eq2(T, (Ω_intertype_0295 = function() {
         return Object.keys(types.declarations['person.address.city'].sub_tests);
       }), ['name', 'postcode']);
-      eq2(T, (Ω_intertype_1295 = function() {
+      eq2(T, (Ω_intertype_0296 = function() {
         return types.declarations['person'].sub_tests !== types.declarations['person.address'].sub_tests;
       }), true);
-      eq2(T, (Ω_intertype_1296 = function() {
+      eq2(T, (Ω_intertype_0297 = function() {
         return types.declarations['person'].sub_tests !== types.declarations['person.address.city'].sub_tests;
       }), true);
       return null;
@@ -1930,23 +1930,23 @@
         'foo.bar': 'text'
       });
       (() => {
-        var d, Ω_intertype_1297;
+        var d, Ω_intertype_0298;
         d = 3;
         // d.bar = '?' # Cannot create property in strict mode, so can never satisfy test
-        eq2(T, (Ω_intertype_1297 = function() {
+        eq2(T, (Ω_intertype_0298 = function() {
           return types.isa.foo(d);
         }), false);
         return null;
       })();
       (() => {
-        var d, Ω_intertype_1298, Ω_intertype_1299;
+        var d, Ω_intertype_0299, Ω_intertype_0300;
         d = new Number(3);
         d.bar = '?';
-        eq2(T, (Ω_intertype_1298 = function() {
+        eq2(T, (Ω_intertype_0299 = function() {
           return d.bar;
         }), '?');
         // still won't work b/c `float` doesn't accept objects (which is a good thing):
-        eq2(T, (Ω_intertype_1299 = function() {
+        eq2(T, (Ω_intertype_0300 = function() {
           return types.isa.foo(d);
         }), false);
         return null;
@@ -1954,7 +1954,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1300, Ω_intertype_1301;
+      var types, Ω_intertype_0301, Ω_intertype_0302;
       types = new Intertype();
       types.declare({
         'foo': 'object'
@@ -1974,10 +1974,10 @@
       types.declare({
         'foo.length': 'float'
       });
-      eq2(T, (Ω_intertype_1300 = function() {
+      eq2(T, (Ω_intertype_0301 = function() {
         return types.isa.foo({});
       }), false);
-      eq2(T, (Ω_intertype_1301 = function() {
+      eq2(T, (Ω_intertype_0302 = function() {
         return types.isa.foo({
           bind: 1,
           apply: 2,
@@ -1989,7 +1989,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1302, Ω_intertype_1303;
+      var types, Ω_intertype_0303, Ω_intertype_0304;
       types = new Intertype();
       types.declare({
         'foo': 'object'
@@ -2004,10 +2004,10 @@
           return x === 2;
         })
       });
-      eq2(T, (Ω_intertype_1302 = function() {
+      eq2(T, (Ω_intertype_0303 = function() {
         return types.isa.foo({});
       }), false);
-      eq2(T, (Ω_intertype_1303 = function() {
+      eq2(T, (Ω_intertype_0304 = function() {
         return types.isa.foo({
           text: 1,
           float: 2
@@ -2023,7 +2023,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1304, Ω_intertype_1305, Ω_intertype_1306, Ω_intertype_1307, Ω_intertype_1308, Ω_intertype_1309;
+      var types, Ω_intertype_0305, Ω_intertype_0306, Ω_intertype_0307, Ω_intertype_0308, Ω_intertype_0309, Ω_intertype_0310;
       types = new Intertype();
       types.declare({
         'person': 'object'
@@ -2051,25 +2051,25 @@
       // debug '^434-1^', types.declarations[ 'person.address.city' ]
       // debug '^434-2^', types.declarations.mycity
       urge('^342-1^', types.declarations.mycity);
-      eq2(T, (Ω_intertype_1304 = function() {
+      eq2(T, (Ω_intertype_0305 = function() {
         return types.isa.person.address.city({});
       }), false);
-      eq2(T, (Ω_intertype_1305 = function() {
+      eq2(T, (Ω_intertype_0306 = function() {
         return types.isa.person.address.city(null);
       }), false);
-      eq2(T, (Ω_intertype_1306 = function() {
+      eq2(T, (Ω_intertype_0307 = function() {
         return types.isa.person.address.city({
           name: 'P',
           postcode: 'SO36'
         });
       }), true);
-      eq2(T, (Ω_intertype_1307 = function() {
+      eq2(T, (Ω_intertype_0308 = function() {
         return types.isa.mycity({});
       }), false);
-      eq2(T, (Ω_intertype_1308 = function() {
+      eq2(T, (Ω_intertype_0309 = function() {
         return types.isa.mycity(null);
       }), false);
-      eq2(T, (Ω_intertype_1309 = function() {
+      eq2(T, (Ω_intertype_0310 = function() {
         return types.isa.mycity({
           name: 'P',
           postcode: 'SO36'
@@ -2078,7 +2078,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1310, Ω_intertype_1311, Ω_intertype_1312, Ω_intertype_1313, Ω_intertype_1314, Ω_intertype_1315;
+      var types, Ω_intertype_0311, Ω_intertype_0312, Ω_intertype_0313, Ω_intertype_0314, Ω_intertype_0315, Ω_intertype_0316;
       types = new Intertype();
       types.declare({
         'person': 'object'
@@ -2104,25 +2104,25 @@
       // debug '^434-3^', types.declarations[ 'person.address.city' ]
       // debug '^434-4^', types.declarations.mycity
       urge('^342-2^', types.declarations.mycity);
-      eq2(T, (Ω_intertype_1310 = function() {
+      eq2(T, (Ω_intertype_0311 = function() {
         return types.isa.person.address.city({});
       }), false);
-      eq2(T, (Ω_intertype_1311 = function() {
+      eq2(T, (Ω_intertype_0312 = function() {
         return types.isa.person.address.city(null);
       }), false);
-      eq2(T, (Ω_intertype_1312 = function() {
+      eq2(T, (Ω_intertype_0313 = function() {
         return types.isa.person.address.city({
           name: 'P',
           postcode: 'SO36'
         });
       }), true);
-      eq2(T, (Ω_intertype_1313 = function() {
+      eq2(T, (Ω_intertype_0314 = function() {
         return types.isa.mycity({});
       }), false);
-      eq2(T, (Ω_intertype_1314 = function() {
+      eq2(T, (Ω_intertype_0315 = function() {
         return types.isa.mycity(null);
       }), false);
-      eq2(T, (Ω_intertype_1315 = function() {
+      eq2(T, (Ω_intertype_0316 = function() {
         return types.isa.mycity({
           name: 'P',
           postcode: 'SO36'
@@ -2131,7 +2131,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1316, Ω_intertype_1317, Ω_intertype_1318, Ω_intertype_1319, Ω_intertype_1320, Ω_intertype_1321, Ω_intertype_1322, Ω_intertype_1323, Ω_intertype_1324;
+      var types, Ω_intertype_0317, Ω_intertype_0318, Ω_intertype_0319, Ω_intertype_0320, Ω_intertype_0321, Ω_intertype_0322, Ω_intertype_0323, Ω_intertype_0324, Ω_intertype_0325;
       types = new Intertype();
       types.declare({
         'person': 'object'
@@ -2159,37 +2159,37 @@
       // debug '^434-5^', types.declarations[ 'person.address.city' ]
       // debug '^434-6^', types.declarations.mycity
       urge('^342-3^', types.declarations.mycity);
-      eq2(T, (Ω_intertype_1316 = function() {
+      eq2(T, (Ω_intertype_0317 = function() {
         return types.isa.person.address.city({});
       }), false);
-      eq2(T, (Ω_intertype_1317 = function() {
+      eq2(T, (Ω_intertype_0318 = function() {
         return types.isa.person.address.city(null);
       }), false);
-      eq2(T, (Ω_intertype_1318 = function() {
+      eq2(T, (Ω_intertype_0319 = function() {
         return types.isa.person.address.city({
           name: 'P',
           postcode: 'SO36'
         });
       }), true);
-      eq2(T, (Ω_intertype_1319 = function() {
+      eq2(T, (Ω_intertype_0320 = function() {
         return types.isa.optional.person.address.city({});
       }), false);
-      eq2(T, (Ω_intertype_1320 = function() {
+      eq2(T, (Ω_intertype_0321 = function() {
         return types.isa.optional.person.address.city(null);
       }), true);
-      eq2(T, (Ω_intertype_1321 = function() {
+      eq2(T, (Ω_intertype_0322 = function() {
         return types.isa.optional.person.address.city({
           name: 'P',
           postcode: 'SO36'
         });
       }), true);
-      eq2(T, (Ω_intertype_1322 = function() {
+      eq2(T, (Ω_intertype_0323 = function() {
         return types.isa.mycity({});
       }), false);
-      eq2(T, (Ω_intertype_1323 = function() {
+      eq2(T, (Ω_intertype_0324 = function() {
         return types.isa.mycity(null);
       }), true);
-      eq2(T, (Ω_intertype_1324 = function() {
+      eq2(T, (Ω_intertype_0325 = function() {
         return types.isa.mycity({
           name: 'P',
           postcode: 'SO36'
@@ -2210,12 +2210,12 @@
   //       isa } = types
   //     declare { maybefloat1: 'optional.float', }
   //     #.......................................................................................................
-  //     eq2 T, ( Ω_intertype_1325 = -> isa.float       null  ), false
-  //     eq2 T, ( Ω_intertype_1326 = -> isa.float       true  ), false
-  //     eq2 T, ( Ω_intertype_1327 = -> isa.float       0     ), true
-  //     eq2 T, ( Ω_intertype_1328 = -> isa.maybefloat1 null  ), true
-  //     eq2 T, ( Ω_intertype_1329 = -> isa.maybefloat1 true  ), false
-  //     eq2 T, ( Ω_intertype_1330 = -> isa.maybefloat1 0     ), true
+  //     eq2 T, ( Ω_intertype_0326 = -> isa.float       null  ), false
+  //     eq2 T, ( Ω_intertype_0327 = -> isa.float       true  ), false
+  //     eq2 T, ( Ω_intertype_0328 = -> isa.float       0     ), true
+  //     eq2 T, ( Ω_intertype_0329 = -> isa.maybefloat1 null  ), true
+  //     eq2 T, ( Ω_intertype_0330 = -> isa.maybefloat1 true  ), false
+  //     eq2 T, ( Ω_intertype_0331 = -> isa.maybefloat1 0     ), true
   //     # #.......................................................................................................
   //     return null
   //   #.........................................................................................................
@@ -2226,14 +2226,14 @@
   //     declare { 'q':              'object', }
   //     declare { 'q.maybefloat2':  'optional.float', }
   //     #.......................................................................................................
-  //     eq2 T, ( Ω_intertype_1331 = -> isa.q             null                    ), false
-  //     eq2 T, ( Ω_intertype_1332 = -> isa.q             {}                      ), true
-  //     eq2 T, ( Ω_intertype_1333 = -> isa.q             { maybefloat2: null }   ), true
-  //     eq2 T, ( Ω_intertype_1334 = -> isa.q             { maybefloat2: false }  ), false
-  //     eq2 T, ( Ω_intertype_1335 = -> isa.q             { maybefloat2: 3 }      ), true
-  //     eq2 T, ( Ω_intertype_1336 = -> isa.q.maybefloat2  null                   ), true
-  //     eq2 T, ( Ω_intertype_1337 = -> isa.q.maybefloat2  true                   ), false
-  //     eq2 T, ( Ω_intertype_1338 = -> isa.q.maybefloat2  0                      ), true
+  //     eq2 T, ( Ω_intertype_0332 = -> isa.q             null                    ), false
+  //     eq2 T, ( Ω_intertype_0333 = -> isa.q             {}                      ), true
+  //     eq2 T, ( Ω_intertype_0334 = -> isa.q             { maybefloat2: null }   ), true
+  //     eq2 T, ( Ω_intertype_0335 = -> isa.q             { maybefloat2: false }  ), false
+  //     eq2 T, ( Ω_intertype_0336 = -> isa.q             { maybefloat2: 3 }      ), true
+  //     eq2 T, ( Ω_intertype_0337 = -> isa.q.maybefloat2  null                   ), true
+  //     eq2 T, ( Ω_intertype_0338 = -> isa.q.maybefloat2  true                   ), false
+  //     eq2 T, ( Ω_intertype_0339 = -> isa.q.maybefloat2  0                      ), true
   //     # #.......................................................................................................
   //     return null
   //   #.........................................................................................................
@@ -2245,14 +2245,14 @@
   //     declare { 'q.maybefloat3':  'optional.float', }
   //     # isa.q null
   //     #.......................................................................................................
-  //     safeguard T, => eq2 T, ( Ω_intertype_1339 = -> isa.q             null                    ), true
-  //     safeguard T, => eq2 T, ( Ω_intertype_1340 = -> isa.q             {}                      ), true
-  //     safeguard T, => eq2 T, ( Ω_intertype_1341 = -> isa.q             { maybefloat3: null }   ), true
-  //     safeguard T, => eq2 T, ( Ω_intertype_1342 = -> isa.q             { maybefloat3: false }  ), false
-  //     safeguard T, => eq2 T, ( Ω_intertype_1343 = -> isa.q             { maybefloat3: 3 }      ), true
-  //     safeguard T, => eq2 T, ( Ω_intertype_1344 = -> isa.q.maybefloat3  null                   ), true
-  //     safeguard T, => eq2 T, ( Ω_intertype_1345 = -> isa.q.maybefloat3  true                   ), false
-  //     safeguard T, => eq2 T, ( Ω_intertype_1346 = -> isa.q.maybefloat3  0                      ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0340 = -> isa.q             null                    ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0341 = -> isa.q             {}                      ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0342 = -> isa.q             { maybefloat3: null }   ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0343 = -> isa.q             { maybefloat3: false }  ), false
+  //     safeguard T, => eq2 T, ( Ω_intertype_0344 = -> isa.q             { maybefloat3: 3 }      ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0345 = -> isa.q.maybefloat3  null                   ), true
+  //     safeguard T, => eq2 T, ( Ω_intertype_0346 = -> isa.q.maybefloat3  true                   ), false
+  //     safeguard T, => eq2 T, ( Ω_intertype_0347 = -> isa.q.maybefloat3  0                      ), true
   //     # #.......................................................................................................
   //     return null
   //   #.........................................................................................................
@@ -2270,19 +2270,19 @@
   //     declare { 'maybesomeone':                 'optional.person', }
   //     declare { 'mycity':                       'optional.person.address.city', }
   //     #.......................................................................................................
-  //     eq2 T, ( Ω_intertype_1347 = -> isa.person        null                                                            ), false
-  //     eq2 T, ( Ω_intertype_1348 = -> isa.person        {}                                                              ), false
-  //     eq2 T, ( Ω_intertype_1349 = -> isa.person        { name: 'Fred',                                               } ), false
-  //     eq2 T, ( Ω_intertype_1350 = -> isa.person        { name: 'Fred', address: {},                                  } ), false
-  //     eq2 T, ( Ω_intertype_1351 = -> isa.person        { name: 'Fred', address: { city: 'Town', },                   } ), false
-  //     eq2 T, ( Ω_intertype_1352 = -> isa.person        { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true # ???????????????????????
+  //     eq2 T, ( Ω_intertype_0348 = -> isa.person        null                                                            ), false
+  //     eq2 T, ( Ω_intertype_0349 = -> isa.person        {}                                                              ), false
+  //     eq2 T, ( Ω_intertype_0350 = -> isa.person        { name: 'Fred',                                               } ), false
+  //     eq2 T, ( Ω_intertype_0351 = -> isa.person        { name: 'Fred', address: {},                                  } ), false
+  //     eq2 T, ( Ω_intertype_0352 = -> isa.person        { name: 'Fred', address: { city: 'Town', },                   } ), false
+  //     eq2 T, ( Ω_intertype_0353 = -> isa.person        { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true # ???????????????????????
   //     debug '^12434^', validate.person        { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  }
-  //     eq2 T, ( Ω_intertype_1353 = -> isa.maybesomeone  null                                                            ), true
-  //     # eq2 T, ( Ω_intertype_1354 = -> isa.maybesomeone  {}                                                              ), false
-  //     # eq2 T, ( Ω_intertype_1355 = -> isa.maybesomeone  { name: 'Fred',                                               } ), false
-  //     # eq2 T, ( Ω_intertype_1356 = -> isa.maybesomeone  { name: 'Fred', address: {},                                  } ), false
-  //     # eq2 T, ( Ω_intertype_1357 = -> isa.maybesomeone  { name: 'Fred', address: { city: 'Town', },                   } ), false
-  //     # eq2 T, ( Ω_intertype_1358 = -> isa.maybesomeone  { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true
+  //     eq2 T, ( Ω_intertype_0354 = -> isa.maybesomeone  null                                                            ), true
+  //     # eq2 T, ( Ω_intertype_0355 = -> isa.maybesomeone  {}                                                              ), false
+  //     # eq2 T, ( Ω_intertype_0356 = -> isa.maybesomeone  { name: 'Fred',                                               } ), false
+  //     # eq2 T, ( Ω_intertype_0357 = -> isa.maybesomeone  { name: 'Fred', address: {},                                  } ), false
+  //     # eq2 T, ( Ω_intertype_0358 = -> isa.maybesomeone  { name: 'Fred', address: { city: 'Town', },                   } ), false
+  //     # eq2 T, ( Ω_intertype_0359 = -> isa.maybesomeone  { name: 'Fred', address: { city: 'Town', postcode: 'W23', },  } ), true
   //     # #.......................................................................................................
   //     return null
   //   #.........................................................................................................
@@ -2293,40 +2293,40 @@
     var Intertype, declarations;
     ({Intertype, declarations} = require('../../../apps/intertype'));
     await (() => {      //.........................................................................................................
-      var declare, isa, types, validate, Ω_intertype_1359, Ω_intertype_1360, Ω_intertype_1361, Ω_intertype_1362, Ω_intertype_1363, Ω_intertype_1364, Ω_intertype_1365;
+      var declare, isa, types, validate, Ω_intertype_0360, Ω_intertype_0361, Ω_intertype_0362, Ω_intertype_0363, Ω_intertype_0364, Ω_intertype_0365, Ω_intertype_0366;
       types = new Intertype();
       ({declare, validate, isa} = types);
-      throws2(T, (Ω_intertype_1359 = function() {
+      throws2(T, (Ω_intertype_0360 = function() {
         return types.declare({
           'optional.d': (function(x) {})
         });
       }), /illegal use of 'optional' in declaration of type 'optional.d'/);
-      throws2(T, (Ω_intertype_1360 = function() {
+      throws2(T, (Ω_intertype_0361 = function() {
         return types.declare({
           'anything.d': (function(x) {})
         });
       }), /illegal use of basetype 'anything' in declaration of type 'anything.d'/);
-      throws2(T, (Ω_intertype_1361 = function() {
+      throws2(T, (Ω_intertype_0362 = function() {
         return types.declare({
           'nothing.d': (function(x) {})
         });
       }), /illegal use of basetype 'nothing' in declaration of type 'nothing.d'/);
-      throws2(T, (Ω_intertype_1362 = function() {
+      throws2(T, (Ω_intertype_0363 = function() {
         return types.declare({
           'something.d': (function(x) {})
         });
       }), /illegal use of basetype 'something' in declaration of type 'something.d'/);
-      throws2(T, (Ω_intertype_1363 = function() {
+      throws2(T, (Ω_intertype_0364 = function() {
         return types.declare({
           'null.d': (function(x) {})
         });
       }), /illegal use of basetype 'null' in declaration of type 'null.d'/);
-      throws2(T, (Ω_intertype_1364 = function() {
+      throws2(T, (Ω_intertype_0365 = function() {
         return types.declare({
           'undefined.d': (function(x) {})
         });
       }), /illegal use of basetype 'undefined' in declaration of type 'undefined.d'/);
-      throws2(T, (Ω_intertype_1365 = function() {
+      throws2(T, (Ω_intertype_0366 = function() {
         return types.declare({
           'unknown.d': (function(x) {})
         });
@@ -2351,35 +2351,35 @@
       return results;
     })());
     (() => {      //.........................................................................................................
-      var types, Ω_intertype_1366, Ω_intertype_1367, Ω_intertype_1368, Ω_intertype_1369, Ω_intertype_1370, Ω_intertype_1371, Ω_intertype_1372, Ω_intertype_1373, Ω_intertype_1374;
+      var types, Ω_intertype_0367, Ω_intertype_0368, Ω_intertype_0369, Ω_intertype_0370, Ω_intertype_0371, Ω_intertype_0372, Ω_intertype_0373, Ω_intertype_0374, Ω_intertype_0375;
       types = new Intertype();
-      eq2(T, (Ω_intertype_1366 = function() {
+      eq2(T, (Ω_intertype_0367 = function() {
         return __type_of(_isa, null);
       }), 'null');
-      eq2(T, (Ω_intertype_1367 = function() {
+      eq2(T, (Ω_intertype_0368 = function() {
         return __type_of(_isa, void 0);
       }), 'undefined');
-      eq2(T, (Ω_intertype_1368 = function() {
+      eq2(T, (Ω_intertype_0369 = function() {
         return __type_of(_isa, 4);
       }), 'float');
-      eq2(T, (Ω_intertype_1369 = function() {
+      eq2(T, (Ω_intertype_0370 = function() {
         return __type_of(_isa, function() {});
       }), 'function');
-      eq2(T, (Ω_intertype_1370 = function() {
+      eq2(T, (Ω_intertype_0371 = function() {
         return __type_of(_isa, async function() {
           return (await null);
         });
       }), 'asyncfunction');
-      eq2(T, (Ω_intertype_1371 = function() {
+      eq2(T, (Ω_intertype_0372 = function() {
         return __type_of(_isa, {});
       }), 'object');
-      eq2(T, (Ω_intertype_1372 = function() {
+      eq2(T, (Ω_intertype_0373 = function() {
         return __type_of(_isa, []);
       }), 'list');
-      eq2(T, (Ω_intertype_1373 = function() {
+      eq2(T, (Ω_intertype_0374 = function() {
         return __type_of(_isa, +2e308);
       }), 'infinity');
-      eq2(T, (Ω_intertype_1374 = function() {
+      eq2(T, (Ω_intertype_0375 = function() {
         return __type_of(_isa, -2e308);
       }), 'infinity');
       return null;
@@ -2392,7 +2392,7 @@
     var Intertype, declarations, deepmerge;
     ({Intertype, declarations, deepmerge} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var probe, result, sub, Ω_intertype_1375, Ω_intertype_1376, Ω_intertype_1377, Ω_intertype_1378, Ω_intertype_1379, Ω_intertype_1380;
+      var probe, result, sub, Ω_intertype_0376, Ω_intertype_0377, Ω_intertype_0378, Ω_intertype_0379, Ω_intertype_0380, Ω_intertype_0381;
       sub = {
         foo: 3
       };
@@ -2405,28 +2405,28 @@
         gnu: 4
       };
       result = deepmerge(probe);
-      eq2(T, (Ω_intertype_1375 = function() {
+      eq2(T, (Ω_intertype_0376 = function() {
         return result;
       }), probe);
-      eq2(T, (Ω_intertype_1376 = function() {
+      eq2(T, (Ω_intertype_0377 = function() {
         return result.bar === probe.bar;
       }), false);
-      eq2(T, (Ω_intertype_1377 = function() {
+      eq2(T, (Ω_intertype_0378 = function() {
         return result.bar.baz === probe.bar.baz;
       }), false);
-      eq2(T, (Ω_intertype_1378 = function() {
+      eq2(T, (Ω_intertype_0379 = function() {
         return result.bar.baz.sub === probe.bar.baz.sub;
       }), false);
-      eq2(T, (Ω_intertype_1379 = function() {
+      eq2(T, (Ω_intertype_0380 = function() {
         return result.bar.baz.sub === sub;
       }), false);
-      eq2(T, (Ω_intertype_1380 = function() {
+      eq2(T, (Ω_intertype_0381 = function() {
         return probe.bar.baz.sub === sub;
       }), true);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var probe, result, sub, types, Ω_intertype_1381, Ω_intertype_1382, Ω_intertype_1383, Ω_intertype_1384, Ω_intertype_1385, Ω_intertype_1386;
+      var probe, result, sub, types, Ω_intertype_0382, Ω_intertype_0383, Ω_intertype_0384, Ω_intertype_0385, Ω_intertype_0386, Ω_intertype_0387;
       sub = {
         foo: 3
       };
@@ -2445,22 +2445,22 @@
         }
       });
       result = types.create.q();
-      eq2(T, (Ω_intertype_1381 = function() {
+      eq2(T, (Ω_intertype_0382 = function() {
         return result;
       }), probe);
-      eq2(T, (Ω_intertype_1382 = function() {
+      eq2(T, (Ω_intertype_0383 = function() {
         return result.bar === probe.bar;
       }), false);
-      eq2(T, (Ω_intertype_1383 = function() {
+      eq2(T, (Ω_intertype_0384 = function() {
         return result.bar.baz === probe.bar.baz;
       }), false);
-      eq2(T, (Ω_intertype_1384 = function() {
+      eq2(T, (Ω_intertype_0385 = function() {
         return result.bar.baz.sub === probe.bar.baz.sub;
       }), false);
-      eq2(T, (Ω_intertype_1385 = function() {
+      eq2(T, (Ω_intertype_0386 = function() {
         return result.bar.baz.sub === sub;
       }), false);
-      eq2(T, (Ω_intertype_1386 = function() {
+      eq2(T, (Ω_intertype_0387 = function() {
         return probe.bar.baz.sub === sub;
       }), true);
       return null;
@@ -2476,7 +2476,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var types, validate, Ω_intertype_1387, Ω_intertype_1388, Ω_intertype_1389, Ω_intertype_1390, Ω_intertype_1391, Ω_intertype_1392, Ω_intertype_1393, Ω_intertype_1394, Ω_intertype_1395, Ω_intertype_1396, Ω_intertype_1397, Ω_intertype_1398, Ω_intertype_1399, Ω_intertype_1400, Ω_intertype_1401;
+      var types, validate, Ω_intertype_0388, Ω_intertype_0389, Ω_intertype_0390, Ω_intertype_0391, Ω_intertype_0392, Ω_intertype_0393, Ω_intertype_0394, Ω_intertype_0395, Ω_intertype_0396, Ω_intertype_0397, Ω_intertype_0398, Ω_intertype_0399, Ω_intertype_0400, Ω_intertype_0401, Ω_intertype_0402;
       types = new Intertype();
       ({validate} = types);
       types.declare({
@@ -2498,64 +2498,64 @@
         'person.address.city.postcode': 'text'
       });
       //.......................................................................................................
-      throws2(T, (Ω_intertype_1387 = function() {
+      throws2(T, (Ω_intertype_0388 = function() {
         return validate.person(null);
       }), /expected a person, got a null/);
-      throws2(T, (Ω_intertype_1388 = function() {
+      throws2(T, (Ω_intertype_0389 = function() {
         return validate.person.address(null);
       }), /expected a person.address, got a null/);
-      throws2(T, (Ω_intertype_1389 = function() {
+      throws2(T, (Ω_intertype_0390 = function() {
         return validate.person.address.city(null);
       }), /expected a person.address.city, got a null/);
-      throws2(T, (Ω_intertype_1390 = function() {
+      throws2(T, (Ω_intertype_0391 = function() {
         return validate.person.address.city.postcode(null);
       }), /expected a person.address.city.postcode, got a null/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1391 = function() {
+      eq2(T, (Ω_intertype_0392 = function() {
         return types.isa.person.address.city.postcode(3);
       }), false);
-      throws2(T, (Ω_intertype_1392 = function() {
+      throws2(T, (Ω_intertype_0393 = function() {
         return validate.person.address.city.postcode(3);
       }), /expected a person.address.city.postcode/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1393 = function() {
+      eq2(T, (Ω_intertype_0394 = function() {
         return types.isa.person.address.city({
           name: 'P'
         });
       }), false);
-      throws2(T, (Ω_intertype_1394 = function() {
+      throws2(T, (Ω_intertype_0395 = function() {
         return validate.person.address.city({
           name: 'P'
         });
       }), /expected a person.address.city/);
       // #.......................................................................................................
-      eq2(T, (Ω_intertype_1395 = function() {
+      eq2(T, (Ω_intertype_0396 = function() {
         return types.isa.person.address.city({
           postcode: '3421'
         });
       }), false);
-      throws2(T, (Ω_intertype_1396 = function() {
+      throws2(T, (Ω_intertype_0397 = function() {
         return validate.person.address.city();
       }), /method 'validate.person.address.city' expects 1 arguments, got 0/);
-      throws2(T, (Ω_intertype_1397 = function() {
+      throws2(T, (Ω_intertype_0398 = function() {
         return validate.person.address.city(null);
       }), /expected a person.address.city/);
-      throws2(T, (Ω_intertype_1398 = function() {
+      throws2(T, (Ω_intertype_0399 = function() {
         return validate.person.address.city('3421');
       }), /expected a person.address.city/);
-      throws2(T, (Ω_intertype_1399 = function() {
+      throws2(T, (Ω_intertype_0400 = function() {
         return validate.person.address.city({
           postcode: '3421'
         });
       }), /expected a person.address.city/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1400 = function() {
+      eq2(T, (Ω_intertype_0401 = function() {
         return types.isa.person.address.city({
           name: 'P',
           postcode: '3421'
         });
       }), true);
-      eq2(T, (Ω_intertype_1401 = function() {
+      eq2(T, (Ω_intertype_0402 = function() {
         return validate.person.address.city({
           name: 'P',
           postcode: '3421'
@@ -2574,7 +2574,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var evaluate, isa, types, validate, Ω_intertype_1402, Ω_intertype_1403, Ω_intertype_1404, Ω_intertype_1405, Ω_intertype_1406, Ω_intertype_1407, Ω_intertype_1408, Ω_intertype_1409, Ω_intertype_1410, Ω_intertype_1411, Ω_intertype_1412, Ω_intertype_1413, Ω_intertype_1414, Ω_intertype_1415;
+      var evaluate, isa, types, validate, Ω_intertype_0403, Ω_intertype_0404, Ω_intertype_0405, Ω_intertype_0406, Ω_intertype_0407, Ω_intertype_0408, Ω_intertype_0409, Ω_intertype_0410, Ω_intertype_0411, Ω_intertype_0412, Ω_intertype_0413, Ω_intertype_0414, Ω_intertype_0415, Ω_intertype_0416;
       types = new Intertype();
       ({validate, isa, evaluate} = types);
       types.declare({
@@ -2596,14 +2596,14 @@
         'person.address.city.postcode': 'text'
       });
       //.......................................................................................................
-      throws2(T, (Ω_intertype_1402 = function() {
+      throws2(T, (Ω_intertype_0403 = function() {
         return evaluate.optional(1);
       }), /`optional` is not a legal type for `evaluate` methods/);
-      throws2(T, (Ω_intertype_1403 = function() {
+      throws2(T, (Ω_intertype_0404 = function() {
         return evaluate.optional.person(1);
       }), /`optional` is not a legal type for `evaluate` methods/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1404 = function() {
+      eq2(T, (Ω_intertype_0405 = function() {
         return isa.person({
           name: 'Alice',
           address: {
@@ -2614,7 +2614,7 @@
           }
         });
       }), true);
-      eq2(T, (Ω_intertype_1405 = function() {
+      eq2(T, (Ω_intertype_0406 = function() {
         return evaluate.person({
           name: 'Alice',
           address: {
@@ -2633,7 +2633,7 @@
         'person.address.city.postcode': true
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1406 = function() {
+      eq2(T, (Ω_intertype_0407 = function() {
         return isa.person({
           name: 'Alice',
           address: {
@@ -2644,7 +2644,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1407 = function() {
+      eq2(T, (Ω_intertype_0408 = function() {
         return evaluate.person({
           name: 'Alice',
           address: {
@@ -2663,7 +2663,7 @@
         'person.address.city.postcode': false
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1408 = function() {
+      eq2(T, (Ω_intertype_0409 = function() {
         return isa.person({
           address: {
             city: {
@@ -2673,7 +2673,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1409 = function() {
+      eq2(T, (Ω_intertype_0410 = function() {
         return evaluate.person({
           address: {
             city: {
@@ -2691,7 +2691,7 @@
         'person.address.city.postcode': false
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1410 = function() {
+      eq2(T, (Ω_intertype_0411 = function() {
         return isa.person({
           address: {
             city: {
@@ -2701,7 +2701,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1411 = function() {
+      eq2(T, (Ω_intertype_0412 = function() {
         return evaluate.person({
           address: {
             city: {
@@ -2719,10 +2719,10 @@
         'person.address.city.postcode': true
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1412 = function() {
+      eq2(T, (Ω_intertype_0413 = function() {
         return isa.person(null);
       }), false);
-      eq2(T, (Ω_intertype_1413 = function() {
+      eq2(T, (Ω_intertype_0414 = function() {
         return evaluate.person(null);
       }), {
         person: false,
@@ -2733,10 +2733,10 @@
         'person.address.city.postcode': false
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1414 = function() {
+      eq2(T, (Ω_intertype_0415 = function() {
         return isa.person({});
       }), false);
-      eq2(T, (Ω_intertype_1415 = function() {
+      eq2(T, (Ω_intertype_0416 = function() {
         return evaluate.person({});
       }), {
         person: false,
@@ -2749,7 +2749,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var evaluate, isa, types, validate, Ω_intertype_1416, Ω_intertype_1417, Ω_intertype_1418, Ω_intertype_1419, Ω_intertype_1420, Ω_intertype_1421, Ω_intertype_1422, Ω_intertype_1423, Ω_intertype_1424, Ω_intertype_1425, Ω_intertype_1426, Ω_intertype_1427, Ω_intertype_1428, Ω_intertype_1429, Ω_intertype_1430;
+      var evaluate, isa, types, validate, Ω_intertype_0417, Ω_intertype_0418, Ω_intertype_0419, Ω_intertype_0420, Ω_intertype_0421, Ω_intertype_0422, Ω_intertype_0423, Ω_intertype_0424, Ω_intertype_0425, Ω_intertype_0426, Ω_intertype_0427, Ω_intertype_0428, Ω_intertype_0429, Ω_intertype_0430, Ω_intertype_0431;
       types = new Intertype();
       ({validate, isa, evaluate} = types);
       types.declare({
@@ -2771,7 +2771,7 @@
         'person.name': 'text'
       });
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1416 = function() {
+      eq2(T, (Ω_intertype_0417 = function() {
         return isa.person({
           name: 'Alice',
           address: {
@@ -2782,7 +2782,7 @@
           }
         });
       }), true);
-      eq2(T, (Ω_intertype_1417 = function() {
+      eq2(T, (Ω_intertype_0418 = function() {
         return evaluate.person({
           name: 'Alice',
           address: {
@@ -2800,7 +2800,7 @@
         'person.address.city.name': true,
         'person.address.city.postcode': true
       });
-      eq2(T, (Ω_intertype_1418 = function() {
+      eq2(T, (Ω_intertype_0419 = function() {
         return Object.keys(evaluate.person({
           name: 'Alice',
           address: {
@@ -2812,7 +2812,7 @@
         }));
       }), ['person', 'person.address', 'person.address.city', 'person.address.city.postcode', 'person.address.city.name', 'person.name']);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1419 = function() {
+      eq2(T, (Ω_intertype_0420 = function() {
         return isa.person({
           address: {
             city: {
@@ -2822,7 +2822,7 @@
           }
         });
       }), false);
-      eq2(T, (Ω_intertype_1420 = function() {
+      eq2(T, (Ω_intertype_0421 = function() {
         return evaluate.person({
           address: {
             city: {
@@ -2839,7 +2839,7 @@
         'person.address.city.name': true,
         'person.address.city.postcode': true
       });
-      eq2(T, (Ω_intertype_1421 = function() {
+      eq2(T, (Ω_intertype_0422 = function() {
         return Object.keys(evaluate.person({
           address: {
             city: {
@@ -2850,10 +2850,10 @@
         }));
       }), ['person', 'person.address', 'person.address.city', 'person.address.city.postcode', 'person.address.city.name', 'person.name']);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1422 = function() {
+      eq2(T, (Ω_intertype_0423 = function() {
         return isa.person(null);
       }), false);
-      eq2(T, (Ω_intertype_1423 = function() {
+      eq2(T, (Ω_intertype_0424 = function() {
         return evaluate.person(null);
       }), {
         person: false,
@@ -2863,14 +2863,14 @@
         'person.address.city.name': false,
         'person.address.city.postcode': false
       });
-      eq2(T, (Ω_intertype_1424 = function() {
+      eq2(T, (Ω_intertype_0425 = function() {
         return Object.keys(evaluate.person(null));
       }), ['person', 'person.address', 'person.address.city', 'person.address.city.postcode', 'person.address.city.name', 'person.name']);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1425 = function() {
+      eq2(T, (Ω_intertype_0426 = function() {
         return isa.person({});
       }), false);
-      eq2(T, (Ω_intertype_1426 = function() {
+      eq2(T, (Ω_intertype_0427 = function() {
         return evaluate.person({});
       }), {
         person: false,
@@ -2880,11 +2880,11 @@
         'person.address.city.name': false,
         'person.address.city.postcode': false
       });
-      eq2(T, (Ω_intertype_1427 = function() {
+      eq2(T, (Ω_intertype_0428 = function() {
         return Object.keys(evaluate.person({}));
       }), ['person', 'person.address', 'person.address.city', 'person.address.city.postcode', 'person.address.city.name', 'person.name']);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1428 = function() {
+      eq2(T, (Ω_intertype_0429 = function() {
         return isa.person.address({
           city: {
             name: 'Atown',
@@ -2892,7 +2892,7 @@
           }
         });
       }), true);
-      eq2(T, (Ω_intertype_1429 = function() {
+      eq2(T, (Ω_intertype_0430 = function() {
         return evaluate.person.address({
           city: {
             name: 'Atown',
@@ -2905,7 +2905,7 @@
         'person.address.city.name': true,
         'person.address.city.postcode': true
       });
-      eq2(T, (Ω_intertype_1430 = function() {
+      eq2(T, (Ω_intertype_0431 = function() {
         return Object.keys(evaluate.person.address({
           city: {
             name: 'Atown',
@@ -2923,24 +2923,24 @@
     var isa, type_of, walk_prefixes;
     ({walk_prefixes, isa, type_of} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var Ω_intertype_1431, Ω_intertype_1432, Ω_intertype_1433, Ω_intertype_1434, Ω_intertype_1435, Ω_intertype_1436;
-      eq2(T, (Ω_intertype_1431 = function() {
+      var Ω_intertype_0432, Ω_intertype_0433, Ω_intertype_0434, Ω_intertype_0435, Ω_intertype_0436, Ω_intertype_0437;
+      eq2(T, (Ω_intertype_0432 = function() {
         return isa.generatorfunction(walk_prefixes);
       }), true);
-      eq2(T, (Ω_intertype_1432 = function() {
+      eq2(T, (Ω_intertype_0433 = function() {
         return [...(walk_prefixes('one'))];
       }), []);
-      eq2(T, (Ω_intertype_1433 = function() {
+      eq2(T, (Ω_intertype_0434 = function() {
         return [...(walk_prefixes('one.two'))];
       }), ['one']);
-      eq2(T, (Ω_intertype_1434 = function() {
+      eq2(T, (Ω_intertype_0435 = function() {
         return [...(walk_prefixes('one.two.three'))];
       }), ['one', 'one.two']);
-      eq2(T, (Ω_intertype_1435 = function() {
+      eq2(T, (Ω_intertype_0436 = function() {
         return [...(walk_prefixes('one.two.three.four'))];
       }), ['one', 'one.two', 'one.two.three']);
       /* TAINT should not allow empty namers: */
-      eq2(T, (Ω_intertype_1436 = function() {
+      eq2(T, (Ω_intertype_0437 = function() {
         return [...(walk_prefixes('.one.two.three'))];
       }), ['', '.one', '.one.two']);
       return null;
@@ -2953,7 +2953,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, Ω_intertype_1437;
+      var declarations, Ω_intertype_0438;
       declarations = {
         'foo.bar': function(x) {
           return x === 'foo.bar';
@@ -2966,39 +2966,39 @@
         var types;
         return types = new Intertype(declarations);
       });
-      throws2(T, (Ω_intertype_1437 = function() {
+      throws2(T, (Ω_intertype_0438 = function() {
         var types;
         return types = new Intertype(declarations);
       }), /unknown partial type 'foo'/);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var declarations, types, Ω_intertype_1438, Ω_intertype_1439, Ω_intertype_1440, Ω_intertype_1441, Ω_intertype_1442, Ω_intertype_1443;
+      var declarations, types, Ω_intertype_0439, Ω_intertype_0440, Ω_intertype_0441, Ω_intertype_0442, Ω_intertype_0443, Ω_intertype_0444;
       declarations = {
         'quantity': 'object',
         'quantity.q': 'float',
         'quantity.u': 'text'
       };
       types = new Intertype(declarations);
-      eq2(T, (Ω_intertype_1438 = function() {
+      eq2(T, (Ω_intertype_0439 = function() {
         return types.isa.quantity({});
       }), false);
-      eq2(T, (Ω_intertype_1439 = function() {
+      eq2(T, (Ω_intertype_0440 = function() {
         return types.isa.quantity({
           q: 12,
           u: 'kg'
         });
       }), true);
-      eq2(T, (Ω_intertype_1440 = function() {
+      eq2(T, (Ω_intertype_0441 = function() {
         return types.isa['quantity.q'](12);
       }), true);
-      eq2(T, (Ω_intertype_1441 = function() {
+      eq2(T, (Ω_intertype_0442 = function() {
         return types.isa['quantity.u']('kg');
       }), true);
-      eq2(T, (Ω_intertype_1442 = function() {
+      eq2(T, (Ω_intertype_0443 = function() {
         return types.isa.quantity.q(12);
       }), true);
-      eq2(T, (Ω_intertype_1443 = function() {
+      eq2(T, (Ω_intertype_0444 = function() {
         return types.isa.quantity.u('kg');
       }), true);
       return null;
@@ -3011,7 +3011,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, isa, types, Ω_intertype_1444, Ω_intertype_1445, Ω_intertype_1446, Ω_intertype_1447, Ω_intertype_1448, Ω_intertype_1449, Ω_intertype_1450, Ω_intertype_1451, Ω_intertype_1452, Ω_intertype_1453, Ω_intertype_1454, Ω_intertype_1455, Ω_intertype_1456;
+      var declarations, isa, types, Ω_intertype_0445, Ω_intertype_0446, Ω_intertype_0447, Ω_intertype_0448, Ω_intertype_0449, Ω_intertype_0450, Ω_intertype_0451, Ω_intertype_0452, Ω_intertype_0453, Ω_intertype_0454, Ω_intertype_0455, Ω_intertype_0456, Ω_intertype_0457;
       declarations = {
         'empty': {
           test: 'object',
@@ -3042,44 +3042,44 @@
       };
       types = new Intertype(declarations);
       ({isa} = types);
-      eq2(T, (Ω_intertype_1444 = function() {
+      eq2(T, (Ω_intertype_0445 = function() {
         return isa.empty.list([]);
       }), true);
-      eq2(T, (Ω_intertype_1445 = function() {
+      eq2(T, (Ω_intertype_0446 = function() {
         return isa.empty.list(['A']);
       }), false);
-      eq2(T, (Ω_intertype_1446 = function() {
+      eq2(T, (Ω_intertype_0447 = function() {
         return isa.empty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1447 = function() {
+      eq2(T, (Ω_intertype_0448 = function() {
         return isa.nonempty.list([]);
       }), false);
-      eq2(T, (Ω_intertype_1448 = function() {
+      eq2(T, (Ω_intertype_0449 = function() {
         return isa.nonempty.list(['A']);
       }), true);
-      eq2(T, (Ω_intertype_1449 = function() {
+      eq2(T, (Ω_intertype_0450 = function() {
         return isa.nonempty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1450 = function() {
+      eq2(T, (Ω_intertype_0451 = function() {
         return isa.empty.text('');
       }), true);
-      eq2(T, (Ω_intertype_1451 = function() {
+      eq2(T, (Ω_intertype_0452 = function() {
         return isa.empty.text('A');
       }), false);
-      eq2(T, (Ω_intertype_1452 = function() {
+      eq2(T, (Ω_intertype_0453 = function() {
         return isa.empty.text(4);
       }), false);
-      eq2(T, (Ω_intertype_1453 = function() {
+      eq2(T, (Ω_intertype_0454 = function() {
         return isa.nonempty.text('');
       }), false);
-      eq2(T, (Ω_intertype_1454 = function() {
+      eq2(T, (Ω_intertype_0455 = function() {
         return isa.nonempty.text('A');
       }), true);
-      eq2(T, (Ω_intertype_1455 = function() {
+      eq2(T, (Ω_intertype_0456 = function() {
         return isa.nonempty.text(4);
       }), false);
       /* this doesn't make a terrible lot of sense: */
-      eq2(T, (Ω_intertype_1456 = function() {
+      eq2(T, (Ω_intertype_0457 = function() {
         return isa.empty({
           list: [],
           text: '',
@@ -3089,7 +3089,7 @@
       return null;
     })();
     (() => {      //.........................................................................................................
-      var declarations, isa, types, validate, Ω_intertype_1457, Ω_intertype_1458, Ω_intertype_1459, Ω_intertype_1460, Ω_intertype_1461, Ω_intertype_1462, Ω_intertype_1463, Ω_intertype_1464, Ω_intertype_1465, Ω_intertype_1466, Ω_intertype_1467, Ω_intertype_1468, Ω_intertype_1469, Ω_intertype_1470, Ω_intertype_1471, Ω_intertype_1472, Ω_intertype_1473, Ω_intertype_1474, Ω_intertype_1475, Ω_intertype_1476, Ω_intertype_1477, Ω_intertype_1478, Ω_intertype_1479, Ω_intertype_1480;
+      var declarations, isa, types, validate, Ω_intertype_0458, Ω_intertype_0459, Ω_intertype_0460, Ω_intertype_0461, Ω_intertype_0462, Ω_intertype_0463, Ω_intertype_0464, Ω_intertype_0465, Ω_intertype_0466, Ω_intertype_0467, Ω_intertype_0468, Ω_intertype_0469, Ω_intertype_0470, Ω_intertype_0471, Ω_intertype_0472, Ω_intertype_0473, Ω_intertype_0474, Ω_intertype_0475, Ω_intertype_0476, Ω_intertype_0477, Ω_intertype_0478, Ω_intertype_0479, Ω_intertype_0480, Ω_intertype_0481;
       declarations = {
         'empty': {
           role: 'qualifier'
@@ -3118,78 +3118,78 @@
       };
       types = new Intertype(declarations);
       ({isa, validate} = types);
-      eq2(T, (Ω_intertype_1457 = function() {
+      eq2(T, (Ω_intertype_0458 = function() {
         return isa.empty.list([]);
       }), true);
-      eq2(T, (Ω_intertype_1458 = function() {
+      eq2(T, (Ω_intertype_0459 = function() {
         return isa.empty.list(['A']);
       }), false);
-      eq2(T, (Ω_intertype_1459 = function() {
+      eq2(T, (Ω_intertype_0460 = function() {
         return isa.empty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1460 = function() {
+      eq2(T, (Ω_intertype_0461 = function() {
         return isa.nonempty.list([]);
       }), false);
-      eq2(T, (Ω_intertype_1461 = function() {
+      eq2(T, (Ω_intertype_0462 = function() {
         return isa.nonempty.list(['A']);
       }), true);
-      eq2(T, (Ω_intertype_1462 = function() {
+      eq2(T, (Ω_intertype_0463 = function() {
         return isa.nonempty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1463 = function() {
+      eq2(T, (Ω_intertype_0464 = function() {
         return isa.empty.text('');
       }), true);
-      eq2(T, (Ω_intertype_1464 = function() {
+      eq2(T, (Ω_intertype_0465 = function() {
         return isa.empty.text('A');
       }), false);
-      eq2(T, (Ω_intertype_1465 = function() {
+      eq2(T, (Ω_intertype_0466 = function() {
         return isa.empty.text(4);
       }), false);
-      eq2(T, (Ω_intertype_1466 = function() {
+      eq2(T, (Ω_intertype_0467 = function() {
         return isa.nonempty.text('');
       }), false);
-      eq2(T, (Ω_intertype_1467 = function() {
+      eq2(T, (Ω_intertype_0468 = function() {
         return isa.nonempty.text('A');
       }), true);
-      eq2(T, (Ω_intertype_1468 = function() {
+      eq2(T, (Ω_intertype_0469 = function() {
         return isa.nonempty.text(4);
       }), false);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1469 = function() {
+      eq2(T, (Ω_intertype_0470 = function() {
         return isa.empty([]);
       }), true);
-      eq2(T, (Ω_intertype_1470 = function() {
+      eq2(T, (Ω_intertype_0471 = function() {
         return isa.empty('');
       }), true);
-      eq2(T, (Ω_intertype_1471 = function() {
+      eq2(T, (Ω_intertype_0472 = function() {
         return isa.empty(new Set());
       }), true);
-      eq2(T, (Ω_intertype_1472 = function() {
+      eq2(T, (Ω_intertype_0473 = function() {
         return isa.empty([1]);
       }), false);
-      eq2(T, (Ω_intertype_1473 = function() {
+      eq2(T, (Ω_intertype_0474 = function() {
         return isa.empty('A');
       }), false);
-      eq2(T, (Ω_intertype_1474 = function() {
+      eq2(T, (Ω_intertype_0475 = function() {
         return isa.empty(new Set('abc'));
       }), false);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1475 = function() {
+      eq2(T, (Ω_intertype_0476 = function() {
         return validate.empty([]);
       }), []);
-      eq2(T, (Ω_intertype_1476 = function() {
+      eq2(T, (Ω_intertype_0477 = function() {
         return validate.empty('');
       }), '');
-      eq2(T, (Ω_intertype_1477 = function() {
+      eq2(T, (Ω_intertype_0478 = function() {
         return validate.empty(new Set());
       }), new Set());
-      throws2(T, (Ω_intertype_1478 = function() {
+      throws2(T, (Ω_intertype_0479 = function() {
         return validate.empty([1]);
       }), /expected a empty, got a list/);
-      throws2(T, (Ω_intertype_1479 = function() {
+      throws2(T, (Ω_intertype_0480 = function() {
         return validate.empty('A');
       }), /expected a empty, got a text/);
-      throws2(T, (Ω_intertype_1480 = function() {
+      throws2(T, (Ω_intertype_0481 = function() {
         return validate.empty(new Set('abc'));
       }), /expected a empty, got a set/);
       return null;
@@ -3202,7 +3202,7 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, isa, types, validate, Ω_intertype_1481, Ω_intertype_1482, Ω_intertype_1483, Ω_intertype_1484, Ω_intertype_1485, Ω_intertype_1486, Ω_intertype_1487, Ω_intertype_1488, Ω_intertype_1489, Ω_intertype_1490, Ω_intertype_1491, Ω_intertype_1492, Ω_intertype_1493, Ω_intertype_1494, Ω_intertype_1495, Ω_intertype_1496, Ω_intertype_1497, Ω_intertype_1498, Ω_intertype_1499, Ω_intertype_1500, Ω_intertype_1501, Ω_intertype_1502, Ω_intertype_1503, Ω_intertype_1504, Ω_intertype_1505, Ω_intertype_1506, Ω_intertype_1507, Ω_intertype_1508, Ω_intertype_1509, Ω_intertype_1510, Ω_intertype_1511, Ω_intertype_1512, Ω_intertype_1513, Ω_intertype_1514, Ω_intertype_1515, Ω_intertype_1516, Ω_intertype_1517;
+      var declarations, isa, types, validate, Ω_intertype_0482, Ω_intertype_0483, Ω_intertype_0484, Ω_intertype_0485, Ω_intertype_0486, Ω_intertype_0487, Ω_intertype_0488, Ω_intertype_0489, Ω_intertype_0490, Ω_intertype_0491, Ω_intertype_0492, Ω_intertype_0493, Ω_intertype_0494, Ω_intertype_0495, Ω_intertype_0496, Ω_intertype_0497, Ω_intertype_0498, Ω_intertype_0499, Ω_intertype_0500, Ω_intertype_0501, Ω_intertype_0502, Ω_intertype_0503, Ω_intertype_0504, Ω_intertype_0505, Ω_intertype_0506, Ω_intertype_0507, Ω_intertype_0508, Ω_intertype_0509, Ω_intertype_0510, Ω_intertype_0511, Ω_intertype_0512, Ω_intertype_0513, Ω_intertype_0514, Ω_intertype_0515, Ω_intertype_0516, Ω_intertype_0517, Ω_intertype_0518;
       declarations = {
         'empty': {
           role: 'qualifier'
@@ -3231,118 +3231,275 @@
       };
       types = new Intertype(declarations);
       ({isa, validate} = types);
-      eq2(T, (Ω_intertype_1481 = function() {
+      eq2(T, (Ω_intertype_0482 = function() {
         return isa.optional.empty.list([]);
       }), true);
-      eq2(T, (Ω_intertype_1482 = function() {
+      eq2(T, (Ω_intertype_0483 = function() {
         return isa.optional.empty.list(['A']);
       }), false);
-      eq2(T, (Ω_intertype_1483 = function() {
+      eq2(T, (Ω_intertype_0484 = function() {
         return isa.optional.empty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1484 = function() {
+      eq2(T, (Ω_intertype_0485 = function() {
         return isa.optional.nonempty.list([]);
       }), false);
-      eq2(T, (Ω_intertype_1485 = function() {
+      eq2(T, (Ω_intertype_0486 = function() {
         return isa.optional.nonempty.list(['A']);
       }), true);
-      eq2(T, (Ω_intertype_1486 = function() {
+      eq2(T, (Ω_intertype_0487 = function() {
         return isa.optional.nonempty.list(4);
       }), false);
-      eq2(T, (Ω_intertype_1487 = function() {
+      eq2(T, (Ω_intertype_0488 = function() {
         return isa.optional.empty.text('');
       }), true);
-      eq2(T, (Ω_intertype_1488 = function() {
+      eq2(T, (Ω_intertype_0489 = function() {
         return isa.optional.empty.text('A');
       }), false);
-      eq2(T, (Ω_intertype_1489 = function() {
+      eq2(T, (Ω_intertype_0490 = function() {
         return isa.optional.empty.text(4);
       }), false);
-      eq2(T, (Ω_intertype_1490 = function() {
+      eq2(T, (Ω_intertype_0491 = function() {
         return isa.optional.nonempty.text('');
       }), false);
-      eq2(T, (Ω_intertype_1491 = function() {
+      eq2(T, (Ω_intertype_0492 = function() {
         return isa.optional.nonempty.text('A');
       }), true);
-      eq2(T, (Ω_intertype_1492 = function() {
+      eq2(T, (Ω_intertype_0493 = function() {
         return isa.optional.nonempty.text(4);
       }), false);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1493 = function() {
+      eq2(T, (Ω_intertype_0494 = function() {
         return isa.optional.empty([]);
       }), true);
-      eq2(T, (Ω_intertype_1494 = function() {
+      eq2(T, (Ω_intertype_0495 = function() {
         return isa.optional.empty('');
       }), true);
-      eq2(T, (Ω_intertype_1495 = function() {
+      eq2(T, (Ω_intertype_0496 = function() {
         return isa.optional.empty(new Set());
       }), true);
-      eq2(T, (Ω_intertype_1496 = function() {
+      eq2(T, (Ω_intertype_0497 = function() {
         return isa.optional.empty([1]);
       }), false);
-      eq2(T, (Ω_intertype_1497 = function() {
+      eq2(T, (Ω_intertype_0498 = function() {
         return isa.optional.empty('A');
       }), false);
-      eq2(T, (Ω_intertype_1498 = function() {
+      eq2(T, (Ω_intertype_0499 = function() {
         return isa.optional.empty(new Set('abc'));
       }), false);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1499 = function() {
+      eq2(T, (Ω_intertype_0500 = function() {
         return validate.optional.empty([]);
       }), []);
-      eq2(T, (Ω_intertype_1500 = function() {
+      eq2(T, (Ω_intertype_0501 = function() {
         return validate.optional.empty('');
       }), '');
-      eq2(T, (Ω_intertype_1501 = function() {
+      eq2(T, (Ω_intertype_0502 = function() {
         return validate.optional.empty(new Set());
       }), new Set());
-      eq2(T, (Ω_intertype_1502 = function() {
+      eq2(T, (Ω_intertype_0503 = function() {
         return validate.optional.empty.list([]);
       }), []);
-      eq2(T, (Ω_intertype_1503 = function() {
+      eq2(T, (Ω_intertype_0504 = function() {
         return validate.optional.empty.text('');
       }), '');
-      eq2(T, (Ω_intertype_1504 = function() {
+      eq2(T, (Ω_intertype_0505 = function() {
         return validate.optional.empty.set(new Set());
       }), new Set());
-      throws2(T, (Ω_intertype_1505 = function() {
+      throws2(T, (Ω_intertype_0506 = function() {
         return validate.optional.empty([1]);
       }), /expected an optional empty, got a list/);
-      throws2(T, (Ω_intertype_1506 = function() {
+      throws2(T, (Ω_intertype_0507 = function() {
         return validate.optional.empty('A');
       }), /expected an optional empty, got a text/);
-      throws2(T, (Ω_intertype_1507 = function() {
+      throws2(T, (Ω_intertype_0508 = function() {
         return validate.optional.empty(new Set('abc'));
       }), /expected an optional empty, got a set/);
       //.......................................................................................................
-      eq2(T, (Ω_intertype_1508 = function() {
+      eq2(T, (Ω_intertype_0509 = function() {
         return isa.optional.empty([]);
       }), true);
-      eq2(T, (Ω_intertype_1509 = function() {
+      eq2(T, (Ω_intertype_0510 = function() {
         return isa.optional.empty('');
       }), true);
-      eq2(T, (Ω_intertype_1510 = function() {
+      eq2(T, (Ω_intertype_0511 = function() {
         return isa.optional.empty(new Set());
       }), true);
-      eq2(T, (Ω_intertype_1511 = function() {
+      eq2(T, (Ω_intertype_0512 = function() {
         return isa.optional.empty([1]);
       }), false);
-      eq2(T, (Ω_intertype_1512 = function() {
+      eq2(T, (Ω_intertype_0513 = function() {
         return isa.optional.empty('A');
       }), false);
-      eq2(T, (Ω_intertype_1513 = function() {
+      eq2(T, (Ω_intertype_0514 = function() {
         return isa.optional.empty(new Set('abc'));
       }), false);
-      eq2(T, (Ω_intertype_1514 = function() {
+      eq2(T, (Ω_intertype_0515 = function() {
         return validate.optional.empty(null);
       }), null);
-      eq2(T, (Ω_intertype_1515 = function() {
+      eq2(T, (Ω_intertype_0516 = function() {
         return validate.optional.empty.list(null);
       }), null);
-      eq2(T, (Ω_intertype_1516 = function() {
+      eq2(T, (Ω_intertype_0517 = function() {
         return validate.optional.empty.text(null);
       }), null);
-      eq2(T, (Ω_intertype_1517 = function() {
+      eq2(T, (Ω_intertype_0518 = function() {
+        return validate.optional.empty.set(null);
+      }), null);
+      return null;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.use_fields_to_declare_qualifiers = function(T, done) {
+    var Intertype;
+    ({Intertype} = require('../../../apps/intertype'));
+    (() => {      //.........................................................................................................
+      var declarations, isa, types, validate, Ω_intertype_0519, Ω_intertype_0520, Ω_intertype_0521, Ω_intertype_0522, Ω_intertype_0523, Ω_intertype_0524, Ω_intertype_0525, Ω_intertype_0526, Ω_intertype_0527, Ω_intertype_0528, Ω_intertype_0529, Ω_intertype_0530, Ω_intertype_0531, Ω_intertype_0532, Ω_intertype_0533, Ω_intertype_0534, Ω_intertype_0535, Ω_intertype_0536, Ω_intertype_0537, Ω_intertype_0538, Ω_intertype_0539, Ω_intertype_0540, Ω_intertype_0541, Ω_intertype_0542, Ω_intertype_0543, Ω_intertype_0544, Ω_intertype_0545, Ω_intertype_0546, Ω_intertype_0547, Ω_intertype_0548, Ω_intertype_0549, Ω_intertype_0550, Ω_intertype_0551, Ω_intertype_0552, Ω_intertype_0553, Ω_intertype_0554, Ω_intertype_0555;
+      declarations = {
+        empty: {
+          role: 'qualifier',
+          fields: {
+            list: function(x) {
+              return (this.isa.list(x)) && (x.length === 0);
+            },
+            text: function(x) {
+              return (this.isa.text(x)) && (x.length === 0);
+            },
+            set: function(x) {
+              return (this.isa.set(x)) && (x.size === 0);
+            }
+          }
+        },
+        nonempty: {
+          role: 'qualifier',
+          fields: {
+            list: function(x) {
+              return (this.isa.list(x)) && (x.length > 0);
+            },
+            text: function(x) {
+              return (this.isa.text(x)) && (x.length > 0);
+            },
+            set: function(x) {
+              return (this.isa.set(x)) && (x.size > 0);
+            }
+          }
+        }
+      };
+      types = new Intertype(declarations);
+      ({isa, validate} = types);
+      eq2(T, (Ω_intertype_0519 = function() {
+        return isa.optional.empty.list([]);
+      }), true);
+      eq2(T, (Ω_intertype_0520 = function() {
+        return isa.optional.empty.list(['A']);
+      }), false);
+      eq2(T, (Ω_intertype_0521 = function() {
+        return isa.optional.empty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_0522 = function() {
+        return isa.optional.nonempty.list([]);
+      }), false);
+      eq2(T, (Ω_intertype_0523 = function() {
+        return isa.optional.nonempty.list(['A']);
+      }), true);
+      eq2(T, (Ω_intertype_0524 = function() {
+        return isa.optional.nonempty.list(4);
+      }), false);
+      eq2(T, (Ω_intertype_0525 = function() {
+        return isa.optional.empty.text('');
+      }), true);
+      eq2(T, (Ω_intertype_0526 = function() {
+        return isa.optional.empty.text('A');
+      }), false);
+      eq2(T, (Ω_intertype_0527 = function() {
+        return isa.optional.empty.text(4);
+      }), false);
+      eq2(T, (Ω_intertype_0528 = function() {
+        return isa.optional.nonempty.text('');
+      }), false);
+      eq2(T, (Ω_intertype_0529 = function() {
+        return isa.optional.nonempty.text('A');
+      }), true);
+      eq2(T, (Ω_intertype_0530 = function() {
+        return isa.optional.nonempty.text(4);
+      }), false);
+      //.......................................................................................................
+      eq2(T, (Ω_intertype_0531 = function() {
+        return isa.optional.empty([]);
+      }), true);
+      eq2(T, (Ω_intertype_0532 = function() {
+        return isa.optional.empty('');
+      }), true);
+      eq2(T, (Ω_intertype_0533 = function() {
+        return isa.optional.empty(new Set());
+      }), true);
+      eq2(T, (Ω_intertype_0534 = function() {
+        return isa.optional.empty([1]);
+      }), false);
+      eq2(T, (Ω_intertype_0535 = function() {
+        return isa.optional.empty('A');
+      }), false);
+      eq2(T, (Ω_intertype_0536 = function() {
+        return isa.optional.empty(new Set('abc'));
+      }), false);
+      //.......................................................................................................
+      eq2(T, (Ω_intertype_0537 = function() {
+        return validate.optional.empty([]);
+      }), []);
+      eq2(T, (Ω_intertype_0538 = function() {
+        return validate.optional.empty('');
+      }), '');
+      eq2(T, (Ω_intertype_0539 = function() {
+        return validate.optional.empty(new Set());
+      }), new Set());
+      eq2(T, (Ω_intertype_0540 = function() {
+        return validate.optional.empty.list([]);
+      }), []);
+      eq2(T, (Ω_intertype_0541 = function() {
+        return validate.optional.empty.text('');
+      }), '');
+      eq2(T, (Ω_intertype_0542 = function() {
+        return validate.optional.empty.set(new Set());
+      }), new Set());
+      throws2(T, (Ω_intertype_0543 = function() {
+        return validate.optional.empty([1]);
+      }), /expected an optional empty, got a list/);
+      throws2(T, (Ω_intertype_0544 = function() {
+        return validate.optional.empty('A');
+      }), /expected an optional empty, got a text/);
+      throws2(T, (Ω_intertype_0545 = function() {
+        return validate.optional.empty(new Set('abc'));
+      }), /expected an optional empty, got a set/);
+      //.......................................................................................................
+      eq2(T, (Ω_intertype_0546 = function() {
+        return isa.optional.empty([]);
+      }), true);
+      eq2(T, (Ω_intertype_0547 = function() {
+        return isa.optional.empty('');
+      }), true);
+      eq2(T, (Ω_intertype_0548 = function() {
+        return isa.optional.empty(new Set());
+      }), true);
+      eq2(T, (Ω_intertype_0549 = function() {
+        return isa.optional.empty([1]);
+      }), false);
+      eq2(T, (Ω_intertype_0550 = function() {
+        return isa.optional.empty('A');
+      }), false);
+      eq2(T, (Ω_intertype_0551 = function() {
+        return isa.optional.empty(new Set('abc'));
+      }), false);
+      eq2(T, (Ω_intertype_0552 = function() {
+        return validate.optional.empty(null);
+      }), null);
+      eq2(T, (Ω_intertype_0553 = function() {
+        return validate.optional.empty.list(null);
+      }), null);
+      eq2(T, (Ω_intertype_0554 = function() {
+        return validate.optional.empty.text(null);
+      }), null);
+      eq2(T, (Ω_intertype_0555 = function() {
         return validate.optional.empty.set(null);
       }), null);
       return null;
@@ -3355,35 +3512,35 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var Ω_intertype_1518, Ω_intertype_1519, Ω_intertype_1520, Ω_intertype_1521, Ω_intertype_1522, Ω_intertype_1523;
+      var Ω_intertype_0556, Ω_intertype_0557, Ω_intertype_0558, Ω_intertype_0559, Ω_intertype_0560, Ω_intertype_0561;
       /* TAINT observe the out-comment messages would perhaps make more sense as they are more specific */
-      eq2(T, (Ω_intertype_1518 = function() {
+      eq2(T, (Ω_intertype_0556 = function() {
         return (new Intertype()).declare({
           foo: 'float'
         });
       }), null);
-      eq2(T, (Ω_intertype_1519 = function() {
+      eq2(T, (Ω_intertype_0557 = function() {
         return (new Intertype()).declare({
           foo: 'text'
         });
       }), null);
       // ( new Intertype() ).declare { foo: 'optional', }
-      throws2(T, (Ω_intertype_1520 = function() {
+      throws2(T, (Ω_intertype_0558 = function() {
         return (new Intertype()).declare({
           foo: 'optional'
         });
       }), /illegal use of 'optional' in declaration of type 'foo'/);
-      throws2(T, (Ω_intertype_1521 = function() {
+      throws2(T, (Ω_intertype_0559 = function() {
         return (new Intertype()).declare({
           foo: 'qqq'
         });
       }), /unknown type 'qqq'/);
-      throws2(T, (Ω_intertype_1522 = function() {
+      throws2(T, (Ω_intertype_0560 = function() {
         return (new Intertype()).declare({
           foo: 'optional.float'
         });
       }), /illegal use of 'optional' in declaration of type 'foo'/);
-      throws2(T, (Ω_intertype_1523 = function() {
+      throws2(T, (Ω_intertype_0561 = function() {
         return (new Intertype()).declare({
           foo: 'anything.float'
         });
@@ -3398,64 +3555,64 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var isa, validate, Ω_intertype_1524, Ω_intertype_1525, Ω_intertype_1526, Ω_intertype_1527, Ω_intertype_1528, Ω_intertype_1529, Ω_intertype_1530, Ω_intertype_1531, Ω_intertype_1532, Ω_intertype_1533, Ω_intertype_1534, Ω_intertype_1535, Ω_intertype_1536, Ω_intertype_1537, Ω_intertype_1538, Ω_intertype_1539;
+      var isa, validate, Ω_intertype_0562, Ω_intertype_0563, Ω_intertype_0564, Ω_intertype_0565, Ω_intertype_0566, Ω_intertype_0567, Ω_intertype_0568, Ω_intertype_0569, Ω_intertype_0570, Ω_intertype_0571, Ω_intertype_0572, Ω_intertype_0573, Ω_intertype_0574, Ω_intertype_0575, Ω_intertype_0576, Ω_intertype_0577;
       ({isa, validate} = new Intertype({
         normalfloat: (function(x) {
           return (this.isa.float(x)) && ((0 <= x && x <= 1));
         })
       }));
-      eq2(T, (Ω_intertype_1524 = function() {
+      eq2(T, (Ω_intertype_0562 = function() {
         return isa.normalfloat(0);
       }), true);
-      eq2(T, (Ω_intertype_1525 = function() {
+      eq2(T, (Ω_intertype_0563 = function() {
         return isa.normalfloat(null);
       }), false);
-      eq2(T, (Ω_intertype_1526 = function() {
+      eq2(T, (Ω_intertype_0564 = function() {
         return isa.normalfloat(-1);
       }), false);
-      eq2(T, (Ω_intertype_1527 = function() {
+      eq2(T, (Ω_intertype_0565 = function() {
         return isa.normalfloat('?');
       }), false);
-      eq2(T, (Ω_intertype_1528 = function() {
+      eq2(T, (Ω_intertype_0566 = function() {
         return isa.optional.normalfloat(0);
       }), true);
-      eq2(T, (Ω_intertype_1529 = function() {
+      eq2(T, (Ω_intertype_0567 = function() {
         return isa.optional.normalfloat(null);
       }), true);
-      eq2(T, (Ω_intertype_1530 = function() {
+      eq2(T, (Ω_intertype_0568 = function() {
         return isa.optional.normalfloat(-1);
       }), false);
-      eq2(T, (Ω_intertype_1531 = function() {
+      eq2(T, (Ω_intertype_0569 = function() {
         return isa.optional.normalfloat('?');
       }), false);
-      eq2(T, (Ω_intertype_1532 = function() {
+      eq2(T, (Ω_intertype_0570 = function() {
         return validate.normalfloat(0);
       }), 0);
-      eq2(T, (Ω_intertype_1533 = function() {
+      eq2(T, (Ω_intertype_0571 = function() {
         return validate.optional.normalfloat(0);
       }), 0);
-      eq2(T, (Ω_intertype_1534 = function() {
+      eq2(T, (Ω_intertype_0572 = function() {
         return validate.optional.normalfloat(null);
       }), null);
-      throws2(T, (Ω_intertype_1535 = function() {
+      throws2(T, (Ω_intertype_0573 = function() {
         return validate.normalfloat(null);
       }), /expected a normalfloat, got a null/);
-      throws2(T, (Ω_intertype_1536 = function() {
+      throws2(T, (Ω_intertype_0574 = function() {
         return validate.normalfloat(-1);
       }), /expected a normalfloat, got a float/);
-      throws2(T, (Ω_intertype_1537 = function() {
+      throws2(T, (Ω_intertype_0575 = function() {
         return validate.normalfloat('?');
       }), /expected a normalfloat, got a text/);
-      throws2(T, (Ω_intertype_1538 = function() {
+      throws2(T, (Ω_intertype_0576 = function() {
         return validate.optional.normalfloat(-1);
       }), /expected an optional normalfloat, got a float/);
-      throws2(T, (Ω_intertype_1539 = function() {
+      throws2(T, (Ω_intertype_0577 = function() {
         return validate.optional.normalfloat('?');
       }), /expected an optional normalfloat, got a text/);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var isa, my_types, types, validate, Ω_intertype_1540, Ω_intertype_1541, Ω_intertype_1542, Ω_intertype_1543, Ω_intertype_1544, Ω_intertype_1545, Ω_intertype_1546, Ω_intertype_1547, Ω_intertype_1548, Ω_intertype_1549, Ω_intertype_1550, Ω_intertype_1551, Ω_intertype_1552, Ω_intertype_1553, Ω_intertype_1554, Ω_intertype_1555, Ω_intertype_1556, Ω_intertype_1557, Ω_intertype_1558, Ω_intertype_1559, Ω_intertype_1560, Ω_intertype_1561, Ω_intertype_1562, Ω_intertype_1563, Ω_intertype_1564, Ω_intertype_1565, Ω_intertype_1566, Ω_intertype_1567, Ω_intertype_1568, Ω_intertype_1569, Ω_intertype_1570;
+      var isa, my_types, types, validate, Ω_intertype_0578, Ω_intertype_0579, Ω_intertype_0580, Ω_intertype_0581, Ω_intertype_0582, Ω_intertype_0583, Ω_intertype_0584, Ω_intertype_0585, Ω_intertype_0586, Ω_intertype_0587, Ω_intertype_0588, Ω_intertype_0589, Ω_intertype_0590, Ω_intertype_0591, Ω_intertype_0592, Ω_intertype_0593, Ω_intertype_0594, Ω_intertype_0595, Ω_intertype_0596, Ω_intertype_0597, Ω_intertype_0598, Ω_intertype_0599, Ω_intertype_0600, Ω_intertype_0601, Ω_intertype_0602, Ω_intertype_0603, Ω_intertype_0604, Ω_intertype_0605, Ω_intertype_0606, Ω_intertype_0607, Ω_intertype_0608;
       my_types = {
         'quantity': 'object',
         'quantity.q': 'float',
@@ -3465,25 +3622,25 @@
         'foo.bar.baz': 'float'
       };
       ({isa, validate} = types = new Intertype(my_types));
-      eq2(T, (Ω_intertype_1540 = function() {
+      eq2(T, (Ω_intertype_0578 = function() {
         return isa.quantity({
           q: 1,
           u: 'm'
         });
       }), true);
-      eq2(T, (Ω_intertype_1541 = function() {
+      eq2(T, (Ω_intertype_0579 = function() {
         return isa.quantity(null);
       }), false);
-      eq2(T, (Ω_intertype_1542 = function() {
+      eq2(T, (Ω_intertype_0580 = function() {
         return isa.optional.quantity({
           q: 2,
           u: 'm'
         });
       }), true);
-      eq2(T, (Ω_intertype_1543 = function() {
+      eq2(T, (Ω_intertype_0581 = function() {
         return isa.optional.quantity(null);
       }), true);
-      eq2(T, (Ω_intertype_1544 = function() {
+      eq2(T, (Ω_intertype_0582 = function() {
         return validate.quantity({
           q: 3,
           u: 'm'
@@ -3492,7 +3649,7 @@
         q: 3,
         u: 'm'
       });
-      eq2(T, (Ω_intertype_1545 = function() {
+      eq2(T, (Ω_intertype_0583 = function() {
         return validate.optional.quantity({
           q: 4,
           u: 'm'
@@ -3501,49 +3658,49 @@
         q: 4,
         u: 'm'
       });
-      eq2(T, (Ω_intertype_1546 = function() {
+      eq2(T, (Ω_intertype_0584 = function() {
         return validate.optional.quantity.q(null);
       }), null);
-      eq2(T, (Ω_intertype_1547 = function() {
+      eq2(T, (Ω_intertype_0585 = function() {
         return validate.optional.quantity.q(111);
       }), 111);
-      eq2(T, (Ω_intertype_1548 = function() {
+      eq2(T, (Ω_intertype_0586 = function() {
         return isa.quantity(null);
       }), false);
-      eq2(T, (Ω_intertype_1549 = function() {
+      eq2(T, (Ω_intertype_0587 = function() {
         return isa.quantity(-1);
       }), false);
-      eq2(T, (Ω_intertype_1550 = function() {
+      eq2(T, (Ω_intertype_0588 = function() {
         return isa.quantity('?');
       }), false);
-      eq2(T, (Ω_intertype_1551 = function() {
+      eq2(T, (Ω_intertype_0589 = function() {
         return isa.quantity.q('?');
       }), false);
-      eq2(T, (Ω_intertype_1552 = function() {
+      eq2(T, (Ω_intertype_0590 = function() {
         return isa.quantity.q(3);
       }), true);
-      eq2(T, (Ω_intertype_1553 = function() {
+      eq2(T, (Ω_intertype_0591 = function() {
         return isa.optional.quantity({
           q: 1,
           u: 'm'
         });
       }), true);
-      eq2(T, (Ω_intertype_1554 = function() {
+      eq2(T, (Ω_intertype_0592 = function() {
         return isa.optional.quantity(null);
       }), true);
-      eq2(T, (Ω_intertype_1555 = function() {
+      eq2(T, (Ω_intertype_0593 = function() {
         return isa.optional.quantity(-1);
       }), false);
-      eq2(T, (Ω_intertype_1556 = function() {
+      eq2(T, (Ω_intertype_0594 = function() {
         return isa.optional.quantity('?');
       }), false);
-      eq2(T, (Ω_intertype_1557 = function() {
+      eq2(T, (Ω_intertype_0595 = function() {
         return isa.optional.quantity.q('?');
       }), false);
-      eq2(T, (Ω_intertype_1558 = function() {
+      eq2(T, (Ω_intertype_0596 = function() {
         return isa.optional.quantity.q(3);
       }), true);
-      eq2(T, (Ω_intertype_1559 = function() {
+      eq2(T, (Ω_intertype_0597 = function() {
         return validate.quantity({
           q: 1,
           u: 'm'
@@ -3552,7 +3709,7 @@
         q: 1,
         u: 'm'
       });
-      eq2(T, (Ω_intertype_1560 = function() {
+      eq2(T, (Ω_intertype_0598 = function() {
         return validate.optional.quantity({
           q: 1,
           u: 'm'
@@ -3561,42 +3718,42 @@
         q: 1,
         u: 'm'
       });
-      eq2(T, (Ω_intertype_1561 = function() {
+      eq2(T, (Ω_intertype_0599 = function() {
         return validate.optional.quantity(null);
       }), null);
-      throws2(T, (Ω_intertype_1562 = function() {
+      throws2(T, (Ω_intertype_0600 = function() {
         return validate.quantity({
           q: 5
         });
       }), /expected a quantity, got a object/);
-      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_1563 = function() {
+      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_0601 = function() {
         return validate.quantity(null);
       }), /expected a quantity, got a null/);
-      throws2(T, (Ω_intertype_1564 = function() {
+      throws2(T, (Ω_intertype_0602 = function() {
         return validate.quantity(-1);
       }), /expected a quantity, got a float/);
-      throws2(T, (Ω_intertype_1565 = function() {
+      throws2(T, (Ω_intertype_0603 = function() {
         return validate.quantity('?');
       }), /expected a quantity, got a text/);
-      throws2(T, (Ω_intertype_1566 = function() {
+      throws2(T, (Ω_intertype_0604 = function() {
         return validate.quantity({
           q: 1
         });
       }), /expected a quantity, got a object/);
-      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_1567 = function() {
+      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_0605 = function() {
         return validate.optional.quantity(-1);
       }), /expected an optional quantity, got a float/);
-      throws2(T, (Ω_intertype_1568 = function() {
+      throws2(T, (Ω_intertype_0606 = function() {
         return validate.optional.quantity({
           q: 1
         });
       }), /expected an optional quantity, got a object/);
-      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_1569 = function() {
+      /* TAINT message should be more specific */      throws2(T, (Ω_intertype_0607 = function() {
         return validate.optional.quantity.q({
           q: 1
         });
       }), /expected an optional quantity.q, got a object/);
-      throws2(T, (Ω_intertype_1570 = function() {
+      throws2(T, (Ω_intertype_0608 = function() {
         return validate.optional.quantity.q(3, 4, 5);
       }), /method 'validate.optional.quantity.q' expects 1 arguments, got 3/);
       return null;
@@ -3609,21 +3766,21 @@
     var Intertype;
     ({Intertype} = require('../../../apps/intertype'));
     (() => {      //.........................................................................................................
-      var declarations, Ω_intertype_1571, Ω_intertype_1572, Ω_intertype_1573, Ω_intertype_1574, Ω_intertype_1575;
+      var declarations, Ω_intertype_0609, Ω_intertype_0610, Ω_intertype_0611, Ω_intertype_0612, Ω_intertype_0613;
       ({declarations} = new Intertype());
-      eq2(T, (Ω_intertype_1571 = function() {
+      eq2(T, (Ω_intertype_0609 = function() {
         return declarations.float.role;
       }), 'usertype');
-      eq2(T, (Ω_intertype_1572 = function() {
+      eq2(T, (Ω_intertype_0610 = function() {
         return declarations.null.role;
       }), 'basetype');
-      eq2(T, (Ω_intertype_1573 = function() {
+      eq2(T, (Ω_intertype_0611 = function() {
         return declarations.anything.role;
       }), 'basetype');
-      eq2(T, (Ω_intertype_1574 = function() {
+      eq2(T, (Ω_intertype_0612 = function() {
         return declarations.unknown.role;
       }), 'basetype');
-      eq2(T, (Ω_intertype_1575 = function() {
+      eq2(T, (Ω_intertype_0613 = function() {
         return declarations.optional.role;
       }), 'optional');
       // throws T, /expected a normalfloat, got a null/,             -> validate.normalfloat           null
@@ -3656,78 +3813,78 @@
     ({Intertype_minimal} = require('../../../apps/intertype'));
     ({isa, validate, create, declare, type_of} = new Intertype_minimal());
     (() => {      //.........................................................................................................
-      var Ω_intertype_1576, Ω_intertype_1577, Ω_intertype_1578, Ω_intertype_1579;
-      eq2(T, (Ω_intertype_1576 = function() {
+      var Ω_intertype_0614, Ω_intertype_0615, Ω_intertype_0616, Ω_intertype_0617;
+      eq2(T, (Ω_intertype_0614 = function() {
         return type_of(null);
       }), 'null');
-      eq2(T, (Ω_intertype_1577 = function() {
+      eq2(T, (Ω_intertype_0615 = function() {
         return type_of(void 0);
       }), 'undefined');
-      eq2(T, (Ω_intertype_1578 = function() {
+      eq2(T, (Ω_intertype_0616 = function() {
         return type_of(+2e308);
       }), 'unknown');
-      eq2(T, (Ω_intertype_1579 = function() {
+      eq2(T, (Ω_intertype_0617 = function() {
         return type_of(4);
       }), 'unknown');
       return null;
     })();
     (() => {      //.........................................................................................................
-      var Ω_intertype_1580, Ω_intertype_1581, Ω_intertype_1582, Ω_intertype_1583;
-      eq2(T, (Ω_intertype_1580 = function() {
+      var Ω_intertype_0618, Ω_intertype_0619, Ω_intertype_0620, Ω_intertype_0621;
+      eq2(T, (Ω_intertype_0618 = function() {
         return isa.anything(1);
       }), true);
-      eq2(T, (Ω_intertype_1581 = function() {
+      eq2(T, (Ω_intertype_0619 = function() {
         return isa.nothing(1);
       }), false);
-      eq2(T, (Ω_intertype_1582 = function() {
+      eq2(T, (Ω_intertype_0620 = function() {
         return isa.something(1);
       }), true);
-      eq2(T, (Ω_intertype_1583 = function() {
+      eq2(T, (Ω_intertype_0621 = function() {
         return isa.unknown(1);
       }), true);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var Ω_intertype_1584, Ω_intertype_1585, Ω_intertype_1586, Ω_intertype_1587;
-      eq2(T, (Ω_intertype_1584 = function() {
+      var Ω_intertype_0622, Ω_intertype_0623, Ω_intertype_0624, Ω_intertype_0625;
+      eq2(T, (Ω_intertype_0622 = function() {
         return isa.anything(null);
       }), true);
-      eq2(T, (Ω_intertype_1585 = function() {
+      eq2(T, (Ω_intertype_0623 = function() {
         return isa.nothing(null);
       }), true);
-      eq2(T, (Ω_intertype_1586 = function() {
+      eq2(T, (Ω_intertype_0624 = function() {
         return isa.something(null);
       }), false);
-      eq2(T, (Ω_intertype_1587 = function() {
+      eq2(T, (Ω_intertype_0625 = function() {
         return isa.unknown(null);
       }), false);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var Ω_intertype_1588, Ω_intertype_1589, Ω_intertype_1590, Ω_intertype_1591;
-      eq2(T, (Ω_intertype_1588 = function() {
+      var Ω_intertype_0626, Ω_intertype_0627, Ω_intertype_0628, Ω_intertype_0629;
+      eq2(T, (Ω_intertype_0626 = function() {
         return isa.anything(void 0);
       }), true);
-      eq2(T, (Ω_intertype_1589 = function() {
+      eq2(T, (Ω_intertype_0627 = function() {
         return isa.nothing(void 0);
       }), true);
-      eq2(T, (Ω_intertype_1590 = function() {
+      eq2(T, (Ω_intertype_0628 = function() {
         return isa.something(void 0);
       }), false);
-      eq2(T, (Ω_intertype_1591 = function() {
+      eq2(T, (Ω_intertype_0629 = function() {
         return isa.unknown(void 0);
       }), false);
       return null;
     })();
     (() => {      //.........................................................................................................
-      var Ω_intertype_1592, Ω_intertype_1593, Ω_intertype_1594;
-      throws2(T, (Ω_intertype_1592 = function() {
+      var Ω_intertype_0630, Ω_intertype_0631, Ω_intertype_0632;
+      throws2(T, (Ω_intertype_0630 = function() {
         return isa.optional(1);
       }), /`optional` is not a legal type for `isa` methods/);
-      throws2(T, (Ω_intertype_1593 = function() {
+      throws2(T, (Ω_intertype_0631 = function() {
         return validate.optional(1);
       }), /`optional` is not a legal type for `validate` methods/);
-      throws2(T, (Ω_intertype_1594 = function() {
+      throws2(T, (Ω_intertype_0632 = function() {
         return create.optional(1);
       }), /`optional` is not a legal type for `create` methods/);
       return null;
