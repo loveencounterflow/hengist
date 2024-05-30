@@ -1,14 +1,15 @@
 (async function() {
   'use strict';
-  var GUY, alert, as_object, debug, demo_1, demo_2, demo_3, echo, help, info, inspect, isa_object, log, plain, praise, ps, reverse, rpr, s, test, throws, try_and_show, urge, warn, whisper;
+  var GUY, alert, as_object, debug, demo_1, demo_2, demo_3, echo, eq, help, info, inspect, isa_object, log, plain, praise, ps, reverse, rpr, s, test, throws, try_and_show, urge, warn, whisper;
 
+  //===========================================================================================================
   GUY = require('guy');
 
   ({alert, debug, help, info, plain, praise, urge, warn, whisper} = GUY.trm.get_loggers('intertalk'));
 
   ({rpr, inspect, echo, reverse, log} = GUY.trm);
 
-  test = require('guy-test');
+  ({test, eq, throws} = require('../../../apps/guy-test-NG'));
 
   //-----------------------------------------------------------------------------------------------------------
   s = function(name) {
@@ -909,7 +910,8 @@
       // await test @WeakMap_replacement
       // await test @unsubscribing
       // await test @on_unhandled
-      return (await test(this.control_object));
+      await this.type_validation();
+      return (await test(this.type_validation));
     })();
   }
 

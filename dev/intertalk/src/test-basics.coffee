@@ -2,6 +2,7 @@
 
 'use strict'
 
+#===========================================================================================================
 GUY                       = require 'guy'
 { alert
   debug
@@ -17,7 +18,9 @@ GUY                       = require 'guy'
   echo
   reverse
   log     }               = GUY.trm
-test                      = require 'guy-test'
+{ test
+  eq
+  throws }                = require '../../../apps/guy-test-NG'
 #-----------------------------------------------------------------------------------------------------------
 s                         = ( name ) -> Symbol.for  name
 ps                        = ( name ) -> Symbol      name
@@ -523,7 +526,8 @@ if module is require.main then await do =>
   # await test @WeakMap_replacement
   # await test @unsubscribing
   # await test @on_unhandled
-  await test @control_object
+  await @type_validation()
+  await test @type_validation
   # await test @
 
 
