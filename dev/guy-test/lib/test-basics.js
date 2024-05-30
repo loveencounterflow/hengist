@@ -1,7 +1,7 @@
 (async function() {
   //===========================================================================================================
   'use strict';
-  var GTNG, GUY, TT, Test, _TMP_test, after, alert, async_eq, async_test, async_throws, debug, demo_async, echo, eq, equals, fail, help, info, inspect, isa, log, pass, plain, praise, reverse, rpr, test, throws, type_of, types, urge, validate, warn, whisper;
+  var GTNG, GUY, TT, TT2, TT3, Test, _TMP_test, after, alert, async_eq, async_test, async_throws, debug, echo, eq, equals, fail, help, info, inspect, isa, log, pass, plain, praise, reverse, rpr, test, throws, type_of, types, urge, validate, warn, whisper;
 
   GUY = require('guy');
 
@@ -25,12 +25,12 @@
   TT = {
     //---------------------------------------------------------------------------------------------------------
     set_equality_by_value: function() {
-      var t2, Ωgtt___1;
+      var t2, ΩTT___1;
       t2 = new Test({
         show_report: false,
         prefix: "TEST RESULT"
       });
-      this.eq((Ωgtt___1 = function() {
+      this.eq((ΩTT___1 = function() {
         return t2.stats;
       }), {
         '*': {
@@ -46,7 +46,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv_3, sebv_4, Ωgtt___2;
+        var matcher1, matcher2, result, sebv_3, sebv_4, ΩTT___2;
         result = [1, [2]];
         matcher1 = [1, [2]];
         matcher2 = [1, [3]];
@@ -56,7 +56,7 @@
         t2.eq((sebv_4 = function() {
           return equals(result, matcher2);
         }), false);
-        this.eq((Ωgtt___2 = function() {
+        this.eq((ΩTT___2 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -83,7 +83,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv_6, sebv_7, sebv_8, Ωgtt___6;
+        var matcher1, matcher2, result, sebv_6, sebv_7, sebv_8, ΩTT___6;
         result = new Set([1, 2]);
         matcher1 = new Set([1, 2]);
         matcher2 = new Set([1, 3]);
@@ -96,7 +96,7 @@
         t2.eq((sebv_8 = function() {
           return equals(result, matcher2);
         }), true);
-        this./* is `false` */eq((Ωgtt___6 = function() {
+        this./* is `false` */eq((ΩTT___6 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -135,7 +135,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv10, sebv11, sebv12, sebv13, sebv14, Ωgtt__13;
+        var matcher1, matcher2, result, sebv10, sebv11, sebv12, sebv13, sebv14, ΩTT__13;
         result = new Set([1, [2]]);
         matcher1 = new Set([1, [2]]);
         matcher2 = new Set([1, [3]]);
@@ -154,7 +154,7 @@
         /* is `false` */        t2.eq((sebv14 = function() {
           return equals(result, matcher2);
         }), true);
-        this./* is `false` */eq((Ωgtt__13 = function() {
+        this./* is `false` */eq((ΩTT__13 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -216,13 +216,13 @@
     },
     //-----------------------------------------------------------------------------------------------------------
     pass_and_fail: function() {
-      var t2, Ωgtt__25, Ωgtt__26, Ωgtt__27, Ωgtt__28, Ωgtt__29, Ωgtt__30, Ωgtt__31, Ωgtt__32, Ωgtt__33, Ωgtt__34, Ωgtt__35, Ωgtt__36;
+      var t2, ΩTT__25, ΩTT__26, ΩTT__27, ΩTT__28, ΩTT__29, ΩTT__30, ΩTT__31, ΩTT__32, ΩTT__33, ΩTT__34, ΩTT__35, ΩTT__36;
       t2 = new Test();
       //.........................................................................................................
-      this.eq((Ωgtt__25 = function() {
+      this.eq((ΩTT__25 = function() {
         return type_of(t2.pass);
       }), 'function');
-      this.eq((Ωgtt__26 = function() {
+      this.eq((ΩTT__26 = function() {
         return type_of(t2.fail);
       }), 'function');
       t2.test({
@@ -236,41 +236,41 @@
       t2.report({
         prefix: "TEST RESULT"
       });
-      this.eq((Ωgtt__27 = function() {
+      this.eq((ΩTT__27 = function() {
         return t2.stats['*'].passes;
       }), 2);
-      this.eq((Ωgtt__28 = function() {
+      this.eq((ΩTT__28 = function() {
         return t2.stats['paf_a.paf_1'].passes;
       }), 1);
-      this.eq((Ωgtt__29 = function() {
+      this.eq((ΩTT__29 = function() {
         return t2.stats['paf_a.paf_2'].passes;
       }), 0);
-      this.eq((Ωgtt__30 = function() {
+      this.eq((ΩTT__30 = function() {
         return t2.stats['paf_a.paf_3'].passes;
       }), 1);
-      this.eq((Ωgtt__31 = function() {
+      this.eq((ΩTT__31 = function() {
         return t2.stats['paf_a.paf_4'].passes;
       }), 0);
-      this.eq((Ωgtt__32 = function() {
+      this.eq((ΩTT__32 = function() {
         return t2.stats['*'].fails;
       }), 2);
-      this.eq((Ωgtt__33 = function() {
+      this.eq((ΩTT__33 = function() {
         return t2.stats['paf_a.paf_1'].fails;
       }), 0);
-      this.eq((Ωgtt__34 = function() {
+      this.eq((ΩTT__34 = function() {
         return t2.stats['paf_a.paf_2'].fails;
       }), 1);
-      this.eq((Ωgtt__35 = function() {
+      this.eq((ΩTT__35 = function() {
         return t2.stats['paf_a.paf_3'].fails;
       }), 0);
-      this.eq((Ωgtt__36 = function() {
+      this.eq((ΩTT__36 = function() {
         return t2.stats['paf_a.paf_4'].fails;
       }), 1);
       return typeof done === "function" ? done() : void 0;
     },
     //-----------------------------------------------------------------------------------------------------------
     asynchronous_throws: async function() {
-      var FS, fetch_filesize, t2, Ωgtt__40, Ωgtt__41, Ωgtt__42;
+      var FS, fetch_filesize, t2, ΩTT__40, ΩTT__41, ΩTT__42;
       FS = require('node:fs/promises');
       t2 = new Test();
       //.........................................................................................................
@@ -278,24 +278,24 @@
         return ((await FS.stat(path))).size;
       };
       //.........................................................................................................
-      // await async_throws  T, ( Ωgtt__37 = -> await fetch_filesize __filename   )
-      // await async_throws  T, ( Ωgtt__38 = -> await fetch_filesize __filename   ), "foobar"
-      // await async_throws  T, ( Ωgtt__39 = -> await fetch_filesize __filename   ), /no such file/
+      // await async_throws  T, ( ΩTT__37 = -> await fetch_filesize __filename   )
+      // await async_throws  T, ( ΩTT__38 = -> await fetch_filesize __filename   ), "foobar"
+      // await async_throws  T, ( ΩTT__39 = -> await fetch_filesize __filename   ), /no such file/
       //.........................................................................................................
-      await t2.async_throws((Ωgtt__40 = async function() {
+      await t2.async_throws((ΩTT__40 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), "foobar");
-      await t2.async_throws((Ωgtt__41 = async function() {
+      await t2.async_throws((ΩTT__41 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), /no such file/);
-      await t2.async_throws((Ωgtt__42 = async function() {
+      await t2.async_throws((ΩTT__42 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }));
       return typeof done === "function" ? done() : void 0;
     },
     //-----------------------------------------------------------------------------------------------------------
     asynchronous_errors: async function() {
-      var FS, fetch_filesize, produce_filesize, Ωgtt__51;
+      var FS, fetch_filesize, produce_filesize, ΩTT__51;
       FS = require('node:fs/promises');
       //.........................................................................................................
       fetch_filesize = async function(path) {
@@ -306,22 +306,22 @@
         var error, filesize;
         try {
           filesize = (await fetch_filesize(path));
-          urge("Ωgtt__47", {filesize});
+          urge("ΩTT__47", {filesize});
         } catch (error1) {
           error = error1;
-          warn("Ωgtt__48", error);
+          warn("ΩTT__48", error);
         }
         return null;
       };
       //.........................................................................................................
       echo('-------------------');
-      // try await produce_filesize 'nosuchpath' catch error then warn 'Ωgtt__49', error.message
+      // try await produce_filesize 'nosuchpath' catch error then warn 'ΩTT__49', error.message
       await produce_filesize('nosuchpath');
       echo('-------------------');
       await produce_filesize(__filename);
       echo('-------------------');
-      // await async_throws ( Ωgtt__50 = -> await fetch_filesize __filename ), '???'
-      await async_throws((Ωgtt__51 = async function() {
+      // await async_throws ( ΩTT__50 = -> await fetch_filesize __filename ), '???'
+      await async_throws((ΩTT__51 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), /no such file/);
       echo('-------------------');
@@ -330,100 +330,100 @@
     //---------------------------------------------------------------------------------------------------------
     test_cfg: function() {
       (() => {        //.........................................................................................................
-        var t2, Ωgtt__52, Ωgtt__53, Ωgtt__54, Ωgtt__55, Ωgtt__56, Ωgtt__57, Ωgtt__58, Ωgtt__59, Ωgtt__60;
+        var t2, ΩTT__52, ΩTT__53, ΩTT__54, ΩTT__55, ΩTT__56, ΩTT__57, ΩTT__58, ΩTT__59, ΩTT__60;
         t2 = new Test();
-        this.eq((Ωgtt__52 = function() {
+        this.eq((ΩTT__52 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((Ωgtt__53 = function() {
+        this.eq((ΩTT__53 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((Ωgtt__54 = function() {
+        this.eq((ΩTT__54 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((Ωgtt__55 = function() {
+        this.eq((ΩTT__55 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((Ωgtt__56 = function() {
+        this.eq((ΩTT__56 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((Ωgtt__57 = function() {
+        this.eq((ΩTT__57 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((Ωgtt__58 = function() {
+        this.eq((ΩTT__58 = function() {
           return t2.cfg.throw_on_error;
         }), false);
-        this.eq((Ωgtt__59 = function() {
+        this.eq((ΩTT__59 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        this.eq((Ωgtt__60 = function() {
+        this.eq((ΩTT__60 = function() {
           return t2.cfg.message_width;
         }), 50);
         return null;
       })();
       (() => {        //.........................................................................................................
-        var t2, Ωgtt__61, Ωgtt__62, Ωgtt__63, Ωgtt__64, Ωgtt__65, Ωgtt__66, Ωgtt__67, Ωgtt__68, Ωgtt__69;
+        var t2, ΩTT__61, ΩTT__62, ΩTT__63, ΩTT__64, ΩTT__65, ΩTT__66, ΩTT__67, ΩTT__68, ΩTT__69;
         t2 = new Test({});
-        this.eq((Ωgtt__61 = function() {
+        this.eq((ΩTT__61 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((Ωgtt__62 = function() {
+        this.eq((ΩTT__62 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((Ωgtt__63 = function() {
+        this.eq((ΩTT__63 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((Ωgtt__64 = function() {
+        this.eq((ΩTT__64 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((Ωgtt__65 = function() {
+        this.eq((ΩTT__65 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((Ωgtt__66 = function() {
+        this.eq((ΩTT__66 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((Ωgtt__67 = function() {
+        this.eq((ΩTT__67 = function() {
           return t2.cfg.throw_on_error;
         }), false);
-        this.eq((Ωgtt__68 = function() {
+        this.eq((ΩTT__68 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        this.eq((Ωgtt__69 = function() {
+        this.eq((ΩTT__69 = function() {
           return t2.cfg.message_width;
         }), 50);
         return null;
       })();
       (() => {        //.........................................................................................................
-        var t2, Ωgtt__70, Ωgtt__71, Ωgtt__72, Ωgtt__73, Ωgtt__74, Ωgtt__75, Ωgtt__76, Ωgtt__77, Ωgtt__78;
+        var t2, ΩTT__70, ΩTT__71, ΩTT__72, ΩTT__73, ΩTT__74, ΩTT__75, ΩTT__76, ΩTT__77, ΩTT__78;
         t2 = new Test({
           message_width: 30,
           throw_on_error: true
         });
-        this.eq((Ωgtt__70 = function() {
+        this.eq((ΩTT__70 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((Ωgtt__71 = function() {
+        this.eq((ΩTT__71 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((Ωgtt__72 = function() {
+        this.eq((ΩTT__72 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((Ωgtt__73 = function() {
+        this.eq((ΩTT__73 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((Ωgtt__74 = function() {
+        this.eq((ΩTT__74 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((Ωgtt__75 = function() {
+        this.eq((ΩTT__75 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((Ωgtt__76 = function() {
+        this.eq((ΩTT__76 = function() {
           return t2.cfg.throw_on_error;
         }), true);
-        this.eq((Ωgtt__77 = function() {
+        this.eq((ΩTT__77 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        return this.eq((Ωgtt__78 = function() {
+        return this.eq((ΩTT__78 = function() {
           return t2.cfg.message_width;
         }), 30);
       })();
@@ -459,7 +459,7 @@
             passes: 0,
             fails: 1
           },
-          'ctof_1.ctof_2.Ωgt__80': {
+          'ctof_1.ctof_2.Ωgt__79': {
             passes: 0,
             fails: 1
           }
@@ -467,7 +467,7 @@
         this.eq((ctof_4 = function() {
           return t2.warnings;
         }), {
-          'ctof_1.ctof_2.Ωgt__23': ['(noerr) expected an error but none was thrown']
+          'ctof_1.ctof_2.Ωgt__80': ['(noerr) expected an error but none was thrown']
         });
         return null;
       })();
@@ -485,7 +485,7 @@
             return 14;
           }), 15);
         }), /neq:/);
-        // @throws ( Ωgtt__84 = -> t2.eq ( xy1 = -> 14 ), 15 ), /---/
+        // @throws ( ΩTT__81 = -> t2.eq ( xy1 = -> 14 ), 15 ), /---/
         return null;
       })();
       //.........................................................................................................
@@ -493,49 +493,76 @@
     }
   };
 
-  //===========================================================================================================
-  demo_async = function() {
-    var _, count, create_task, i, ref;
-    count = 0;
-    ref = null;
-    create_task = function() {
-      return new Promise(function(resolve) {
-        var dt;
-        count++;
-        dt = Math.round(Math.random() * 1000);
-        ref = `task_${count}`;
-        (function(count, dt) {
-          help('Ωgt__10', `(${count} ${rpr(dt)} ${ref}`);
-          return after(dt / 1000, function() {
-            warn('Ωgt__10', `${count}) ${ref}`);
-            ref = null;
-            return resolve();
-          });
-        })(count, dt);
-        return null;
-      });
-    };
-    for (_ = i = 1; i <= 3; _ = ++i) {
-      create_task();
+  TT2 = {
+    test_cfg: TT.test_cfg
+  };
+
+  TT3 = {
+    demo_assumptions: function(ctx) {
+      var line, ΩTT__82, ΩTT__83, ΩTT__84, ΩTT__85, ΩTT__90;
+      line = '-'.repeat(108);
+      //.........................................................................................................
+      echo(line);
+      this.eq((ΩTT__82 = function() {
+        return this._upref;
+      }), 'TT3.demo_assumptions');
+      echo(line);
+      this.eq((ΩTT__83 = function() {
+        throw new Error("fine");
+      }));
+      echo(line);
+      this.eq((ΩTT__84 = function() {
+        return 32;
+      }), 32);
+      echo(line);
+      this.eq((ΩTT__85 = function() {
+        return 32;
+      }), 33);
+      echo(line);
+      this.pass('ΩTT__86', 'test', "all fine");
+      echo(line);
+      this.pass('ΩTT__87', 'test');
+      echo(line);
+      echo(line);
+      this.fail('ΩTT__88', 'test', "all fine");
+      echo(line);
+      this.fail('ΩTT__89', 'test');
+      echo(line);
+      this.throws((ΩTT__90 = function() {
+        throw new Error("this is actually fine");
+      }), /fine/);
+      //.........................................................................................................
+      return null;
     }
-    return null;
   };
 
   //===========================================================================================================
   if (module === require.main) {
-    await (async() => {
-      // await async_test TT.asynchronous_throws
-      // test TT.pass_and_fail
-      // await async_test TT.pass_and_fail
-      // test TT.test_cfg
-      // ( new Test() ).test TT.can_throw_on_fail
-      // ( new Test        { throw_on_error: true, } ).test        TT.can_throw_on_fail
-      // await ( new Test  { throw_on_error: true, } ).async_test  TT.can_throw_on_fail
-      return (await demo_async());
+    await (() => {
+      return (() => {        // await async_test TT.asynchronous_throws
+        // test TT.pass_and_fail
+        // await async_test TT.pass_and_fail
+        // test TT.test_cfg
+        // ( new Test() ).test TT.can_throw_on_fail
+        // ( new Test        { throw_on_error: true, } ).test        TT.can_throw_on_fail
+        // await ( new Test  { throw_on_error: true, } ).async_test  TT.can_throw_on_fail
+        // ( new Test() ).test TT
+        // ( new Test() ).test { TT, }
+        //.........................................................................................................
+        // do =>
+        //   ( new Test() ).test TT2.test_cfg
+        //   ( new Test() ).test TT2
+        //   ( new Test() ).test { TT2, }
+        //.........................................................................................................
+        // ( new Test() ).test TT3.demo_assumptions
+        // ( new Test() ).test TT3
+        // ( new Test( throw_on_error: true ) ).test { TT3, }
+        return (new Test()).test({TT3});
+      })();
     })();
   }
 
-  // ( new Test() ).test TT
+  //.........................................................................................................
 // ( new Test()        ).test        TT.set_equality_by_value
 // await ( new Test()  ).async_test  TT.set_equality_by_value
 // await ( new Test() ).async_test TT
