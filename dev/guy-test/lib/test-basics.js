@@ -25,12 +25,12 @@
   TT = {
     //---------------------------------------------------------------------------------------------------------
     set_equality_by_value: function() {
-      var t2, ΩTT___1;
+      var t2, Ω___1;
       t2 = new Test({
         show_report: false,
         prefix: "TEST RESULT"
       });
-      this.eq((ΩTT___1 = function() {
+      this.eq((Ω___1 = function() {
         return t2.stats;
       }), {
         '*': {
@@ -46,7 +46,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv_3, sebv_4, ΩTT___2;
+        var matcher1, matcher2, result, sebv_3, sebv_4, Ω___2;
         result = [1, [2]];
         matcher1 = [1, [2]];
         matcher2 = [1, [3]];
@@ -56,7 +56,7 @@
         t2.eq((sebv_4 = function() {
           return equals(result, matcher2);
         }), false);
-        this.eq((ΩTT___2 = function() {
+        this.eq((Ω___2 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -83,7 +83,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv_6, sebv_7, sebv_8, ΩTT___6;
+        var matcher1, matcher2, result, sebv_6, sebv_7, sebv_8, Ω___6;
         result = new Set([1, 2]);
         matcher1 = new Set([1, 2]);
         matcher2 = new Set([1, 3]);
@@ -96,7 +96,7 @@
         t2.eq((sebv_8 = function() {
           return equals(result, matcher2);
         }), true);
-        this./* is `false` */eq((ΩTT___6 = function() {
+        this./* is `false` */eq((Ω___6 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -135,7 +135,7 @@
         return null;
       })();
       (() => {        //.........................................................................................................
-        var matcher1, matcher2, result, sebv10, sebv11, sebv12, sebv13, sebv14, ΩTT__13;
+        var matcher1, matcher2, result, sebv10, sebv11, sebv12, sebv13, sebv14, Ω__13;
         result = new Set([1, [2]]);
         matcher1 = new Set([1, [2]]);
         matcher2 = new Set([1, [3]]);
@@ -154,7 +154,7 @@
         /* is `false` */        t2.eq((sebv14 = function() {
           return equals(result, matcher2);
         }), true);
-        this./* is `false` */eq((ΩTT__13 = function() {
+        this./* is `false` */eq((Ω__13 = function() {
           return t2.stats;
         }), {
           '*': {
@@ -216,13 +216,13 @@
     },
     //-----------------------------------------------------------------------------------------------------------
     pass_and_fail: function() {
-      var t2, ΩTT__25, ΩTT__26, ΩTT__27, ΩTT__28, ΩTT__29, ΩTT__30, ΩTT__31, ΩTT__32, ΩTT__33, ΩTT__34, ΩTT__35, ΩTT__36;
+      var t2, Ω__25, Ω__26, Ω__27, Ω__28, Ω__29, Ω__30, Ω__31, Ω__32, Ω__33, Ω__34, Ω__35, Ω__36;
       t2 = new Test();
       //.........................................................................................................
-      this.eq((ΩTT__25 = function() {
+      this.eq((Ω__25 = function() {
         return type_of(t2.pass);
       }), 'function');
-      this.eq((ΩTT__26 = function() {
+      this.eq((Ω__26 = function() {
         return type_of(t2.fail);
       }), 'function');
       t2.test({
@@ -236,41 +236,41 @@
       t2.report({
         prefix: "TEST RESULT"
       });
-      this.eq((ΩTT__27 = function() {
+      this.eq((Ω__27 = function() {
         return t2.stats['*'].passes;
       }), 2);
-      this.eq((ΩTT__28 = function() {
+      this.eq((Ω__28 = function() {
         return t2.stats['paf_a.paf_1'].passes;
       }), 1);
-      this.eq((ΩTT__29 = function() {
+      this.eq((Ω__29 = function() {
         return t2.stats['paf_a.paf_2'].passes;
       }), 0);
-      this.eq((ΩTT__30 = function() {
+      this.eq((Ω__30 = function() {
         return t2.stats['paf_a.paf_3'].passes;
       }), 1);
-      this.eq((ΩTT__31 = function() {
+      this.eq((Ω__31 = function() {
         return t2.stats['paf_a.paf_4'].passes;
       }), 0);
-      this.eq((ΩTT__32 = function() {
+      this.eq((Ω__32 = function() {
         return t2.stats['*'].fails;
       }), 2);
-      this.eq((ΩTT__33 = function() {
+      this.eq((Ω__33 = function() {
         return t2.stats['paf_a.paf_1'].fails;
       }), 0);
-      this.eq((ΩTT__34 = function() {
+      this.eq((Ω__34 = function() {
         return t2.stats['paf_a.paf_2'].fails;
       }), 1);
-      this.eq((ΩTT__35 = function() {
+      this.eq((Ω__35 = function() {
         return t2.stats['paf_a.paf_3'].fails;
       }), 0);
-      this.eq((ΩTT__36 = function() {
+      this.eq((Ω__36 = function() {
         return t2.stats['paf_a.paf_4'].fails;
       }), 1);
       return typeof done === "function" ? done() : void 0;
     },
     //-----------------------------------------------------------------------------------------------------------
     asynchronous_throws: async function() {
-      var FS, fetch_filesize, t2, ΩTT__40, ΩTT__41, ΩTT__42;
+      var FS, fetch_filesize, t2, Ω__40, Ω__41, Ω__42;
       FS = require('node:fs/promises');
       t2 = new Test();
       //.........................................................................................................
@@ -278,24 +278,24 @@
         return ((await FS.stat(path))).size;
       };
       //.........................................................................................................
-      // await async_throws  T, ( ΩTT__37 = -> await fetch_filesize __filename   )
-      // await async_throws  T, ( ΩTT__38 = -> await fetch_filesize __filename   ), "foobar"
-      // await async_throws  T, ( ΩTT__39 = -> await fetch_filesize __filename   ), /no such file/
+      // await async_throws  T, ( Ω__37 = -> await fetch_filesize __filename   )
+      // await async_throws  T, ( Ω__38 = -> await fetch_filesize __filename   ), "foobar"
+      // await async_throws  T, ( Ω__39 = -> await fetch_filesize __filename   ), /no such file/
       //.........................................................................................................
-      await t2.async_throws((ΩTT__40 = async function() {
+      await t2.async_throws((Ω__40 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), "foobar");
-      await t2.async_throws((ΩTT__41 = async function() {
+      await t2.async_throws((Ω__41 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), /no such file/);
-      await t2.async_throws((ΩTT__42 = async function() {
+      await t2.async_throws((Ω__42 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }));
       return typeof done === "function" ? done() : void 0;
     },
     //-----------------------------------------------------------------------------------------------------------
     asynchronous_errors: async function() {
-      var FS, fetch_filesize, produce_filesize, ΩTT__51;
+      var FS, fetch_filesize, produce_filesize, Ω__51;
       FS = require('node:fs/promises');
       //.........................................................................................................
       fetch_filesize = async function(path) {
@@ -306,22 +306,22 @@
         var error, filesize;
         try {
           filesize = (await fetch_filesize(path));
-          urge("ΩTT__47", {filesize});
+          urge("Ω__47", {filesize});
         } catch (error1) {
           error = error1;
-          warn("ΩTT__48", error);
+          warn("Ω__48", error);
         }
         return null;
       };
       //.........................................................................................................
       echo('-------------------');
-      // try await produce_filesize 'nosuchpath' catch error then warn 'ΩTT__49', error.message
+      // try await produce_filesize 'nosuchpath' catch error then warn 'Ω__49', error.message
       await produce_filesize('nosuchpath');
       echo('-------------------');
       await produce_filesize(__filename);
       echo('-------------------');
-      // await async_throws ( ΩTT__50 = -> await fetch_filesize __filename ), '???'
-      await async_throws((ΩTT__51 = async function() {
+      // await async_throws ( Ω__50 = -> await fetch_filesize __filename ), '???'
+      await async_throws((Ω__51 = async function() {
         return (await fetch_filesize('nosuchpath'));
       }), /no such file/);
       echo('-------------------');
@@ -330,100 +330,100 @@
     //---------------------------------------------------------------------------------------------------------
     test_cfg: function() {
       (() => {        //.........................................................................................................
-        var t2, ΩTT__52, ΩTT__53, ΩTT__54, ΩTT__55, ΩTT__56, ΩTT__57, ΩTT__58, ΩTT__59, ΩTT__60;
+        var t2, Ω__52, Ω__53, Ω__54, Ω__55, Ω__56, Ω__57, Ω__58, Ω__59, Ω__60;
         t2 = new Test();
-        this.eq((ΩTT__52 = function() {
+        this.eq((Ω__52 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((ΩTT__53 = function() {
+        this.eq((Ω__53 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((ΩTT__54 = function() {
+        this.eq((Ω__54 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((ΩTT__55 = function() {
+        this.eq((Ω__55 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((ΩTT__56 = function() {
+        this.eq((Ω__56 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((ΩTT__57 = function() {
+        this.eq((Ω__57 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((ΩTT__58 = function() {
+        this.eq((Ω__58 = function() {
           return t2.cfg.throw_on_error;
         }), false);
-        this.eq((ΩTT__59 = function() {
+        this.eq((Ω__59 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        this.eq((ΩTT__60 = function() {
+        this.eq((Ω__60 = function() {
           return t2.cfg.message_width;
         }), 50);
         return null;
       })();
       (() => {        //.........................................................................................................
-        var t2, ΩTT__61, ΩTT__62, ΩTT__63, ΩTT__64, ΩTT__65, ΩTT__66, ΩTT__67, ΩTT__68, ΩTT__69;
+        var t2, Ω__61, Ω__62, Ω__63, Ω__64, Ω__65, Ω__66, Ω__67, Ω__68, Ω__69;
         t2 = new Test({});
-        this.eq((ΩTT__61 = function() {
+        this.eq((Ω__61 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((ΩTT__62 = function() {
+        this.eq((Ω__62 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((ΩTT__63 = function() {
+        this.eq((Ω__63 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((ΩTT__64 = function() {
+        this.eq((Ω__64 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((ΩTT__65 = function() {
+        this.eq((Ω__65 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((ΩTT__66 = function() {
+        this.eq((Ω__66 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((ΩTT__67 = function() {
+        this.eq((Ω__67 = function() {
           return t2.cfg.throw_on_error;
         }), false);
-        this.eq((ΩTT__68 = function() {
+        this.eq((Ω__68 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        this.eq((ΩTT__69 = function() {
+        this.eq((Ω__69 = function() {
           return t2.cfg.message_width;
         }), 50);
         return null;
       })();
       (() => {        //.........................................................................................................
-        var t2, ΩTT__70, ΩTT__71, ΩTT__72, ΩTT__73, ΩTT__74, ΩTT__75, ΩTT__76, ΩTT__77, ΩTT__78;
+        var t2, Ω__70, Ω__71, Ω__72, Ω__73, Ω__74, Ω__75, Ω__76, Ω__77, Ω__78;
         t2 = new Test({
           message_width: 30,
           throw_on_error: true
         });
-        this.eq((ΩTT__70 = function() {
+        this.eq((Ω__70 = function() {
           return Object.isFrozen(t2.cfg);
         }), true);
-        this.eq((ΩTT__71 = function() {
+        this.eq((Ω__71 = function() {
           return t2.cfg.auto_reset;
         }), false);
-        this.eq((ΩTT__72 = function() {
+        this.eq((Ω__72 = function() {
           return t2.cfg.show_report;
         }), true);
-        this.eq((ΩTT__73 = function() {
+        this.eq((Ω__73 = function() {
           return t2.cfg.show_results;
         }), true);
-        this.eq((ΩTT__74 = function() {
+        this.eq((Ω__74 = function() {
           return t2.cfg.show_fails;
         }), true);
-        this.eq((ΩTT__75 = function() {
+        this.eq((Ω__75 = function() {
           return t2.cfg.show_passes;
         }), true);
-        this.eq((ΩTT__76 = function() {
+        this.eq((Ω__76 = function() {
           return t2.cfg.throw_on_error;
         }), true);
-        this.eq((ΩTT__77 = function() {
+        this.eq((Ω__77 = function() {
           return t2.cfg.throw_on_fail;
         }), false);
-        return this.eq((ΩTT__78 = function() {
+        return this.eq((Ω__78 = function() {
           return t2.cfg.message_width;
         }), 30);
       })();
@@ -485,7 +485,7 @@
             return 14;
           }), 15);
         }), /neq:/);
-        // @throws ( ΩTT__81 = -> t2.eq ( xy1 = -> 14 ), 15 ), /---/
+        // @throws ( Ω__81 = -> t2.eq ( xy1 = -> 14 ), 15 ), /---/
         return null;
       })();
       //.........................................................................................................
@@ -498,39 +498,54 @@
   };
 
   TT3 = {
-    demo_assumptions: function(ctx) {
-      var line, ΩTT__82, ΩTT__83, ΩTT__84, ΩTT__85, ΩTT__90;
+    demo_assumptions: async function(ctx) {
+      var line, Ω__90, Ω__91, Ω__92, Ω__93, Ω__94, Ω__95, Ω__98;
       line = '-'.repeat(108);
       //.........................................................................................................
+      // echo line; @eq ( Ω__82 = -> 32 ), 32
+      // echo line; @eq ( Ω__83 = -> 32 ), 33
+      // echo line; @eq ( Ω__84 = -> throw new Error "fine" )
+      // echo line; @pass 'Ω__85', 'test', "all fine"
+      // echo line; @pass 'Ω__86', 'test'
+      // echo line; @fail 'Ω__87', 'test', "all fine"
+      // echo line; @fail 'Ω__88', 'test'
+      // echo line; @throws ( Ω__89 = -> 'oops' ), /fine/
       echo(line);
-      this.eq((ΩTT__82 = function() {
-        return this._upref;
-      }), 'TT3.demo_assumptions');
+      this.throws((Ω__90 = function() {
+        throw new Error("this is actually fine 1");
+      }), /fine/);
       echo(line);
-      this.eq((ΩTT__83 = function() {
-        throw new Error("fine");
+      this.throws((Ω__91 = function() {
+        throw new Error("this is actually fine 2");
+      }), /what/);
+      echo(line);
+      this.throws((Ω__92 = function() {
+        throw new Error("this is actually fine 3");
+      }), "not this");
+      echo(line);
+      await this.async_throws((Ω__93 = function() {
+        throw new Error("this is actually fine 4");
       }));
       echo(line);
-      this.eq((ΩTT__84 = function() {
-        return 32;
-      }), 32);
-      echo(line);
-      this.eq((ΩTT__85 = function() {
-        return 32;
-      }), 33);
-      echo(line);
-      this.pass('ΩTT__86', 'test', "all fine");
-      echo(line);
-      this.pass('ΩTT__87', 'test');
-      echo(line);
-      echo(line);
-      this.fail('ΩTT__88', 'test', "all fine");
-      echo(line);
-      this.fail('ΩTT__89', 'test');
-      echo(line);
-      this.throws((ΩTT__90 = function() {
-        throw new Error("this is actually fine");
+      await this.async_throws((Ω__94 = function() {
+        throw new Error("this is actually fine 5");
       }), /fine/);
+      echo(line);
+      await this.async_throws((Ω__95 = function() {
+        throw new Error("this is actually fine 6");
+      }), /not this/);
+      // echo line; await @async_throws ( Ω__96 = -> new Promise ( rslv ) -> after 0.1, -> rslv 'oops' )
+      // echo line; await @async_throws ( Ω__97 = -> new Promise ( rslv, rjct ) => after 0.1, => rjct "this is actually fine 8" ), /fine/
+      echo(line);
+      await this.async_throws((Ω__98 = function() {
+        return after(0.1, async() => {
+          return (await (function() {
+            throw new Error("this is actually fine 7");
+          })());
+        });
+      }), /fine/);
+      // echo line; await @async_throws ( Ω__99 = -> after 0.1, => await throw new Error "this is actually fine 9" ), /what/
+      // echo line; await @async_throws ( Ω_100 = -> after 0.1, => await throw new Error "this is actually fine 10" ), "not this"
       //.........................................................................................................
       return null;
     }
@@ -538,8 +553,8 @@
 
   //===========================================================================================================
   if (module === require.main) {
-    await (() => {
-      return (() => {        // await async_test TT.asynchronous_throws
+    await (async() => {
+      return (await (async() => {        // await async_test TT.asynchronous_throws
         // test TT.pass_and_fail
         // await async_test TT.pass_and_fail
         // test TT.test_cfg
@@ -557,8 +572,9 @@
         // ( new Test() ).test TT3.demo_assumptions
         // ( new Test() ).test TT3
         // ( new Test( throw_on_error: true ) ).test { TT3, }
-        return (new Test()).test({TT3});
-      })();
+        // ( new Test() ).test { TT3, }
+        return (await (new Test()).async_test({TT3}));
+      })());
     })();
   }
 
@@ -566,6 +582,19 @@
 // ( new Test()        ).test        TT.set_equality_by_value
 // await ( new Test()  ).async_test  TT.set_equality_by_value
 // await ( new Test() ).async_test TT
+
+  // af1 = ->       after 0.1, ->       throw new Error 'oops' ### not OK ###
+// af2 = -> await after 0.1, ->       throw new Error 'oops' ### not OK ###
+// af3 = ->       after 0.1, -> await throw new Error 'oops' ### OK ###
+// af4 = -> await after 0.1, -> await throw new Error 'oops' ### OK ###
+// # debug 'Ω_101', validate.asyncfunction af
+// f1 = ->
+//   try
+//     result = await af2()
+//   catch error
+//     warn error.message
+//   help result
+// await f1()
 
 }).call(this);
 
