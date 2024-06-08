@@ -93,6 +93,66 @@ types                     = new ( require 'intertype' ).Intertype
   #.........................................................................................................
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+demo_replace_line = ->
+  #.........................................................................................................
+  # Moves cursor to beginning of the line n (default 1) lines up
+  to_start_0 = '\x1b[0F'
+  to_start_1 = '\x1b[1F'
+  to_start_2 = '\x1b[2F'
+  #.........................................................................................................
+  # clears  part of the line.
+  # If n is 0 (or missing), clear from cursor to the end of the line.
+  # If n is 1, clear from cursor to beginning of the line.
+  # If n is 2, clear entire line.
+  # Cursor position does not change.
+  clear_to_end    = '\x1b[0K'
+  clear_to_start  = '\x1b[1K'
+  clear_line      = '\x1b[2K'
+  #.........................................................................................................
+  write     = _GUY.trm.get_writer process.stdout, '', ''
+  cr_and_up = -> write to_start_1 + clear_line
+  #.........................................................................................................
+  info "1 what dis???"
+  info "2 what dis???"
+  info "3 what dis???".repeat 50
+  info "4 what dis???".repeat 50
+  cr_and_up()
+  info _GUY.trm.red "helo world"
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+demo_color_memory = ->
+  { colors: color_codes } = require 'guy/lib/_temporary_colors'
+  _H                      = require 'guy/lib/_helpers'
+  color_stack = [ color_codes.grey, ]
+  #.........................................................................................................
+  get_color_method = ( color_name ) ->
+    ### TAINT allow arbitrary ANSI codes? ###
+    ### TAINT check whether color_name is known ###
+    color_code      = color_codes[ color_name ]
+    #.......................................................................................................
+    ### TAINT give function an informative name ###
+    return ( P... ) ->
+      prv_color_code = color_stack.at -1
+      color_stack.push color_code
+      ### TAINT partial re-implementation of `pen()` ###
+      parts = ( ( color_code + ( _GUY.trm.pen p ) + prv_color_code ) for p in P )
+      R = ( parts.join _H._trm_cfg.separator ) + color_stack.pop()
+      return R
+  #.........................................................................................................
+  red       = get_color_method 'red'
+  yellow    = get_color_method 'yellow'
+  gold      = get_color_method 'gold'
+  blue      = get_color_method 'blue'
+  lime      = get_color_method 'lime'
+  plum      = get_color_method 'plum'
+  #.........................................................................................................
+  info "this", ( red "is", "---", ( gold "a nice" ), "!!!", ( lime "example", ( plum "of" ), "nested" ) ), "colors"
+  #.........................................................................................................
+  return null
+
 
 
 ############################################################################################################
@@ -100,5 +160,7 @@ if require.main is module then do =>
   # test @
   # test @[ "GUY.trm.rpr" ]
   # test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-  test @GUY_trm_strip_ansi
+  # test @GUY_trm_strip_ansi
+  demo_replace_line()
+  demo_color_memory()
 

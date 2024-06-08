@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var H, _GUY, alert, debug, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
+  var H, _GUY, alert, debug, demo_color_memory, demo_replace_line, echo, equals, help, info, inspect, isa, log, plain, praise, rpr, test, type_of, types, urge, validate, validate_list_of, warn, whisper;
 
   //###########################################################################################################
   _GUY = require('guy');
@@ -192,13 +192,95 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  demo_replace_line = function() {
+    var clear_line, clear_to_end, clear_to_start, cr_and_up, to_start_0, to_start_1, to_start_2, write;
+    //.........................................................................................................
+    // Moves cursor to beginning of the line n (default 1) lines up
+    to_start_0 = '\x1b[0F';
+    to_start_1 = '\x1b[1F';
+    to_start_2 = '\x1b[2F';
+    //.........................................................................................................
+    // clears  part of the line.
+    // If n is 0 (or missing), clear from cursor to the end of the line.
+    // If n is 1, clear from cursor to beginning of the line.
+    // If n is 2, clear entire line.
+    // Cursor position does not change.
+    clear_to_end = '\x1b[0K';
+    clear_to_start = '\x1b[1K';
+    clear_line = '\x1b[2K';
+    //.........................................................................................................
+    write = _GUY.trm.get_writer(process.stdout, '', '');
+    cr_and_up = function() {
+      return write(to_start_1 + clear_line);
+    };
+    //.........................................................................................................
+    info("1 what dis???");
+    info("2 what dis???");
+    info("3 what dis???".repeat(50));
+    info("4 what dis???".repeat(50));
+    cr_and_up();
+    info(_GUY.trm.red("helo world"));
+    //.........................................................................................................
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  demo_color_memory = function() {
+    var _H, blue, color_codes, color_stack, get_color_method, gold, lime, plum, red, yellow;
+    ({
+      colors: color_codes
+    } = require('guy/lib/_temporary_colors'));
+    _H = require('guy/lib/_helpers');
+    color_stack = [color_codes.grey];
+    //.........................................................................................................
+    get_color_method = function(color_name) {
+      /* TAINT allow arbitrary ANSI codes? */
+      /* TAINT check whether color_name is known */
+      var color_code;
+      color_code = color_codes[color_name];
+      //.......................................................................................................
+      /* TAINT give function an informative name */
+      return function(...P) {
+        /* TAINT partial re-implementation of `pen()` */
+        var R, p, parts, prv_color_code;
+        prv_color_code = color_stack.at(-1);
+        color_stack.push(color_code);
+        parts = (function() {
+          var i, len, results;
+          results = [];
+          for (i = 0, len = P.length; i < len; i++) {
+            p = P[i];
+            results.push(color_code + (_GUY.trm.pen(p)) + prv_color_code);
+          }
+          return results;
+        })();
+        R = (parts.join(_H._trm_cfg.separator)) + color_stack.pop();
+        return R;
+      };
+    };
+    //.........................................................................................................
+    red = get_color_method('red');
+    yellow = get_color_method('yellow');
+    gold = get_color_method('gold');
+    blue = get_color_method('blue');
+    lime = get_color_method('lime');
+    plum = get_color_method('plum');
+    //.........................................................................................................
+    info("this", red("is", "---", gold("a nice"), "!!!", lime("example", plum("of"), "nested")), "colors");
+    //.........................................................................................................
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
       // test @
       // test @[ "GUY.trm.rpr" ]
       // test @[ "GUY.src.parse() accepts `fallback` argument, otherwise errors where appropriate" ]
-      return test(this.GUY_trm_strip_ansi);
+      // test @GUY_trm_strip_ansi
+      demo_replace_line();
+      return demo_color_memory();
     })();
   }
 
