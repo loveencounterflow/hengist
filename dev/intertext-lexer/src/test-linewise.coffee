@@ -102,6 +102,26 @@ tabulate_lexer = ( lexer ) ->
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@use_linewise_lexing_with_peacemeal_feed = ( T, done ) ->
+  FS      = require 'node:fs'
+  GUY     = require '../../../apps/guy'
+  { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ->
+    lexer   = new Interlex { split: 'lines', }
+    mode    = 'plain'
+    lexer.add_lexeme { mode, lxid: 'ws',       pattern: ( /\s+/u ), }
+    lexer.add_lexeme { mode, lxid: 'word',     pattern: ( /\S+/u ), }
+    lexer.add_lexeme { mode, lxid: 'empty',    pattern: ( /^$/u ), }
+    return lexer
+  #.........................................................................................................
+  # T?.eq result, matcher
+  # H.tabulate ( rpr path ), tokens
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @use_linewise_with_single_text = ( T, done ) ->
   FS      = require 'node:fs'
   GUY     = require '../../../apps/guy'
@@ -342,11 +362,13 @@ tabulate_lexer = ( lexer ) ->
 ############################################################################################################
 if require.main is module then do =>
   # @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
-  test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
+  # test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
   # test @use_linewise_with_single_text
   # test @parse_nested_codespan_across_lines
   # @read_csv()
   # test @use_linewise_with_prepend_and_append
   # test @read_csv
   # test @throws_error_on_linewise_with_nl_in_source
+  @use_linewise_lexing_with_peacemeal_feed
+  # test @use_linewise_lexing_with_peacemeal_feed
   # test @

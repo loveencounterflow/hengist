@@ -107,38 +107,110 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
 
 #-----------------------------------------------------------------------------------------------------------
 @dbay_concurrency_with_implicitly_two_connections = ( T, done ) ->
-  { DBay }            = require '../../../apps/dbay'
-  { SQL  }            = DBay
-  db                  = new DBay()
-  T?.eq db.get_journal_mode(), 'wal'
-  T?.eq db.get_journal_mode(), 'wal'
+  do =>
+    { DBay }            = require '../../../apps/dbay'
+    { SQL  }            = DBay
+    db                  = new DBay()
+    T?.eq db.get_journal_mode(), 'wal'
+    #.........................................................................................................
+    db SQL"""create table numbers (
+      n   integer not null primary key,
+      sqr integer );"""
+    insert_number = db.alt.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+    #.........................................................................................................
+    db ->
+      for n in [ 0 .. 4 ]
+        db insert_number, { n, sqr: null, }
+    #.........................................................................................................
+    do ->
+      result = db.all_rows SQL"""select * from numbers order by n;"""
+      T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+    #.........................................................................................................
+    # db.with_transaction ->
+    for d from db SQL"select * from numbers order by n;"
+      d.sqr = d.n ** 2
+      debug 'Ω___1', insert_number.database.inTransaction
+      db insert_number, d
+      d.n = d.n + 100
+      d.sqr = d.n ** 2
+      db insert_number, d
+    #.........................................................................................................
+    do ->
+      result = db.all_rows SQL"""select * from numbers order by n;"""
+      T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
   #.........................................................................................................
-  db SQL"""create table numbers (
-    n   integer not null primary key,
-    sqr integer );"""
-  insert_number = db.alt.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
-  #.........................................................................................................
-  db ->
-    for n in [ 0 .. 4 ]
-      db insert_number, { n, sqr: null, }
-  #.........................................................................................................
-  do ->
-    result = db.all_rows SQL"""select * from numbers order by n;"""
-    T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
-  #.........................................................................................................
-  # db.with_transaction ->
-  for d from db SQL"select * from numbers order by n;"
-    d.sqr = d.n ** 2
-    db insert_number, d
-    d.n = d.n + 100
-    d.sqr = d.n ** 2
-    db insert_number, d
-  #.........................................................................................................
-  do ->
-    result = db.all_rows SQL"""select * from numbers order by n;"""
-    T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
+  do =>
+    { DBay }            = require '../../../apps/dbay'
+    { SQL  }            = DBay
+    db                  = new DBay()
+    T?.eq db.get_journal_mode(), 'wal'
+    #.........................................................................................................
+    db SQL"""create table numbers (
+      n   integer not null primary key,
+      sqr integer );"""
+    insert_number = db.alt.prepare_insert { into: 'numbers', on_conflict: { update: true, }, }
+    #.........................................................................................................
+    db ->
+      for n in [ 0 .. 4 ]
+        db insert_number, { n, sqr: null, }
+    #.........................................................................................................
+    do ->
+      result = db.all_rows SQL"""select * from numbers order by n;"""
+      T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+    #.........................................................................................................
+    db.with_transaction =>
+      for d from db SQL"select * from numbers order by n;"
+        d.sqr = d.n ** 2
+        db insert_number, d
+        d.n = d.n + 100
+        d.sqr = d.n ** 2
+        db insert_number, d
+    #.........................................................................................................
+    do ->
+      result = db.all_rows SQL"""select * from numbers order by n;"""
+      T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
   #.........................................................................................................
   done?()
+
+# #-----------------------------------------------------------------------------------------------------------
+# @dbay_concurrency_with_single_connection = ( T, done ) ->
+#   { DBay }            = require '../../../apps/dbay'
+#   { SQL  }            = DBay
+#   db                  = new DBay()
+#   T?.eq db.get_journal_mode(), 'wal'
+#   #.........................................................................................................
+#   db SQL"""create table numbers (
+#     n   integer not null primary key,
+#     sqr integer );"""
+#   # debug '^Ω___5', db.create_insert { into: 'numbers', }
+#   insert_number = SQL"""insert into numbers ( n, sqr ) values ( $n, $sqr );"""
+#   #.........................................................................................................
+#   db SQL"""begin;"""
+#   for n in [ 0 .. 4 ]
+#     db insert_number, { n, sqr: null, }
+#   db SQL"""commit;"""
+#   #.........................................................................................................
+#   do ->
+#     result = db.all_rows SQL"""select * from numbers order by n;"""
+#     T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+#   #.........................................................................................................
+#   # db.with_transaction ->
+#   db SQL"""begin;"""
+#   for d from db SQL"select * from numbers order by n;"
+#     d.sqr = d.n ** 2
+#     debug 'Ω___6', d
+#     db.alt insert_number, d
+#     d.n = d.n + 100
+#     d.sqr = d.n ** 2
+#     debug 'Ω___7', d
+#     db.alt insert_number, d
+#   db SQL"""commit;"""
+#   #.........................................................................................................
+#   do ->
+#     result = db.all_rows SQL"""select * from numbers order by n;"""
+#     T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
+#   #.........................................................................................................
+#   done?()
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -195,7 +267,9 @@ if require.main is module then do =>
   # test @dbay_concurrency_with_explicitly_two_connections
   # test @dbay_concurrency_with_implicitly_two_connections
   # @dbay_concurrency_with_table_function()
-  test @dbay_concurrency_with_table_function
+  # test @dbay_concurrency_with_table_function
+  @dbay_concurrency_with_implicitly_two_connections()
+  test @dbay_concurrency_with_implicitly_two_connections
   # test @
 
 

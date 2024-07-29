@@ -506,12 +506,96 @@ H                         = require './helpers'
   return null
 
 
+#===========================================================================================================
+# JUMP FUNCTIONS
+#-----------------------------------------------------------------------------------------------------------
+@jump_function_return_values = ( T, done ) ->
+  { Interlex }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( enter_marks ) ->
+    lexer   = new Interlex { dotall: false, }
+    do =>
+      mode = 'p'
+      lexer.add_lexeme { mode, lxid: 'L', jump: enter_marks,  pattern:  /\[/u,                }
+      lexer.add_lexeme { mode, lxid: 'P', jump: null,         pattern:  /[^\[\\]+/u,          }
+    #.........................................................................................................
+    do =>
+      mode = 'm'
+      lexer.add_lexeme { mode, lxid: 'R', jump: '.]',         pattern:  /\]/u, reserved: ']', }
+      lexer.add_lexeme { mode, lxid: 'G', jump: null,         pattern:  /[U01234]/u,          }
+      lexer.add_reserved_lexeme { mode, lxid: 'forbidden', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  lex = ( lexer, probe ) ->
+    R = []
+    for token from lexer.walk probe
+      R.push "#{token.$key}#{rpr token.value}"
+    return R.join '|'
+  #.........................................................................................................
+  T?.eq ( lex ( new_lexer     '[m'  ), "[32] what?" ), "m:L'['|m:G'3'|m:G'2'|m:R']'|p:P' what?'"
+  T?.eq ( lex ( new_lexer     '[m]' ), "[32] what?" ), "m:L'['|p:P'32] what?'"
+  T?.eq ( lex ( new_lexer     null  ), "[32] what?" ), "p:L'['|p:P'32] what?'"
+  T?.eq ( lex ( new_lexer ->  '[m'  ), "[32] what?" ), "m:L'['|m:G'3'|m:G'2'|m:R']'|p:P' what?'"
+  T?.eq ( lex ( new_lexer ->  '[m]' ), "[32] what?" ), "m:L'['|p:P'32] what?'"
+  T?.eq ( lex ( new_lexer ->  null  ), "[32] what?" ), "p:L'['|p:P'32] what?'"
+  #.........................................................................................................
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@jump_property_value = ( T, done ) ->
+  { Interlex }        = require '../../../apps/intertext-lexer'
+  #.........................................................................................................
+  new_lexer = ( enter_marks ) ->
+    lexer   = new Interlex { dotall: false, }
+    do =>
+      mode = 'p'
+      lexer.add_lexeme { mode, lxid: 'L', jump: enter_marks,  pattern:  /\[/u,                }
+      lexer.add_lexeme { mode, lxid: 'P', jump: null,         pattern:  /[^\[\\]+/u,          }
+    #.........................................................................................................
+    do =>
+      mode = 'm'
+      lexer.add_lexeme { mode, lxid: 'R', jump: '.]',         pattern:  /\]/u, reserved: ']', }
+      lexer.add_lexeme { mode, lxid: 'G', jump: null,         pattern:  /[U01234]/u,          }
+      lexer.add_reserved_lexeme { mode, lxid: 'forbidden', concat: true, }
+    #.........................................................................................................
+    return lexer
+  #.........................................................................................................
+  lex = ( lexer, probe ) ->
+    R = []
+    for token from lexer.walk probe
+      jump = if token.jump? then ( rpr token.jump ) else '-'
+      R.push "#{token.$key}#{jump}"
+    return R.join '|'
+  #.........................................................................................................
+  help 'Ω___1', rpr ( lex ( new_lexer     '[m'  ), "[32] what?" )
+  help 'Ω___2', rpr ( lex ( new_lexer     '[m]' ), "[32] what?" )
+  help 'Ω___3', rpr ( lex ( new_lexer     null  ), "[32] what?" )
+  help 'Ω___4', rpr ( lex ( new_lexer ->  '[m'  ), "[32] what?" )
+  help 'Ω___5', rpr ( lex ( new_lexer ->  '[m]' ), "[32] what?" )
+  help 'Ω___6', rpr ( lex ( new_lexer ->  null  ), "[32] what?" )
+  #.........................................................................................................
+  T?.eq ( lex ( new_lexer     '[m'  ), "[32] what?" ), "m:L'm'|m:G-|m:G-|m:R'p'|p:P-"
+  T?.eq ( lex ( new_lexer     '[m]' ), "[32] what?" ), "m:L'p'|p:P-"
+  T?.eq ( lex ( new_lexer     null  ), "[32] what?" ), "p:L-|p:P-"
+  T?.eq ( lex ( new_lexer ->  '[m'  ), "[32] what?" ), "m:L'm'|m:G-|m:G-|m:R'p'|p:P-"
+  T?.eq ( lex ( new_lexer ->  '[m]' ), "[32] what?" ), "m:L'p'|p:P-"
+  T?.eq ( lex ( new_lexer ->  null  ), "[32] what?" ), "p:L-|p:P-"
+  #.........................................................................................................
+  done?()
+  return null
+
 
 
 
 ############################################################################################################
 if require.main is module then do =>
-  test @
+  # test @
+  # @jump_function_return_values()
+  # test @jump_function_return_values
+  @jump_property_value()
+  test @jump_property_value
   # test @markup_with_variable_length
   # test @auto_inserted_border_posts_exclusive
   # @singular_jumps()

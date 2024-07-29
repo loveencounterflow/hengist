@@ -323,7 +323,7 @@ types                     = new ( require 'intertype' ).Intertype()
   { Dataclass } = require '../../../apps/datom'
   #.........................................................................................................
   do ->
-    my_types = new ( require '../../../apps/intertype' ).Intertype()
+    my_types = new ( require '../../../../intertype-2024-04-15' ).Intertype()
     #.......................................................................................................
     class Something extends Dataclass
       #-----------------------------------------------------------------------------------------------------
@@ -414,11 +414,11 @@ types                     = new ( require 'intertype' ).Intertype()
 ############################################################################################################
 if require.main is module then do =>
   # test @
-  # test @datom_dataclass_method_to_trigger_declaration
+  test @datom_dataclass_method_to_trigger_declaration
   # @datom_dataclass_with_instance_methods()
   # test @datom_dataclass_with_instance_methods
   # test @datom_as_dataclass
   # test @datom_dataclass_automatic_validation
   # @datom_dataclass_deep_freezing()
-  test @datom_dataclass_deep_freezing
+  # test @datom_dataclass_deep_freezing
   # test @datom_dataclass_computed_properties

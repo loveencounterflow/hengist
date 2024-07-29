@@ -108,7 +108,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   for [ probe, matcher, error, ] in probes_and_matchers
     # do =>
     await T.perform probe, matcher, error, -> return new Promise ( resolve, reject ) ->
-      lexer       = new Interlex { end_token: true, }
+      lexer       = new Interlex { eof_token: true, }
       result      = lexer.run probe
       result_rpr  = ( "#{lexer.get_token_lxid t}:#{rpr t.value}" for t in result ).join '|'
       H.tabulate "#{rpr probe} -> #{rpr result_rpr}", result
@@ -123,7 +123,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   { Interlex } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
   get_lexer = ->
-    lexer = new Interlex { end_token: true, }
+    lexer = new Interlex { eof_token: true, }
     lexer.add_lexeme { mode: 'base',  lxid: 'a',             pattern: 'a', }
     lexer.add_lexeme { mode: 'base',  lxid: 'b', jump: 'up[', pattern: 'b', }
     lexer.add_lexeme { mode: 'up',    lxid: 'c',             pattern: 'c', }
@@ -155,7 +155,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
   #.........................................................................................................
   new_lexer = ->
-    lexer = new Interlex { split: false, end_token: true, }
+    lexer = new Interlex { split: false, eof_token: true, }
     do =>
       ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
       mode    = 'plain'
@@ -205,7 +205,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
   new_lexer = ->
-    lexer = new Interlex { split: false, end_token: true, }
+    lexer = new Interlex { split: false, eof_token: true, }
     #.........................................................................................................
     do =>
       ### NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens ###
@@ -373,7 +373,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
     """
   #.........................................................................................................
   new_toy_md_lexer = ( mode = 'plain' ) ->
-    lexer   = new Interlex { dotall: false, end_token: false, }
+    lexer   = new Interlex { dotall: false, eof_token: false, }
     #.........................................................................................................
     lexer.add_lexeme { mode, lxid: 'escchr', pattern: /\\(?<chr>.)/u, }
     lexer.add_lexeme { mode, lxid: 'star1',  pattern: /(?<!\*)\*(?!\*)/u, }
@@ -505,7 +505,7 @@ after                     = ( dts, f  ) => new Promise ( resolve ) -> setTimeout
 @match_start_of_line = ( T, done ) ->
   # T?.halt_on_error()
   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
-  lexer = new Interlex { split: false, dotall: true, end_token: true, }
+  lexer = new Interlex { split: false, dotall: true, eof_token: true, }
   #.........................................................................................................
   do =>
     mode    = 'plain'
