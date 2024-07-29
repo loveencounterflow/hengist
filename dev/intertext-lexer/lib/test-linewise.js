@@ -910,44 +910,37 @@
     return null;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.use_linewise_lexing_with_peacemeal_feed = function(T, done) {
-    var FS, Interlex, c, new_lexer;
-    FS = require('node:fs');
-    GUY = require('../../../apps/guy');
-    ({
-      Interlex,
-      compose: c
-    } = require('../../../apps/intertext-lexer'));
-    //.........................................................................................................
-    new_lexer = function() {
-      var lexer, mode;
-      lexer = new Interlex({
-        split: 'lines'
-      });
-      mode = 'plain';
-      lexer.add_lexeme({
-        mode,
-        lxid: 'ws',
-        pattern: /\s+/u
-      });
-      lexer.add_lexeme({
-        mode,
-        lxid: 'word',
-        pattern: /\S+/u
-      });
-      lexer.add_lexeme({
-        mode,
-        lxid: 'empty',
-        pattern: /^$/u
-      });
-      return lexer;
-    };
-    if (typeof done === "function") {
-      done();
-    }
-    return null;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+  // @use_linewise_lexing_with_peacemeal_feed = ( T, done ) ->
+  //   FS                        = require 'node:fs'
+  //   GUY                       = require '../../../apps/guy'
+  //   { Interlex, compose: c, } = require '../../../apps/intertext-lexer'
+  //   start_of_line             = Symbol 'start_of_line'
+  //   end_of_line               = Symbol 'end_of_line'
+  //   first                     = Symbol 'first'
+  //   last                      = Symbol 'last'
+  //   #.........................................................................................................
+  //   new_lexer = ->
+  //     lexer   = new Interlex { split: false, first, last, start_of_line, end_of_line, }
+  //     mode    = 'A'
+  //     lexer.add_lexeme { mode, lxid: 'w', pattern: ( /\s+/u ), }
+  //     lexer.add_lexeme { mode, lxid: 'm', pattern: ( /\S+/u ), }
+  //     lexer.add_lexeme { mode, lxid: 'e', pattern: ( /^$/u ), }
+  //     return lexer
+  //   #.........................................................................................................
+  //   lexer = new_lexer()
+  //   sources = [ "helo world what", "'s going on?\nyo", ]
+  //   for source in sources
+  //     for d from lexer.walk { source, }
+  //       if lexer.types.isa.symbol d
+  //         info 'Ω___1', d
+  //       else
+  //         help 'Ω___2', "#{d.$key}:#{rpr d.value}"
+  //   # T?.eq result, matcher
+  //   # H.tabulate ( rpr path ), tokens
+  //   #.........................................................................................................
+  //   done?()
+  //   return null
 
   //-----------------------------------------------------------------------------------------------------------
   this.use_linewise_with_single_text = function(T, done) {
@@ -1527,12 +1520,11 @@
       // test @use_linewise_with_prepend_and_append
       // test @read_csv
       // test @throws_error_on_linewise_with_nl_in_source
-      return this.use_linewise_lexing_with_peacemeal_feed;
+      // @use_linewise_lexing_with_peacemeal_feed()
+      // test @use_linewise_lexing_with_peacemeal_feed
+      return test(this);
     })();
   }
-
-  // test @use_linewise_lexing_with_peacemeal_feed
-// test @
 
 }).call(this);
 
