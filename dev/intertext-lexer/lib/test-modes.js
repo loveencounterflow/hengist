@@ -1827,10 +1827,214 @@
     return null;
   };
 
+  //===========================================================================================================
+  // JUMP FUNCTIONS
+  //-----------------------------------------------------------------------------------------------------------
+  this.jump_function_return_values = function(T, done) {
+    var Interlex, lex, new_lexer;
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(enter_marks) {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      (() => {
+        var mode;
+        mode = 'p';
+        lexer.add_lexeme({
+          mode,
+          lxid: 'L',
+          jump: enter_marks,
+          pattern: /\[/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          lxid: 'P',
+          jump: null,
+          pattern: /[^\[\\]+/u
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'm';
+        lexer.add_lexeme({
+          mode,
+          lxid: 'R',
+          jump: '.]',
+          pattern: /\]/u,
+          reserved: ']'
+        });
+        lexer.add_lexeme({
+          mode,
+          lxid: 'G',
+          jump: null,
+          pattern: /[U01234]/u
+        });
+        return lexer.add_reserved_lexeme({
+          mode,
+          lxid: 'forbidden',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    lex = function(lexer, probe) {
+      var R, ref, token;
+      R = [];
+      ref = lexer.walk(probe);
+      for (token of ref) {
+        R.push(`${token.$key}${rpr(token.value)}`);
+      }
+      return R.join('|');
+    };
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(lex(new_lexer('[m'), "[32] what?"), "m:L'['|m:G'3'|m:G'2'|m:R']'|p:P' what?'");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer('[m]'), "[32] what?"), "m:L'['|p:P'32] what?'");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(null), "[32] what?"), "p:L'['|p:P'32] what?'");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return '[m';
+      }), "[32] what?"), "m:L'['|m:G'3'|m:G'2'|m:R']'|p:P' what?'");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return '[m]';
+      }), "[32] what?"), "m:L'['|p:P'32] what?'");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return null;
+      }), "[32] what?"), "p:L'['|p:P'32] what?'");
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.jump_property_value = function(T, done) {
+    var Interlex, lex, new_lexer;
+    ({Interlex} = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function(enter_marks) {
+      var lexer;
+      lexer = new Interlex({
+        dotall: false
+      });
+      (() => {
+        var mode;
+        mode = 'p';
+        lexer.add_lexeme({
+          mode,
+          lxid: 'L',
+          jump: enter_marks,
+          pattern: /\[/u
+        });
+        return lexer.add_lexeme({
+          mode,
+          lxid: 'P',
+          jump: null,
+          pattern: /[^\[\\]+/u
+        });
+      })();
+      (() => {        //.........................................................................................................
+        var mode;
+        mode = 'm';
+        lexer.add_lexeme({
+          mode,
+          lxid: 'R',
+          jump: '.]',
+          pattern: /\]/u,
+          reserved: ']'
+        });
+        lexer.add_lexeme({
+          mode,
+          lxid: 'G',
+          jump: null,
+          pattern: /[U01234]/u
+        });
+        return lexer.add_reserved_lexeme({
+          mode,
+          lxid: 'forbidden',
+          concat: true
+        });
+      })();
+      //.........................................................................................................
+      return lexer;
+    };
+    //.........................................................................................................
+    lex = function(lexer, probe) {
+      var R, jump, ref, token;
+      R = [];
+      ref = lexer.walk(probe);
+      for (token of ref) {
+        jump = token.jump != null ? rpr(token.jump) : '-';
+        R.push(`${token.$key}${jump}`);
+      }
+      return R.join('|');
+    };
+    //.........................................................................................................
+    help('Ω___1', rpr(lex(new_lexer('[m'), "[32] what?")));
+    help('Ω___2', rpr(lex(new_lexer('[m]'), "[32] what?")));
+    help('Ω___3', rpr(lex(new_lexer(null), "[32] what?")));
+    help('Ω___4', rpr(lex(new_lexer(function() {
+      return '[m';
+    }), "[32] what?")));
+    help('Ω___5', rpr(lex(new_lexer(function() {
+      return '[m]';
+    }), "[32] what?")));
+    help('Ω___6', rpr(lex(new_lexer(function() {
+      return null;
+    }), "[32] what?")));
+    //.........................................................................................................
+    if (T != null) {
+      T.eq(lex(new_lexer('[m'), "[32] what?"), "m:L'm'|m:G-|m:G-|m:R'p'|p:P-");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer('[m]'), "[32] what?"), "m:L'p'|p:P-");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(null), "[32] what?"), "p:L-|p:P-");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return '[m';
+      }), "[32] what?"), "m:L'm'|m:G-|m:G-|m:R'p'|p:P-");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return '[m]';
+      }), "[32] what?"), "m:L'p'|p:P-");
+    }
+    if (T != null) {
+      T.eq(lex(new_lexer(function() {
+        return null;
+      }), "[32] what?"), "p:L-|p:P-");
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this);
+      // test @
+      // @jump_function_return_values()
+      // test @jump_function_return_values
+      this.jump_property_value();
+      return test(this.jump_property_value);
     })();
   }
 

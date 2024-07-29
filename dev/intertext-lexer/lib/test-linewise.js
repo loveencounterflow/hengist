@@ -911,6 +911,45 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
+  this.use_linewise_lexing_with_peacemeal_feed = function(T, done) {
+    var FS, Interlex, c, new_lexer;
+    FS = require('node:fs');
+    GUY = require('../../../apps/guy');
+    ({
+      Interlex,
+      compose: c
+    } = require('../../../apps/intertext-lexer'));
+    //.........................................................................................................
+    new_lexer = function() {
+      var lexer, mode;
+      lexer = new Interlex({
+        split: 'lines'
+      });
+      mode = 'plain';
+      lexer.add_lexeme({
+        mode,
+        lxid: 'ws',
+        pattern: /\s+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        lxid: 'word',
+        pattern: /\S+/u
+      });
+      lexer.add_lexeme({
+        mode,
+        lxid: 'empty',
+        pattern: /^$/u
+      });
+      return lexer;
+    };
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
   this.use_linewise_with_single_text = function(T, done) {
     var FS, Interlex, c, cfg, i, len, lexer, matcher, new_lexer, path, probe, probes_and_matchers, ref, result, source, token, tokens;
     FS = require('node:fs');
@@ -1481,16 +1520,18 @@
   if (require.main === module) {
     (() => {
       // @use_linewise_lexing_with_external_iterator_no_linewise_cfg()
-      return test(this.use_linewise_lexing_with_external_iterator_no_linewise_cfg);
+      // test @use_linewise_lexing_with_external_iterator_no_linewise_cfg
+      // test @use_linewise_with_single_text
+      // test @parse_nested_codespan_across_lines
+      // @read_csv()
+      // test @use_linewise_with_prepend_and_append
+      // test @read_csv
+      // test @throws_error_on_linewise_with_nl_in_source
+      return this.use_linewise_lexing_with_peacemeal_feed;
     })();
   }
 
-  // test @use_linewise_with_single_text
-// test @parse_nested_codespan_across_lines
-// @read_csv()
-// test @use_linewise_with_prepend_and_append
-// test @read_csv
-// test @throws_error_on_linewise_with_nl_in_source
+  // test @use_linewise_lexing_with_peacemeal_feed
 // test @
 
 }).call(this);

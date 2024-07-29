@@ -85,7 +85,7 @@
       lexer = new Interlex({
         split: false,
         dotall: false,
-        end_token: true
+        eof_token: true
       });
       //.........................................................................................................
       lexer.add_lexeme({

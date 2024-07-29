@@ -144,7 +144,7 @@
         return new Promise(function(resolve, reject) {
           var lexer, result, result_rpr, t;
           lexer = new Interlex({
-            end_token: true
+            eof_token: true
           });
           result = lexer.run(probe);
           result_rpr = ((function() {
@@ -176,7 +176,7 @@
     get_lexer = function() {
       var lexer;
       lexer = new Interlex({
-        end_token: true
+        eof_token: true
       });
       lexer.add_lexeme({
         mode: 'base',
@@ -253,7 +253,7 @@
       var lexer;
       lexer = new Interlex({
         split: false,
-        end_token: true
+        eof_token: true
       });
       (() => {
         /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
@@ -1312,7 +1312,7 @@
       var lexer;
       lexer = new Interlex({
         split: false,
-        end_token: true
+        eof_token: true
       });
       (() => {        //.........................................................................................................
         /* NOTE arbitrarily forbidding question marks and not using fallback token to test for error tokens */
@@ -1697,7 +1697,7 @@ the
       var lexer;
       lexer = new Interlex({
         dotall: false,
-        end_token: false
+        eof_token: false
       });
       //.........................................................................................................
       lexer.add_lexeme({
@@ -1974,7 +1974,7 @@ the
     lexer = new Interlex({
       split: false,
       dotall: true,
-      end_token: true
+      eof_token: true
     });
     (() => {      //.........................................................................................................
       var mode;
