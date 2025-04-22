@@ -210,6 +210,27 @@
     return null;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.GUY_fs_get_descriptor = function(T, done) {
+    var Test, _, fs_tasks, i, j, ref, ref1, stats;
+    ({Test} = require('guy-test-NG'));
+    ({fs_tasks} = require('../../../apps/hengist-NG/dev/guy/lib/test-fs.js'));
+    //.........................................................................................................
+    stats = (new Test({
+      throw_on_error: false
+    })).test(fs_tasks);
+    for (_ = i = 0, ref = stats['*'].passes; (0 <= ref ? i < ref : i > ref); _ = 0 <= ref ? ++i : --i) {
+      T.ok(true);
+    }
+    for (_ = j = 0, ref1 = stats['*'].fails; (0 <= ref1 ? j < ref1 : j > ref1); _ = 0 <= ref1 ? ++j : --j) {
+      T.ok(false);
+    }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
   //###########################################################################################################
   if (require.main === module) {
     (() => {

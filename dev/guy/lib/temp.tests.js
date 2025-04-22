@@ -24,10 +24,15 @@
   ({isa, declare, type_of, validate, equals} = types);
 
   //===========================================================================================================
-  declare.fs_file({
-    isa: function(x) {
+  isa = {
+    //---------------------------------------------------------------------------------------------------------
+    nonempty_text: function(x) {
+      return ((typeof x) === 'string') && (x.length > 0);
+    },
+    //---------------------------------------------------------------------------------------------------------
+    fs_file_path: function(x) {
       var error, stat;
-      if (!this.isa.nonempty.text(x)) {
+      if (!isa.nonempty_text(x)) {
         return false;
       }
       try {
@@ -40,14 +45,11 @@
         throw error;
       }
       return stat.isFile();
-    }
-  });
-
-  //-----------------------------------------------------------------------------------------------------------
-  declare.fs_directory({
-    isa: function(x) {
+    },
+    //---------------------------------------------------------------------------------------------------------
+    fs_directory_path: function(x) {
       var error, stat;
-      if (!this.isa.nonempty.text(x)) {
+      if (!isa.nonempty_text(x)) {
         return false;
       }
       try {
@@ -60,14 +62,11 @@
         throw error;
       }
       return stat.isDirectory();
-    }
-  });
-
-  //-----------------------------------------------------------------------------------------------------------
-  declare.fs_exists({
-    isa: function(x) {
+    },
+    //---------------------------------------------------------------------------------------------------------
+    fs_exists: function(x) {
       var error, stat;
-      if (!this.isa.nonempty.text(x)) {
+      if (!isa.nonempty_text(x)) {
         return false;
       }
       try {
@@ -81,242 +80,146 @@
       }
       return true;
     }
-  });
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_temp_context_handler_file = function(T, done) {
-    var GUY;
-    GUY = require('../../../apps/guy');
-    (() => {      //.........................................................................................................
-      var path;
-      path = null;
-      info = GUY.temp.with_file(function({
-          path: mypath,
-          fd
-        }) {
-        path = mypath;
-        return T != null ? T.ok(isa.fs_file(mypath)) : void 0;
-      });
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(!isa.fs_file(path)) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var path;
-      path = null;
-      info = GUY.temp.with_file({
-        keep: true
-      }, function({
-          path: mypath,
-          fd
-        }) {
-        path = mypath;
-        return T != null ? T.ok(isa.fs_file(mypath)) : void 0;
-      });
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(isa.fs_file(path)) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
   };
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_temp_context_handler_directory = function(T, done) {
-    var GUY;
-    GUY = require('../../../apps/guy');
-    (() => {      //.........................................................................................................
-      var path;
-      path = null;
-      info = GUY.temp.with_directory(function({
-          path: mypath
-        }) {
-        path = mypath;
-        debug('^345-1^', {path});
-        return T != null ? T.ok(isa.fs_directory(mypath)) : void 0;
-      });
-      debug('^345-2^', info);
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var path;
-      path = null;
-      info = GUY.temp.with_directory({
-        prefix: 'zzwhatever-'
-      }, function({
-          path: mypath
-        }) {
-        path = mypath;
-        debug('^345-3^', {path});
-        if (T != null) {
-          T.ok((PATH.basename(mypath)).startsWith('zzwhatever-'));
-        }
-        return T != null ? T.ok(isa.fs_directory(mypath)) : void 0;
-      });
-      debug('^345-4^', info);
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
-    })();
-    (() => {      //.........................................................................................................
-      var path;
-      path = null;
-      info = GUY.temp.with_directory({
-        keep: true,
-        prefix: 'zzwhatever-'
-      }, function({
-          path: mypath
-        }) {
-        path = mypath;
-        debug('^345-5^', {path});
-        if (T != null) {
-          T.ok((PATH.basename(mypath)).startsWith('zzwhatever-'));
-        }
-        return T != null ? T.ok(isa.fs_directory(mypath)) : void 0;
-      });
-      debug('^345-6^', info);
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(isa.fs_directory(path)) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+// @GUY_temp_context_handler_file = ( T, done ) ->
+//   GUY = require '../../../apps/guy'
+//   #.........................................................................................................
+//   do =>
+//     path = null
+//     info = GUY.temp.with_file ({ path: mypath, fd, }) ->
+//       path = mypath
+//       T?.ok isa.fs_file_path mypath
+//     T?.eq info, null
+//     T?.ok not isa.fs_file_path path
+//   #.........................................................................................................
+//   do =>
+//     path = null
+//     info = GUY.temp.with_file { keep: true, }, ({ path: mypath, fd, }) ->
+//       path = mypath
+//       T?.ok isa.fs_file_path mypath
+//     T?.eq info, null
+//     T?.ok isa.fs_file_path path
+//   #.........................................................................................................
+//   return done?()
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_temp_tempfolder_removed_with_contents = function(T, done) {
-    var GUY;
-    GUY = require('../../../apps/guy');
-    (() => {      //.........................................................................................................
-      var fpath, path;
-      path = null;
-      fpath = null;
-      info = GUY.temp.with_directory({
-        prefix: 'zzwhatever-'
-      }, function({
-          path: mypath
-        }) {
-        path = mypath;
-        debug('^345-3^', {path});
-        fpath = PATH.join(path, 'myfile.txt');
-        FS.writeFileSync(fpath, "helo");
-        return isa.fs_file(fpath);
-      });
-      debug('^345-4^', info);
-      if (T != null) {
-        T.eq(info, null);
-      }
-      if (T != null) {
-        T.ok(!isa.fs_file(fpath));
-      }
-      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+// @GUY_temp_context_handler_directory = ( T, done ) ->
+//   GUY = require '../../../apps/guy'
+//   #.........................................................................................................
+//   do =>
+//     path = null
+//     info = GUY.temp.with_directory ({ path: mypath, }) ->
+//       path = mypath
+//       debug '^345-1^', { path, }
+//       T?.ok isa.fs_directory_path mypath
+//     debug '^345-2^', info
+//     T?.eq info, null
+//     T?.ok not isa.fs_directory_path path
+//   #.........................................................................................................
+//   do =>
+//     path = null
+//     info = GUY.temp.with_directory { prefix: 'zzwhatever-', }, ({ path: mypath, }) ->
+//       path = mypath
+//       debug '^345-3^', { path, }
+//       T?.ok ( PATH.basename mypath ).startsWith 'zzwhatever-'
+//       T?.ok isa.fs_directory_path mypath
+//     debug '^345-4^', info
+//     T?.eq info, null
+//     T?.ok not isa.fs_directory_path path
+//   #.........................................................................................................
+//   do =>
+//     path = null
+//     info = GUY.temp.with_directory { keep: true, prefix: 'zzwhatever-', }, ({ path: mypath, }) ->
+//       path = mypath
+//       debug '^345-5^', { path, }
+//       T?.ok ( PATH.basename mypath ).startsWith 'zzwhatever-'
+//       T?.ok isa.fs_directory_path mypath
+//     debug '^345-6^', info
+//     T?.eq info, null
+//     T?.ok isa.fs_directory_path path
+//   #.........................................................................................................
+//   return done?()
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_temp_works_with_async_functions = async function(T, done) {
-    var GUY, async_fn, collector;
-    GUY = require('../../../apps/guy');
-    collector = [];
-    //.........................................................................................................
-    async_fn = function(x) {
-      return new Promise(async function(done) {
-        debug('^43-1^', rpr(x));
-        collector.push(x);
-        await GUY.async.after(0.01, done);
-        return null;
-      });
-    };
-    //.........................................................................................................
-    await async_fn('^43-2^');
-    await (async() => {
-      var path;
-      path = null;
-      info = (await GUY.temp.with_file({
-        prefix: 'yyy-'
-      }, async function({
-          path: mypath,
-          fd
-        }) {
-        path = mypath;
-        await async_fn('^43-3^');
-        return T != null ? T.ok(isa.fs_file(mypath)) : void 0;
-      }));
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(!isa.fs_file(path)) : void 0;
-    })();
-    //.........................................................................................................
-    await async_fn('^43-4^');
-    await (async() => {
-      var path;
-      path = null;
-      info = (await GUY.temp.with_directory({
-        prefix: 'yyy-'
-      }, async function({
-          path: mypath
-        }) {
-        path = mypath;
-        await async_fn('^43-5^');
-        return T != null ? T.ok(isa.fs_directory(mypath)) : void 0;
-      }));
-      if (T != null) {
-        T.eq(info, null);
-      }
-      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
-    })();
-    //.........................................................................................................
-    await async_fn('^43-6^');
-    if (T != null) {
-      T.eq(collector, ['^43-2^', '^43-3^', '^43-4^', '^43-5^', '^43-6^']);
-    }
-    debug('^43-7^', collector);
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+// @GUY_temp_tempfolder_removed_with_contents = ( T, done ) ->
+//   GUY = require '../../../apps/guy'
+//   #.........................................................................................................
+//   do =>
+//     path  = null
+//     fpath = null
+//     info  = GUY.temp.with_directory { prefix: 'zzwhatever-', }, ({ path: mypath, }) ->
+//       path = mypath
+//       debug '^345-3^', { path, }
+//       fpath = PATH.join path, 'myfile.txt'
+//       FS.writeFileSync fpath, "helo"
+//       isa.fs_file_path fpath
+//     debug '^345-4^', info
+//     T?.eq info, null
+//     T?.ok not isa.fs_file_path fpath
+//     T?.ok not isa.fs_directory_path path
+//   #.........................................................................................................
+//   return done?()
 
-  //-----------------------------------------------------------------------------------------------------------
-  this.GUY_temp_create_directory = function(T, done) {
-    var GUY;
-    GUY = require('../../../apps/guy');
-    (() => {      //.........................................................................................................
-      var path, rm;
-      try {
-        ({rm, path} = GUY.temp.create_directory({
-          prefix: 'zzwhatever-'
-        }));
-        debug('^345-4^', {rm, path});
-        if (T != null) {
-          T.ok(/\/zzwhatever-/.test(path));
-        }
-        if (T != null) {
-          T.ok(isa.fs_directory(path));
-        }
-      } finally {
-        if (typeof rm === "function") {
-          rm();
-        }
-      }
-      return T != null ? T.ok(!isa.fs_directory(path)) : void 0;
-    })();
-    return typeof done === "function" ? done() : void 0;
-  };
+  // #-----------------------------------------------------------------------------------------------------------
+// @GUY_temp_works_with_async_functions = ( T, done ) ->
+//   GUY       = require '../../../apps/guy'
+//   collector = []
+//   #.........................................................................................................
+//   async_fn  = ( x ) -> new Promise ( done ) ->
+//     debug '^43-1^', rpr x
+//     collector.push x
+//     await GUY.async.after 0.01, done
+//     return null
+//   #.........................................................................................................
+//   await async_fn '^43-2^'
+//   await do =>
+//     path = null
+//     info = await GUY.temp.with_file { prefix: 'yyy-', }, ({ path: mypath, fd, }) ->
+//       path = mypath
+//       await async_fn '^43-3^'
+//       T?.ok isa.fs_file_path mypath
+//     T?.eq info, null
+//     T?.ok not isa.fs_file_path path
+//   #.........................................................................................................
+//   await async_fn '^43-4^'
+//   await do =>
+//     path = null
+//     info = await GUY.temp.with_directory { prefix: 'yyy-', }, ({ path: mypath, }) ->
+//       path = mypath
+//       await async_fn '^43-5^'
+//       T?.ok isa.fs_directory_path mypath
+//     T?.eq info, null
+//     T?.ok not isa.fs_directory_path path
+//   #.........................................................................................................
+//   await async_fn '^43-6^'
+//   T?.eq collector, [ '^43-2^', '^43-3^', '^43-4^', '^43-5^', '^43-6^' ]
+//   debug '^43-7^', collector
+//   return done?()
 
-  //###########################################################################################################
-  if (require.main === module) {
-    (() => {
-      this.GUY_temp_create_directory();
-      return test(this.GUY_temp_create_directory);
-    })();
-  }
+  // #-----------------------------------------------------------------------------------------------------------
+// @GUY_temp_create_directory = ( T, done ) ->
+//   GUY = require '../../../apps/guy'
+//   #.........................................................................................................
+//   do =>
+//     try
+//       { rm
+//         path } = GUY.temp.create_directory { prefix: 'zzwhatever-', }
+//       debug '^345-4^', { rm, path, }
+//       T?.ok /\/zzwhatever-/.test path
+//       T?.ok isa.fs_directory_path path
+//     finally
+//       rm?()
+//     T?.ok not isa.fs_directory_path path
+//   #.........................................................................................................
+//   return done?()
 
-  // test @
+  // ############################################################################################################
+// if require.main is module then do =>
+//   @GUY_temp_create_directory()
+//   test @GUY_temp_create_directory
+//   # test @
 
 }).call(this);
 

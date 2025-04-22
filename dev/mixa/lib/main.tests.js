@@ -864,7 +864,7 @@
     //   error: {
     //     code: 15,
     //     tag: 'EXTRA_FLAGS',
-    //     message: "command 'psql' does not allow extra, got [ 'path/to/that.sql' ]" },
+    //     message: "command 'psql' does not allow extra parameters, got [ 'path/to/that.sql' ]" },
     //   cmd: 'help' }
     // #.........................................................................................................
     // result = MIXA.parse jobdef, [ 'psql', '-U', 'jpfx', '-f', 'path/to/this.sql', '-f', 'path/to/that.sql' ]
@@ -923,7 +923,7 @@
       error: {
         code: 15,
         tag: 'EXTRA_FLAGS',
-        message: "command 'psql' does not allow extra, got [ 'select 43;', '-U', 'x' ]"
+        message: "command 'psql' does not allow extra parameters, got [ 'select 43;', '-U', 'x' ]"
       },
       cmd: 'help'
     });
@@ -947,7 +947,7 @@
       error: {
         code: 15,
         tag: 'EXTRA_FLAGS',
-        message: "command 'psql' does not allow extra, got [ 'select 43;', '-U', 'x' ]"
+        message: "command 'psql' does not allow extra parameters, got [ 'select 43;', '-U', 'x' ]"
       },
       cmd: 'help'
     });
@@ -1026,11 +1026,85 @@
         error: {
           code: 15,
           tag: 'EXTRA_FLAGS',
-          message: "command 'frobulate' does not allow extra, got [ 'path/to/image' ]"
+          message: "command 'frobulate' does not allow extra parameters, got [ 'path/to/image' ]"
         },
         cmd: 'help'
       });
     }
+    if (typeof done === "function") {
+      done();
+    }
+    return null;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this["on error, verdict.parameters is still set"] = function(T, done) {
+    var MIXA, jobdef;
+    jobdef = {
+      commands: {
+        frobulate: {
+          allow_extra: false,
+          flags: {
+            width: {
+              alias: 'w',
+              type: Number,
+              fallback: 123
+            },
+            height: {
+              alias: 'h',
+              type: Number,
+              // positional:     true
+              fallback: 10
+            },
+            image: {
+              alias: 'i',
+              positional: true,
+              type: String
+            }
+          }
+        }
+      }
+    };
+    MIXA = require('../../../apps/mixa');
+    (() => {      //.........................................................................................................
+      var job, ref, ref1, ref2;
+      job = MIXA.parse(jobdef, ['frobulate', 'path/to/image']);
+      if (T != null) {
+        T.eq((ref = job.verdict) != null ? ref.argv : void 0, []);
+      }
+      if (T != null) {
+        T.eq((ref1 = job.verdict) != null ? ref1.parameters : void 0, {
+          width: 123,
+          height: 10,
+          image: 'path/to/image'
+        });
+      }
+      return T != null ? T.eq((ref2 = job.verdict) != null ? ref2.cmd : void 0, 'frobulate') : void 0;
+    })();
+    (() => {      //.........................................................................................................
+      var job, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+      jobdef.commands.frobulate.flags.image.positional = false;
+      job = MIXA.parse(jobdef, ['frobulate', '--what=22', '-o', 'path/to/image']);
+      if (T != null) {
+        T.eq((ref = job.verdict) != null ? ref.argv : void 0, ['--what=22', '-o', 'path/to/image']);
+      }
+      if (T != null) {
+        T.eq((ref1 = job.verdict) != null ? ref1.parameters : void 0, {
+          width: 123,
+          height: 10
+        });
+      }
+      if (T != null) {
+        T.eq((ref2 = job.verdict) != null ? (ref3 = ref2.error) != null ? ref3.code : void 0 : void 0, 15, T != null ? T.eq((ref4 = job.verdict) != null ? (ref5 = ref4.error) != null ? ref5.tag : void 0 : void 0, 'EXTRA_FLAGS', T != null ? T.eq((ref6 = job.verdict) != null ? ref6.extra_flags : void 0, ['--what=22', '-o', 'path/to/image']) : void 0) : void 0);
+      }
+      if (T != null) {
+        T.eq((ref7 = job.verdict) != null ? (ref8 = ref7.error) != null ? ref8.message : void 0 : void 0, "command 'frobulate' does not allow extra parameters, got [ '--what=22', '-o', 'path/to/image' ]");
+      }
+      if (T != null) {
+        T.eq((ref9 = job.verdict) != null ? ref9.cmd : void 0, 'help');
+      }
+      return null;
+    })();
     if (typeof done === "function") {
       done();
     }
@@ -1532,11 +1606,12 @@
     })();
   }
 
-  // test @[ "MIXA --cd changes process directory" ]
+  // test @[ "on error, verdict.parameters is still set" ]
+// test @[ "MIXA --cd changes process directory" ]
 // test @[ "MIXA parse with defaults" ]
 // test @[ "MIXA settings validation 2" ]
 // test @[ "MIXA types" ]
-// test @[ "MIXA parse with settings 3" ]
+// test @[ "MIXA parse with settings 4" ]
 // test @[ "MIXA parse with settings 1" ]
 // @[ "MIXA parse with default command" ]()
 // test @[ "MIXA parse with default command" ]

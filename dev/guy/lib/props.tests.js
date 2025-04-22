@@ -1368,13 +1368,14 @@
       T.eq(GUY.props.keys(lst, {
         symbols: true,
         builtins: true
-      }), ['0', 'length', 'constructor', 'at', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toLocaleString', 'toString', 'findLast', 'findLastIndex', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__']);
+      }), ['0', 'length', 'constructor', 'at', 'concat', 'copyWithin', 'fill', 'find', 'findIndex', 'findLast', 'findLastIndex', 'lastIndexOf', 'pop', 'push', 'reverse', 'shift', 'unshift', 'slice', 'sort', 'splice', 'includes', 'indexOf', 'join', 'keys', 'entries', 'values', 'forEach', 'filter', 'flat', 'flatMap', 'map', 'every', 'some', 'reduce', 'reduceRight', 'toReversed', 'toSorted', 'toSpliced', 'with', 'toLocaleString', 'toString', Symbol.iterator, Symbol.unscopables, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__']);
     }
+    // T?.eq ( GUY.props.keys Array, { symbols: true, builtins: true, } ), [ 'length', 'name', 'prototype', 'isArray', 'from', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString' ]
     if (T != null) {
       T.eq(GUY.props.keys(Array, {
         symbols: true,
         builtins: true
-      }), ['length', 'name', 'prototype', 'isArray', 'from', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString']);
+      }), ['length', 'name', 'prototype', 'isArray', 'from', 'fromAsync', 'of', Symbol.species, 'arguments', 'caller', 'constructor', 'apply', 'bind', 'call', 'toString', Symbol.hasInstance, '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'valueOf', '__proto__', 'toLocaleString']);
     }
     return typeof done === "function" ? done() : void 0;
   };

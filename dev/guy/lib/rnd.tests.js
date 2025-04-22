@@ -31,35 +31,12 @@
     //.........................................................................................................
     d = GUY.rnd.shuffle([1, 2]);
     if (T != null) {
-      T.ok((equals(d, [1, 2])) || (equals(d, [2, 1])));
+      T.ok((GUY.samesame.equals(d, [1, 2])) || (GUY.samesame.equals(d, [2, 1])));
     }
     //.........................................................................................................
     d = GUY.rnd.shuffle([1, 2, 3]);
     if (T != null) {
-      T.ok((equals(d, [1, 2, 3])) || (equals(d, [1, 3, 2])) || (equals(d, [2, 1, 3])) || (equals(d, [2, 3, 1])) || (equals(d, [3, 2, 1])) || (equals(d, [3, 1, 2])));
-    }
-    return typeof done === "function" ? done() : void 0;
-  };
-
-  //-----------------------------------------------------------------------------------------------------------
-  this.guy_rnd_shuffle = function(T, done) {
-    var d;
-    GUY = require(H.guy_path);
-    if (T != null) {
-      T.eq(GUY.rnd.shuffle([]), []);
-    }
-    if (T != null) {
-      T.eq(GUY.rnd.shuffle([1]), [1]);
-    }
-    //.........................................................................................................
-    d = GUY.rnd.shuffle([1, 2]);
-    if (T != null) {
-      T.ok((equals(d, [1, 2])) || (equals(d, [2, 1])));
-    }
-    //.........................................................................................................
-    d = GUY.rnd.shuffle([1, 2, 3]);
-    if (T != null) {
-      T.ok((equals(d, [1, 2, 3])) || (equals(d, [1, 3, 2])) || (equals(d, [2, 1, 3])) || (equals(d, [2, 3, 1])) || (equals(d, [3, 2, 1])) || (equals(d, [3, 1, 2])));
+      T.ok((GUY.samesame.equals(d, [1, 2, 3])) || (GUY.samesame.equals(d, [1, 3, 2])) || (GUY.samesame.equals(d, [2, 1, 3])) || (GUY.samesame.equals(d, [2, 3, 1])) || (GUY.samesame.equals(d, [3, 2, 1])) || (GUY.samesame.equals(d, [3, 1, 2])));
     }
     return typeof done === "function" ? done() : void 0;
   };
