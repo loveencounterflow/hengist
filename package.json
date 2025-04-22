@@ -73,6 +73,7 @@
     "got": "^11.8.2",
     "guy": "^13.0.0",
     "guy-test": "5.0.1",
+    "guy-test-NG": "npm:guy-test@>=6",
     "hamt": "^2.2.2",
     "hashbow": "^1.1.1",
     "highlight.js": "^11.4.0",
