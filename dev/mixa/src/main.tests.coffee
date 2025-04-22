@@ -286,7 +286,7 @@ resolve_recursively = ( x, path ) ->
   #   error: {
   #     code: 15,
   #     tag: 'EXTRA_FLAGS',
-  #     message: "command 'psql' does not allow extra, got [ 'path/to/that.sql' ]" },
+  #     message: "command 'psql' does not allow extra parameters, got [ 'path/to/that.sql' ]" },
   #   cmd: 'help' }
   # #.........................................................................................................
   # result = MIXA.parse jobdef, [ 'psql', '-U', 'jpfx', '-f', 'path/to/this.sql', '-f', 'path/to/that.sql' ]
@@ -321,13 +321,13 @@ resolve_recursively = ( x, path ) ->
   debug '^4445-1^', result = MIXA.parse jobdef, [ 'psql', '-c', 'select 42;', '-c', 'select 43;', '-U', 'x', ]
   T.eq result.verdict, { error: { code: 16, tag: 'OTHER', message: 'Singular option already set [command=select 42;]' }, cmd: 'help' }
   debug '^4445-2^', result = MIXA.parse jobdef, [ 'psql', '-c', 'select 42;', 'select 43;', '-U', 'x', ]
-  T.eq result.verdict, { argv: [ 'select 43;', '-U', 'x' ], parameters: { command: 'select 42;' }, error: { code: 15, tag: 'EXTRA_FLAGS', message: "command 'psql' does not allow extra, got [ 'select 43;', '-U', 'x' ]" }, cmd: 'help' }
+  T.eq result.verdict, { argv: [ 'select 43;', '-U', 'x' ], parameters: { command: 'select 42;' }, error: { code: 15, tag: 'EXTRA_FLAGS', message: "command 'psql' does not allow extra parameters, got [ 'select 43;', '-U', 'x' ]" }, cmd: 'help' }
   jobdef.commands.psql.flags.command.multiple = 'lazy'
   urge '^5554-2^', ( MIXA._compile_jobdef jobdef ).commands.psql.flags
   debug '^4445-3^', result = MIXA.parse jobdef, [ 'psql', '-c', 'select 42;', '-c', 'select 43;', '-U', 'x', ]
   T.eq result.verdict, { argv: [], parameters: { command: [ 'select 42;', 'select 43;' ], user: 'x' }, cmd: 'psql' }
   debug '^4445-4^', result = MIXA.parse jobdef, [ 'psql', '-c', 'select 42;', 'select 43;', '-U', 'x', ]
-  T.eq result.verdict, { argv: [ 'select 43;', '-U', 'x' ], parameters: { command: [ 'select 42;' ] }, error: { code: 15, tag: 'EXTRA_FLAGS', message: "command 'psql' does not allow extra, got [ 'select 43;', '-U', 'x' ]" }, cmd: 'help' }
+  T.eq result.verdict, { argv: [ 'select 43;', '-U', 'x' ], parameters: { command: [ 'select 42;' ] }, error: { code: 15, tag: 'EXTRA_FLAGS', message: "command 'psql' does not allow extra parameters, got [ 'select 43;', '-U', 'x' ]" }, cmd: 'help' }
   jobdef.commands.psql.flags.command.multiple = 'greedy'
   urge '^5554-3^', ( MIXA._compile_jobdef jobdef ).commands.psql.flags
   debug '^4445-5^', result = MIXA.parse jobdef, [ 'psql', '-c', 'select 42;', '-c', 'select 43;', '-U', 'x', ]
@@ -366,8 +366,51 @@ resolve_recursively = ( x, path ) ->
       error: {
         code: 15,
         tag: 'EXTRA_FLAGS',
-        message: "command 'frobulate' does not allow extra, got [ 'path/to/image' ]" }, \
+        message: "command 'frobulate' does not allow extra parameters, got [ 'path/to/image' ]" }, \
       cmd: 'help' }
+  done?()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "on error, verdict.parameters is still set" ] = ( T, done ) ->
+  jobdef =
+    commands:
+      frobulate:
+        allow_extra: false
+        flags:
+          width:
+            alias:          'w'
+            type:           Number
+            fallback:       123
+          height:
+            alias:          'h'
+            type:           Number
+            # positional:     true
+            fallback:       10
+          image:
+            alias:          'i'
+            positional:     true
+            type:           String
+  MIXA = require '../../../apps/mixa'
+  #.........................................................................................................
+  do =>
+    job = MIXA.parse jobdef, [ 'frobulate', 'path/to/image' ]
+    T?.eq job.verdict?.argv,        []
+    T?.eq job.verdict?.parameters,  { width: 123, height: 10, image: 'path/to/image' }
+    T?.eq job.verdict?.cmd,         'frobulate'
+  #.........................................................................................................
+  do =>
+    jobdef.commands.frobulate.flags.image.positional = false
+    job = MIXA.parse jobdef, [ 'frobulate', '--what=22', '-o', 'path/to/image' ]
+    T?.eq job.verdict?.argv,                [ '--what=22', '-o', 'path/to/image' ]
+    T?.eq job.verdict?.parameters,          { width: 123, height: 10 }
+    T?.eq job.verdict?.error?.code,         15,
+    T?.eq job.verdict?.error?.tag,          'EXTRA_FLAGS',
+    T?.eq job.verdict?.extra_flags,         [ '--what=22', '-o', 'path/to/image' ]
+    T?.eq job.verdict?.error?.message,      "command 'frobulate' does not allow extra parameters, got [ '--what=22', '-o', 'path/to/image' ]"
+    T?.eq job.verdict?.cmd,                 'help'
+    return null
+  #.........................................................................................................
   done?()
   return null
 
@@ -698,11 +741,12 @@ if module is require.main then do =>
   # debug '^4445^', MIXA.parse null, [ 'cats!' ]
   demo_configurator()
   test @
+  # test @[ "on error, verdict.parameters is still set" ]
   # test @[ "MIXA --cd changes process directory" ]
   # test @[ "MIXA parse with defaults" ]
   # test @[ "MIXA settings validation 2" ]
   # test @[ "MIXA types" ]
-  # test @[ "MIXA parse with settings 3" ]
+  # test @[ "MIXA parse with settings 4" ]
   # test @[ "MIXA parse with settings 1" ]
   # @[ "MIXA parse with default command" ]()
   # test @[ "MIXA parse with default command" ]

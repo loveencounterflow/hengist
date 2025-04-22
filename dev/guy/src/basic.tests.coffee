@@ -31,25 +31,25 @@ types                     = new ( require 'intertype' ).Intertype
 
 #===========================================================================================================
 # TESTS
-#-----------------------------------------------------------------------------------------------------------
-@[ "demo" ] = ( T, done ) ->
-  { createRequire, }  = require 'module'
-  guy_realpath        = require.resolve H.guy_path
-  guy_realpath        = PATH.join guy_realpath, 'whatever' ### H.guy_path points to pkg folder, must be one element deeper ###
-  debug '^7665^', { guy_realpath, }
-  rq                  = createRequire guy_realpath
-  guy                 = require H.guy_path
-  urge '^83443^', H.guy_path
-  help '^83443^', rq.resolve 'letsfreezethat'
-  help '^83443^', rq.resolve 'intertype-legacy'
-  # help '^83443^', rq.resolve 'deasync'
-  # help '^83443^', rq.resolve 'frob'
-  # help '^83443^', rq.resolve 'steampipes'
-  debug '340^', guy
-  debug '340^', guy.nowait
-  debug '340^', guy
-  debug '340^', guy.nowait
-  done?()
+# #-----------------------------------------------------------------------------------------------------------
+# @[ "demo" ] = ( T, done ) ->
+#   { createRequire, }  = require 'module'
+#   guy_realpath        = require.resolve H.guy_path
+#   guy_realpath        = PATH.join guy_realpath, 'whatever' ### H.guy_path points to pkg folder, must be one element deeper ###
+#   debug '^7665^', { guy_realpath, }
+#   rq                  = createRequire guy_realpath
+#   guy                 = require H.guy_path
+#   urge '^83443^', H.guy_path
+#   help '^83443^', rq.resolve 'letsfreezethat'
+#   help '^83443^', rq.resolve 'intertype-legacy'
+#   # help '^83443^', rq.resolve 'deasync'
+#   # help '^83443^', rq.resolve 'frob'
+#   # help '^83443^', rq.resolve 'steampipes'
+#   debug '340^', guy
+#   debug '340^', guy.nowait
+#   debug '340^', guy
+#   debug '340^', guy.nowait
+#   done?()
 
 # #-----------------------------------------------------------------------------------------------------------
 # @[ "nowait" ] = ( T, done ) ->

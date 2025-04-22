@@ -144,10 +144,10 @@ lft310                    = require 'letsfreezethat310'
 
 #-----------------------------------------------------------------------------------------------------------
 @run_benchmarks = ->
-  debug '^446^', Object.keys ( require '../letsfreezethat@2.2.5' )
-  debug '^446^', Object.keys lft225
-  debug '^446^', Object.keys lft310
-  process.exit 119
+  # debug '^446^', Object.keys ( require '../letsfreezethat@2.2.5' )
+  # debug '^446^', Object.keys lft225
+  # debug '^446^', Object.keys lft310
+  # process.exit 119
   bench       = BM.new_benchmarks()
   cfg         = { set_count: 100, datom_length: 5, change_facet_count: 3, }
   # cfg         = { set_count: 3, datom_length: 2, change_facet_count: 1, }
