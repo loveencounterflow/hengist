@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  var CND, badge, debug, echo, help, info, isa, jr, rpr, test, type_of, types, urge, validate, warn, whisper;
+  var CND, badge, debug, echo, help, info, jr, rpr, test, urge, warn, whisper;
 
   //###########################################################################################################
   CND = require('cnd');
@@ -27,11 +27,6 @@
   test = require('guy-test');
 
   jr = JSON.stringify;
-
-  //...........................................................................................................
-  types = new (require('../../../apps/intertype')).Intertype();
-
-  ({isa, validate, type_of} = types);
 
   //-----------------------------------------------------------------------------------------------------------
   this.select_2 = async function(T, done) {
@@ -291,7 +286,7 @@
         return new Promise(function(resolve) {
           var d, result, selector;
           [d, selector] = probe;
-          if (isa.text(selector)) {
+          if ((typeof selector) === 'string') {
             result = select(d, selector);
           } else {
             result = select(d, ...selector);

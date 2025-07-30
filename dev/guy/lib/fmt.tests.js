@@ -252,6 +252,26 @@
     return typeof done === "function" ? done() : void 0;
   };
 
+  //-----------------------------------------------------------------------------------------------------------
+  this.guy_fmt_dots_in_strings = function(T, done) {
+    var GUY, format, new_formatter;
+    // T?.halt_on_error()
+    GUY = require(H.guy_path);
+    ({format, new_formatter} = GUY.fmt);
+    //.........................................................................................................
+    // T?.eq ( format '.2f',      3.14159       ), '3.14'
+    if (T != null) {
+      T.eq(format('>15s', "abcd.efgh"), '      abcd.efgh');
+    }
+    if (T != null) {
+      T.eq(format('<15s', "abcd.efgh"), 'abcd.efgh      ');
+    }
+    if (T != null) {
+      T.eq(format('^15s', "abcd.efgh"), '   abcd.efgh   ');
+    }
+    return typeof done === "function" ? done() : void 0;
+  };
+
   // #-----------------------------------------------------------------------------------------------------------
   // @guy_str_pluralize = ( T, done ) ->
   //   # T?.halt_on_error()

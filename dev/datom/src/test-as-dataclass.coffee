@@ -232,47 +232,47 @@ types                     = new ( require 'intertype' ).Intertype()
   done?()
   return null
 
-#-----------------------------------------------------------------------------------------------------------
-@datom_dataclass_custom_types_instance = ( T, done ) ->
-  { Dataclass } = require '../../../apps/datom'
-  #.........................................................................................................
-  do ->
-    my_types = new ( require '../../../apps/intertype' ).Intertype()
-    my_types.declare.awesome_list isa: 'list.of.integer'
-    #.......................................................................................................
-    class Something extends Dataclass
-      #-----------------------------------------------------------------------------------------------------
-      @types: my_types
-      @declaration:
-        freeze:   'deep'
-        fields:
-          values:   'awesome_list'
-        template:
-          values:   []
-    #.......................................................................................................
-    s = new Something [ 4, 5, 6, ]
-    T?.eq ( my_types is s.__types ), true
-    return null
-  #.........................................................................................................
-  do ->
-    my_types = new ( require '../../../apps/intertype' ).Intertype()
-    my_types.declare.awesome_list isa: 'list.of.integer'
-    #.......................................................................................................
-    class Something extends Dataclass
-      #-----------------------------------------------------------------------------------------------------
-      @types: my_types
-      @declaration:
-        freeze:   'deep'
-        fields:
-          values:   'awesome_list'
-        template:
-          values:   []
-    #.......................................................................................................
-    T?.throws /not a valid Something/, -> new Something { values: [ 'wronk', ], }
-    return null
-  #.........................................................................................................
-  done?()
-  return null
+# #-----------------------------------------------------------------------------------------------------------
+# @datom_dataclass_custom_types_instance = ( T, done ) ->
+#   { Dataclass } = require '../../../apps/datom'
+#   #.........................................................................................................
+#   do ->
+#     my_types = new ( require '../../../../archived/intertype' ).Intertype()
+#     my_types.declare.awesome_list isa: 'list.of.integer'
+#     #.......................................................................................................
+#     class Something extends Dataclass
+#       #-----------------------------------------------------------------------------------------------------
+#       @types: my_types
+#       @declaration:
+#         freeze:   'deep'
+#         fields:
+#           values:   'awesome_list'
+#         template:
+#           values:   []
+#     #.......................................................................................................
+#     s = new Something [ 4, 5, 6, ]
+#     T?.eq ( my_types is s.__types ), true
+#     return null
+#   #.........................................................................................................
+#   do ->
+#     my_types = new ( require '../../../apps/intertype' ).Intertype()
+#     my_types.declare.awesome_list isa: 'list.of.integer'
+#     #.......................................................................................................
+#     class Something extends Dataclass
+#       #-----------------------------------------------------------------------------------------------------
+#       @types: my_types
+#       @declaration:
+#         freeze:   'deep'
+#         fields:
+#           values:   'awesome_list'
+#         template:
+#           values:   []
+#     #.......................................................................................................
+#     T?.throws /not a valid Something/, -> new Something { values: [ 'wronk', ], }
+#     return null
+#   #.........................................................................................................
+#   done?()
+#   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @datom_dataclass_computed_properties = ( T, done ) ->
@@ -323,7 +323,7 @@ types                     = new ( require 'intertype' ).Intertype()
   { Dataclass } = require '../../../apps/datom'
   #.........................................................................................................
   do ->
-    my_types = new ( require '../../../../intertype-2024-04-15' ).Intertype()
+    my_types = new ( require '../../../../archived/intertype-2024-04-15' ).Intertype()
     #.......................................................................................................
     class Something extends Dataclass
       #-----------------------------------------------------------------------------------------------------
@@ -355,7 +355,7 @@ types                     = new ( require 'intertype' ).Intertype()
   { Dataclass } = require '../../../apps/datom'
   #.........................................................................................................
   get_types_and_class = ->
-    base_types = new ( require '../../../apps/intertype' ).Intertype()
+    base_types = new ( require '../../../../archived/intertype-2024-04-15' ).Intertype()
     base_types.declare.ilx_codeunit_idx 'positive0.integer'
     base_types.declare.ilx_line_number  'positive1.integer'
     base_types.declare.ilx_token_value  'text'

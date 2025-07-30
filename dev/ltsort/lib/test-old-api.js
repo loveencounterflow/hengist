@@ -78,7 +78,7 @@
 //.........................................................................................................
     for (i = 0, len = elements.length; i < len; i++) {
       element = elements[i];
-      if (LTSORT.types.isa.text(element)) {
+      if ((typeof element) === 'string') {
         continue;
       }
       [a, b] = element;
@@ -100,7 +100,7 @@
 //.........................................................................................................
     for (i = 0, len = elements.length; i < len; i++) {
       element = elements[i];
-      if (LTSORT.types.isa.text(element)) {
+      if ((typeof element) === 'string') {
         T.ok(LTSORT.has_node(graph, element));
       } else {
         [a, b] = element;
@@ -149,7 +149,7 @@
 //.........................................................................................................
     for (i = 0, len = elements.length; i < len; i++) {
       element = elements[i];
-      if (LTSORT.types.isa.text(element)) {
+      if ((typeof element) === 'string') {
         LTSORT.add(graph, element);
       } else {
         [a, b] = element;

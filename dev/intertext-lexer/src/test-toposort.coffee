@@ -102,6 +102,7 @@ show = ( topograph ) ->
 
 ############################################################################################################
 if require.main is module then do =>
-  test @parse_stars_using_toposort
+  @parse_stars_using_toposort()
+  # test @parse_stars_using_toposort
   # @toposort()
   # test @

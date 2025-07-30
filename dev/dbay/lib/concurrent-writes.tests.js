@@ -132,10 +132,9 @@ sqr integer );`);
     }
     //.........................................................................................................
     db.with_deferred_write(function(write) {
-      var d, ref, results;
-      ref = db(select_numbers);
+      var d, results;
       results = [];
-      for (d of ref) {
+      for (d of db(select_numbers)) {
         results.push(write(insert_number, {
           n: d.n,
           sqr: d.n ** 2
@@ -198,7 +197,7 @@ sqr integer );`);
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_concurrency_with_explicitly_two_connections = function(T, done) {
-    var DBay, SQL, d, dbr, dbw, insert_number, ref;
+    var DBay, SQL, d, dbr, dbw, insert_number;
     ({DBay} = require('../../../apps/dbay'));
     ({SQL} = DBay);
     dbr = new DBay();
@@ -259,10 +258,9 @@ sqr integer );`);
         }
       ]) : void 0;
     })();
-    ref = dbr(SQL`select * from numbers order by n;`);
-    //.........................................................................................................
-    // dbr.with_transaction ->
-    for (d of ref) {
+//.........................................................................................................
+// dbr.with_transaction ->
+    for (d of dbr(SQL`select * from numbers order by n;`)) {
       d.sqr = d.n ** 2;
       dbw(insert_number, d);
       d.n = d.n + 100;
@@ -321,7 +319,7 @@ sqr integer );`);
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_concurrency_with_implicitly_two_connections = function(T, done) {
     (() => {
-      var DBay, SQL, d, db, insert_number, ref;
+      var DBay, SQL, d, db, insert_number;
       ({DBay} = require('../../../apps/dbay'));
       ({SQL} = DBay);
       db = new DBay();
@@ -376,10 +374,9 @@ sqr integer );`);
           }
         ]) : void 0;
       })();
-      ref = db(SQL`select * from numbers order by n;`);
-      //.........................................................................................................
-      // db.with_transaction ->
-      for (d of ref) {
+//.........................................................................................................
+// db.with_transaction ->
+      for (d of db(SQL`select * from numbers order by n;`)) {
         d.sqr = d.n ** 2;
         debug('Ω___1', insert_number.database.inTransaction);
         db(insert_number, d);
@@ -492,10 +489,9 @@ sqr integer );`);
       })();
       //.........................................................................................................
       db.with_transaction(() => {
-        var d, ref, results;
-        ref = db(SQL`select * from numbers order by n;`);
+        var d, results;
         results = [];
-        for (d of ref) {
+        for (d of db(SQL`select * from numbers order by n;`)) {
           d.sqr = d.n ** 2;
           db(insert_number, d);
           d.n = d.n + 100;
@@ -554,45 +550,157 @@ sqr integer );`);
     return typeof done === "function" ? done() : void 0;
   };
 
-  // #-----------------------------------------------------------------------------------------------------------
-  // @dbay_concurrency_with_single_connection = ( T, done ) ->
-  //   { DBay }            = require '../../../apps/dbay'
-  //   { SQL  }            = DBay
-  //   db                  = new DBay()
-  //   T?.eq db.get_journal_mode(), 'wal'
-  //   #.........................................................................................................
-  //   db SQL"""create table numbers (
-  //     n   integer not null primary key,
-  //     sqr integer );"""
-  //   # debug '^Ω___5', db.create_insert { into: 'numbers', }
-  //   insert_number = SQL"""insert into numbers ( n, sqr ) values ( $n, $sqr );"""
-  //   #.........................................................................................................
-  //   db SQL"""begin;"""
-  //   for n in [ 0 .. 4 ]
-  //     db insert_number, { n, sqr: null, }
-  //   db SQL"""commit;"""
-  //   #.........................................................................................................
-  //   do ->
-  //     result = db.all_rows SQL"""select * from numbers order by n;"""
-  //     T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
-  //   #.........................................................................................................
-  //   # db.with_transaction ->
-  //   db SQL"""begin;"""
-  //   for d from db SQL"select * from numbers order by n;"
-  //     d.sqr = d.n ** 2
-  //     debug 'Ω___6', d
-  //     db.alt insert_number, d
-  //     d.n = d.n + 100
-  //     d.sqr = d.n ** 2
-  //     debug 'Ω___7', d
-  //     db.alt insert_number, d
-  //   db SQL"""commit;"""
-  //   #.........................................................................................................
-  //   do ->
-  //     result = db.all_rows SQL"""select * from numbers order by n;"""
-  //     T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
-  //   #.........................................................................................................
-  //   done?()
+  //-----------------------------------------------------------------------------------------------------------
+  this.dbay_concurrency_with_single_connection = function(T, done) {
+    var DBay, SQL, db, i, insert_number, n, upsert_number;
+    ({DBay} = require('../../../apps/dbay'));
+    ({SQL} = DBay);
+    db = new DBay();
+    if (T != null) {
+      T.eq(db.get_journal_mode(), 'wal');
+    }
+    //.........................................................................................................
+    db(SQL`create table numbers (
+n   integer not null primary key,
+sqr integer );`);
+    // debug '^Ω___2', db.create_insert { into: 'numbers', }
+    insert_number = SQL`insert into numbers ( n, sqr ) values ( $n, $sqr );`;
+    // upsert_number = SQL"""
+    //   insert into numbers ( n, sqr ) values ( $n, $sqr )
+    //     on conflict ( n ) do update set sqr = $sqr;
+    //   """
+    upsert_number = db.create_insert({
+      into: 'numbers',
+      on_conflict: {
+        update: true
+      }
+    });
+    // debug 'Ω___3', db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+    // debug 'Ω___4', rpr upsert_number.replace /\n\s*/g, ' '
+    /* NOTE concurrency problem is caused—surprisingly!—by the `returning: '*'` clause */
+    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
+    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
+    //.........................................................................................................
+    db(SQL`begin;`);
+    for (n = i = 0; i <= 4; n = ++i) {
+      db(insert_number, {
+        n,
+        sqr: null
+      });
+    }
+    db(SQL`commit;`);
+    (function() {      //.........................................................................................................
+      var result;
+      result = db.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: null
+        },
+        {
+          n: 1,
+          sqr: null
+        },
+        {
+          n: 2,
+          sqr: null
+        },
+        {
+          n: 3,
+          sqr: null
+        },
+        {
+          n: 4,
+          sqr: null
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var results, row;
+      results = [];
+      for (row of db(SQL`select * from numbers order by n;`)) {
+        results.push(help('Ω___5', row));
+      }
+      return results;
+    })();
+    //.........................................................................................................
+    // db SQL"""begin;"""
+    info('Ω___1', "statement used for concurrent writes:");
+    info('Ω___1', GUY.trm.white(GUY.trm.reverse(GUY.trm.bold(` ${upsert_number} `))));
+    // db.with_transaction { mode: 'immediate', }, -> ### NOTE: 'immediate' and 'exclusive' will cause locking error ###
+    db.with_transaction({
+      mode: 'deferred'
+    }, function()/* NOTE: 'deferred' is default */ {
+      var d, results;
+// db SQL"""begin immediate;"""
+      results = [];
+      for (d of db(SQL`select * from numbers order by n;`)) {
+        d.sqr = d.n ** 2;
+        db.alt(upsert_number, d);
+        d.n = d.n + 100;
+        d.sqr = d.n ** 2;
+        results.push(db.alt(upsert_number, d));
+      }
+      return results;
+    });
+    (function() {      // db SQL"""commit;"""
+      //.........................................................................................................
+      var result;
+      result = db.all_rows(SQL`select * from numbers order by n;`);
+      return T != null ? T.eq(result, [
+        {
+          n: 0,
+          sqr: 0
+        },
+        {
+          n: 1,
+          sqr: 1
+        },
+        {
+          n: 2,
+          sqr: 4
+        },
+        {
+          n: 3,
+          sqr: 9
+        },
+        {
+          n: 4,
+          sqr: 16
+        },
+        {
+          n: 100,
+          sqr: 10000
+        },
+        {
+          n: 101,
+          sqr: 10201
+        },
+        {
+          n: 102,
+          sqr: 10404
+        },
+        {
+          n: 103,
+          sqr: 10609
+        },
+        {
+          n: 104,
+          sqr: 10816
+        }
+      ]) : void 0;
+    })();
+    (function() {      //.........................................................................................................
+      var results, row;
+      results = [];
+      for (row of db(SQL`select * from numbers order by n;`)) {
+        results.push(urge('Ω___7', row));
+      }
+      return results;
+    })();
+    return typeof done === "function" ? done() : void 0;
+  };
 
   //-----------------------------------------------------------------------------------------------------------
   this.dbay_concurrency_with_table_function = async function(T, done) {
@@ -627,7 +735,7 @@ sqr integer );`);
       }
     });
     (() => {      //.........................................................................................................
-      var d, insert_number, ref, select_numbers, select_rows;
+      var d, insert_number, select_numbers, select_rows;
       insert_number = db.alt.prepare_insert({
         into: 'nnt'
       });
@@ -643,9 +751,8 @@ sqr integer );`);
       if (T != null) {
         T.eq(db.all_first_values(select_numbers), [0, 1, 1.5, 2, 2.3, 3, 3.1, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       }
-      ref = db(select_rows);
-      //.......................................................................................................
-      for (d of ref) {
+//.......................................................................................................
+      for (d of db(select_rows)) {
         db(insert_number, {
           ...d,
           n: d.n + 100
@@ -670,12 +777,12 @@ sqr integer );`);
       // test @dbay_concurrency_with_implicitly_two_connections
       // @dbay_concurrency_with_table_function()
       // test @dbay_concurrency_with_table_function
-      this.dbay_concurrency_with_implicitly_two_connections();
-      return test(this.dbay_concurrency_with_implicitly_two_connections);
+      // @dbay_concurrency_with_implicitly_two_connections()
+      // test @dbay_concurrency_with_implicitly_two_connections
+      // test @
+      return this.dbay_concurrency_with_single_connection();
     })();
   }
-
-  // test @
 
 }).call(this);
 

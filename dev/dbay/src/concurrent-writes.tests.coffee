@@ -172,45 +172,66 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   #.........................................................................................................
   done?()
 
-# #-----------------------------------------------------------------------------------------------------------
-# @dbay_concurrency_with_single_connection = ( T, done ) ->
-#   { DBay }            = require '../../../apps/dbay'
-#   { SQL  }            = DBay
-#   db                  = new DBay()
-#   T?.eq db.get_journal_mode(), 'wal'
-#   #.........................................................................................................
-#   db SQL"""create table numbers (
-#     n   integer not null primary key,
-#     sqr integer );"""
-#   # debug '^Ω___5', db.create_insert { into: 'numbers', }
-#   insert_number = SQL"""insert into numbers ( n, sqr ) values ( $n, $sqr );"""
-#   #.........................................................................................................
-#   db SQL"""begin;"""
-#   for n in [ 0 .. 4 ]
-#     db insert_number, { n, sqr: null, }
-#   db SQL"""commit;"""
-#   #.........................................................................................................
-#   do ->
-#     result = db.all_rows SQL"""select * from numbers order by n;"""
-#     T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
-#   #.........................................................................................................
-#   # db.with_transaction ->
-#   db SQL"""begin;"""
-#   for d from db SQL"select * from numbers order by n;"
-#     d.sqr = d.n ** 2
-#     debug 'Ω___6', d
-#     db.alt insert_number, d
-#     d.n = d.n + 100
-#     d.sqr = d.n ** 2
-#     debug 'Ω___7', d
-#     db.alt insert_number, d
-#   db SQL"""commit;"""
-#   #.........................................................................................................
-#   do ->
-#     result = db.all_rows SQL"""select * from numbers order by n;"""
-#     T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
-#   #.........................................................................................................
-#   done?()
+#-----------------------------------------------------------------------------------------------------------
+@dbay_concurrency_with_single_connection = ( T, done ) ->
+  { DBay }            = require '../../../apps/dbay'
+  { SQL  }            = DBay
+  db                  = new DBay()
+  T?.eq db.get_journal_mode(), 'wal'
+  #.........................................................................................................
+  db SQL"""create table numbers (
+    n   integer not null primary key,
+    sqr integer );"""
+  # debug '^Ω___2', db.create_insert { into: 'numbers', }
+  insert_number = SQL"""insert into numbers ( n, sqr ) values ( $n, $sqr );"""
+  # upsert_number = SQL"""
+  #   insert into numbers ( n, sqr ) values ( $n, $sqr )
+  #     on conflict ( n ) do update set sqr = $sqr;
+  #   """
+  upsert_number = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+  # debug 'Ω___3', db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+  # debug 'Ω___4', rpr upsert_number.replace /\n\s*/g, ' '
+  ### NOTE concurrency problem is caused—surprisingly!—by the `returning: '*'` clause ###
+  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
+  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
+  #.........................................................................................................
+  db SQL"""begin;"""
+  for n in [ 0 .. 4 ]
+    db insert_number, { n, sqr: null, }
+  db SQL"""commit;"""
+  #.........................................................................................................
+  do ->
+    result = db.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: null }, { n: 1, sqr: null }, { n: 2, sqr: null }, { n: 3, sqr: null }, { n: 4, sqr: null } ]
+  #.........................................................................................................
+  do ->
+    for row from db SQL"""select * from numbers order by n;"""
+      help 'Ω___5', row
+  #.........................................................................................................
+  # db SQL"""begin;"""
+  info 'Ω___1', "statement used for concurrent writes:"
+  info 'Ω___1', GUY.trm.white GUY.trm.reverse GUY.trm.bold " #{upsert_number} "
+  # db.with_transaction { mode: 'immediate', }, -> ### NOTE: 'immediate' and 'exclusive' will cause locking error ###
+  db.with_transaction { mode: 'deferred', }, -> ### NOTE: 'deferred' is default ###
+    # db SQL"""begin immediate;"""
+    for d from db SQL"select * from numbers order by n;"
+      d.sqr = d.n ** 2
+      db.alt upsert_number, d
+      d.n = d.n + 100
+      d.sqr = d.n ** 2
+      db.alt upsert_number, d
+  # db SQL"""commit;"""
+  #.........................................................................................................
+  do ->
+    result = db.all_rows SQL"""select * from numbers order by n;"""
+    T?.eq result, [ { n: 0, sqr: 0 }, { n: 1, sqr: 1 }, { n: 2, sqr: 4 }, { n: 3, sqr: 9 }, { n: 4, sqr: 16 }, { n: 100, sqr: 10000 }, { n: 101, sqr: 10201 }, { n: 102, sqr: 10404 }, { n: 103, sqr: 10609 }, { n: 104, sqr: 10816 } ]
+  #.........................................................................................................
+  do ->
+    for row from db SQL"""select * from numbers order by n;"""
+      urge 'Ω___7', row
+  #.........................................................................................................
+  done?()
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -268,9 +289,9 @@ if require.main is module then do =>
   # test @dbay_concurrency_with_implicitly_two_connections
   # @dbay_concurrency_with_table_function()
   # test @dbay_concurrency_with_table_function
-  @dbay_concurrency_with_implicitly_two_connections()
-  test @dbay_concurrency_with_implicitly_two_connections
+  # @dbay_concurrency_with_implicitly_two_connections()
+  # test @dbay_concurrency_with_implicitly_two_connections
   # test @
-
+  @dbay_concurrency_with_single_connection()
 
 

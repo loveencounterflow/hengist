@@ -41,7 +41,13 @@
   //===========================================================================================================
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_methods = function(T, done) {
+  this.dbay_macros_no_more_part_of_dbay = function(T, done) {
+    warn('Ω___1', "Macros are no more part of DBay");
+    return typeof done === "function" ? done() : void 0;
+  };
+
+  //-----------------------------------------------------------------------------------------------------------
+  this.__________dbay_macros_methods = function(T, done) {
     var DBay, SQL, db, ref, ref1;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));
@@ -58,7 +64,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_assert_basic_functionality = function(T, done) {
+  this.__________dbay_macros_assert_basic_functionality = function(T, done) {
     var DBay, SQL, _test, db;
     /* NOTE this test is a shortened version of the more extensive tests to be found at
      https://github.com/loveencounterflow/hengist/tree/master/dev/dbay-sql-macros/src; it's only here to
@@ -93,7 +99,7 @@
   };
 
   //-----------------------------------------------------------------------------------------------------------
-  this.dbay_macros_implicit_expansion = function(T, done) {
+  this.__________dbay_macros_implicit_expansion = function(T, done) {
     var DBay, SQL, db;
     // T?.halt_on_error()
     ({DBay} = require(H.dbay_path));

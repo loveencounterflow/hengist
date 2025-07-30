@@ -139,6 +139,20 @@ types                     = new ( require 'intertype' ).Intertype
   # T?.eq ( format 'e',      12345.6789       ), '1.234568e+04'
   return done?()
 
+#-----------------------------------------------------------------------------------------------------------
+@guy_fmt_dots_in_strings = ( T, done ) ->
+  # T?.halt_on_error()
+  GUY                       = require H.guy_path
+  { format
+    new_formatter,        } = GUY.fmt
+  #.........................................................................................................
+  # T?.eq ( format '.2f',      3.14159       ), '3.14'
+  T?.eq ( format '>15s',     "abcd.efgh"        ), '      abcd.efgh'
+  T?.eq ( format '<15s',     "abcd.efgh"        ), 'abcd.efgh      '
+  T?.eq ( format '^15s',     "abcd.efgh"        ), '   abcd.efgh   '
+  # T?.eq ( format '>10.3f',   1.23456       ), '     1.235'
+  return done?()
+
 
 
 # #-----------------------------------------------------------------------------------------------------------

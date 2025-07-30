@@ -85,6 +85,7 @@
     ({Ltsort} = require('../../../apps/ltsort'));
     g = new Ltsort();
     debug('^40-1^', g);
+    debug('^40-1^', g.linearize());
     if (T != null) {
       T.eq(rpr(g), "Ltsort { cfg: { loners: true } }");
     }
@@ -394,7 +395,10 @@
 
   // @instantiation()
 // test @instantiation
+// @add_nodes()
 // test @add_nodes
+// @use_relatives()
+// test @use_relatives
 // @use_global_relatives()
 // test @use_global_relatives
 // test @before_and_after_with_antecedents_and_subsequents_3

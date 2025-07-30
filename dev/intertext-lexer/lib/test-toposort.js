@@ -175,11 +175,12 @@
   //###########################################################################################################
   if (require.main === module) {
     (() => {
-      return test(this.parse_stars_using_toposort);
+      return this.parse_stars_using_toposort();
     })();
   }
 
-  // @toposort()
+  // test @parse_stars_using_toposort
+// @toposort()
 // test @
 
 }).call(this);

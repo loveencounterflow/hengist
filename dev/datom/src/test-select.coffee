@@ -17,11 +17,6 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 test                      = require 'guy-test'
 jr                        = JSON.stringify
-#...........................................................................................................
-types                     = new ( require '../../../apps/intertype' ).Intertype
-{ isa
-  validate
-  type_of }               = types
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -61,7 +56,7 @@ types                     = new ( require '../../../apps/intertype' ).Intertype
   for [ probe, matcher, error, ] in probes_and_matchers
     await T.perform probe, matcher, error, -> return new Promise ( resolve ) ->
       [ d, selector, ]  = probe
-      if isa.text selector
+      if ( typeof selector ) is 'string'
         result  = select d, selector
       else
         result  = select d, selector...

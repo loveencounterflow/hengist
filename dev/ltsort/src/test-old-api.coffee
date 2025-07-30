@@ -59,7 +59,7 @@ _probes =
   probe     = LTSORT.linearize graph
   #.........................................................................................................
   for element in elements
-    continue if LTSORT.types.isa.text element
+    continue if ( typeof element ) is 'string'
     [ a, b, ] = element
     T.ok ( a_idx = probe.indexOf a ) >= 0
     T.ok ( b_idx = probe.indexOf b ) >= 0
@@ -75,7 +75,7 @@ _probes =
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
-    if LTSORT.types.isa.text element
+    if ( typeof element ) is 'string'
       T.ok LTSORT.has_node graph, element
     else
       [ a, b, ] = element
@@ -113,7 +113,7 @@ _probes =
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
-    if LTSORT.types.isa.text element
+    if ( typeof element ) is 'string'
       LTSORT.add graph, element
     else
       [ a, b, ] = element

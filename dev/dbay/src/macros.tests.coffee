@@ -40,7 +40,12 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_methods = ( T, done ) ->
+@dbay_macros_no_more_part_of_dbay = ( T, done ) ->
+  warn 'Ω___1', "Macros are no more part of DBay"
+  done?()
+
+#-----------------------------------------------------------------------------------------------------------
+@__________dbay_macros_methods = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }          = require H.dbay_path
   { SQL  }          = DBay
@@ -52,7 +57,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_assert_basic_functionality = ( T, done ) ->
+@__________dbay_macros_assert_basic_functionality = ( T, done ) ->
   ### NOTE this test is a shortened version of the more extensive tests to be found at
   https://github.com/loveencounterflow/hengist/tree/master/dev/dbay-sql-macros/src; it's only here to
   assert that `declare()` and `resolve()` behave in roughly the expted ways. ###
@@ -80,7 +85,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   done?()
 
 #-----------------------------------------------------------------------------------------------------------
-@dbay_macros_implicit_expansion = ( T, done ) ->
+@__________dbay_macros_implicit_expansion = ( T, done ) ->
   # T?.halt_on_error()
   { DBay }          = require H.dbay_path
   { SQL  }          = DBay
