@@ -573,14 +573,15 @@ sqr integer );`);
       into: 'numbers',
       on_conflict: {
         update: true
-      }
+      },
+      returning: '*'
     });
     // debug 'Ω___3', db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
     // debug 'Ω___4', rpr upsert_number.replace /\n\s*/g, ' '
     /* NOTE concurrency problem is caused—surprisingly!—by the `returning: '*'` clause */
-    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
-    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
-    // debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
+    // debug 'Ω___5', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
+    // debug 'Ω___6', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+    // debug 'Ω___7', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
     //.........................................................................................................
     db(SQL`begin;`);
     for (n = i = 0; i <= 4; n = ++i) {
@@ -620,14 +621,14 @@ sqr integer );`);
       var results, row;
       results = [];
       for (row of db(SQL`select * from numbers order by n;`)) {
-        results.push(help('Ω___5', row));
+        results.push(help('Ω___8', row));
       }
       return results;
     })();
     //.........................................................................................................
     // db SQL"""begin;"""
-    info('Ω___1', "statement used for concurrent writes:");
-    info('Ω___1', GUY.trm.white(GUY.trm.reverse(GUY.trm.bold(` ${upsert_number} `))));
+    info('Ω___9', "statement used for concurrent writes:");
+    info('Ω__10', GUY.trm.white(GUY.trm.reverse(GUY.trm.bold(` ${upsert_number} `))));
     // db.with_transaction { mode: 'immediate', }, -> ### NOTE: 'immediate' and 'exclusive' will cause locking error ###
     db.with_transaction({
       mode: 'deferred'
@@ -637,10 +638,10 @@ sqr integer );`);
       results = [];
       for (d of db(SQL`select * from numbers order by n;`)) {
         d.sqr = d.n ** 2;
-        db.alt(upsert_number, d);
+        debug('Ω__11', db.alt.first_row(upsert_number, d));
         d.n = d.n + 100;
         d.sqr = d.n ** 2;
-        results.push(db.alt(upsert_number, d));
+        results.push(debug('Ω__12', db.alt.first_row(upsert_number, d)));
       }
       return results;
     });
@@ -695,7 +696,7 @@ sqr integer );`);
       var results, row;
       results = [];
       for (row of db(SQL`select * from numbers order by n;`)) {
-        results.push(urge('Ω___7', row));
+        results.push(urge('Ω__13', row));
       }
       return results;
     })();

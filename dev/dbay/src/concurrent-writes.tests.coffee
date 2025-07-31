@@ -188,13 +188,13 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   #   insert into numbers ( n, sqr ) values ( $n, $sqr )
   #     on conflict ( n ) do update set sqr = $sqr;
   #   """
-  upsert_number = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+  upsert_number = db.create_insert { into: 'numbers', on_conflict: { update: true, }, returning: '*', }
   # debug 'Ω___3', db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
   # debug 'Ω___4', rpr upsert_number.replace /\n\s*/g, ' '
   ### NOTE concurrency problem is caused—surprisingly!—by the `returning: '*'` clause ###
-  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
-  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
-  # debug 'Ω___4', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
+  # debug 'Ω___5', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', }
+  # debug 'Ω___6', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: { update: true, }, }
+  # debug 'Ω___7', rpr upsert_number_2 = db.create_insert { into: 'numbers', on_conflict: '( n ) do update set sqr = $sqr', returning: '*', }
   #.........................................................................................................
   db SQL"""begin;"""
   for n in [ 0 .. 4 ]
@@ -207,20 +207,20 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   #.........................................................................................................
   do ->
     for row from db SQL"""select * from numbers order by n;"""
-      help 'Ω___5', row
+      help 'Ω___8', row
   #.........................................................................................................
   # db SQL"""begin;"""
-  info 'Ω___1', "statement used for concurrent writes:"
-  info 'Ω___1', GUY.trm.white GUY.trm.reverse GUY.trm.bold " #{upsert_number} "
+  info 'Ω___9', "statement used for concurrent writes:"
+  info 'Ω__10', GUY.trm.white GUY.trm.reverse GUY.trm.bold " #{upsert_number} "
   # db.with_transaction { mode: 'immediate', }, -> ### NOTE: 'immediate' and 'exclusive' will cause locking error ###
   db.with_transaction { mode: 'deferred', }, -> ### NOTE: 'deferred' is default ###
     # db SQL"""begin immediate;"""
     for d from db SQL"select * from numbers order by n;"
       d.sqr = d.n ** 2
-      db.alt upsert_number, d
+      debug 'Ω__11', db.alt.first_row upsert_number, d
       d.n = d.n + 100
       d.sqr = d.n ** 2
-      db.alt upsert_number, d
+      debug 'Ω__12', db.alt.first_row upsert_number, d
   # db SQL"""commit;"""
   #.........................................................................................................
   do ->
@@ -229,7 +229,7 @@ sql_lexer                 = require '../../../apps/dbay-sql-lexer'
   #.........................................................................................................
   do ->
     for row from db SQL"""select * from numbers order by n;"""
-      urge 'Ω___7', row
+      urge 'Ω__13', row
   #.........................................................................................................
   done?()
 
