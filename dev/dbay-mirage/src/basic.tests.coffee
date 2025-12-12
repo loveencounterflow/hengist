@@ -134,8 +134,8 @@ H                         = require '../../../lib/helpers'
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
   # @[ "mrg.refresh_datasource" ]()
   # test @[ "mrg.refresh_datasource" ]
-  @[ "altering mirrored source lines causes error" ]()
-  test @[ "altering mirrored source lines causes error" ]
+  # @[ "altering mirrored source lines causes error" ]()
+  # test @[ "altering mirrored source lines causes error" ]

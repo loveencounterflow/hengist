@@ -291,7 +291,7 @@ if require.main is module then do =>
   # test @dbay_concurrency_with_table_function
   # @dbay_concurrency_with_implicitly_two_connections()
   # test @dbay_concurrency_with_implicitly_two_connections
-  # test @
-  @dbay_concurrency_with_single_connection()
+  test @
+  # @dbay_concurrency_with_single_connection()
 
 

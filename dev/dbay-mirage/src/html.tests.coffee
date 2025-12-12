@@ -24,7 +24,9 @@ types                     = new ( require 'intertype' ).Intertype
   validate
   validate_list_of }      = types.export()
 SQL                       = String.raw
-guy                       = require '../../../apps/guy'
+{ freeze,
+  thaw,
+  lets,                 } = require 'letsfreezethat'
 H                         = require '../../../lib/helpers'
 
 #-----------------------------------------------------------------------------------------------------------
@@ -146,8 +148,6 @@ text_from_token = ( token ) ->
   # debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\\n';  info rpr reveal text
   # debug '^237^', { text, reveal, } = mrg.html.HTMLISH._tunnel 'foo\\\\'; info rpr reveal text
   # return done()
-  { lets
-    thaw }  = guy.lft
   # #.........................................................................................................
   # debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\' ).text
   # debug '^33673^', rpr ( mrg.html.HTMLISH._tunnel '\\\\' ).text
@@ -237,8 +237,6 @@ text_from_token = ( token ) ->
   { HDML  } = require '../../../apps/hdml'
   db        = new DBay()
   mrg       = new Mrg { db, }
-  { lets
-    thaw }  = guy.lft
   #.........................................................................................................
   probes_and_matchers = [
     [ '<b x="&">&lt;<&foo;', "(0-9)<b x='&amp;'>(0-4)(NCR:named:&lt;)(13-19)<&foo;>(14-19)<error message='Expecting: one of these possible Token sequences:&#10;  1. [i_close]&#10;  2. [i_slash_close]&#10;  3. [stm_slash1]&#10;but found: &#39;&#39;'>&amp;foo;</error>", null ]
@@ -277,8 +275,6 @@ text_from_token = ( token ) ->
   { HDML  } = require '../../../apps/hdml'
   db        = new DBay()
   mrg       = new Mrg { db, }
-  { lets
-    thaw }  = guy.lft
   #.........................................................................................................
   probes_and_matchers = [
     # [ '<foo-bar#c55>*xxx*</foo-bar>', '(0-13)<foo-bar>#(13-17)<em>#(17-20)xxx#(20-25)</em>#(25-35)</foo-bar>', null ]
@@ -304,11 +300,12 @@ text_from_token = ( token ) ->
 
 ############################################################################################################
 if require.main is module then do =>
-  # test @
+  test @
+  # @[ "Mirage HTML: quotes in attribute values" ]()
+  # test @[ "Mirage HTML: quotes in attribute values" ]
+  #.........................................................................................................
   # test @[ "Mirage HTML: parse stretch with compact tagnames" ]
   # @[ "Mirage HTML: Basic functionality" ]()
-  @[ "Mirage HTML: quotes in attribute values" ]()
-  test @[ "Mirage HTML: quotes in attribute values" ]
   # test @[ "altering mirrored source lines causes error" ]
   # @[ "altering mirrored source lines causes error" ]()
   # test @[ "Mirage HTML: tag syntax variants" ]

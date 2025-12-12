@@ -100,7 +100,8 @@ get_gitlog = ( dpan, pkg_fspath ) ->
   # if pkg_fspath.endsWith '/cxltx'
   #   warn "^439342344^ skipping #{pkg_fspath}"
   #   return []
-  commits = dpan.git_get_log { pkg_fspath, }
+  commits   = dpan.git_get_log { pkg_fspath, fallback: null, }
+  commits  ?= []
   # try commits = gitlog cfg catch error
   #   # throw error
   #   warn "^347834^ when trying to get git logs for #{pkg_fspath}, an error occurred:"
@@ -196,7 +197,10 @@ demo_show_recent_commits = ->
   help '^46456^', "using DB at #{db_path}"
   #.........................................................................................................
   for { pkg_fspath, pkg_rel_fspath, pkg_name, } in pkgs
-    for commit in get_gitlog dpan, pkg_fspath
+    gitlog  = get_gitlog dpan, pkg_fspath
+    gitlog  = gitlog[ ... 500 ]
+    # gitlog  = gitlog[ ... 1 ]
+    for commit in gitlog
       recent_commits.push commit
   #.........................................................................................................
   ### TAINT the idea was to use the DB for this kind of processing ###
@@ -286,8 +290,8 @@ if module is require.main then do =>
   # await demo_db_add_pkg_info()
   # await demo_db_add_pkg_infos()
   # await demo_git_fetch_pkg_status()
-  await demo_show_recent_commits()
-  await demo_git_get_dirty_counts()
+  demo_show_recent_commits()
+  demo_git_get_dirty_counts()
   # await demo_variables()
   # await demo_staged_file_paths()
 

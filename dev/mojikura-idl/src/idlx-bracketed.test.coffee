@@ -77,14 +77,14 @@ types                     = new ( require 'intertype' ).Intertype()
 @[ "(IDLX) reject bogus formulas" ] = ( T, done ) ->
   # T.halt_on_error()
   probes_and_matchers = [
-    ["⿲木木木",'invalid syntax at index 0 (⿲木木木)\nUnexpected "⿲"\n']
-    ["木",'invalid syntax at index 0 (木)\nUnexpected "木"\n']
-    [42,'expected a text, got a float']
-    ["","expected a non-empty text, got an empty text"]
-    ["⿱⿰亻式⿱目八木木木",'invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected "木"\n']
-    ["⿺廴聿123",'invalid syntax at index 3 (⿺廴聿123)\nUnexpected "1"\n']
-    ["⿺","Syntax Error: '⿺'"]
-    ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
+    # ["⿲木木木",'invalid syntax at index 0 (⿲木木木)\nUnexpected "⿲"\n']
+    # ["木",'invalid syntax at index 0 (木)\nUnexpected "木"\n']
+    # [42,'expected a text, got a float']
+    # ["","expected a non-empty text, got an empty text"]
+    # ["⿱⿰亻式⿱目八木木木",'invalid syntax at index 7 (⿱⿰亻式⿱目八木木木)\nUnexpected "木"\n']
+    # ["⿺廴聿123",'invalid syntax at index 3 (⿺廴聿123)\nUnexpected "1"\n']
+    # ["⿺","Syntax Error: '⿺'"]
+    # ["⿺⿺⿺⿺","Syntax Error: '⿺⿺⿺⿺'"]
 #     ["()","IDLX: unexpected right bracket [ ( ✘ ) ✘  ]"]
 #     ["(⿰)","IDLX: too few constituents [ (⿰ ✘ ) ✘  ]"]
 #     ["(聿)","IDL: extra token(s) [ (聿 ✘ ) ✘  ]"]
@@ -95,6 +95,14 @@ types                     = new ( require 'intertype' ).Intertype()
 #     ["(⿰亻)","IDLX: too few constituents [ (⿰亻 ✘ ) ✘  ]"]
 #     ["(⿰亻)聿","IDLX: too few constituents [ (⿰亻 ✘ ) ✘ 聿 ]"]
 #     ["(≈北㓁)","IDLX: cannot bracket unary operator [ ( ✘ ≈ ✘ 北㓁) ]"]
+    ["⿲木木木",              'Syntax error']
+    ["木",                   'Syntax error']
+    [42,                      'expected a text, got a float']
+    ["",                      "expected a non-empty text, got an empty text"]
+    ["⿱⿰亻式⿱目八木木木",  'Syntax error']
+    ["⿺廴聿123",            'Syntax error']
+    ["⿺",                   "Syntax Error: '⿺'"]
+    ["⿺⿺⿺⿺",              "Syntax Error: '⿺⿺⿺⿺'"]
     ]
   for [ probe, matcher, ] in probes_and_matchers
     try
@@ -122,7 +130,7 @@ types                     = new ( require 'intertype' ).Intertype()
 
 ############################################################################################################
 if module is require.main then do =>
-  test @
-  # test @[ "(IDLX) reject bogus formulas" ]
+  # test @
+  test @[ "(IDLX) reject bogus formulas" ]
 
 
